@@ -7,7 +7,38 @@ import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, Play, Pause, Mic, Square, Volume2, Check, RotateCcw } from "lucide-react"
 import type { Lesson } from "@/lib/data/lessons"
-import { resetAudio, togglePlay, stopRecording, startRecording } from "@/lib/audio-utils" // Import audio utility functions
+// Remove the broken import. Implement local audio utility functions below.
+
+function resetAudio() {
+  const audio = document.querySelector("audio");
+  if (audio) {
+    audio.currentTime = 0;
+    audio.pause();
+  }
+}
+
+function togglePlay() {
+  const audio = document.querySelector("audio");
+  if (audio) {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  }
+}
+
+// Dummy implementations for recording (replace with real logic as needed)
+function startRecording() {
+  // Start recording logic here
+  // You may want to use MediaRecorder API
+  alert("Bắt đầu ghi âm (chưa triển khai)");
+}
+
+function stopRecording() {
+  // Stop recording logic here
+  alert("Dừng ghi âm (chưa triển khai)");
+}
 
 interface ShadowingExerciseProps {
   lesson: Lesson
