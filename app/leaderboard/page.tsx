@@ -6,189 +6,208 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowLeft, Trophy, Flame, BookOpen, Crown } from "lucide-react"
 import { leaderboardData } from "@/lib/data/leaderboard"
 
+// Màu sắc chủ đạo nhất quán
+const PRIMARY_COLOR = "#FF7A00";
+
 export default function LeaderboardPage() {
   const currentUser = leaderboardData.find((entry) => entry.userId === "user-1")
   const topThree = leaderboardData.slice(0, 3)
   const restOfLeaderboard = leaderboardData.slice(3)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-5 font-mono">
+      
       {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-white shadow-md border-b border-gray-200">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard">
+              <Link href="/dashboard" className="text-slate-600 hover:text-slate-800">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Dashboard
               </Link>
             </Button>
-            <h1 className="text-xl font-bold">Leaderboard</h1>
+            <h1 className="text-2xl font-extrabold text-slate-800">Bảng Xếp Hạng</h1>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/profile">Profile</Link>
+          <Button variant="outline" size="sm" asChild className="border-orange-300 text-orange-600 hover:bg-orange-50">
+            <Link href="/profile">Hồ Sơ</Link>
           </Button>
         </div>
       </header>
 
       {/* Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Trophy className="h-8 w-8 text-primary" />
+          
+          {/* Header & Mục tiêu */}
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4 border-2 border-orange-300">
+              <Trophy className="h-8 w-8" style={{ color: PRIMARY_COLOR }} />
             </div>
-            <h2 className="text-3xl font-bold mb-2">Global Rankings</h2>
-            <p className="text-muted-foreground">Compete with learners from around the world</p>
+            <h2 className="text-4xl font-extrabold text-slate-900 mb-2">Bảng Xếp Hạng Toàn Cầu</h2>
+            <p className="text-slate-600 text-lg">Cùng tranh tài với những người học từ khắp nơi trên thế giới!</p>
           </div>
 
-          {/* Current User Card */}
+          {/* Thẻ Người Dùng Hiện Tại (Current User Card) */}
           {currentUser && (
-            <Card className="p-6 mb-8 bg-gradient-to-br from-primary/10 to-card border-primary/20">
+            <Card className="p-6 mb-10 bg-gradient-to-r from-orange-100 to-white border-4 border-double border-orange-400 shadow-2xl shadow-orange-300/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="text-3xl font-bold text-primary">#{currentUser.rank}</div>
-                  <Avatar className="h-12 w-12">
+                  <div className="text-4xl font-extrabold" style={{ color: PRIMARY_COLOR }}>#{currentUser.rank}</div>
+                  <Avatar className="h-14 w-14 border-2 border-orange-500">
                     <AvatarImage src={currentUser.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>You</AvatarFallback>
+                    <AvatarFallback className="bg-orange-200 text-orange-700 font-bold">Bạn</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-semibold text-lg">{currentUser.username}</div>
-                    <div className="text-sm text-muted-foreground">{currentUser.country}</div>
+                    <div className="font-extrabold text-xl text-slate-800">{currentUser.username} (Bạn)</div>
+                    <div className="text-sm text-slate-600">{currentUser.country}</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-primary">{currentUser.totalScore.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">Total Score</div>
+                  <div className="text-3xl font-extrabold" style={{ color: PRIMARY_COLOR }}>{currentUser.totalScore.toLocaleString()}</div>
+                  <div className="text-sm text-slate-600">Tổng Điểm</div>
                 </div>
               </div>
             </Card>
           )}
 
-          {/* Top 3 Podium */}
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {/* 2nd Place */}
-            <Card className="p-6 md:order-1 bg-card">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gray-500/10 flex items-center justify-center mx-auto mb-3 border-2 border-gray-500">
-                  <span className="text-2xl font-bold text-gray-500">2</span>
-                </div>
-                <Avatar className="h-16 w-16 mx-auto mb-3">
-                  <AvatarImage src={topThree[1].avatar || "/placeholder.svg"} />
-                  <AvatarFallback>{topThree[1].username[0]}</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold mb-1">{topThree[1].username}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{topThree[1].country}</p>
-                <div className="text-2xl font-bold text-primary mb-2">{topThree[1].totalScore.toLocaleString()}</div>
-                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    <span>{topThree[1].completedLessons}</span>
+          {/* Top 3 Bục Vinh Quang (Podium) */}
+          <div className="grid md:grid-cols-3 gap-6 mb-10 items-end">
+            
+            {/* Hạng 2 (2nd Place) */}
+            {topThree[1] && (
+                <Card className="p-6 md:order-1 bg-white border-gray-300 shadow-xl h-full flex flex-col justify-end">
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-3 border-2 border-gray-500">
+                      <span className="text-3xl font-extrabold text-gray-600">2</span>
+                    </div>
+                    <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-gray-500">
+                      <AvatarImage src={topThree[1].avatar || "/placeholder.svg"} />
+                      <AvatarFallback>{topThree[1].username[0]}</AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-bold text-xl mb-1 text-slate-800">{topThree[1].username}</h3>
+                    <p className="text-sm text-slate-500 mb-3">{topThree[1].country}</p>
+                    <div className="text-3xl font-extrabold text-slate-700 mb-3">{topThree[1].totalScore.toLocaleString()}</div>
+                    <div className="flex items-center justify-center gap-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="h-4 w-4 text-sky-500" />
+                        <span>{topThree[1].completedLessons} Bài</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Flame className="h-4 w-4 text-red-500" />
+                        <span>{topThree[1].currentStreak} Ngày</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Flame className="h-4 w-4" />
-                    <span>{topThree[1].currentStreak}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+                </Card>
+            )}
 
-            {/* 1st Place */}
-            <Card className="p-6 md:order-2 bg-gradient-to-br from-primary/10 to-card border-primary/20">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3 border-2 border-primary relative">
-                  <Crown className="h-6 w-6 text-primary absolute -top-6" />
-                  <span className="text-2xl font-bold text-primary">1</span>
-                </div>
-                <Avatar className="h-20 w-20 mx-auto mb-3 border-2 border-primary">
-                  <AvatarImage src={topThree[0].avatar || "/placeholder.svg"} />
-                  <AvatarFallback>{topThree[0].username[0]}</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold text-lg mb-1">{topThree[0].username}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{topThree[0].country}</p>
-                <div className="text-3xl font-bold text-primary mb-2">{topThree[0].totalScore.toLocaleString()}</div>
-                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    <span>{topThree[0].completedLessons}</span>
+            {/* Hạng 1 (1st Place) - Lớn nhất */}
+            {topThree[0] && (
+                <Card className="p-8 md:order-2 bg-gradient-to-t from-orange-200 to-white border-4 border-yellow-500 shadow-2xl shadow-yellow-400/50 relative transform scale-[1.05] z-10">
+                  <div className="text-center">
+                    <div className="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-3 border-4 border-yellow-500 relative">
+                      <Crown className="h-8 w-8 text-yellow-500 absolute -top-8 animate-pulse" />
+                      <span className="text-4xl font-extrabold text-yellow-600">1</span>
+                    </div>
+                    <Avatar className="h-24 w-24 mx-auto mb-3 border-4 border-yellow-500">
+                      <AvatarImage src={topThree[0].avatar || "/placeholder.svg"} />
+                      <AvatarFallback>{topThree[0].username[0]}</AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-extrabold text-2xl mb-1 text-slate-900">{topThree[0].username}</h3>
+                    <p className="text-base text-slate-600 mb-3">{topThree[0].country}</p>
+                    <div className="text-4xl font-extrabold" style={{ color: PRIMARY_COLOR }}>{topThree[0].totalScore.toLocaleString()}</div>
+                    <div className="text-sm text-slate-600 mb-4">Tổng Điểm</div>
+                    <div className="flex items-center justify-center gap-4 text-sm text-slate-600">
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="h-4 w-4 text-sky-500" />
+                        <span className="font-semibold">{topThree[0].completedLessons} Bài</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Flame className="h-4 w-4 text-red-500" />
+                        <span className="font-semibold">{topThree[0].currentStreak} Ngày</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Flame className="h-4 w-4" />
-                    <span>{topThree[0].currentStreak}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+                </Card>
+            )}
 
-            {/* 3rd Place */}
-            <Card className="p-6 md:order-3 bg-card">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3 border-2 border-orange-500">
-                  <span className="text-2xl font-bold text-orange-500">3</span>
-                </div>
-                <Avatar className="h-16 w-16 mx-auto mb-3">
-                  <AvatarImage src={topThree[2].avatar || "/placeholder.svg"} />
-                  <AvatarFallback>{topThree[2].username[0]}</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold mb-1">{topThree[2].username}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{topThree[2].country}</p>
-                <div className="text-2xl font-bold text-primary mb-2">{topThree[2].totalScore.toLocaleString()}</div>
-                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    <span>{topThree[2].completedLessons}</span>
+            {/* Hạng 3 (3rd Place) */}
+            {topThree[2] && (
+                <Card className="p-6 md:order-3 bg-white border-gray-300 shadow-xl h-full flex flex-col justify-end">
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-amber-200/50 flex items-center justify-center mx-auto mb-3 border-2 border-amber-500">
+                      <span className="text-3xl font-extrabold text-amber-600">3</span>
+                    </div>
+                    <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-amber-500">
+                      <AvatarImage src={topThree[2].avatar || "/placeholder.svg"} />
+                      <AvatarFallback>{topThree[2].username[0]}</AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-bold text-xl mb-1 text-slate-800">{topThree[2].username}</h3>
+                    <p className="text-sm text-slate-500 mb-3">{topThree[2].country}</p>
+                    <div className="text-3xl font-extrabold text-slate-700 mb-3">{topThree[2].totalScore.toLocaleString()}</div>
+                    <div className="flex items-center justify-center gap-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="h-4 w-4 text-sky-500" />
+                        <span>{topThree[2].completedLessons} Bài</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Flame className="h-4 w-4 text-red-500" />
+                        <span>{topThree[2].currentStreak} Ngày</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Flame className="h-4 w-4" />
-                    <span>{topThree[2].currentStreak}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+                </Card>
+            )}
           </div>
 
-          {/* Rest of Leaderboard */}
-          <Card className="p-6">
-            <h3 className="text-xl font-bold mb-4">Rankings</h3>
+          {/* Phần còn lại của Bảng Xếp Hạng (Rest of Leaderboard) */}
+          <Card className="p-6 shadow-xl border-gray-200">
+            <h3 className="text-2xl font-bold mb-4 text-slate-800">Các Thứ Hạng Khác</h3>
             <div className="space-y-3">
               {restOfLeaderboard.map((entry) => (
                 <div
                   key={entry.userId}
-                  className={`flex items-center gap-4 p-4 rounded-lg ${
+                  className={`flex items-center gap-6 p-4 rounded-xl ${
                     entry.userId === "user-1"
-                      ? "bg-primary/10 border border-primary/20"
-                      : "bg-secondary/50 hover:bg-secondary/70 transition-colors"
+                      ? "bg-orange-100/50 border-l-4 border-orange-500 shadow-md"
+                      : "bg-white hover:bg-gray-100 transition-colors border border-gray-200"
                   }`}
                 >
-                  <div className="w-8 text-center font-bold text-muted-foreground">#{entry.rank}</div>
+                  <div className="w-8 text-center font-bold text-xl" style={{ color: entry.userId === "user-1" ? PRIMARY_COLOR : "#6B7280" }}>
+                    #{entry.rank}
+                  </div>
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={entry.avatar || "/placeholder.svg"} />
                     <AvatarFallback>{entry.username[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold">{entry.username}</span>
+                      <span className="font-semibold text-lg">{entry.username}</span>
                       {entry.userId === "user-1" && (
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                          You
+                        <Badge variant="outline" className="bg-orange-300 text-orange-800 border-orange-400 font-bold">
+                          Bạn
                         </Badge>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground">{entry.country}</div>
+                    <div className="text-sm text-slate-500">{entry.country}</div>
                   </div>
-                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                  
+                  {/* Chi tiết thống kê */}
+                  <div className="flex items-center gap-8 text-sm text-slate-600">
                     <div className="flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
+                      <BookOpen className="h-4 w-4 text-sky-500" />
                       <span>{entry.completedLessons}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Flame className="h-4 w-4" />
+                      <Flame className="h-4 w-4 text-red-500" />
                       <span>{entry.currentStreak}</span>
                     </div>
                   </div>
+                  
+                  {/* Điểm số */}
                   <div className="text-right">
-                    <div className="text-xl font-bold text-primary">{entry.totalScore.toLocaleString()}</div>
+                    <div className="text-xl font-extrabold" style={{ color: PRIMARY_COLOR }}>{entry.totalScore.toLocaleString()}</div>
                   </div>
                 </div>
               ))}

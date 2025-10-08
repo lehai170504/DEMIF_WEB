@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { UserProfileCard } from "@/components/dashboard/user-profile-card"
 import { LessonCardSmall } from "@/components/dashboard/lesson-card-small"
@@ -9,6 +8,7 @@ import { StreakCalendar } from "@/components/dashboard/streak-calendar"
 import { TimeAccuracyCards } from "@/components/dashboard/time-accuracy-cards"
 import { LearningAnalyticsChart } from "@/components/dashboard/learning-analytics-chart"
 import { SkillBreakdownChart } from "@/components/dashboard/skill-breakdown-chart"
+import { HeaderUser } from "@/components/layouts/User/HeaderUser"
 
 export default function DashboardPage() {
   const recentLessons = [
@@ -32,40 +32,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-orange-100/50">
-      <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-orange-200/50 shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF7A00] to-orange-300 flex items-center justify-center">
-                <span className="text-lg font-bold text-white">D</span>
-              </div>
-              <span className="text-xl font-bold">DEMIF</span>
-            </div>
-            <nav className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/home">Trang chủ</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dictation">Chính tả</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/shadowing">Bóng đổ</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/review">Ôn tập</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/leaderboard">Bảng xếp hạng</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/profile">Hồ sơ</Link>
-              </Button>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <HeaderUser />
 
-      <main className="container mx-auto px-6 py-6">
+      <main className="container mx-auto px-6 py-6 font-mono">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-4">
           <div className="space-y-3">
             <UserProfileCard />
