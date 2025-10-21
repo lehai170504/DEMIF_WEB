@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Play, Pause, RotateCcw } from "lucide-react"
+import { Play, Pause, RotateCcw, Volume2, Maximize, Lock } from "lucide-react" // Thêm icon
+import { motion } from "framer-motion" // Thêm Framer Motion
 
 interface AudioPlayerProps {
   audioUrl: string
@@ -18,6 +19,10 @@ export function AudioPlayer({ audioUrl, duration, maxPlays, onPlayCountChange }:
   const audioRef = useRef<HTMLAudioElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
+  const playsRemaining = maxPlays - playCount
+  const isLimitReached = playsRemaining <= 0
+
+  // Quản lý sự kiện Audio
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -31,6 +36,9 @@ export function AudioPlayer({ audioUrl, duration, maxPlays, onPlayCountChange }:
       const newCount = playCount + 1
       setPlayCount(newCount)
       onPlayCountChange(newCount)
+      // Đặt lại thời gian về 0 sau khi kết thúc để lượt nghe tiếp theo bắt đầu lại
+      audio.currentTime = 0
+      setCurrentTime(0)
     }
 
     audio.addEventListener("timeupdate", handleTimeUpdate)
@@ -42,7 +50,7 @@ export function AudioPlayer({ audioUrl, duration, maxPlays, onPlayCountChange }:
     }
   }, [playCount, onPlayCountChange])
 
-  // Simple waveform visualization
+  // Hiển thị Sóng âm (Waveform Visualization)
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -53,24 +61,27 @@ export function AudioPlayer({ audioUrl, duration, maxPlays, onPlayCountChange }:
     const draw = () => {
       const width = canvas.width
       const height = canvas.height
-      const barCount = 60
+      const barCount = 70 
       const barWidth = width / barCount
       const progress = currentTime / duration
 
       ctx.clearRect(0, 0, width, height)
 
       for (let i = 0; i < barCount; i++) {
-        const barHeight = Math.random() * height * 0.6 + height * 0.2
+        // Tạo hiệu ứng sóng âm dựa trên hàm sin và thời gian hiện tại
+        const barHeight = Math.sin(i * 0.3 + currentTime) * height * 0.3 + height * 0.4 
         const x = i * barWidth
         const isPast = i / barCount < progress
 
-        ctx.fillStyle = isPast ? "#FF7A00" : "#FFE5C4"
-        ctx.fillRect(x, (height - barHeight) / 2, barWidth - 2, barHeight)
+        // Màu sắc theo chủ đề cam
+        ctx.fillStyle = isPast ? "#FF7A00" : "#FFE5C4" 
+        ctx.fillRect(x, (height - barHeight) / 2, barWidth - 1.5, barHeight)
       }
     }
 
     draw()
-    const interval = isPlaying ? setInterval(draw, 100) : null
+    // Cập nhật sóng âm nhanh hơn để mượt mà hơn
+    const interval = isPlaying ? setInterval(draw, 50) : null 
 
     return () => {
       if (interval) clearInterval(interval)
@@ -85,7 +96,7 @@ export function AudioPlayer({ audioUrl, duration, maxPlays, onPlayCountChange }:
       audio.pause()
       setIsPlaying(false)
     } else {
-      if (playCount < maxPlays) {
+      if (!isLimitReached) {
         audio.play()
         setIsPlaying(true)
       }
@@ -103,43 +114,82 @@ export function AudioPlayer({ audioUrl, duration, maxPlays, onPlayCountChange }:
 
   return (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl p-6 shadow-lg shadow-orange-100/40">
-        <canvas ref={canvasRef} width={800} height={120} className="w-full h-[120px] rounded-lg mb-4" />
+      <div className="bg-white rounded-3xl p-6 shadow-xl shadow-orange-200/50 border border-orange-100">
 
-        <div className="flex items-center justify-between mb-4 text-sm text-slate-700">
-          <span>Plays remaining: {maxPlays - playCount}</span>
-          <span>
-            {Math.floor(currentTime)}s / {duration}s
-          </span>
+        {/* Canvas Sóng âm */}
+        <canvas ref={canvasRef} width={800} height={100} className="w-full h-[100px] rounded-xl mb-6 shadow-inner bg-orange-50/50" />
+
+        {/* Thông tin thời gian và số lượt nghe */}
+        <div className="flex items-center justify-between mb-6 text-sm">
+          
+          {/* Lượt nghe còn lại */}
+          <div className={`flex items-center gap-1 font-semibold ${isLimitReached ? 'text-red-500' : 'text-slate-700'}`}>
+            {isLimitReached ? (
+                <>
+                    <Lock className="h-4 w-4" />
+                    Đã hết lượt nghe
+                </>
+            ) : (
+                <>
+                    <Maximize className="h-4 w-4 text-orange-600" />
+                    Lượt nghe còn lại: <span className="text-[#FF7A00] text-base">{playsRemaining}</span>
+                </>
+            )}
+          </div>
+          
+          {/* Thời gian */}
+          <div className="text-slate-600 font-mono">
+            **{Math.floor(currentTime)}s** / {duration}s
+          </div>
         </div>
 
-        <div className="flex items-center justify-center gap-4">
+        {/* Khu vực nút điều khiển */}
+        <div className="flex items-center justify-center gap-6">
+          
+          {/* Nút Phát lại (Reset) */}
           <Button
             variant="outline"
             size="icon"
             onClick={resetAudio}
-            className="rounded-xl border-orange-200 hover:bg-orange-50 bg-transparent"
+            className="rounded-full border-2 border-orange-300/50 hover:bg-orange-100/50 bg-white transition-all duration-200 shadow-md"
           >
-            <RotateCcw className="h-4 w-4 text-orange-600" />
+            <RotateCcw className="h-5 w-5 text-orange-600" />
           </Button>
-          <Button
-            size="lg"
-            onClick={togglePlay}
-            disabled={playCount >= maxPlays && !isPlaying}
-            className="w-40 bg-[#FF7A00] hover:bg-[#FF9E2C] text-white font-semibold rounded-xl shadow-lg shadow-orange-200/50"
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="h-5 w-5 mr-2" />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play className="h-5 w-5 mr-2" />
-                Play Audio
-              </>
-            )}
-          </Button>
+          
+          {/* Nút Play/Pause chính */}
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={togglePlay}
+              disabled={isLimitReached && !isPlaying}
+              className={`
+                w-48 h-14 
+                font-bold 
+                rounded-2xl 
+                transition-all duration-300
+                ${isLimitReached && !isPlaying 
+                    ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-inner" 
+                    : "bg-[#FF7A00] hover:bg-[#FF8A1C] text-white shadow-2xl shadow-orange-300/60"
+                }
+              `}
+            >
+              {isPlaying ? (
+                <>
+                  <Pause className="h-6 w-6 mr-2" />
+                  Tạm Dừng
+                </>
+              ) : isLimitReached ? (
+                <>
+                  <Lock className="h-5 w-5 mr-2" />
+                  Hết Lượt
+                </>
+              ) : (
+                <>
+                  <Play className="h-6 w-6 mr-2" />
+                  Nghe Âm Thanh
+                </>
+              )}
+            </Button>
+          </motion.div>
         </div>
       </div>
 

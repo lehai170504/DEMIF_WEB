@@ -29,7 +29,8 @@ export function LeaderboardTop() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Trophy className="h-5 w-5 text-[#FF7A00]" />
-              <h3 className="text-lg font-semibold text-slate-800">Top Learners Today</h3>
+              {/* Dịch: Top Learners Today -> Người học hàng đầu hôm nay */}
+              <h3 className="text-lg font-semibold text-slate-800">Người học hàng đầu hôm nay</h3>
             </div>
             <div className="flex gap-3">
               {topLearners.map((user, index) => (
@@ -47,7 +48,8 @@ export function LeaderboardTop() {
                   </div>
                   <div className="text-sm">
                     <div className="font-medium text-slate-800">{user.name}</div>
-                    <div className="text-slate-600">{user.score} pts</div>
+                    {/* Dịch: pts -> điểm */}
+                    <div className="text-slate-600">{user.score} điểm</div>
                   </div>
                 </div>
               ))}
@@ -59,7 +61,8 @@ export function LeaderboardTop() {
               <Flame className="h-5 w-5 text-orange-500" />
               <span className="text-2xl font-bold text-[#FF7A00]">7</span>
             </div>
-            <div className="text-sm text-slate-600">Day Streak</div>
+            {/* Dịch: Day Streak -> Chuỗi ngày */}
+            <div className="text-sm text-slate-600">Chuỗi ngày</div>
           </div>
         </div>
       </Card>

@@ -133,6 +133,17 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Dành cho Chrome, Safari và Opera */
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* Dành cho IE và Edge */
+    scrollbar-width: none; /* Dành cho Firefox */
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
