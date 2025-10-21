@@ -1,118 +1,303 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ArrowLeft, Search, MoreVertical, Ban, CheckCircle, XCircle } from "lucide-react"
-import { usersData } from "@/lib/data/admin-data"
+// pages/admin/users/page.tsx
+
+"use client";
+
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  MoreVertical,
+  Ban,
+  User,
+  CheckCircle,
+  XCircle,
+  Plus,
+  Clock,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+// Tách components
+import AddAdminDialog from "@/components/userManagement/AddAdminDialog";
+import UserDetailDrawer from "@/components/userManagement/UserDetailDrawer";
+
+// Dữ liệu giả định (usersData)
+// Thêm trường 'role' và 'lastActive' chính xác hơn
+const usersData = [
+  {
+    id: 1,
+    username: "admin_test",
+    email: "admin.test@dictation.com",
+    status: "active",
+    completedLessons: 120,
+    totalScore: 92.5,
+    joinedDate: "2024-01-15",
+    lastActive: "3 minutes ago",
+    role: "admin",
+  },
+  {
+    id: 2,
+    username: "student_vip",
+    email: "vip.user@gmail.com",
+    status: "active",
+    completedLessons: 350,
+    totalScore: 88.9,
+    joinedDate: "2023-11-20",
+    lastActive: "1 day ago",
+    role: "member",
+  },
+  {
+    id: 3,
+    username: "suspended_user",
+    email: "suspend@gmail.com",
+    status: "suspended",
+    completedLessons: 5,
+    totalScore: 55.0,
+    joinedDate: "2024-08-01",
+    lastActive: "1 month ago",
+    role: "member",
+  },
+  {
+    id: 4,
+    username: "banned_bot",
+    email: "bot@spam.com",
+    status: "banned",
+    completedLessons: 0,
+    totalScore: 0.0,
+    joinedDate: "2024-09-10",
+    lastActive: "N/A",
+    role: "member",
+  },
+  {
+    id: 5,
+    username: "pro_listener",
+    email: "pro@listener.net",
+    status: "active",
+    completedLessons: 580,
+    totalScore: 95.1,
+    joinedDate: "2023-05-10",
+    lastActive: "2 hours ago",
+    role: "member",
+  },
+];
+
+type UserStatus = "all" | "active" | "suspended" | "banned";
+
+const getStatusBadgeClass = (status: string) => {
+  switch (status) {
+    case "active":
+      return "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400";
+    case "suspended":
+      return "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-400";
+    case "banned":
+      return "bg-red-100 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+};
 
 export default function AdminUsersPage() {
+  const [activeFilter, setActiveFilter] = React.useState<UserStatus>("all");
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  const filteredUsers = usersData.filter((user) => {
+    // 1. Lọc theo trạng thái
+    const statusMatch = activeFilter === "all" || user.status === activeFilter;
+
+    // 2. Lọc theo tìm kiếm
+    const searchMatch =
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return statusMatch && searchMatch;
+  });
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Link>
-            </Button>
-            <h1 className="text-xl font-bold">User Management</h1>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      {/* HEADER PAGE */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <User className="h-6 w-6 text-primary" /> Quản Lý Người Dùng
+        </h1>
+        <AddAdminDialog>
+          <Button size="sm">
+            <Plus className="h-4 w-4 mr-2" /> Thêm Admin
+          </Button>
+        </AddAdminDialog>
+      </div>
 
-      {/* Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search users..." className="pl-10" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="bg-primary/10 border-primary text-primary">
-                All Users
-              </Button>
-              <Button variant="outline" size="sm">
-                Active
-              </Button>
-              <Button variant="outline" size="sm">
-                Suspended
-              </Button>
-              <Button variant="outline" size="sm">
-                Banned
-              </Button>
-            </div>
+      {/* CARD BAO BỌC: Search và Filters */}
+      <Card className="p-4">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm kiếm theo tên, email..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          {/* Users Table */}
-          <Card className="p-6">
-            <div className="space-y-4">
-              {usersData.map((user) => (
-                <div key={user.id} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback>{user.username[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold">{user.username}</span>
-                      <Badge
-                        variant="outline"
-                        className={
-                          user.status === "active"
-                            ? "bg-green-500/10 text-green-500 border-green-500/20"
-                            : user.status === "suspended"
-                              ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                              : "bg-red-500/10 text-red-500 border-red-500/20"
-                        }
-                      >
-                        {user.status}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{user.email}</div>
-                  </div>
-                  <div className="hidden md:flex flex-col items-end gap-1">
-                    <div className="text-sm font-semibold">{user.completedLessons} lessons</div>
-                    <div className="text-xs text-muted-foreground">Score: {user.totalScore.toLocaleString()}</div>
-                  </div>
-                  <div className="hidden md:flex flex-col items-end gap-1">
-                    <div className="text-sm text-muted-foreground">Joined {user.joinedDate}</div>
-                    <div className="text-xs text-muted-foreground">Active {user.lastActive}</div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        View Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Ban className="h-4 w-4 mr-2" />
-                        Suspend User
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Ban User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ))}
-            </div>
-          </Card>
+          {/* Filter Buttons */}
+          <div className="flex gap-2 flex-wrap md:ml-auto">
+            {["all", "active", "suspended", "banned"].map((status) => {
+              const count =
+                status === "all"
+                  ? usersData.length
+                  : usersData.filter((u) => u.status === status).length;
+              return (
+                <Button
+                  key={status}
+                  variant={activeFilter === status ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveFilter(status as UserStatus)}
+                  className={activeFilter === status ? "" : "hover:bg-muted/50"}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
+                </Button>
+              );
+            })}
+          </div>
         </div>
-      </main>
+      </Card>
+
+      {/* CARD BAO BỌC: Bảng Người Dùng */}
+      <Card className="overflow-hidden shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-xl">
+            Danh sách Học viên ({filteredUsers.length} Users)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/70 hover:bg-muted/70">
+                  <TableHead className="w-[30%] min-w-[200px]">
+                    Người Dùng
+                  </TableHead>
+                  <TableHead className="w-[150px]">Trạng Thái</TableHead>
+                  <TableHead className="w-[120px] text-right hidden sm:table-cell">
+                    Bài Đã HC
+                  </TableHead>
+                  <TableHead className="w-[120px] text-right hidden lg:table-cell">
+                    Điểm TB
+                  </TableHead>
+                  <TableHead className="w-[150px] text-right hidden xl:table-cell">
+                    Hoạt Động Cuối
+                  </TableHead>
+                  <TableHead className="w-[100px] text-right">
+                    Hành động
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <TableRow
+                      key={user.id}
+                      className="hover:bg-secondary/20 transition-colors cursor-pointer"
+                    >
+                      {/* Cột Người Dùng (Avatar + Email + Role) */}
+                      <TableCell className="font-medium flex items-center gap-3 py-3">
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage
+                            src={`https://placehold.co/40x40/505050/ffffff?text=${user.username[0]}`}
+                            alt={user.username}
+                          />
+                          <AvatarFallback>{user.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold text-foreground">
+                              {user.username}
+                            </span>
+                            {user.role === "admin" && (
+                              <Badge
+                                variant="default"
+                                className="ml-1 px-1.5 py-0 text-xs bg-primary/20 text-primary"
+                              >
+                                Admin
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {user.email}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Cột Trạng Thái */}
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={getStatusBadgeClass(user.status)}
+                        >
+                          {user.status.charAt(0).toUpperCase() +
+                            user.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="text-right tabular-nums hidden sm:table-cell text-sm font-medium">
+                        {user.completedLessons}
+                      </TableCell>
+
+                      <TableCell className="text-right tabular-nums hidden lg:table-cell font-bold text-primary">
+                        {user.totalScore.toFixed(1)}%
+                      </TableCell>
+
+                      <TableCell className="text-right hidden xl:table-cell text-sm text-muted-foreground flex items-center justify-end gap-1">
+                        <Clock className="h-3 w-3" />
+                        {user.lastActive}
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <UserDetailDrawer user={user}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Hành động</span>
+                          </Button>
+                        </UserDetailDrawer>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      Không tìm thấy người dùng nào khớp với bộ lọc.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>{" "}
+               
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
