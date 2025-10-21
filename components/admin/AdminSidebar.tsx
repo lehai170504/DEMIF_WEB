@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Package2, Home, BarChart3, Users, Settings, BookOpen } from 'lucide-react';
+import { Package2, Home, Users, Settings, BookOpen, FileAudio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -8,7 +8,7 @@ export default function AdminSidebar() {
     { href: "/admin", icon: Home, label: "Dashboard" },
     { href: "/admin/lessons", icon: BookOpen, label: "Bài Tập" },
     { href: "/admin/users", icon: Users, label: "Người Dùng" },
-    { href: "/admin/analytics", icon: BarChart3, label: "Phân Tích" },
+    { href: "/admin/audio", icon: FileAudio, label: "Audio" },
   ];
   
   return (

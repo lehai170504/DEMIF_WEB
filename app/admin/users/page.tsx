@@ -33,12 +33,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Tách components
 import AddAdminDialog from "@/components/userManagement/AddAdminDialog";
 import UserDetailDrawer from "@/components/userManagement/UserDetailDrawer";
 
-// Dữ liệu giả định (usersData)
-// Thêm trường 'role' và 'lastActive' chính xác hơn
 const usersData = [
   {
     id: 1,
@@ -117,10 +114,8 @@ export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
 
   const filteredUsers = usersData.filter((user) => {
-    // 1. Lọc theo trạng thái
     const statusMatch = activeFilter === "all" || user.status === activeFilter;
 
-    // 2. Lọc theo tìm kiếm
     const searchMatch =
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -130,7 +125,6 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      {/* HEADER PAGE */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <User className="h-6 w-6 text-primary" /> Quản Lý Người Dùng
@@ -142,7 +136,6 @@ export default function AdminUsersPage() {
         </AddAdminDialog>
       </div>
 
-      {/* CARD BAO BỌC: Search và Filters */}
       <Card className="p-4">
         <div className="flex flex-col md:flex-row gap-3 md:items-center">
           <div className="relative flex-1 max-w-sm">
@@ -155,7 +148,6 @@ export default function AdminUsersPage() {
             />
           </div>
 
-          {/* Filter Buttons */}
           <div className="flex gap-2 flex-wrap md:ml-auto">
             {["all", "active", "suspended", "banned"].map((status) => {
               const count =
@@ -178,7 +170,6 @@ export default function AdminUsersPage() {
         </div>
       </Card>
 
-      {/* CARD BAO BỌC: Bảng Người Dùng */}
       <Card className="overflow-hidden shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl">
@@ -193,7 +184,9 @@ export default function AdminUsersPage() {
                   <TableHead className="w-[30%] min-w-[200px]">
                     Người Dùng
                   </TableHead>
-                  <TableHead className="w-[150px]">Trạng Thái</TableHead>
+                  <TableHead className="w-[150px] text-center">
+                    Trạng Thái
+                  </TableHead>
                   <TableHead className="w-[120px] text-right hidden sm:table-cell">
                     Bài Đã HC
                   </TableHead>
@@ -215,7 +208,6 @@ export default function AdminUsersPage() {
                       key={user.id}
                       className="hover:bg-secondary/20 transition-colors cursor-pointer"
                     >
-                      {/* Cột Người Dùng (Avatar + Email + Role) */}
                       <TableCell className="font-medium flex items-center gap-3 py-3">
                         <Avatar className="h-9 w-9">
                           <AvatarImage
@@ -244,15 +236,16 @@ export default function AdminUsersPage() {
                         </div>
                       </TableCell>
 
-                      {/* Cột Trạng Thái */}
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getStatusBadgeClass(user.status)}
-                        >
-                          {user.status.charAt(0).toUpperCase() +
-                            user.status.slice(1)}
-                        </Badge>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center">
+                          <Badge
+                            variant="outline"
+                            className={getStatusBadgeClass(user.status)}
+                          >
+                            {user.status.charAt(0).toUpperCase() +
+                              user.status.slice(1)}
+                          </Badge>
+                        </div>
                       </TableCell>
 
                       <TableCell className="text-right tabular-nums hidden sm:table-cell text-sm font-medium">
@@ -292,8 +285,7 @@ export default function AdminUsersPage() {
                     </TableCell>
                   </TableRow>
                 )}
-              </TableBody>{" "}
-               
+              </TableBody>
             </Table>
           </div>
         </CardContent>

@@ -205,10 +205,6 @@ export default function DataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm">
-            <IconPlus />
-            <span className="hidden lg:inline">Thêm Bài Tập</span>
-          </Button>
         </div>
       </div>
       <TabsContent
