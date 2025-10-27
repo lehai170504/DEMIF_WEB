@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/select";
 import { Search, BookOpen, Plus } from "lucide-react";
 
-import DataTable from "@/components/dashboardAdmin/data-table";
-import AddLessonDialog from "@/components/lessonManagement/AddLessonDialog";
+import DataTable from "@/components/admin/dashboard/data-table";
+import AddLessonDialog from "@/components/admin/lesson/AddLessonDialog";
 
 import { lessonsData } from "./admin-lessons-data";
-import { schema } from "@/components/dashboardAdmin/table-columns";
+import { schema } from "@/components/admin/dashboard/table-columns";
 
 const allLessons = lessonsData.map((item) => {
   try {

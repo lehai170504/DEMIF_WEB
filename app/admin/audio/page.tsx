@@ -25,7 +25,7 @@ import {
   ListPlus,
 } from "lucide-react";
 import { toast } from "sonner";
-import AudioUploadDialog from "@/components/audioManagement/AudioUploadDialog";
+import AudioUploadDialog from "@/components/admin/audio/AudioUploadDialog";
 
 interface AudioFile {
   id: number;

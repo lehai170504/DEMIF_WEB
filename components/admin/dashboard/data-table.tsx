@@ -65,10 +65,10 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-// --- COMPONENTS TÁCH RỜI (Cần import từ các file riêng) ---
+
 import DraggableRow from "./draggable-row"
 import TablePagination from "./table-pagination"
-import { columns, schema } from "./table-columns" // Import columns và schema
+import { columns, schema } from "./table-columns" 
 // ---------------------------------------------------------
 
 

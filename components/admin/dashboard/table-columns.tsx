@@ -1,13 +1,12 @@
 // components/dashboardAdmin/table-columns.tsx
 
 import { z } from "zod";
-import { ColumnDef, Row, flexRender } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
   IconGripVertical,
   IconLoader,
   IconDotsVertical,
-  IconTrendingUp,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,6 +32,8 @@ import { useSortable } from "@dnd-kit/sortable";
 
 // --- Import Component Viewer ---
 import TableCellViewer from "./table-cell-viewer";
+import LessonDetailDialog from "@/components/admin/lesson/LessonDetailDialog";
+import { useState } from "react";
 // -----------------------------
 
 export const schema = z.object({
@@ -44,6 +45,7 @@ export const schema = z.object({
   min_accuracy: z.string(),
   max_attempts: z.string(),
   reviewer: z.enum(["AI Voice Check", "Admin A", "Admin B", "Chỉ định"]),
+  highlighted: z.boolean().optional().default(false),
 });
 
 // Tạo component DragHandle ở đây hoặc trong file riêng
@@ -216,45 +218,111 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
             Người/AI Review
           </Label>
           <Select defaultValue={row.original.reviewer}>
-          <SelectTrigger
-            className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-            size="sm"
-            id={`${row.original.id}-reviewer`}
-          >
-            <SelectValue placeholder="Chỉ định" />
-          </SelectTrigger>
-          <SelectContent align="end">
-            <SelectItem value="AI Voice Check">AI Voice Check</SelectItem>
-            <SelectItem value="Admin A">Admin A</SelectItem>F
-            <SelectItem value="Admin B">Admin B</SelectItem>
-          </SelectContent>
-        </Select>
+            <SelectTrigger
+              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
+              size="sm"
+              id={`${row.original.id}-reviewer`}
+            >
+              <SelectValue placeholder="Chỉ định" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value="AI Voice Check">AI Voice Check</SelectItem>
+              <SelectItem value="Admin A">Admin A</SelectItem>F
+              <SelectItem value="Admin B">Admin B</SelectItem>
+            </SelectContent>
+          </Select>
         </>
       );
     },
   },
   {
     id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Mở menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
-          <DropdownMenuItem>Sao chép</DropdownMenuItem>
-          <DropdownMenuItem>Làm nổi bật</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Xóa</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const lesson = row.original;
+      const [open, setOpen] = useState(false);
+
+      const handleSave = (updatedLesson: any) => {
+        console.log("Updated lesson:", updatedLesson);
+        toast.success("Đã cập nhật bài học!");
+      };
+
+      const handleDelete = (id: string) => {
+        console.log("Deleted lesson ID:", id);
+        toast.success("Đã xóa bài học!");
+      };
+
+      // 🧩 Hàm sao chép bài học
+      const handleDuplicate = () => {
+        const newLesson = {
+          ...lesson,
+          id: Date.now(), // tạo id giả mới
+          title: `${lesson.title} (Copy)`,
+        };
+        console.log("Duplicated lesson:", newLesson);
+        toast.success(`Đã sao chép bài học "${lesson.title}"`);
+        // TODO: Gọi API tạo mới bài học từ newLesson
+      };
+
+      // 🧩 Hàm làm nổi bật bài học
+      const handleHighlight = () => {
+        const updated = { ...lesson, highlighted: !lesson.highlighted };
+        console.log("Highlight toggled:", updated);
+        toast.success(
+          updated.highlighted
+            ? `Đã làm nổi bật bài "${lesson.title}"`
+            : `Đã bỏ nổi bật bài "${lesson.title}"`
+        );
+        // TODO: Gọi API updateLesson(updated)
+      };
+
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <IconDotsVertical />
+                <span className="sr-only">Mở menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                Chỉnh sửa
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate}>
+                Sao chép
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHighlight}>
+                {lesson.highlighted ? "Bỏ nổi bật" : "Làm nổi bật"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleDelete(lesson.id.toString())}
+                className="text-red-500"
+              >
+                Xóa
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <LessonDetailDialog
+            open={open}
+            onClose={() => setOpen(false)}
+            data={{
+              id: lesson.id.toString(),
+              title: lesson.title,
+              type: lesson.type,
+              level: lesson.level,
+              status: lesson.status,
+            }}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        </>
+      );
+    },
   },
 ];

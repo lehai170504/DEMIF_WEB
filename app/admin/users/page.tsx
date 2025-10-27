@@ -18,8 +18,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import AddAdminDialog from "@/components/userManagement/AddAdminDialog";
-import UserDetailDrawer from "@/components/userManagement/UserDetailDrawer";
+import AddAdminDialog from "@/components/admin/user/AddAdminDialog";
+import UserDetailDrawer from "@/components/admin/user/UserDetailDrawer";
 
 const usersData = [
   {
