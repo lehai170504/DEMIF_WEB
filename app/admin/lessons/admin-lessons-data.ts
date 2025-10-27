@@ -1,0 +1,115 @@
+// lib/data/admin-data/admin-lessons-data.ts
+
+export interface LessonData {
+  id: number;
+  title: string;
+  type: "Dictation" | "Shadowing" | "Test";
+  level: "Beginner" | "Intermediate" | "Advanced";
+  status: "Published" | "Draft" | "Review";
+  min_accuracy: string;
+  max_attempts: string;
+  reviewer: string;
+}
+
+export const lessonsData: LessonData[] = [
+  {
+    id: 1,
+    title: "Bài 1: Giới thiệu bản thân",
+    type: "Dictation",
+    level: "Beginner",
+    status: "Published",
+    min_accuracy: "85%",
+    max_attempts: "5",
+    reviewer: "AI Voice Check",
+  },
+  {
+    id: 2,
+    title: "Bài 2: Phỏng vấn xin việc (Phần 1)",
+    type: "Shadowing",
+    level: "Intermediate",
+    status: "Published",
+    min_accuracy: "70%",
+    max_attempts: "3",
+    reviewer: "AI Voice Check",
+  },
+  {
+    id: 3,
+    title: "Bài 3: Tin tức kinh tế hàng ngày",
+    type: "Dictation",
+    level: "Advanced",
+    status: "Published",
+    min_accuracy: "90%",
+    max_attempts: "Không giới hạn",
+    reviewer: "Admin A",
+  },
+  {
+    id: 4,
+    title: "Bài 4: Phát âm từ khóa (Test)",
+    type: "Test",
+    level: "Intermediate",
+    status: "Published",
+    min_accuracy: "75%",
+    max_attempts: "1",
+    reviewer: "AI Voice Check",
+  },
+  {
+    id: 5,
+    title: "Bài 5: Học thuật (Biến đổi khí hậu)",
+    type: "Dictation",
+    level: "Advanced",
+    status: "Draft",
+    min_accuracy: "88%",
+    max_attempts: "5",
+    reviewer: "Admin B",
+  },
+  {
+    id: 6,
+    title: "Bài 6: Ngữ điệu trong giao tiếp",
+    type: "Shadowing",
+    level: "Beginner",
+    status: "Review",
+    min_accuracy: "60%",
+    max_attempts: "10",
+    reviewer: "Admin A",
+  },
+  {
+    id: 7,
+    title: "Bài 7: Tiếng lóng công nghệ",
+    type: "Dictation",
+    level: "Intermediate",
+    status: "Published",
+    min_accuracy: "80%",
+    max_attempts: "4",
+    reviewer: "AI Voice Check",
+  },
+  {
+    id: 8,
+    title: "Bài 8: Đoạn thoại dài (Test)",
+    type: "Test",
+    level: "Advanced",
+    status: "Published",
+    min_accuracy: "95%",
+    max_attempts: "1",
+    reviewer: "Chỉ định",
+  },
+  {
+    id: 9,
+    title: "Bài 9: Du lịch và văn hóa",
+    type: "Shadowing",
+    level: "Intermediate",
+    status: "Draft",
+    min_accuracy: "72%",
+    max_attempts: "Không giới hạn",
+    reviewer: "Admin B",
+  },
+  {
+    id: 10,
+    title: "Bài 10: Quy trình làm việc",
+    type: "Dictation",
+    level: "Intermediate",
+    status: "Published",
+    min_accuracy: "85%",
+    max_attempts: "3",
+    reviewer: "AI Voice Check",
+  },
+];
