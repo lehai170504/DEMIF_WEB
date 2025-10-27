@@ -8,22 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  MoreVertical,
-  Ban,
-  User,
-  CheckCircle,
-  XCircle,
-  Plus,
-  Clock,
-} from "lucide-react";
+import { Search, MoreVertical, User, Plus, Clock } from "lucide-react";
 import {
   Table,
   TableBody,
