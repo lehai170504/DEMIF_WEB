@@ -7,10 +7,10 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Save } from "lucide-react"
 import { mockUserProfile } from "@/lib/data/user-profile"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState(mockUserProfile)
@@ -21,6 +21,7 @@ export default function SettingsPage() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsSaving(false)
+    alert('Đã lưu thành công!')
   }
 
   return (
@@ -32,14 +33,14 @@ export default function SettingsPage() {
             <Button variant="ghost" size="sm" asChild>
               <Link href="/profile">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Profile
+                Quay lại Hồ sơ
               </Link>
             </Button>
-            <h1 className="text-xl font-bold">Settings</h1>
+            <h1 className="text-xl font-bold">Cài đặt</h1>
           </div>
           <Button onClick={handleSave} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>
         </div>
       </header>
@@ -49,16 +50,8 @@ export default function SettingsPage() {
         <div className="max-w-3xl mx-auto space-y-6">
           {/* Account Settings */}
           <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Account Settings</h2>
+            <h2 className="text-2xl font-bold mb-6">Thông tin tài khoản</h2>
             <div className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={profile.username}
-                  onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                />
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -67,116 +60,36 @@ export default function SettingsPage() {
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="country">Country</Label>
-                <Select value={profile.country} onValueChange={(value) => setProfile({ ...profile, country: value })}>
-                  <SelectTrigger id="country">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="USA">United States</SelectItem>
-                    <SelectItem value="UK">United Kingdom</SelectItem>
-                    <SelectItem value="Canada">Canada</SelectItem>
-                    <SelectItem value="Australia">Australia</SelectItem>
-                    <SelectItem value="Germany">Germany</SelectItem>
-                    <SelectItem value="France">France</SelectItem>
-                    <SelectItem value="Japan">Japan</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Email dùng để đăng nhập và nhận thông báo
+                </p>
               </div>
             </div>
           </Card>
 
-          {/* Learning Preferences */}
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Learning Preferences</h2>
-            <div className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="nativeLanguage">Native Language</Label>
-                <Select
-                  value={profile.nativeLanguage}
-                  onValueChange={(value) => setProfile({ ...profile, nativeLanguage: value })}
-                >
-                  <SelectTrigger id="nativeLanguage">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="English">English</SelectItem>
-                    <SelectItem value="Spanish">Spanish</SelectItem>
-                    <SelectItem value="French">French</SelectItem>
-                    <SelectItem value="German">German</SelectItem>
-                    <SelectItem value="Chinese">Chinese</SelectItem>
-                    <SelectItem value="Japanese">Japanese</SelectItem>
-                  </SelectContent>
-                </Select>
+          {/* Info Note */}
+          <Card className="p-4 bg-muted/50">
+            <div className="flex items-start gap-3">
+              <div className="text-muted-foreground">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="targetLanguage">Target Language</Label>
-                <Select
-                  value={profile.targetLanguage}
-                  onValueChange={(value) => setProfile({ ...profile, targetLanguage: value })}
-                >
-                  <SelectTrigger id="targetLanguage">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Spanish">Spanish</SelectItem>
-                    <SelectItem value="French">French</SelectItem>
-                    <SelectItem value="German">German</SelectItem>
-                    <SelectItem value="English">English</SelectItem>
-                    <SelectItem value="Chinese">Chinese</SelectItem>
-                    <SelectItem value="Japanese">Japanese</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="learningGoal">Learning Goal</Label>
-                <Select
-                  value={profile.learningGoal}
-                  onValueChange={(value) => setProfile({ ...profile, learningGoal: value })}
-                >
-                  <SelectTrigger id="learningGoal">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Basic conversation">Basic conversation</SelectItem>
-                    <SelectItem value="Travel fluency">Travel fluency</SelectItem>
-                    <SelectItem value="Professional fluency">Professional fluency</SelectItem>
-                    <SelectItem value="Native-like fluency">Native-like fluency</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="dailyGoal">Daily Goal (minutes)</Label>
-                <Select
-                  value={profile.dailyGoalMinutes.toString()}
-                  onValueChange={(value) => setProfile({ ...profile, dailyGoalMinutes: Number.parseInt(value) })}
-                >
-                  <SelectTrigger id="dailyGoal">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                    <SelectItem value="90">90 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium mb-1">Lưu ý:</p>
+                <p>Để chỉnh sửa thông tin cá nhân như tên, ảnh đại diện, vui lòng truy cập trang <Link href="/profile/edit" className="text-primary hover:underline">Chỉnh sửa hồ sơ</Link>.</p>
               </div>
             </div>
           </Card>
 
           {/* Notifications */}
           <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Notifications</h2>
+            <h2 className="text-2xl font-bold mb-6">Thông báo</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Email Notifications</div>
-                  <div className="text-sm text-muted-foreground">Receive updates via email</div>
+                  <div className="font-medium">Thông báo qua Email</div>
+                  <div className="text-sm text-muted-foreground">Nhận cập nhật qua email</div>
                 </div>
                 <Switch
                   checked={profile.notifications.email}
@@ -191,8 +104,8 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Push Notifications</div>
-                  <div className="text-sm text-muted-foreground">Receive push notifications</div>
+                  <div className="font-medium">Thông báo đẩy</div>
+                  <div className="text-sm text-muted-foreground">Nhận thông báo đẩy trên thiết bị</div>
                 </div>
                 <Switch
                   checked={profile.notifications.push}
@@ -207,8 +120,8 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Daily Reminder</div>
-                  <div className="text-sm text-muted-foreground">Get reminded to practice daily</div>
+                  <div className="font-medium">Nhắc nhở hàng ngày</div>
+                  <div className="text-sm text-muted-foreground">Nhận nhắc nhở luyện tập hàng ngày</div>
                 </div>
                 <Switch
                   checked={profile.notifications.dailyReminder}
@@ -223,8 +136,8 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Weekly Report</div>
-                  <div className="text-sm text-muted-foreground">Receive weekly progress reports</div>
+                  <div className="font-medium">Báo cáo hàng tuần</div>
+                  <div className="text-sm text-muted-foreground">Nhận báo cáo tiến độ hàng tuần</div>
                 </div>
                 <Switch
                   checked={profile.notifications.weeklyReport}
@@ -241,12 +154,12 @@ export default function SettingsPage() {
 
           {/* Privacy */}
           <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Privacy</h2>
+            <h2 className="text-2xl font-bold mb-6">Quyền riêng tư</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Show Profile</div>
-                  <div className="text-sm text-muted-foreground">Make your profile visible to others</div>
+                  <div className="font-medium">Hiển thị hồ sơ</div>
+                  <div className="text-sm text-muted-foreground">Cho phép người khác xem hồ sơ của bạn</div>
                 </div>
                 <Switch
                   checked={profile.privacy.showProfile}
@@ -261,8 +174,8 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Show Progress</div>
-                  <div className="text-sm text-muted-foreground">Display your learning progress publicly</div>
+                  <div className="font-medium">Hiển thị tiến độ</div>
+                  <div className="text-sm text-muted-foreground">Hiển thị tiến độ học tập của bạn công khai</div>
                 </div>
                 <Switch
                   checked={profile.privacy.showProgress}
@@ -277,8 +190,8 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Show on Leaderboard</div>
-                  <div className="text-sm text-muted-foreground">Appear in global rankings</div>
+                  <div className="font-medium">Hiển thị trên bảng xếp hạng</div>
+                  <div className="text-sm text-muted-foreground">Xuất hiện trong bảng xếp hạng toàn cầu</div>
                 </div>
                 <Switch
                   checked={profile.privacy.showOnLeaderboard}
@@ -295,21 +208,22 @@ export default function SettingsPage() {
 
           {/* Danger Zone */}
           <Card className="p-6 border-destructive/50">
-            <h2 className="text-2xl font-bold mb-6 text-destructive">Danger Zone</h2>
+            <h2 className="text-2xl font-bold mb-6 text-destructive">Vùng nguy hiểm</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">Delete Account</div>
-                  <div className="text-sm text-muted-foreground">Permanently delete your account and all data</div>
+                  <div className="font-medium">Xóa tài khoản</div>
+                  <div className="text-sm text-muted-foreground">Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu của bạn</div>
                 </div>
                 <Button variant="destructive" size="sm">
-                  Delete
+                  Xóa tài khoản
                 </Button>
               </div>
             </div>
           </Card>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }

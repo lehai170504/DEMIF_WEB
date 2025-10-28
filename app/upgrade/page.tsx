@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Check, Star, Zap } from "lucide-react"
 import Link from "next/link"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function UpgradePage() {
   return (
@@ -164,7 +165,7 @@ export default function UpgradePage() {
       <div className="mt-16 text-center text-gray-500">
         Bạn có câu hỏi? <Link href="/faq" className="text-[#FF7A00] font-medium hover:underline">Xem Câu hỏi thường gặp</Link> hoặc liên hệ hỗ trợ.
       </div>
-      
+      <FooterLanding />
     </section>
   )
 }

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowLeft, Trophy, Flame, BookOpen, Crown } from "lucide-react"
 import { leaderboardData } from "@/lib/data/leaderboard"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 // Màu sắc chủ đạo nhất quán
 const PRIMARY_COLOR = "#FF7A00";
@@ -215,6 +216,7 @@ export default function LeaderboardPage() {
           </Card>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }

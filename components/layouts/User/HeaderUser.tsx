@@ -19,13 +19,15 @@ export function HeaderUser() {
       <div className="container mx-auto px-6 py-3">
         <div className="flex items-center justify-between h-14 font-mono">
           {/* Logo và Tên ứng dụng */}
-          <div className="flex items-center gap-2">
-            <Link href="/home" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF7A00] to-orange-300 flex items-center justify-center shadow-md">
-                <span className="text-lg font-bold text-white">D</span>
-              </div>
+          <div className="flex items-center gap-3">
+            <Link href="/home" className="flex items-center gap-3 p-2 rounded-lg hover:bg-orange-50 transition-colors">
+              <img
+                src="/DemifLogo.png"
+                alt="DEMIF Logo"
+                className="w-10 h-10 rounded-lg shadow-md"
+              />
               {/* Logo font chính: Chắc chắn hơn */}
-              <span className="text-xl font-bold text-gray-800">DEMIF</span>
+              <span className="text-2xl font-extrabold text-gray-800 tracking-wide">DEMIF</span>
             </Link>
           </div>
 
@@ -110,8 +112,8 @@ export function HeaderUser() {
 
                 <DropdownMenuSeparator className="my-1" />
 
-                {/* Mục 1: Hồ sơ (Profile) - Highlight màu cam */}
-                <Link href="/profile" passHref>
+                {/* Mục 1: Quản lý tài khoản - Highlight màu cam */}
+                <Link href="/profile/edit" passHref>
                   <DropdownMenuItem
                     className="cursor-pointer font-medium 
                    focus:bg-orange-50 focus:text-[#FF7A00] 
@@ -119,7 +121,7 @@ export function HeaderUser() {
                    transition-colors duration-150 rounded-lg p-2"
                   >
                     <User className="mr-3 h-4 w-4" />
-                    <span>Hồ sơ cá nhân</span>
+                    <span>Quản lý tài khoản</span>
                   </DropdownMenuItem>
                 </Link>
 

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, BookOpen, Clock, TrendingUp } from "lucide-react"
 import { vocabularyItems } from "@/lib/data/vocabulary"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 // Định nghĩa màu cam chủ đạo nhất quán
 const PRIMARY_ORANGE = "#FF7A00";
@@ -214,6 +215,7 @@ export default function ReviewPage() {
           <div className="hidden lg:block"></div>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }
