@@ -60,7 +60,7 @@ export function HeroLanding() {
           </div>
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-[#FF7A00]" />
-            <span>Có thể hủy bất kỳ lúc nào</span>
+            <span>Có thể hủy bất kỳ lúc nào bạn muốn</span>
           </div>
         </div>
       </div>
