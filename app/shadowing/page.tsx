@@ -1,11 +1,13 @@
+// app/shadowing/page.tsx
 'use client'
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { ArrowLeft, Clock, BookOpen, ChevronRight, Filter } from "lucide-react"
-import { lessons } from "@/lib/data/lessons"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { ArrowLeft, Clock, BookOpen, ChevronRight, Filter } from "lucide-react";
+import { lessons } from "@/lib/data/lessons";
+import { HeaderUser } from "@/components/layouts/User/HeaderUser";
 import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 import {
   Table,
@@ -14,13 +16,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import type { ColumnDef } from "@tanstack/react-table"
+} from "@/components/ui/table";
+import type { ColumnDef } from "@tanstack/react-table";
 
 type LessonLevel = "beginner" | "intermediate" | "advanced";
 
 const getLevelBadgeClasses = (level: LessonLevel): string => {
-  switch (level.toLowerCase()) {
+   switch (level.toLowerCase()) {
     case "beginner":
       return "bg-green-100 text-green-700 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-600";
     case "intermediate":
@@ -48,7 +50,7 @@ const columns: ColumnDef<(typeof lessons)[number]>[] = [
       </div>
     ),
   },
-  {
+   {
     accessorKey: 'level',
     header: 'Cấp độ',
     cell: ({ row }) => (
@@ -68,17 +70,17 @@ const columns: ColumnDef<(typeof lessons)[number]>[] = [
     accessorKey: 'duration',
     header: 'Thời gian',
     cell: ({ row }) => (
-      <div className="flex items-center gap-1 text-sm text-gray-600">
-        <Clock className="h-4 w-4" />
-        <span>{row.original.duration}s</span>
-      </div>
+       <div className="flex items-center gap-1 text-sm text-gray-600">
+         <Clock className="h-4 w-4" />
+         <span>{row.original.duration}s</span>
+       </div>
     ),
   },
   {
     accessorKey: 'category',
     header: 'Danh mục',
     cell: ({ row }) => (
-      <span className="text-sm text-gray-600">{row.original.category}</span>
+       <span className="text-sm text-gray-600">{row.original.category}</span>
     ),
   },
   {
@@ -86,7 +88,7 @@ const columns: ColumnDef<(typeof lessons)[number]>[] = [
     header: '',
     cell: ({ row }) => (
       <Button asChild size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-        <Link href={`/shadowing/${row.original.id}`}>
+        <Link href={`/shadowing/${row.original.id}`}> {/* <<< ĐÃ ĐỔI LINK */}
           Start
           <ChevronRight className="h-4 w-4 ml-1" />
         </Link>
@@ -97,28 +99,17 @@ const columns: ColumnDef<(typeof lessons)[number]>[] = [
 
 export default function ShadowingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Link>
-            </Button>
-            <h1 className="text-xl font-bold">Shadowing Exercises</h1>
-          </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard">Dashboard</Link>
-          </Button>
-        </div>
-      </header>
+    <div className="flex flex-col min-h-screen bg-background">
+      <HeaderUser /> 
 
-      {/* Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8"> {/* <<< ĐÃ THÊM flex-1 */}
         <div className="space-y-6">
+          {/* Main Title Block */}
+          <div className="mb-6 text-center">
+            <h2 className="text-4xl font-extrabold tracking-tight mb-2 text-primary">Luyện Tập Shadowing</h2>
+            <p className="text-lg text-muted-foreground">Chọn bài tập để luyện phát âm và ngữ điệu.</p>
+          </div>
+
           {/* Filters Section */}
           <Card className="p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -129,17 +120,13 @@ export default function ShadowingPage() {
                 </h4>
                 <p className="text-sm text-muted-foreground">Lọc bài học theo cấp độ</p>
               </div>
-
               <div className="flex flex-wrap gap-2">
                 {['Tất cả', 'Sơ cấp', 'Trung cấp', 'Nâng cao'].map((level) => (
                   <Button
                     key={level}
                     variant="ghost"
                     size="sm"
-                    className={`
-                      transition-colors duration-200
-                      ${level === 'Tất cả' ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/20' : 'hover:bg-accent'}
-                    `}
+                    className={`transition-colors duration-200 ${level === 'Tất cả' ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/20' : 'hover:bg-accent'}`}
                   >
                     {level}
                   </Button>
@@ -147,7 +134,8 @@ export default function ShadowingPage() {
               </div>
             </div>
           </Card>
-{/* Stats Card */}
+
+          {/* Stats Card */}
           <Card className="p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -172,6 +160,7 @@ export default function ShadowingPage() {
               </div>
             </div>
           </Card>
+
           {/* Lessons Table */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
@@ -204,7 +193,7 @@ export default function ShadowingPage() {
                           variant="outline"
                           className={`text-xs ${getLevelBadgeClasses(lesson.level as LessonLevel)}`}
                         >
-                          {lesson.level}
+                           {lesson.level === "beginner" ? "Sơ cấp" : lesson.level === "intermediate" ? "Trung cấp" : "Nâng cao"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -218,7 +207,7 @@ export default function ShadowingPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button asChild size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-                          <Link href={`/shadowing/${lesson.id}`}>
+                          <Link href={`/shadowing/${lesson.id}`}> 
                             Start
                             <ChevronRight className="h-4 w-4 ml-1" />
                           </Link>
@@ -230,8 +219,6 @@ export default function ShadowingPage() {
               </Table>
             </div>
           </div>
-
-          
         </div>
       </main>
       <FooterLanding />
