@@ -1,10 +1,99 @@
+'use client'
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Clock, BookOpen } from "lucide-react"
+import { Card } from "@/components/ui/card"
+import { ArrowLeft, Clock, BookOpen, ChevronRight, Filter } from "lucide-react"
 import { lessons } from "@/lib/data/lessons"
 import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import type { ColumnDef } from "@tanstack/react-table"
+
+type LessonLevel = "beginner" | "intermediate" | "advanced";
+
+const getLevelBadgeClasses = (level: LessonLevel): string => {
+  switch (level.toLowerCase()) {
+    case "beginner":
+      return "bg-green-100 text-green-700 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-600";
+    case "intermediate":
+      return "bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:border-yellow-600";
+    case "advanced":
+      return "bg-red-100 text-red-700 border-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-600";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500";
+  }
+};
+
+const columns: ColumnDef<(typeof lessons)[number]>[] = [
+  {
+    accessorKey: 'title',
+    header: 'Tên bài học',
+    cell: ({ row }) => (
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+          <BookOpen className="h-5 w-5 text-white" />
+        </div>
+        <div>
+          <div className="font-semibold text-gray-900">{row.original.title}</div>
+          <div className="text-sm text-gray-500 line-clamp-1">{row.original.description}</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'level',
+    header: 'Cấp độ',
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className={`text-xs ${getLevelBadgeClasses(row.original.level as LessonLevel)}`}
+      >
+        {
+          row.original.level === "beginner" ? "Sơ cấp" :
+          row.original.level === "intermediate" ? "Trung cấp" :
+          "Nâng cao"
+        }
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: 'duration',
+    header: 'Thời gian',
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1 text-sm text-gray-600">
+        <Clock className="h-4 w-4" />
+        <span>{row.original.duration}s</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'category',
+    header: 'Danh mục',
+    cell: ({ row }) => (
+      <span className="text-sm text-gray-600">{row.original.category}</span>
+    ),
+  },
+  {
+    id: 'actions',
+    header: '',
+    cell: ({ row }) => (
+      <Button asChild size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+        <Link href={`/shadowing/${row.original.id}`}>
+          Start
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Link>
+      </Button>
+    ),
+  },
+];
 
 export default function ShadowingPage() {
   return (
@@ -29,68 +118,120 @@ export default function ShadowingPage() {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-2">Choose Your Lesson</h2>
-            <p className="text-muted-foreground">Select a shadowing exercise to practice your pronunciation</p>
-          </div>
+        <div className="space-y-6">
+          {/* Filters Section */}
+          <Card className="p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h4 className="flex items-center text-lg font-semibold mb-2 sm:mb-0 text-primary">
+                  <Filter className="h-5 w-5 mr-2" />
+                  Bộ Lọc
+                </h4>
+                <p className="text-sm text-muted-foreground">Lọc bài học theo cấp độ</p>
+              </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            <Button variant="outline" size="sm" className="bg-primary/10 border-primary text-primary">
-              All Levels
-            </Button>
-            <Button variant="outline" size="sm">
-              Beginner
-            </Button>
-            <Button variant="outline" size="sm">
-              Intermediate
-            </Button>
-            <Button variant="outline" size="sm">
-              Advanced
-            </Button>
-          </div>
-
-          {/* Lessons Grid */}
-          <div className="grid gap-4">
-            {lessons.map((lesson) => (
-              <Card key={lesson.id} className="p-6 hover:border-primary/50 transition-colors">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-semibold">{lesson.title}</h3>
-                      <Badge
-                        variant="outline"
-                        className={
-                          lesson.level === "beginner"
-                            ? "bg-green-500/10 text-green-500 border-green-500/20"
-                            : lesson.level === "intermediate"
-                              ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                              : "bg-red-500/10 text-red-500 border-red-500/20"
-                        }
-                      >
-                        {lesson.level}
-                      </Badge>
-                    </div>
-                    <p className="text-muted-foreground mb-4">{lesson.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{lesson.duration}s</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <BookOpen className="h-4 w-4" />
-                        <span>{lesson.category}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button asChild>
-                    <Link href={`/shadowing/${lesson.id}`}>Start</Link>
+              <div className="flex flex-wrap gap-2">
+                {['Tất cả', 'Sơ cấp', 'Trung cấp', 'Nâng cao'].map((level) => (
+                  <Button
+                    key={level}
+                    variant="ghost"
+                    size="sm"
+                    className={`
+                      transition-colors duration-200
+                      ${level === 'Tất cả' ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/20' : 'hover:bg-accent'}
+                    `}
+                  >
+                    {level}
                   </Button>
+                ))}
+              </div>
+            </div>
+          </Card>
+{/* Stats Card */}
+          <Card className="p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h4 className="text-lg font-semibold mb-2">Thống Kê Cá Nhân</h4>
+                <p className="text-sm text-muted-foreground">
+                  Bạn đã hoàn thành <span className="font-semibold text-primary">3/8</span> bài tập.
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span>Tiến độ</span>
+                    <span className="font-semibold">37.5%</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-gray-200">
+                    <div className="h-2 rounded-full bg-primary" style={{ width: '37.5%' }}></div>
+                  </div>
                 </div>
-              </Card>
-            ))}
+                <Button variant="link" className="p-0 h-auto text-sm whitespace-nowrap" asChild>
+                  <Link href="/dashboard">Xem Chi Tiết</Link>
+                </Button>
+              </div>
+            </div>
+          </Card>
+          {/* Lessons Table */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[300px]">Tên bài học</TableHead>
+                    <TableHead className="min-w-[100px]">Cấp độ</TableHead>
+                    <TableHead className="min-w-[120px]">Thời gian</TableHead>
+                    <TableHead className="min-w-[120px]">Danh mục</TableHead>
+                    <TableHead className="min-w-[120px] text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lessons.map((lesson) => (
+                    <TableRow key={lesson.id} className="hover:bg-orange-50/50">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0">
+                            <BookOpen className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-gray-900 truncate">{lesson.title}</div>
+                            <div className="text-sm text-gray-500 line-clamp-2">{lesson.description}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${getLevelBadgeClasses(lesson.level as LessonLevel)}`}
+                        >
+                          {lesson.level}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Clock className="h-4 w-4 flex-shrink-0" />
+                          <span>{lesson.duration}s</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-600">{lesson.category}</span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                          <Link href={`/shadowing/${lesson.id}`}>
+                            Start
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
+
+          
         </div>
       </main>
       <FooterLanding />
