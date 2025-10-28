@@ -110,8 +110,8 @@ export function HeaderUser() {
 
                 <DropdownMenuSeparator className="my-1" />
 
-                {/* Mục 1: Hồ sơ (Profile) - Highlight màu cam */}
-                <Link href="/profile" passHref>
+                {/* Mục 1: Quản lý tài khoản - Highlight màu cam */}
+                <Link href="/profile/edit" passHref>
                   <DropdownMenuItem
                     className="cursor-pointer font-medium 
                    focus:bg-orange-50 focus:text-[#FF7A00] 
@@ -119,7 +119,7 @@ export function HeaderUser() {
                    transition-colors duration-150 rounded-lg p-2"
                   >
                     <User className="mr-3 h-4 w-4" />
-                    <span>Hồ sơ cá nhân</span>
+                    <span>Quản lý tài khoản</span>
                   </DropdownMenuItem>
                 </Link>
 

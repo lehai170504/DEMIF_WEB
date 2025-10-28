@@ -17,7 +17,7 @@ export default function DashboardPage() {
       title: "[Oxford3000] Ep7: Office Work",
       code: "ESL 25313107",
       views: 921,
-      source: "WELE",
+      source: "DEMIF",
       thumbnail: "/lesson-1.jpg",
     },
     {
