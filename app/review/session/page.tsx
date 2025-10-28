@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, Check, X, Trophy, RefreshCw } from "lucide-react" // Thêm icon Trophy
 import { motion, AnimatePresence } from "framer-motion" // Import Framer Motion
 import { vocabularyItems } from "@/lib/data/vocabulary"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 // Định nghĩa màu sắc chủ đạo
 const PRIMARY_COLOR = "#FF7A00"; // Cam chủ đạo
@@ -113,6 +114,7 @@ export default function ReviewSessionPage() {
             </Card>
           </div>
         </main>
+        <FooterLanding />
       </div>
     )
   }

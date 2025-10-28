@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Save } from "lucide-react"
 import { mockUserProfile } from "@/lib/data/user-profile"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState(mockUserProfile)
@@ -222,6 +223,7 @@ export default function SettingsPage() {
           </Card>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }

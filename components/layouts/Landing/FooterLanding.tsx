@@ -9,11 +9,13 @@ export function FooterLanding() {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Logo and Tagline - Logo và Slogan */}
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center shadow-lg shadow-orange-500/20">
-                <span className="text-xl font-bold text-white">D</span>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] bg-clip-text text-transparent">
+            <div className="flex items-center gap-4 p-3 rounded-lg bg-orange-50/30 border border-orange-200/50 mb-6">
+              <img
+                src="/DemifLogo.png"
+                alt="DEMIF Logo"
+                className="w-12 h-12 rounded-xl shadow-lg"
+              />
+              <span className="text-3xl font-extrabold bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] bg-clip-text text-transparent tracking-wide">
                 DEMIF
               </span>
             </div>

@@ -28,8 +28,15 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-white flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl font-bold text-primary-foreground">D</span>
+          <div className="flex items-center justify-center gap-4 p-4 rounded-lg bg-orange-50/50 border border-orange-200/50 mb-6">
+            <img
+              src="/DemifLogo.png"
+              alt="DEMIF Logo"
+              className="w-16 h-16 rounded-xl shadow-lg"
+            />
+            <span className="text-4xl font-extrabold bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] bg-clip-text text-transparent tracking-wide">
+              DEMIF
+            </span>
           </div>
           <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
           <p className="text-muted-foreground">Sign in to continue your learning journey</p>

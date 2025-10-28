@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Clock, BookOpen, ChevronRight, Filter } from "lucide-react" // Added Filter icon
 import { lessons } from "@/lib/data/lessons"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function DictationPage() {
   type LessonLevel = "beginner" | "intermediate" | "advanced";
@@ -155,6 +156,7 @@ export default function DictationPage() {
 
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }

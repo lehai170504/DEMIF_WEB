@@ -9,6 +9,7 @@ import { TimeAccuracyCards } from "@/components/dashboard/time-accuracy-cards"
 import { LearningAnalyticsChart } from "@/components/dashboard/learning-analytics-chart"
 import { SkillBreakdownChart } from "@/components/dashboard/skill-breakdown-chart"
 import { HeaderUser } from "@/components/layouts/User/HeaderUser"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function DashboardPage() {
   const recentLessons = [
@@ -67,6 +68,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }

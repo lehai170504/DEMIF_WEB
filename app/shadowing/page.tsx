@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Clock, BookOpen } from "lucide-react"
 import { lessons } from "@/lib/data/lessons"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function ShadowingPage() {
   return (
@@ -92,6 +93,7 @@ export default function ShadowingPage() {
           </div>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }

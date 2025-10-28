@@ -1,11 +1,13 @@
 import ChartAreaInteractive  from "@/components/admin/dashboard/chart-area-interactive"
 import  DataTable  from "@/components/admin/dashboard/data-table"
 import  SectionCards  from "@/components/admin/dashboard/section-cards"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 import data from "./data.json"
 
 export default function Page() {
   return (
+    <div>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -16,6 +18,8 @@ export default function Page() {
               <DataTable data={data} />
             </div>
           </div>
-        </div>        
+        </div>
+        <FooterLanding />
+    </div>
   )
-} 
+}

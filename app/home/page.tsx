@@ -9,6 +9,7 @@ import { SidebarArticles } from "@/components/home/sidebar-articles"
 import { homeData } from "@/lib/data/home-data"
 import { Button } from "@/components/ui/button"
 import { HeaderUser } from "@/components/layouts/User/HeaderUser"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 export default function HomePage() {
   const recentLessons = [
@@ -53,6 +54,7 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+      <FooterLanding />
     </div>
   )
 }
