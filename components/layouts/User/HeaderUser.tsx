@@ -40,7 +40,7 @@ export function HeaderUser() {
               <Link href="/dictation">Chính tả</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/shadowing">Bóng đổ</Link>
+              <Link href="/shadowing">Shadowing</Link>
             </Button>
             {/* Thêm các link từ header đầu tiên và tối ưu hóa */}
             <Button variant="ghost" size="sm" asChild>
@@ -48,9 +48,6 @@ export function HeaderUser() {
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/leaderboard">Bảng xếp hạng</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/classroom">Lớp học</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/blog">Blog</Link>
