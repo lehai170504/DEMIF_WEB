@@ -26,7 +26,7 @@ export function Pricing() {
           </div>
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold">$19</span>
+              <span className="text-5xl font-bold">39.000đ</span>
               <span className="text-foreground/60">/tháng</span>
             </div>
           </div>
@@ -65,14 +65,14 @@ export function Pricing() {
           </Badge>
           <div className="mb-6">
             <h3 className="text-2xl font-bold mb-2 text-white">Hàng năm</h3>
-            <p className="text-white/80">Tiết kiệm 40% hàng năm</p>
+            <p className="text-white/80">Tiết kiệm 25% hàng năm</p>
           </div>
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold text-white">$11</span>
+              <span className="text-5xl font-bold text-white">29.166đ</span>
               <span className="text-white/80">/tháng</span>
             </div>
-            <p className="text-sm text-white/70 mt-2">Thanh toán $132/năm</p>
+            <p className="text-sm text-white/70 mt-2">Thanh toán 350.000đ/năm</p>
           </div>
           <ul className="space-y-4 mb-8">
             <li className="flex items-start gap-3">
@@ -109,7 +109,7 @@ export function Pricing() {
           </div>
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold">$299</span>
+              <span className="text-3xl md:text-4xl font-bold break-words">3.500.000đ</span>
             </div>
             <p className="text-sm text-foreground/60 mt-2">Thanh toán một lần, học trọn đời</p>
           </div>
