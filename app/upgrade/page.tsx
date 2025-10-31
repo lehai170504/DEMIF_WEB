@@ -27,7 +27,7 @@ export default function UpgradePage() {
           </div>
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-6xl font-extrabold text-gray-900">$19</span>
+              <span className="text-4xl md:text-5xl font-extrabold text-gray-900">39.000đ</span>
               <span className="text-gray-500">/tháng</span>
             </div>
           </div>
@@ -75,11 +75,11 @@ export default function UpgradePage() {
           </Badge>
           <div className="mb-6 mt-4">
             <h3 className="text-3xl font-extrabold mb-2 text-white">PRO Hàng năm</h3>
-            <p className="text-white/80">Tiết kiệm 40% (Chỉ $132/năm)</p>
+            <p className="text-white/80">Tiết kiệm 25% (Chỉ 350.000đ/năm)</p>
           </div>
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-6xl font-extrabold text-white">$11</span>
+              <span className="text-4xl md:text-5xl font-extrabold text-white">29.166đ</span>
               <span className="text-white/80">/tháng</span>
             </div>
             <p className="text-sm text-white/80 mt-2">Thanh toán hàng năm</p>
@@ -124,7 +124,7 @@ export default function UpgradePage() {
           </div>
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-6xl font-extrabold text-gray-900">$299</span>
+              <span className="text-4xl md:text-5xl font-extrabold text-gray-900 break-words">3.500.000đ</span>
             </div>
             <p className="text-sm text-gray-500 mt-2">Thanh toán một lần</p>
           </div>
