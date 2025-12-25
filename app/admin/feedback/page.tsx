@@ -5,7 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, MessageSquare, Cpu, Eye, CheckCircle } from "lucide-react";
+import {
+  Search,
+  MessageSquare,
+  Cpu,
+  Eye,
+  CheckCircle,
+  Filter,
+  LayoutGrid,
+  Activity,
+  Sparkles,
+  UserCircle,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,7 +26,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FeedbackDetailDrawer } from "@/components/admin/feedback/FeedbackDetailDrawer";
+import { cn } from "@/lib/utils";
 
+// Types & Logic Giữ nguyên
 type FeedbackSource = "user" | "ai";
 type FeedbackStatus = "all" | "pending" | "in-progress" | "resolved";
 
@@ -67,16 +80,16 @@ const feedbackData = [
   },
 ];
 
-const getStatusBadgeClass = (status: string) => {
+const getStatusStyles = (status: string) => {
   switch (status) {
     case "pending":
-      return "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-400";
+      return "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-500/10";
     case "in-progress":
-      return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400";
+      return "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10";
     case "resolved":
-      return "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400";
+      return "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10";
     default:
-      return "bg-muted text-muted-foreground";
+      return "bg-slate-50 text-slate-600 border-slate-100";
   }
 };
 
@@ -96,164 +109,241 @@ export default function AdminFeedbackPage() {
     return statusMatch && sourceMatch && searchMatch;
   });
 
-  const handleViewDetail = (feedback: any) => {
-    setSelectedFeedback(feedback);
-    setDrawerOpen(true);
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-primary" /> Quản Lý Feedback
-        </h1>
+    <div className="w-full space-y-8 pb-10 font-mono">
+      {/* --- HEADER --- */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2 pt-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-orange-500 mb-2">
+            <LayoutGrid className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">
+              Quality Assurance
+            </span>
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none text-slate-900 dark:text-white">
+            Feedback{" "}
+            <span className="text-slate-300 dark:text-slate-700">Terminal</span>
+          </h1>
+          <p className="text-muted-foreground text-xs font-medium italic">
+            Xử lý khiếu nại của học viên và cảnh báo hiệu suất từ AI Engine.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-4 py-2 rounded-2xl uppercase italic animate-pulse">
+          <Activity className="h-3 w-3" /> System Health: Stable
+        </div>
       </div>
 
-      {/* Bộ lọc */}
-      <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-3 md:items-center">
-          {/* Tìm kiếm */}
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      {/* --- FILTER CONTROL PANEL --- */}
+      <Card className="rounded-[2.5rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white dark:bg-slate-900 p-8 space-y-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-center">
+          {/* Search Bar */}
+          <div className="relative w-full lg:max-w-md group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
             <Input
-              placeholder="Tìm theo người dùng hoặc nội dung..."
-              className="pl-10"
+              placeholder="Tìm nội dung khiếu nại..."
+              className="h-12 pl-12 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl font-bold focus-visible:ring-2 focus-visible:ring-orange-500/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Bộ lọc nguồn */}
-          <div className="flex gap-2 flex-wrap">
+          <div className="h-8 w-px bg-slate-100 dark:bg-slate-800 hidden lg:block" />
+
+          {/* Source Toggle Pills */}
+          <div className="flex bg-slate-50 dark:bg-slate-800 p-1.5 rounded-2xl">
             {[
-              { label: "Tất cả", value: "all" },
-              { label: "Người dùng", value: "user" },
-              { label: "AI Hệ thống", value: "ai" },
+              { label: "Tất cả", value: "all", icon: Filter },
+              { label: "Người dùng", value: "user", icon: UserCircle },
+              { label: "AI System", value: "ai", icon: Cpu },
             ].map((opt) => (
-              <Button
+              <button
                 key={opt.value}
-                variant={source === opt.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSource(opt.value as FeedbackSource | "all")}
-              >
-                {opt.value === "ai" ? (
-                  <Cpu className="mr-1 h-4 w-4" />
-                ) : (
-                  <MessageSquare className="mr-1 h-4 w-4" />
+                onClick={() => setSource(opt.value as any)}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2 rounded-xl text-[11px] font-bold uppercase transition-all duration-300",
+                  source === opt.value
+                    ? "bg-slate-900 text-white dark:bg-orange-500 shadow-md"
+                    : "text-slate-400 hover:text-slate-600"
                 )}
-                {opt.label}
-              </Button>
+              >
+                <opt.icon className="h-3.5 w-3.5" /> {opt.label}
+              </button>
             ))}
           </div>
+        </div>
 
-          {/* Bộ lọc trạng thái */}
-          <div className="flex gap-2 flex-wrap md:ml-auto">
-            {["all", "pending", "in-progress", "resolved"].map((status) => {
-              const count =
-                status === "all"
-                  ? feedbackData.length
-                  : feedbackData.filter((f) => f.status === status).length;
-              return (
-                <Button
-                  key={status}
-                  variant={filter === status ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter(status as FeedbackStatus)}
+        {/* Status Pills */}
+        <div className="flex flex-wrap items-center gap-2 pt-6 border-t border-slate-50 dark:border-slate-800">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-2 italic">
+            Status Filter:
+          </span>
+          {["all", "pending", "in-progress", "resolved"].map((status) => {
+            const isActive = filter === status;
+            const count =
+              status === "all"
+                ? feedbackData.length
+                : feedbackData.filter((f) => f.status === status).length;
+            return (
+              <button
+                key={status}
+                onClick={() => setFilter(status as any)}
+                className={cn(
+                  "px-5 py-2 rounded-xl text-[11px] font-bold uppercase transition-all flex items-center gap-2",
+                  isActive
+                    ? "bg-orange-500 text-white shadow-lg shadow-orange-200"
+                    : "bg-white border border-slate-100 dark:bg-slate-800 dark:border-none text-slate-500 hover:bg-slate-50"
+                )}
+              >
+                {status}
+                <span
+                  className={cn(
+                    "px-1.5 py-0.5 rounded-md text-[9px] font-black",
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-400"
+                  )}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-                </Button>
-              );
-            })}
-          </div>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </Card>
 
-      {/* Bảng dữ liệu */}
-      <Card className="overflow-hidden shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl">
-            Danh sách Feedback ({filtered.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/70 hover:bg-muted/70">
-                  <TableHead>Nguồn</TableHead>
-                  <TableHead>Người / AI</TableHead>
-                  <TableHead>Danh Mục</TableHead>
-                  <TableHead>Nội dung</TableHead>
-                  <TableHead>Trạng Thái</TableHead>
-                  <TableHead>Ngày Gửi</TableHead>
-                  <TableHead className="text-right">Hành động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((fb) => (
-                  <TableRow
-                    key={fb.id}
-                    className="hover:bg-secondary/20 transition-colors cursor-pointer"
-                  >
-                    <TableCell>
-                      {fb.source === "ai" ? (
-                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400">
-                          AI
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-400">
-                          User
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-semibold">{fb.userName}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {fb.email}
-                      </div>
-                    </TableCell>
-                    <TableCell>{fb.category}</TableCell>
-                    <TableCell className="max-w-[280px] truncate">
-                      {fb.content}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getStatusBadgeClass(fb.status)}
+      {/* --- DATA TABLE SECTION --- */}
+      <div className="rounded-[2.5rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden bg-white dark:bg-slate-900 mx-2 transition-all hover:shadow-md">
+        <div className="p-8 border-b flex items-center justify-between bg-slate-50/30">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-500/10 rounded-2xl text-orange-500">
+              <MessageSquare className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-black text-xl italic uppercase leading-none text-slate-800 dark:text-white">
+                Communication Log
+              </h2>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase mt-1.5">
+                {filtered.length} kết quả được tìm thấy
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-b border-slate-100">
+                <TableHead className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Nguồn & Người gửi
+                </TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Danh mục
+                </TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Nội dung tóm tắt
+                </TableHead>
+                <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Trạng thái
+                </TableHead>
+                <TableHead className="text-right px-8 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Thao tác
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((fb) => (
+                <TableRow
+                  key={fb.id}
+                  className="group hover:bg-orange-50/30 transition-all border-b border-slate-50 last:border-none"
+                >
+                  <TableCell className="px-8 py-5">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={cn(
+                          "h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm",
+                          fb.source === "ai"
+                            ? "bg-slate-900 text-orange-400"
+                            : "bg-orange-100 text-orange-600"
+                        )}
                       >
-                        {fb.status.charAt(0).toUpperCase() + fb.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{fb.createdAt}</TableCell>
-                    <TableCell className="text-right space-x-2">
+                        {fb.source === "ai" ? (
+                          <Sparkles className="h-5 w-5" />
+                        ) : (
+                          <UserCircle className="h-5 w-5" />
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-700 dark:text-slate-200 uppercase text-xs">
+                          {fb.userName}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium lowercase tracking-tighter">
+                          {fb.email}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className="rounded-lg border-slate-200 font-black text-[9px] uppercase bg-white dark:bg-slate-800"
+                    >
+                      {fb.category}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="max-w-[300px]">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 font-medium truncate italic">
+                      "{fb.content}"
+                    </p>
+                    <span className="text-[9px] text-slate-400 uppercase font-black tracking-tighter mt-1 block">
+                      Sent: {fb.createdAt}
+                    </span>
+                  </TableCell>
+
+                  <TableCell className="text-center">
+                    <Badge
+                      className={cn(
+                        "px-3 py-1 rounded-lg border-none font-black text-[9px] uppercase tracking-tighter shadow-sm",
+                        getStatusStyles(fb.status)
+                      )}
+                    >
+                      {fb.status}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="text-right px-8">
+                    <div className="flex justify-end gap-2">
                       <Button
-                        onClick={() => handleViewDetail(fb)}
-                        size="icon"
                         variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                      >
+                        <CheckCircle className="h-4 w-4" />
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
-            {/* Drawer chi tiết */}
-            <FeedbackDetailDrawer
-              open={drawerOpen}
-              onClose={() => setDrawerOpen(false)}
-              feedback={selectedFeedback}
-              onReply={() => console.log("Reply user")}
-              onResendTraining={() => console.log("Resend training")}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <FeedbackDetailDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        feedback={selectedFeedback}
+        onReply={() => console.log("Reply user")}
+        onResendTraining={() => console.log("Resend training")}
+      />
     </div>
   );
 }

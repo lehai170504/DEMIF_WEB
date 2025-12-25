@@ -1,5 +1,3 @@
-// pages/admin/audio/page.tsx
-
 "use client";
 
 import * as React from "react";
@@ -18,13 +16,17 @@ import {
   Search,
   Volume2,
   Upload,
-  FileAudio,
   Trash2,
   Clock,
   Mic,
   ListPlus,
+  Play,
+  Music,
+  HardDrive,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import AudioUploadDialog from "@/components/admin/audio/AudioUploadDialog";
 
 interface AudioFile {
@@ -36,7 +38,8 @@ interface AudioFile {
   usedIn: number;
 }
 
-const audioLibrary: AudioFile[] = [
+// Dữ liệu khởi tạo (Thực tế sẽ lấy từ API)
+const INITIAL_AUDIO_LIBRARY: AudioFile[] = [
   {
     id: 1,
     name: "Intro_Self_Eng.mp3",
@@ -81,208 +84,272 @@ const audioLibrary: AudioFile[] = [
 
 export default function AdminAudioPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [audios, setAudios] = React.useState<AudioFile[]>(
+    INITIAL_AUDIO_LIBRARY
+  );
 
-  const filteredAudio = audioLibrary.filter((file) =>
+  // 1. Logic Lọc dữ liệu theo Search Term
+  const filteredAudio = audios.filter((file) =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalDuration = audioLibrary.reduce((total, file) => {
-    const [min, sec] = file.duration.split(":").map(Number);
-    return total + min * 60 + sec;
-  }, 0);
+  // 2. Logic Tính toán số liệu (Tự động cập nhật khi 'audios' thay đổi)
+  const stats = React.useMemo(() => {
+    const totalSec = audios.reduce((total, file) => {
+      const [min, sec] = file.duration.split(":").map(Number);
+      return total + min * 60 + sec;
+    }, 0);
 
-  const totalFiles = audioLibrary.length;
-  const totalUsed = audioLibrary.reduce(
-    (total, file) => total + file.usedIn,
-    0
-  );
+    return {
+      count: audios.length,
+      duration: `${Math.floor(totalSec / 60)}m ${totalSec % 60}s`,
+      usage: audios.reduce((total, file) => total + file.usedIn, 0),
+    };
+  }, [audios]);
 
+  // 3. Xử lý Phát Audio (Giả lập)
   const handlePlay = (fileName: string) => {
-    toast.info(`Đang phát: ${fileName}`);
+    toast(`Đang phát: ${fileName}`, {
+      icon: <Play className="h-4 w-4 text-orange-500" />,
+      description: "Hệ thống đang tải dữ liệu âm thanh...",
+    });
   };
 
+  // 4. Xử lý Xóa Audio (Cập nhật State)
   const handleDelete = (id: number, name: string) => {
-    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
-      loading: `Đang xóa ${name}...`,
-      success: "Đã xóa thành công!",
-      error: "Lỗi xóa file",
+    toast.error(`Xác nhận xóa ${name}?`, {
+      action: {
+        label: "Xác nhận",
+        onClick: () => {
+          setAudios((prev) => prev.filter((item) => item.id !== id));
+          toast.success(`Đã xóa thành công file ${name}`);
+        },
+      },
     });
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <FileAudio className="h-6 w-6 text-primary" /> Thư Viện Audio
-        </h1>
+    <div className="max-w-[1600px] mx-auto space-y-8 pb-10 font-mono">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4 px-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-orange-500 mb-2">
+            <Music className="h-4 w-4" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">
+              Media Assets
+            </span>
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none">
+            Audio{" "}
+            <span className="text-slate-300 dark:text-slate-700">Library</span>
+          </h1>
+          <p className="text-muted-foreground text-xs font-medium italic">
+            Quản lý tài nguyên âm thanh cho hệ thống bài tập.
+          </p>
+        </div>
+
         <AudioUploadDialog>
-          <Button size="sm" className="shadow-md">
-            <Upload className="h-4 w-4 mr-2" /> Tải Lên Audio
+          <Button className="h-12 px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-95">
+            <Upload className="h-4 w-4 mr-2" /> Tải lên tài nguyên mới
           </Button>
         </AudioUploadDialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng Số Files</CardTitle>
-            <Mic className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold tabular-nums">{totalFiles}</div>
-            <p className="text-xs text-muted-foreground">Audio files có sẵn</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tổng Thời Lượng
-            </CardTitle>
-            <Clock className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold tabular-nums">
-              {Math.floor(totalDuration / 60)}m {totalDuration % 60}s
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Tổng thời gian luyện tập
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tổng Lượt Sử Dụng
-            </CardTitle>
-            <ListPlus className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold tabular-nums">{totalUsed}</div>
-            <p className="text-xs text-muted-foreground">
-              Lượt sử dụng trong các bài học
-            </p>
-          </CardContent>
-        </Card>
+      {/* STATS CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2">
+        <StatCard
+          label="Tổng số Files"
+          val={stats.count}
+          sub="Files sẵn dùng"
+          icon={HardDrive}
+          color="text-blue-500"
+          bg="bg-blue-50"
+        />
+        <StatCard
+          label="Tổng thời lượng"
+          val={stats.duration}
+          sub="Nội dung luyện tập"
+          icon={Clock}
+          color="text-orange-500"
+          bg="bg-orange-50"
+        />
+        <StatCard
+          label="Tỷ lệ sử dụng"
+          val={stats.usage}
+          sub="Lượt trong bài học"
+          icon={ListPlus}
+          color="text-emerald-500"
+          bg="bg-emerald-50"
+        />
       </div>
 
-      <Card className="overflow-hidden shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-xl">Danh sách Files</CardTitle>
-          <div className="relative flex-1 max-w-sm ml-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      {/* MAIN TABLE */}
+      <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 mx-2">
+        <CardHeader className="p-8 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-black text-xl italic uppercase">
+              Danh sách tài nguyên
+            </h2>
+            <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase mt-0.5">
+              Thời gian thực
+            </p>
+          </div>
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Tìm kiếm file..."
-              className="pl-10"
+              className="pl-10 h-11 bg-slate-50 border-none rounded-xl focus-visible:ring-2 focus-visible:ring-orange-500/20 font-bold"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/70 hover:bg-muted/70">
-                  {/* Tên File: Căn trái */}
-                  <TableHead className="w-[45%] min-w-[280px]">
-                    Tên File
-                  </TableHead>
-
-                  {/* Cột số liệu: Căn giữa */}
-                  <TableHead className="w-[100px] text-center">
-                    Kích Thước
-                  </TableHead>
-                  <TableHead className="w-[100px] text-center">
-                    Thời Lượng
-                  </TableHead>
-                  <TableHead className="w-[120px] text-center hidden sm:table-cell">
-                    Số Bài Dùng
-                  </TableHead>
-                  <TableHead className="w-[150px] text-center hidden md:table-cell">
-                    Tải Lên
-                  </TableHead>
-
-                  {/* Hành động: Căn phải */}
-                  <TableHead className="w-[100px] text-right">
-                    Hành động
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAudio.length > 0 ? (
-                  filteredAudio.map((file) => (
-                    <TableRow
-                      key={file.id}
-                      className="hover:bg-secondary/20 transition-colors"
-                    >
-                      {/* Cột Tên File: Căn trái */}
-                      <TableCell className="font-medium py-3">
-                        <div className="flex items-center gap-2">
-                          <FileAudio className="h-5 w-5 text-primary" />
-                          <span className="font-semibold truncate max-w-[200px]">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-b">
+                <TableHead className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">
+                  Tên file
+                </TableHead>
+                <TableHead className="text-center text-[10px] font-black uppercase tracking-widest">
+                  Thông tin
+                </TableHead>
+                <TableHead className="text-center text-[10px] font-black uppercase tracking-widest">
+                  Sử dụng
+                </TableHead>
+                <TableHead className="text-right px-8 text-[10px] font-black uppercase tracking-widest">
+                  Thao tác
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredAudio.length > 0 ? (
+                filteredAudio.map((file) => (
+                  <TableRow
+                    key={file.id}
+                    className="group hover:bg-orange-50/30 transition-all border-b last:border-none"
+                  >
+                    <TableCell className="px-8 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 shrink-0 group-hover:scale-110 transition-transform">
+                          <Volume2 className="h-5 w-5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-700 truncate max-w-[200px]">
                             {file.name}
                           </span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge
+                              variant="secondary"
+                              className="text-[9px] px-1.5 py-0 bg-slate-100 text-slate-500 border-none uppercase font-bold"
+                            >
+                              {file.name.split(".").pop()}
+                            </Badge>
+                            <span className="text-[10px] text-muted-foreground font-bold">
+                              {file.size}
+                            </span>
+                          </div>
                         </div>
-                      </TableCell>
-
-                      {/* Cột Kích Thước: Căn giữa */}
-                      <TableCell className="text-center tabular-nums text-sm font-medium">
-                        {file.size}
-                      </TableCell>
-
-                      {/* Cột Thời Lượng: Căn giữa */}
-                      <TableCell className="text-center tabular-nums text-sm text-muted-foreground">
-                        {file.duration}
-                      </TableCell>
-
-                      {/* Cột Số Bài Sử Dụng: Căn giữa */}
-                      <TableCell className="text-center tabular-nums hidden sm:table-cell text-sm font-medium text-primary">
-                        {file.usedIn}
-                      </TableCell>
-
-                      {/* Cột Tải Lên: Căn giữa */}
-                      <TableCell className="text-center hidden md:table-cell text-sm text-muted-foreground">
-                        {file.uploaded}
-                      </TableCell>
-
-                      {/* Cột Hành động: Căn phải */}
-                      <TableCell className="text-right space-x-1">
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-bold">
+                      <div className="flex flex-col items-center italic text-slate-600">
+                        <span className="text-sm">{file.duration}</span>
+                        <span className="text-[9px] text-muted-foreground uppercase not-italic">
+                          {file.uploaded}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[10px]">
+                        {file.usedIn} Lessons
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right px-8">
+                      <div className="flex justify-end items-center gap-2">
                         <Button
+                          onClick={() => handlePlay(file.name)}
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                          onClick={() => handlePlay(file.name)}
+                          className="h-9 w-9 rounded-xl text-orange-500 hover:bg-orange-100 transition-colors"
                         >
-                          <Volume2 className="h-4 w-4" />
+                          <Play className="h-4 w-4 fill-current" />
                         </Button>
                         <Button
+                          onClick={() => handleDelete(file.id, file.name)}
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(file.id, file.name)}
+                          className="h-9 w-9 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="h-24 text-center text-muted-foreground"
-                    >
-                      Không tìm thấy file audio nào khớp.
+                      </div>
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="h-32 text-center text-muted-foreground font-bold italic"
+                  >
+                    Không tìm thấy tài nguyên nào khớp với từ khóa.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
+
+      {/* INFO BOX STORAGE */}
+      <div className="mx-2 p-6 rounded-[2rem] bg-slate-900 text-white flex items-center justify-between overflow-hidden relative shadow-2xl shadow-slate-200">
+        <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-orange-500/20 to-transparent" />
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 bg-white/10 rounded-2xl">
+            <Mic className="h-6 w-6 text-orange-400" />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg italic uppercase">
+              Dung lượng lưu trữ
+            </h3>
+            <p className="text-xs opacity-60">
+              Hệ thống đang sử dụng 1.2 GB / 2.0 GB.
+            </p>
+          </div>
+        </div>
+        <Button className="bg-white text-slate-900 font-black text-xs uppercase tracking-widest hover:bg-orange-400 hover:text-white rounded-xl relative z-10 transition-colors">
+          Quản lý gói
+        </Button>
+      </div>
     </div>
+  );
+}
+
+// Component phụ cho thẻ Stats
+function StatCard({ label, val, sub, icon: Icon, color, bg }: any) {
+  return (
+    <Card className="border-none shadow-sm rounded-[2rem] bg-white dark:bg-slate-900 overflow-hidden group">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">
+          {label}
+        </CardTitle>
+        <div
+          className={cn(
+            "p-2 rounded-xl transition-transform group-hover:scale-110",
+            bg,
+            color
+          )}
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-black italic tracking-tighter">{val}</div>
+        <p className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-tighter">
+          {sub}
+        </p>
+      </CardContent>
+    </Card>
   );
 }

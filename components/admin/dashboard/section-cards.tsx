@@ -1,108 +1,116 @@
-import { IconTrendingDown, IconTrendingUp, IconHeadphones, IconUsers, IconTarget, IconRobot } from "@tabler/icons-react"
+"use client";
 
-import { Badge } from "@/components/ui/badge"
 import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  Headphones,
+  Mic2,
+  Users,
+  FileCheck,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+const stats = [
+  {
+    title: "Tổng học viên",
+    value: "1,284",
+    description: "+12% tháng này",
+    icon: Users,
+    trend: "up",
+    gradient: "from-blue-500/10 to-transparent",
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-600",
+  },
+  {
+    title: "Câu đã chép",
+    value: "45,672",
+    description: "+5.2% hôm nay",
+    icon: Headphones,
+    trend: "up",
+    gradient: "from-orange-500/10 to-transparent",
+    iconColor: "text-orange-500",
+    bgColor: "bg-orange-500",
+  },
+  {
+    title: "Giờ Shadowing",
+    value: "1,120h",
+    description: "-2% tuần trước",
+    icon: Mic2,
+    trend: "down",
+    gradient: "from-purple-500/10 to-transparent",
+    iconColor: "text-purple-500",
+    bgColor: "bg-purple-500",
+  },
+  {
+    title: "Hoàn thành",
+    value: "84.2%",
+    description: "Mục tiêu: 90%",
+    icon: FileCheck,
+    trend: "up",
+    gradient: "from-emerald-500/10 to-transparent",
+    iconColor: "text-emerald-500",
+    bgColor: "bg-emerald-500",
+  },
+];
 
 export default function SectionCards() {
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Tổng Số Bài Luyện Tập</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            250
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">
-              <IconHeadphones className="size-4 mr-1" />
-              +5 Bài/Tuần
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Nội dung mới được thêm đều đặn
-          </div>
-          <div className="text-muted-foreground">
-            Bao gồm cả Dictation và Shadowing
-          </div>
-        </CardFooter>
-      </Card>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-2">
+      {stats.map((stat, index) => (
+        <Card
+          key={index}
+          className="group relative overflow-hidden border-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500"
+        >
+          {/* Decorative Gradient */}
+          <div
+            className={cn(
+              "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+              stat.gradient
+            )}
+          />
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Tổng Số Người Dùng</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            12,500
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-              <IconTrendingUp className="size-4 mr-1" />
-              +15%
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Tăng trưởng ổn định tháng này <IconTrendingUp className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Người dùng mới đăng ký thành công
-          </div>
-        </CardFooter>
-      </Card>
-
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Tỷ Lệ Chính Xác TB</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            85.6%
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
-              <IconTrendingDown className="size-4 mr-1" />
-              -1.2%
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Cần kiểm tra cấp độ bài tập <IconTrendingDown className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Điểm số Dictation trung bình của User
-          </div>
-        </CardFooter>
-      </Card>
-
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Số Lượt Phản Hồi AI (24h)</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            4,890
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">
-              <IconRobot className="size-4 mr-1" />
-              100% Xử lý
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Tất cả yêu cầu AI đã được xử lý
-          </div>
-          <div className="text-muted-foreground">Phản hồi tức thì cho Shadowing</div>
-        </CardFooter>
-      </Card>
+          <CardHeader className="relative flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground/80">
+              {stat.title}
+            </CardTitle>
+            <div
+              className={cn(
+                "p-2 rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+                "bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700",
+                stat.iconColor
+              )}
+            >
+              <stat.icon className="h-4 w-4" />
+            </div>
+          </CardHeader>
+          <CardContent className="relative">
+            <div className="text-3xl font-black tracking-tighter italic">
+              {stat.value}
+            </div>
+            <div className="flex items-center mt-1">
+              <div
+                className={cn(
+                  "flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold",
+                  stat.trend === "up"
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-red-100 text-red-600"
+                )}
+              >
+                {stat.trend === "up" ? (
+                  <ArrowUpRight className="mr-0.5 h-3 w-3" />
+                ) : (
+                  <ArrowDownRight className="mr-0.5 h-3 w-3" />
+                )}
+                {stat.description.split(" ")[0]}
+              </div>
+              <span className="ml-2 text-[10px] text-muted-foreground font-medium">
+                {stat.description.split(" ").slice(1).join(" ")}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
-  )
+  );
 }
