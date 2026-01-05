@@ -5,6 +5,8 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
+import { HeaderUser } from "@/components/layouts/User/HeaderUser"
+import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,8 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans ${poppins.variable} ${inter.variable} antialiased`}>
+        <HeaderUser />
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />
+        <FooterLanding /> 
       </body>
     </html>
   )

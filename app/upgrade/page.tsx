@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, Star, Zap } from "lucide-react";
 import Link from "next/link";
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding";
 
 export default function UpgradePage() {
   return (
@@ -219,8 +218,6 @@ export default function UpgradePage() {
         </Link>{" "}
         hoặc liên hệ hỗ trợ.
       </div>
-
-      <FooterLanding />
     </section>
   );
 }

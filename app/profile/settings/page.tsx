@@ -1,28 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Save } from "lucide-react"
-import { mockUserProfile } from "@/lib/data/user-profile"
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Save } from "lucide-react";
+import { mockUserProfile } from "@/lib/data/user-profile";
 
 export default function SettingsPage() {
-  const [profile, setProfile] = useState(mockUserProfile)
-  const [isSaving, setIsSaving] = useState(false)
+  const [profile, setProfile] = useState(mockUserProfile);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsSaving(false)
-    alert('Đã lưu thành công!')
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsSaving(false);
+    alert("Đã lưu thành công!");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,7 +57,9 @@ export default function SettingsPage() {
                   id="email"
                   type="email"
                   value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, email: e.target.value })
+                  }
                 />
                 <p className="text-xs text-muted-foreground">
                   Email dùng để đăng nhập và nhận thông báo
@@ -71,13 +72,33 @@ export default function SettingsPage() {
           <Card className="p-4 bg-muted/50">
             <div className="flex items-start gap-3">
               <div className="text-muted-foreground">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <div className="text-sm text-muted-foreground">
                 <p className="font-medium mb-1">Lưu ý:</p>
-                <p>Để chỉnh sửa thông tin cá nhân như tên, ảnh đại diện, vui lòng truy cập trang <Link href="/profile/edit" className="text-primary hover:underline">Chỉnh sửa hồ sơ</Link>.</p>
+                <p>
+                  Để chỉnh sửa thông tin cá nhân như tên, ảnh đại diện, vui lòng
+                  truy cập trang{" "}
+                  <Link
+                    href="/profile/edit"
+                    className="text-primary hover:underline"
+                  >
+                    Chỉnh sửa hồ sơ
+                  </Link>
+                  .
+                </p>
               </div>
             </div>
           </Card>
@@ -89,14 +110,19 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Thông báo qua Email</div>
-                  <div className="text-sm text-muted-foreground">Nhận cập nhật qua email</div>
+                  <div className="text-sm text-muted-foreground">
+                    Nhận cập nhật qua email
+                  </div>
                 </div>
                 <Switch
                   checked={profile.notifications.email}
                   onCheckedChange={(checked) =>
                     setProfile({
                       ...profile,
-                      notifications: { ...profile.notifications, email: checked },
+                      notifications: {
+                        ...profile.notifications,
+                        email: checked,
+                      },
                     })
                   }
                 />
@@ -105,14 +131,19 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Thông báo đẩy</div>
-                  <div className="text-sm text-muted-foreground">Nhận thông báo đẩy trên thiết bị</div>
+                  <div className="text-sm text-muted-foreground">
+                    Nhận thông báo đẩy trên thiết bị
+                  </div>
                 </div>
                 <Switch
                   checked={profile.notifications.push}
                   onCheckedChange={(checked) =>
                     setProfile({
                       ...profile,
-                      notifications: { ...profile.notifications, push: checked },
+                      notifications: {
+                        ...profile.notifications,
+                        push: checked,
+                      },
                     })
                   }
                 />
@@ -121,14 +152,19 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Nhắc nhở hàng ngày</div>
-                  <div className="text-sm text-muted-foreground">Nhận nhắc nhở luyện tập hàng ngày</div>
+                  <div className="text-sm text-muted-foreground">
+                    Nhận nhắc nhở luyện tập hàng ngày
+                  </div>
                 </div>
                 <Switch
                   checked={profile.notifications.dailyReminder}
                   onCheckedChange={(checked) =>
                     setProfile({
                       ...profile,
-                      notifications: { ...profile.notifications, dailyReminder: checked },
+                      notifications: {
+                        ...profile.notifications,
+                        dailyReminder: checked,
+                      },
                     })
                   }
                 />
@@ -137,14 +173,19 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Báo cáo hàng tuần</div>
-                  <div className="text-sm text-muted-foreground">Nhận báo cáo tiến độ hàng tuần</div>
+                  <div className="text-sm text-muted-foreground">
+                    Nhận báo cáo tiến độ hàng tuần
+                  </div>
                 </div>
                 <Switch
                   checked={profile.notifications.weeklyReport}
                   onCheckedChange={(checked) =>
                     setProfile({
                       ...profile,
-                      notifications: { ...profile.notifications, weeklyReport: checked },
+                      notifications: {
+                        ...profile.notifications,
+                        weeklyReport: checked,
+                      },
                     })
                   }
                 />
@@ -159,7 +200,9 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Hiển thị hồ sơ</div>
-                  <div className="text-sm text-muted-foreground">Cho phép người khác xem hồ sơ của bạn</div>
+                  <div className="text-sm text-muted-foreground">
+                    Cho phép người khác xem hồ sơ của bạn
+                  </div>
                 </div>
                 <Switch
                   checked={profile.privacy.showProfile}
@@ -175,7 +218,9 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Hiển thị tiến độ</div>
-                  <div className="text-sm text-muted-foreground">Hiển thị tiến độ học tập của bạn công khai</div>
+                  <div className="text-sm text-muted-foreground">
+                    Hiển thị tiến độ học tập của bạn công khai
+                  </div>
                 </div>
                 <Switch
                   checked={profile.privacy.showProgress}
@@ -191,14 +236,19 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Hiển thị trên bảng xếp hạng</div>
-                  <div className="text-sm text-muted-foreground">Xuất hiện trong bảng xếp hạng toàn cầu</div>
+                  <div className="text-sm text-muted-foreground">
+                    Xuất hiện trong bảng xếp hạng toàn cầu
+                  </div>
                 </div>
                 <Switch
                   checked={profile.privacy.showOnLeaderboard}
                   onCheckedChange={(checked) =>
                     setProfile({
                       ...profile,
-                      privacy: { ...profile.privacy, showOnLeaderboard: checked },
+                      privacy: {
+                        ...profile.privacy,
+                        showOnLeaderboard: checked,
+                      },
                     })
                   }
                 />
@@ -208,12 +258,16 @@ export default function SettingsPage() {
 
           {/* Danger Zone */}
           <Card className="p-6 border-destructive/50">
-            <h2 className="text-2xl font-bold mb-6 text-destructive">Vùng nguy hiểm</h2>
+            <h2 className="text-2xl font-bold mb-6 text-destructive">
+              Vùng nguy hiểm
+            </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Xóa tài khoản</div>
-                  <div className="text-sm text-muted-foreground">Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu của bạn</div>
+                  <div className="text-sm text-muted-foreground">
+                    Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu của bạn
+                  </div>
                 </div>
                 <Button variant="destructive" size="sm">
                   Xóa tài khoản
@@ -223,7 +277,6 @@ export default function SettingsPage() {
           </Card>
         </div>
       </main>
-      <FooterLanding />
     </div>
-  )
+  );
 }

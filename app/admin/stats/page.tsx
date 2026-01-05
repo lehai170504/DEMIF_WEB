@@ -3,14 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Users,
-  Trophy,
   BookOpen,
-  BarChart3,
   MessageSquare,
   TrendingUp,
   Target,
   Medal,
   Calendar,
+  LayoutGrid,
+  Download,
+  Activity,
 } from "lucide-react";
 import {
   AreaChart,
@@ -21,8 +22,8 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const summary = {
   totalUsers: 532,
@@ -32,116 +33,142 @@ const summary = {
 };
 
 const performanceData = [
-  { month: "Th1", score: 75, accuracy: 70 },
-  { month: "Th2", score: 80, accuracy: 78 },
-  { month: "Th3", score: 85, accuracy: 82 },
-  { month: "Th4", score: 83, accuracy: 80 },
-  { month: "Th5", score: 90, accuracy: 88 },
-  { month: "Th6", score: 88, accuracy: 92 },
+  { month: "T1", score: 75 },
+  { month: "T2", score: 82 },
+  { month: "T3", score: 78 },
+  { month: "T4", score: 85 },
+  { month: "T5", score: 92 },
+  { month: "T6", score: 88 },
 ];
 
 const topStudents = [
-  { name: "pro_listener", score: 95.1, lessons: 580, rank: 1 },
-  { name: "student_vip", score: 88.9, lessons: 350, rank: 2 },
-  { name: "newbie_user", score: 72.4, lessons: 120, rank: 3 },
+  { name: "pro_listener", score: 95.1, lessons: 580 },
+  { name: "student_vip", score: 88.9, lessons: 350 },
+  { name: "newbie_user", score: 72.4, lessons: 120 },
 ];
 
 export default function AdminStatsPage() {
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 pb-10 font-mono">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
+    <div className="max-w-[1600px] mx-auto space-y-6 pb-10 px-4 md:px-8 font-mono">
+      {/* 1. Header & Actions */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black tracking-tighter uppercase italic flex items-center gap-3">
-            System <span className="text-orange-500">Statistics</span>
+          <div className="flex items-center gap-2 text-orange-500 mb-1">
+            <LayoutGrid className="h-4 w-4" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">
+              Báo cáo thống kê
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-none">
+            Hệ thống{" "}
+            <span className="text-slate-300 dark:text-slate-700">Insights</span>
           </h1>
-          <p className="text-muted-foreground text-sm font-medium italic">
-            Phân tích dữ liệu học tập chuyên sâu trên toàn hệ thống.
-          </p>
         </div>
-        <Badge
-          variant="outline"
-          className="w-fit h-8 px-4 rounded-full border-orange-200 text-orange-600 bg-orange-50 font-bold"
-        >
-          <Calendar className="mr-2 h-3 w-3" /> Cập nhật: 25/12/2025
-        </Badge>
-      </div>
 
-      {/* Grid 4 Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
+        <div className="flex items-center gap-3">
+          <Badge
+            variant="outline"
+            className="h-10 px-4 rounded-xl border-slate-200 font-bold bg-white dark:bg-slate-900"
+          >
+            <Calendar className="mr-2 h-4 w-4 text-orange-500" /> 25/12/2025
+          </Badge>
+          <Button className="h-10 px-6 bg-slate-900 dark:bg-orange-500 hover:opacity-90 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95">
+            <Download className="mr-2 h-4 w-4" /> Xuất Báo cáo
+          </Button>
+        </div>
+      </header>
+
+      {/* 2. Key Metrics Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            label: "Tổng học viên",
+            label: "Người dùng",
             val: summary.totalUsers,
             icon: Users,
-            color: "text-blue-600",
-            bg: "bg-blue-50",
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
           },
           {
-            label: "Hoàn thành",
+            label: "Bài học",
             val: summary.totalLessons,
             icon: BookOpen,
             color: "text-orange-500",
-            bg: "bg-orange-50",
+            bg: "bg-orange-500/10",
           },
           {
             label: "Điểm trung bình",
             val: `${summary.avgScore}%`,
             icon: Target,
             color: "text-emerald-500",
-            bg: "bg-emerald-50",
+            bg: "bg-emerald-500/10",
           },
           {
             label: "Feedback",
             val: summary.feedbackCount,
             icon: MessageSquare,
             color: "text-purple-500",
-            bg: "bg-purple-50",
+            bg: "bg-purple-500/10",
           },
         ].map((item, i) => (
           <Card
             key={i}
-            className="border-none shadow-sm rounded-[2rem] bg-white dark:bg-slate-900 transition-transform hover:scale-[1.02]"
+            className="border border-slate-100 dark:border-slate-800 rounded-[2rem] bg-white dark:bg-slate-900 shadow-sm overflow-hidden"
           >
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                {item.label}
-              </CardTitle>
-              <div className={`p-2 rounded-xl ${item.bg} ${item.color}`}>
-                <item.icon className="h-4 w-4" />
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                  {item.label}
+                </p>
+                <div className="text-3xl font-black tracking-tighter italic">
+                  {item.val}
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-black tracking-tighter italic">
-                {item.val}
+              <div className={`p-3 rounded-2xl ${item.bg} ${item.color}`}>
+                <item.icon className="h-5 w-5" />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts & Top Students Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-2">
-        {/* Biểu đồ hiệu suất */}
-        <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-white dark:bg-slate-900 p-6">
-          <CardHeader className="px-2">
-            <div className="flex items-center gap-2 mb-2 text-emerald-500">
-              <TrendingUp className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">
-                Growth Analytics
+      {/* 3. Main Data Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Large Chart Area (Col 8) */}
+        <Card className="lg:col-span-8 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] bg-white dark:bg-slate-900 overflow-hidden">
+          <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-black italic uppercase flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-orange-500" />
+                Đường cong hiệu suất
+              </CardTitle>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase mt-1">
+                Hệ thống đang tăng trưởng +12.4%
+              </p>
+            </div>
+            {/* Quick Online Widget Integrated */}
+            <div className="hidden sm:flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-tight">
+                128 Hoạt động ngay bây giờ
               </span>
             </div>
-            <CardTitle className="text-xl font-black italic uppercase">
-              Hiệu suất trung bình
-            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-80 w-full mt-4">
+          <CardContent className="p-8 pt-4">
+            <div className="h-[380px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={performanceData}>
+                <AreaChart
+                  data={performanceData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                    <linearGradient
+                      id="chartGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.2} />
                       <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -154,16 +181,21 @@ export default function AdminStatsPage() {
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fontWeight: "bold" }}
+                    tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }}
                     dy={10}
                   />
-                  <YAxis hide domain={[60, 100]} />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }}
+                  />
                   <Tooltip
+                    cursor={{ stroke: "#f97316", strokeWidth: 2 }}
                     contentStyle={{
-                      borderRadius: "16px",
+                      borderRadius: "15px",
                       border: "none",
-                      boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                      fontFamily: "monospace",
+                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                      fontWeight: "bold",
                     }}
                   />
                   <Area
@@ -171,8 +203,7 @@ export default function AdminStatsPage() {
                     dataKey="score"
                     stroke="#f97316"
                     strokeWidth={4}
-                    fillOpacity={1}
-                    fill="url(#colorScore)"
+                    fill="url(#chartGradient)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -180,64 +211,74 @@ export default function AdminStatsPage() {
           </CardContent>
         </Card>
 
-        {/* Top Học Viên Bảng Vàng */}
-        <Card className="border-none shadow-sm rounded-[2.5rem] bg-slate-900 text-white p-6 relative overflow-hidden">
-          <div className="absolute top-[-10%] right-[-10%] h-40 w-40 bg-orange-500 opacity-20 blur-[80px]" />
-          <CardHeader className="relative px-0">
-            <div className="flex items-center gap-2 mb-2 text-orange-400">
-              <Medal className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">
-                Top Performers
-              </span>
-            </div>
-            <CardTitle className="text-xl font-black italic uppercase">
-              Bảng Vàng Học Viên
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-0 relative">
-            <div className="space-y-4 mt-4">
+        {/* Sidebar Ranking (Col 4) */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="border-none shadow-2xl rounded-[2.5rem] bg-slate-900 text-white p-1 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 h-32 w-32 bg-orange-500 opacity-20 blur-[60px]" />
+            <CardHeader className="p-7 pb-4 relative">
+              <div className="flex items-center gap-2 text-orange-400 mb-1">
+                <Medal className="h-4 w-4" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
+                  Bảng xếp hạng
+                </span>
+              </div>
+              <CardTitle className="text-lg font-black italic uppercase">
+                Bảng Vàng
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 space-y-3 relative">
               {topStudents.map((s, i) => (
                 <div
                   key={i}
-                  className="group flex justify-between items-center p-4 rounded-3xl bg-white/5 hover:bg-white/10 transition-all border border-white/5"
+                  className="flex justify-between items-center p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`h-10 w-10 rounded-2xl flex items-center justify-center font-black text-lg ${
-                        i === 0
-                          ? "bg-orange-500 text-white"
-                          : "bg-slate-800 text-slate-400"
+                    <span
+                      className={`text-xl font-black italic ${
+                        i === 0 ? "text-orange-500" : "text-slate-600"
                       }`}
                     >
-                      {i + 1}
-                    </div>
+                      #0{i + 1}
+                    </span>
                     <div>
-                      <p className="font-bold text-sm tracking-tight">
+                      <p className="font-bold text-sm leading-tight">
                         {s.name}
                       </p>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                        {s.lessons} Lessons
+                      <p className="text-[9px] text-slate-500 font-bold uppercase">
+                        {s.lessons} Bài học
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-lg font-black italic ${
-                        i === 0 ? "text-orange-500" : "text-white"
-                      }`}
-                    >
-                      {s.score}%
-                    </p>
+                  <div
+                    className={`text-lg font-black italic ${
+                      i === 0 ? "text-orange-500" : "text-white"
+                    }`}
+                  >
+                    {s.score}%
                   </div>
                 </div>
               ))}
-            </div>
+              <Button className="w-full mt-2 h-12 rounded-2xl bg-white text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all">
+                Xem toàn bộ
+              </Button>
+            </CardContent>
+          </Card>
 
-            <button className="w-full mt-6 py-4 rounded-2xl bg-white text-slate-900 text-xs font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all">
-              Xem bảng xếp hạng đầy đủ
-            </button>
-          </CardContent>
-        </Card>
+          {/* Quick Stats Widget */}
+          <div className="bg-orange-500 rounded-[2.5rem] p-8 text-white shadow-lg shadow-orange-500/20 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-80">
+                Trạng thái đồng bộ
+              </p>
+              <p className="text-2xl font-black italic tracking-tighter uppercase">
+                Trực tuyến
+              </p>
+            </div>
+            <div className="h-12 w-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              <Activity className="h-6 w-6 animate-pulse" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

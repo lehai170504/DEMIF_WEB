@@ -1,230 +1,262 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, Check, X, Trophy, RefreshCw } from "lucide-react" // Thêm icon Trophy
-import { motion, AnimatePresence } from "framer-motion" // Import Framer Motion
-import { vocabularyItems } from "@/lib/data/vocabulary"
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
-
-// Định nghĩa màu sắc chủ đạo
-const PRIMARY_COLOR = "#FF7A00"; // Cam chủ đạo
-const CORRECT_COLOR = "#10B981"; // Xanh lá
-const INCORRECT_COLOR = "#EF4444"; // Đỏ
+import { useState, useCallback } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  Check,
+  X,
+  Trophy,
+  Volume2,
+  Sparkles,
+  Zap,
+  RotateCcw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
+import { vocabularyItems } from "@/lib/data/vocabulary";
+import { cn } from "@/lib/utils";
 
 export default function ReviewSessionPage() {
-  const dueItems = vocabularyItems.filter((item) => new Date(item.nextReview) <= new Date())
-  
-  // State quản lý phiên ôn tập
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [showAnswer, setShowAnswer] = useState(false)
-  const [results, setResults] = useState<{ correct: number; incorrect: number }>({ correct: 0, incorrect: 0 })
-  const [animationKey, setAnimationKey] = useState(0); // Dùng để reset animation khi chuyển từ
+  const dueItems = vocabularyItems.filter(
+    (item) => new Date(item.nextReview) <= new Date()
+  );
 
-  const currentItem = dueItems[currentIndex]
-  const progress = dueItems.length > 0 ? ((currentIndex + (showAnswer ? 0.5 : 0)) / dueItems.length) * 100 : 0;
-  
-  // Kiểm tra xem đã hoàn thành toàn bộ danh sách (đã trả lời xong từ cuối)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [results, setResults] = useState({ correct: 0, incorrect: 0 });
+  const [direction, setDirection] = useState(0); // 1: next, -1: prev
+
   const isComplete = currentIndex >= dueItems.length && dueItems.length > 0;
+  const currentItem = dueItems[currentIndex];
+  const progress = (currentIndex / dueItems.length) * 100;
 
-  const handleAnswer = (isCorrect: boolean) => {
-    // 1. Cập nhật kết quả
-    setResults((prev) => ({
-      correct: prev.correct + (isCorrect ? 1 : 0),
-      incorrect: prev.incorrect + (isCorrect ? 0 : 1),
-    }))
+  const handleAnswer = useCallback(
+    (isCorrect: boolean) => {
+      setDirection(1);
+      setResults((prev) => ({
+        correct: prev.correct + (isCorrect ? 1 : 0),
+        incorrect: prev.incorrect + (isCorrect ? 0 : 1),
+      }));
 
-    // 2. Chuyển sang từ tiếp theo
-    if (currentIndex < dueItems.length) {
-        // Cần dùng setTimeout để Framer Motion có thời gian chạy exit animation trước khi unmount component
-        setTimeout(() => {
-            setCurrentIndex((prev) => prev + 1);
-            setShowAnswer(false);
-            setAnimationKey(prev => prev + 1); // Đổi key để force re-render và animation mới
-        }, 300); // 300ms là thời gian animation
-    }
-  }
+      // Tạo hiệu ứng chuyển mượt mà hơn
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+        setShowAnswer(false);
+      }, 100);
+    },
+    [dueItems.length]
+  );
 
-  // --- TRẠNG THÁI: KHÔNG CÓ TỪ NÀO CẦN ÔN ---
-  if (dueItems.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="p-10 max-w-md text-center border-green-300 shadow-xl">
-          <Trophy className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4 text-slate-800">Tuyệt Vời!</h2>
-          <p className="text-slate-600 mb-6">Bạn đã hoàn thành việc ôn tập! Không còn từ nào cần ôn hôm nay.</p>
-          <Button asChild style={{ backgroundColor: PRIMARY_COLOR }} className="hover:bg-orange-600">
-            <Link href="/review">Quay lại Trang Ôn Tập</Link>
-          </Button>
-        </Card>
-      </div>
-    )
-  }
-
-  // --- TRẠNG THÁI: HOÀN THÀNH PHIÊN ÔN TẬP ---
+  // 1. Giao diện Hoàn thành (Result Screen)
   if (isComplete) {
-    const totalAnswered = results.correct + results.incorrect;
-    const accuracy = totalAnswered > 0 ? Math.round((results.correct / totalAnswered) * 100) : 0;
-
+    const accuracy = Math.round((results.correct / dueItems.length) * 100);
     return (
-      <div className="min-h-screen bg-gray-50 font-mono">
-        <header className="border-b border-gray-200">
-          <div className="container mx-auto px-6 py-4">
-            <h1 className="text-2xl font-bold text-green-600">Hoàn Thành! 🎉</h1>
-          </div>
-        </header>
-
-        <main className="container mx-auto px-6 py-12">
-          <div className="max-w-2xl mx-auto">
-            <Card className="p-10 shadow-2xl border-green-400/50">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4 scale-animation">
-                  <Trophy className="h-10 w-10 text-green-500" />
-                </div>
-                <h2 className="text-3xl font-extrabold text-slate-800 mb-2">Phiên Ôn Tập Hoàn Tất!</h2>
-                <p className="text-slate-600">Xin chúc mừng vì sự chăm chỉ của bạn.</p>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="w-full max-w-lg overflow-hidden border-none bg-white p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.08)] rounded-[3rem]">
+            <div className="relative mx-auto mb-8 h-24 w-24">
+              <div className="absolute inset-0 animate-ping rounded-full bg-orange-100 opacity-75" />
+              <div className="relative flex h-full w-full items-center justify-center rounded-full bg-orange-500 text-white shadow-xl">
+                <Trophy className="h-10 w-10" />
               </div>
+            </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <Card className="p-4 text-center bg-orange-50 border-orange-300">
-                  <div className="text-4xl font-extrabold mb-1" style={{ color: PRIMARY_COLOR }}>{accuracy}%</div>
-                  <div className="text-sm text-slate-600">Độ Chính Xác</div>
-                </Card>
-                <Card className="p-4 text-center bg-green-50 border-green-300">
-                  <div className="text-4xl font-extrabold text-green-600 mb-1">{results.correct}</div>
-                  <div className="text-sm text-slate-600">Đúng</div>
-                </Card>
-                <Card className="p-4 text-center bg-red-50 border-red-300">
-                  <div className="text-4xl font-extrabold text-red-600 mb-1">{results.incorrect}</div>
-                  <div className="text-sm text-slate-600">Sai</div>
-                </Card>
-              </div>
+            <h2 className="mb-2 text-3xl font-black text-slate-900 leading-tight">
+              Tuyệt vời!
+            </h2>
+            <p className="mb-8 text-slate-500 font-medium">
+              Bạn vừa củng cố thêm {results.correct} từ vựng vào trí nhớ dài
+              hạn.
+            </p>
 
-              <div className="flex gap-3">
-                <Button variant="outline" asChild className="flex-1 border-orange-300 text-orange-600 hover:bg-orange-50">
-                  <Link href="/review">Quay lại Ôn Tập</Link>
-                </Button>
-                <Button asChild className="flex-1 bg-slate-700 hover:bg-slate-800">
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
-              </div>
-            </Card>
-          </div>
-        </main>
-        <FooterLanding />
+            <div className="grid grid-cols-3 gap-4 mb-10">
+              <ResultStat
+                label="Đúng"
+                value={results.correct}
+                color="text-emerald-500"
+              />
+              <ResultStat
+                label="Chính xác"
+                value={`${accuracy}%`}
+                color="text-orange-500"
+              />
+              <ResultStat
+                label="Sai"
+                value={results.incorrect}
+                color="text-rose-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                asChild
+                className="h-14 rounded-2xl bg-slate-900 text-lg font-bold shadow-xl hover:bg-slate-800 transition-all active:scale-95"
+              >
+                <Link href="/review">Tiếp tục ôn tập</Link>
+              </Button>
+              <Button
+                variant="ghost"
+                asChild
+                className="h-12 rounded-2xl font-bold text-slate-400"
+              >
+                <Link href="/dashboard">Về trang chủ</Link>
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
       </div>
-    )
+    );
   }
 
-  // --- TRẠNG THÁI: ĐANG ÔN TẬP ---
+  // 2. Giao diện Đang ôn tập (Session Screen)
   return (
-    <div className="min-h-screen bg-gray-50 font-mono">
-      {/* Header và Progress Bar */}
-      <header className="sticky top-0 z-10 bg-white shadow-md">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Button variant="ghost" size="sm" asChild className="text-slate-600 hover:text-red-500">
-            <Link href="/review">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Thoát
-            </Link>
-          </Button>
-          <div className="text-center flex-1">
-             <Progress value={progress} className="h-2 w-full max-w-sm mx-auto" />
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-slate-700">
+    <div className="min-h-screen bg-card/50 flex flex-col font-mono">
+      {/* Header tinh giản */}
+      <nav className="flex items-center justify-between px-6 py-6 max-w-4xl mx-auto w-full">
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="rounded-full hover:bg-slate-100"
+        >
+          <Link href="/review">
+            <ArrowLeft className="h-5 w-5 text-slate-400" />
+          </Link>
+        </Button>
+        <div className="flex-1 px-8">
+          <div className="flex justify-between mb-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <span>Tiến độ ôn tập</span>
+            <span>
               {currentIndex + 1} / {dueItems.length}
             </span>
           </div>
+          <Progress value={progress} className="h-1.5 bg-slate-100" />
         </div>
-      </header>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-600 font-bold text-xs">
+          <Zap className="h-4 w-4 fill-current mr-1" /> {results.correct}
+        </div>
+      </nav>
 
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-12 font-mono">
-        <div className="max-w-2xl mx-auto">
-            <AnimatePresence mode="wait">
-            <motion.div
-                key={currentItem.word + animationKey} // Key thay đổi để kích hoạt animation
-                initial={{ opacity: 0, x: 200 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -200 }}
-                transition={{ duration: 0.3 }}
+      {/* Card Arena */}
+      <main className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            initial={{ opacity: 0, x: 100 * direction, rotateY: 20 }}
+            animate={{ opacity: 1, x: 0, rotateY: 0 }}
+            exit={{ opacity: 0, x: -100 * direction, rotateY: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="w-full max-w-xl perspective-1000"
+          >
+            <div
+              className={cn(
+                "relative h-[400px] w-full transition-all duration-700 preserve-3d cursor-pointer",
+                showAnswer ? "rotate-y-180" : ""
+              )}
+              onClick={() => !showAnswer && setShowAnswer(true)}
             >
-                <Card className="p-10 shadow-2xl border-4 border-orange-200/50 bg-white">
-                    {!showAnswer ? (
-                        /* GIAI ĐOẠN 1: HIỂN THỊ TỪ */
-                        <div className="text-center">
-                            <p className="text-xl font-medium text-slate-500 mb-6">Bạn có nhớ nghĩa của từ này không?</p>
-                            <h2 className="text-6xl font-extrabold mb-10 text-slate-900 drop-shadow-md">{currentItem.word}</h2>
-                            <p className="text-slate-600 mb-10 italic text-lg">"{currentItem.example}"</p>
-                            
-                            <Button onClick={() => setShowAnswer(true)} 
-                                style={{ backgroundColor: PRIMARY_COLOR }} 
-                                className="w-full text-lg py-7 font-bold hover:bg-orange-600 transition-all duration-300 shadow-xl shadow-orange-300/50"
-                            >
-                                <RefreshCw className="h-5 w-5 mr-3" />
-                                Xem Đáp Án
-                            </Button>
-                        </div>
-                    ) : (
-                        /* GIAI ĐOẠN 2: HIỂN THỊ ĐÁP ÁN VÀ NÚT CHỌN */
-                        <div>
-                            <div className="text-center mb-10">
-                                <h2 className="text-xl font-bold text-slate-800 mb-3">{currentItem.word}</h2>
-                                <motion.div 
-                                    initial={{ scale: 0.8, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    transition={{ duration: 0.3, delay: 0.1 }}
-                                    className="bg-orange-50 rounded-xl p-8 border-2 border-orange-300/70"
-                                >
-                                    <p className="text-3xl font-extrabold text-slate-900 mb-2">{currentItem.translation}</p>
-                                    <p className="text-slate-600 italic text-base">"{currentItem.example}"</p>
-                                </motion.div>
-                            </div>
+              {/* MẶT TRƯỚC (CÂU HỎI) */}
+              <Card className="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-12 border-none bg-white shadow-[0_30px_60px_rgba(0,0,0,0.05)] rounded-[3rem]">
+                <div className="absolute top-8 left-8 flex items-center gap-2 opacity-30">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">
+                    Question
+                  </span>
+                </div>
 
-                            <div className="text-center mb-6">
-                                <p className="text-slate-700 font-semibold mb-4 text-lg">Bạn có nhớ từ này không?</p>
-                            </div>
+                <h2 className="text-6xl font-black text-slate-900 tracking-tighter mb-4 select-none">
+                  {currentItem?.word}
+                </h2>
+                <div className="flex items-center gap-4 text-slate-300 mb-8">
+                  <div className="h-[1px] w-8 bg-current" />
+                  <Volume2 className="h-5 w-5 cursor-pointer hover:text-orange-500 transition-colors" />
+                  <div className="h-[1px] w-8 bg-current" />
+                </div>
+                <p className="text-center text-slate-400 font-medium leading-relaxed italic px-4">
+                  "{currentItem?.example}"
+                </p>
+                <div className="mt-10 text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] animate-pulse">
+                  Chạm để xem đáp án
+                </div>
+              </Card>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <Button
-                                    onClick={() => handleAnswer(false)}
-                                    className="bg-red-500/10 border-2 border-red-500/50 text-red-600 hover:bg-red-500/20 py-5 text-lg font-bold transition-all duration-300"
-                                >
-                                    <X className="h-6 w-6 mr-2" />
-                                    Quên Mất
-                                </Button>
-                                <Button
-                                    onClick={() => handleAnswer(true)}
-                                    className="bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-300/50 py-5 text-lg font-bold transition-all duration-300"
-                                >
-                                    <Check className="h-6 w-6 mr-2" />
-                                    Nhớ Rồi
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </Card>
-            </motion.div>
-            </AnimatePresence>
-
-          {/* Stats Bar cố định ở dưới */}
-          <Card className="grid grid-cols-2 gap-4 mt-8 p-4 bg-white shadow-lg">
-            <div className="text-center">
-              <div className="text-3xl font-extrabold text-green-600">{results.correct}</div>
-              <div className="text-sm text-slate-600">Đúng</div>
+              {/* MẶT SAU (ĐÁP ÁN) */}
+              <Card className="absolute inset-0 rotate-y-180 backface-hidden flex flex-col items-center justify-center p-12 border-none bg-slate-900 text-white shadow-2xl rounded-[3rem]">
+                <div className="mb-4 text-orange-500 font-black uppercase tracking-widest text-xs">
+                  Meaning
+                </div>
+                <h3 className="text-4xl font-bold mb-6 text-center">
+                  {currentItem?.translation}
+                </h3>
+                <div className="w-full max-w-[200px] h-[1px] bg-white/10 mb-6" />
+                <p className="text-slate-400 text-center italic text-sm px-6">
+                  "{currentItem?.example}"
+                </p>
+              </Card>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-extrabold text-red-600">{results.incorrect}</div>
-              <div className="text-sm text-slate-600">Sai</div>
-            </div>
-          </Card>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </main>
+
+      {/* Footer Controls */}
+      <footer className="p-8">
+        <div className="max-w-xl mx-auto h-24 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            {!showAnswer ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Button
+                  onClick={() => setShowAnswer(true)}
+                  className="h-16 px-12 rounded-2xl bg-white text-slate-900 font-bold border-2 border-slate-100 shadow-xl hover:bg-slate-50 transition-all active:scale-95"
+                >
+                  Tôi đã nhớ rồi
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="flex gap-4 w-full"
+              >
+                <Button
+                  onClick={() => handleAnswer(false)}
+                  className="flex-1 h-16 rounded-2xl bg-rose-50 text-rose-600 font-bold border-2 border-rose-100 hover:bg-rose-100 transition-all active:scale-95"
+                >
+                  <X className="mr-2 h-5 w-5" /> Quên mất
+                </Button>
+                <Button
+                  onClick={() => handleAnswer(true)}
+                  className="flex-1 h-16 rounded-2xl bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-95"
+                >
+                  <Check className="mr-2 h-5 w-5" /> Thuộc rồi
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </footer>
     </div>
-  )
+  );
+}
+
+// Sub-component cho trang kết quả
+function ResultStat({ label, value, color }: any) {
+  return (
+    <div className="p-4 rounded-3xl bg-slate-50 border font-mono border-slate-100">
+      <div className={cn("text-2xl font-black mb-1", color)}>{value}</div>
+      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        {label}
+      </div>
+    </div>
+  );
 }

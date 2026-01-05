@@ -1,8 +1,18 @@
-// src/components/layouts/Dashboard/Header.jsx
+"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User, Zap } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  User,
+  Menu,
+  ChevronDown,
+  Sparkles,
+  CreditCard,
+  LayoutGrid,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,147 +21,163 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+const navLinks = [
+  { name: "Trang chủ", href: "/home" },
+  { name: "Chính tả", href: "/dictation" },
+  { name: "Shadowing", href: "/shadowing" },
+  { name: "Ôn tập", href: "/review" },
+  { name: "Bảng xếp hạng", href: "/leaderboard" },
+];
 
 export function HeaderUser() {
+  const pathname = usePathname();
+
   return (
-    // Header chính: sticky, hiệu ứng blur, shadow nhẹ
-    <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-orange-200/50 shadow-sm">
-      <div className="container mx-auto px-6 py-3">
-        <div className="flex items-center justify-between h-14 font-mono">
-          {/* Logo và Tên ứng dụng */}
-          <div className="flex items-center gap-3">
-            <Link href="/home" className="flex items-center gap-3 p-2 rounded-lg hover:bg-orange-50 transition-colors">
-              <img
-                src="/DemifLogo.png"
-                alt="DEMIF Logo"
-                className="w-10 h-10 rounded-lg shadow-md"
-              />
-              {/* Logo font chính: Chắc chắn hơn */}
-              <span className="text-2xl font-extrabold text-gray-800 tracking-wide">DEMIF</span>
+    <header className="sticky top-0 z-[100] w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
+        <div className="flex h-16 items-center justify-between gap-8 font-mono">
+          {/* 1. LOGO SECTION - Sharp & Clear */}
+          <div className="flex items-center gap-10">
+            <Link href="/home" className="flex items-center gap-2.5 group">
+              <div className="relative flex items-center justify-center w-10 h-10 bg-orange-500 rounded-xl shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
+                <img
+                  src="/DemifLogo.png"
+                  alt="D"
+                  className="w-7 h-7 brightness-0 invert"
+                />
+              </div>
+              <span className="text-2xl font-black tracking-tighter italic uppercase text-slate-950">
+                DEMIF<span className="text-orange-500 not-italic">.</span>
+              </span>
             </Link>
+
+            {/* 2. DESKTOP NAV - Enhanced Contrast */}
+            <nav className="hidden xl:flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "px-5 py-2 text-[13px] font-bold rounded-xl transition-all duration-200 whitespace-nowrap",
+                      isActive
+                        ? "bg-white text-orange-600 shadow-[0_2px_10px_rgba(0,0,0,0.05)] ring-1 ring-slate-200/50"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Menu Điều hướng Chính (Dùng Button/Link chuẩn) */}
-          <nav className="hidden md:flex items-center gap-1">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/home">Trang chủ</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dictation">Chính tả</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/shadowing">Shadowing</Link>
-            </Button>
-            {/* Thêm các link từ header đầu tiên và tối ưu hóa */}
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/review">Ôn tập</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/leaderboard">Bảng xếp hạng</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/blog">Blog</Link>
-            </Button>
-          </nav>
-
-          {/* Nâng cấp và Hồ sơ Người dùng */}
-          <div className="flex items-center gap-3">
-            {/* Nút CTA Nâng cấp - Màu cam chủ đạo */}
+          {/* 3. ACTIONS SECTION */}
+          <div className="flex items-center gap-3 sm:gap-5">
+            {/* PRO Badge - More Visible */}
             <Button
-              className="rounded-full bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] 
-             pl-4 pr-5 py-2 text-sm font-semibold text-white 
-             shadow-xl shadow-orange-500/50 
-             hover:from-[#FF9E2C] hover:to-[#FF7A00] 
-             transition-all duration-300 transform hover:translate-y-[-1px]"
+              variant="outline"
               size="sm"
+              className="hidden md:flex h-10 px-5 rounded-xl border-orange-200 bg-orange-50 text-orange-600 font-black text-xs hover:bg-orange-100 hover:text-neutral-800 transition-all gap-2 shadow-sm shadow-orange-100"
               asChild
             >
               <Link href="/upgrade">
-                <Zap className="w-4 h-4 mr-1 fill-white text-white" />
-                Nâng cấp
+                <Sparkles className="w-4 h-4 fill-orange-500" />
+                UPGRADE PRO
               </Link>
             </Button>
 
-            {/* Avatar Người dùng (Tối ưu hóa từ Header 1) */}
+            {/* Divider */}
+            <div className="hidden sm:block w-px h-6 bg-slate-200" />
+
+            {/* USER PROFILE - Clean & Bold */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  // Tăng cường hiệu ứng trigger: border cam, shadow, và hiệu ứng scale khi hover
-                  className="rounded-full h-10 w-10 p-0 overflow-hidden 
-                 border-2 border-transparent 
-                 shadow-md transition-all duration-300 
-                 hover:border-[#FF7A00] hover:shadow-lg hover:scale-[1.05]"
-                >
-                  <div
-                    className="flex h-full w-full items-center justify-center 
-                      bg-gradient-to-br from-green-500 to-green-600 
-                      text-sm font-bold text-white shadow-inner"
-                  >
-                    H
+                <button className="flex items-center gap-3 p-1 pr-3 rounded-2xl hover:bg-slate-50 transition-all outline-none group border border-transparent hover:border-slate-200">
+                  <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-sm shadow-md group-hover:bg-orange-600 transition-colors">
+                    HV
                   </div>
-                </Button>
+                  <div className="hidden sm:block text-left">
+                    <p className="text-[12px] font-black leading-none uppercase text-slate-900">
+                      Hà Vi
+                    </p>
+                    <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-widest">
+                      Online
+                    </p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-slate-400 group-data-[state=open]:rotate-180 transition-transform" />
+                </button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
-                className="w-60 p-1 rounded-xl shadow-2xl border border-gray-100/50 font-mono"
                 align="end"
+                className="w-64 p-3 rounded-[2rem] shadow-2xl border-slate-200 bg-white font-mono mt-2"
               >
-                <div className="p-2 pb-3 pt-2">
-                  <DropdownMenuLabel className="font-extrabold text-gray-800 text-base leading-snug">
-                    Hà Vi
-                  </DropdownMenuLabel>
-                  <DropdownMenuLabel className="text-xs font-normal text-gray-500 truncate mt-[-2px]">
-                    havi.student@demif.com
-                  </DropdownMenuLabel>
+                <DropdownMenuLabel className="px-3 py-4 mb-2 bg-slate-50 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-black">
+                      HV
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-900 uppercase">
+                        Hà Vi
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-bold lowercase">
+                        havi.student@demif.com
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+
+                <div className="space-y-1">
+                  {[
+                    { icon: User, label: "Tài khoản", href: "/profile" },
+                    {
+                      icon: LayoutGrid,
+                      label: "Bảng quản lý",
+                      href: "/dashboard",
+                    },
+                    {
+                      icon: CreditCard,
+                      label: "Gói dịch vụ",
+                      href: "/billing",
+                    },
+                    { icon: Settings, label: "Cài đặt", href: "/settings" },
+                  ].map((item) => (
+                    <DropdownMenuItem
+                      key={item.label}
+                      className="rounded-xl cursor-pointer p-3 focus:bg-slate-100 focus:text-slate-900 transition-colors group"
+                    >
+                      <item.icon className="mr-3 h-4 w-4 text-slate-400 group-focus:text-orange-500" />
+                      <span className="font-bold text-[11px] uppercase tracking-wider">
+                        {item.label}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
                 </div>
 
-                <DropdownMenuSeparator className="my-1" />
+                <DropdownMenuSeparator className="my-2" />
 
-                {/* Mục 1: Quản lý tài khoản - Highlight màu cam */}
-                <Link href="/profile/edit" passHref>
-                  <DropdownMenuItem
-                    className="cursor-pointer font-medium 
-                   focus:bg-orange-50 focus:text-[#FF7A00] 
-                   data-[highlighted]:bg-orange-50 data-[highlighted]:text-[#FF7A00] 
-                   transition-colors duration-150 rounded-lg p-2"
-                  >
-                    <User className="mr-3 h-4 w-4" />
-                    <span>Quản lý tài khoản</span>
-                  </DropdownMenuItem>
-                </Link>
-
-                {/* Mục khác (ví dụ: Cài đặt) */}
-                <Link href="/settings" passHref>
-                  <DropdownMenuItem
-                    className="cursor-pointer font-medium 
-                   focus:bg-gray-100 focus:text-gray-900
-                   data-[highlighted]:bg-gray-100 data-[highlighted]:text-gray-900 
-                   transition-colors duration-150 rounded-lg p-2"
-                  >
-                    <Settings className="mr-3 h-4 w-4 text-gray-500" />
-                    <span>Cài đặt</span>
-                  </DropdownMenuItem>
-                </Link>
-
-                <DropdownMenuSeparator className="my-1" />
-
-                {/* Mục cuối: Đăng xuất (Log Out) - Màu đỏ nổi bật */}
-                <Link href="/logout" passHref>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    className="cursor-pointer font-medium p-2 rounded-lg 
-                   focus:bg-red-50 focus:text-red-600 
-                   data-[highlighted]:bg-red-50 data-[highlighted]:text-red-600"
-                  >
-                    <LogOut className="mr-3 h-4 w-4" />
-                    <span>Đăng xuất</span>
-                  </DropdownMenuItem>
-                </Link>
+                <DropdownMenuItem className="rounded-xl cursor-pointer p-3 text-red-500 focus:bg-red-50 focus:text-red-600">
+                  <LogOut className="mr-3 h-4 w-4" />
+                  <span className="font-black text-[11px] uppercase tracking-wider">
+                    Đăng xuất
+                  </span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {/* <MobileMenuToggle /> */}
+
+            {/* Mobile Burger */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="xl:hidden rounded-xl bg-slate-100"
+            >
+              <Menu className="h-5 w-5 text-slate-900" />
+            </Button>
           </div>
         </div>
       </div>

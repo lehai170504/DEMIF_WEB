@@ -1,45 +1,50 @@
-// app/review/page.tsx
-"use client"
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  BookOpen,
+  Clock,
+  TrendingUp,
+  Zap,
+  RotateCw,
+  ChevronRight,
+  BarChart3,
+  Search,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, BookOpen, Clock, TrendingUp } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
 import { vocabularyItems } from "@/lib/data/vocabulary";
-import { HeaderUser } from "@/components/layouts/User/HeaderUser"; // <<< ĐÃ SỬA IMPORT
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
-
-// Định nghĩa màu cam chủ đạo nhất quán
-const PRIMARY_ORANGE = "#FF7A00";
+import { cn } from "@/lib/utils";
 
 export default function ReviewPage() {
-  // Lọc từ cần ôn tập (ngày ôn tập tiếp theo <= ngày hiện tại)
-  const dueForReview = vocabularyItems.filter((item) => new Date(item.nextReview) <= new Date())
+  const [filter, setFilter] = useState<"all" | "due" | "mastered" | "learning">(
+    "all"
+  );
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Tính độ thành thạo trung bình
-  const totalMastery = vocabularyItems.length > 0
-    ? Math.round(vocabularyItems.reduce((sum, item) => sum + item.mastery, 0) / vocabularyItems.length)
-    : 0;
+  const dueForReview = vocabularyItems.filter(
+    (item) => new Date(item.nextReview) <= new Date()
+  );
 
-  // State for filter
-  const [filter, setFilter] = useState<"all" | "due" | "mastered" | "learning">("all");
+  const totalMastery =
+    vocabularyItems.length > 0
+      ? Math.round(
+          vocabularyItems.reduce((sum, item) => sum + item.mastery, 0) /
+            vocabularyItems.length
+        )
+      : 0;
 
-  // Hàm ánh xạ độ khó sang tiếng Việt
-  const getDifficultyText = (difficulty: "easy" | "medium" | "hard") => {
-    switch (difficulty) {
-      case "easy": return "Dễ";
-      case "medium": return "Trung Bình";
-      case "hard": return "Khó";
-      default: return "";
-    }
-  }
-
-  // Filter vocabulary items based on selected filter
   const filteredItems = vocabularyItems.filter((item) => {
+    const matchesSearch = item.word
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+
     switch (filter) {
       case "due":
         return new Date(item.nextReview) <= new Date();
@@ -52,205 +57,265 @@ export default function ReviewPage() {
     }
   });
 
-  // FlashCard Component
-  const FlashCard = ({ item, getDifficultyText }: { item: any; getDifficultyText: (difficulty: "easy" | "medium" | "hard") => string }) => {
-    const [isFlipped, setIsFlipped] = useState(false);
-
-    return (
-      <motion.div
-        className="relative w-full h-64 cursor-pointer"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
-        <AnimatePresence mode="wait">
-          {!isFlipped ? (
-            <motion.div
-              key="front"
-              initial={{ opacity: 0, rotateY: -90 }}
-              animate={{ opacity: 1, rotateY: 0 }}
-              exit={{ opacity: 0, rotateY: 90 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0"
-            >
-              <Card className="w-full h-full p-6 bg-gradient-to-br from-white to-orange-50 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col justify-center items-center text-center">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className={`text-xs font-semibold px-2 py-1 ${item.difficulty === "easy" ? "bg-green-100 text-green-700 border-green-300" : item.difficulty === "medium" ? "bg-yellow-100 text-yellow-700 border-yellow-300" : "bg-red-100 text-red-700 border-red-300"}`}>
-                    {getDifficultyText(item.difficulty)}
-                  </Badge>
-                  {new Date(item.nextReview) <= new Date() && (
-                    <Badge variant="outline" className="bg-orange-100 text-[#FF7A00] border-orange-300 font-semibold text-xs">Cần Ôn</Badge>
-                  )}
-                </div>
-                <h3 className="text-3xl font-extrabold text-slate-800 mb-2">{item.word}</h3>
-                <p className="text-sm text-slate-500 italic">Nhấn để xem nghĩa</p>
-              </Card>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="back"
-              initial={{ opacity: 0, rotateY: 90 }}
-              animate={{ opacity: 1, rotateY: 0 }}
-              exit={{ opacity: 0, rotateY: -90 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0"
-            >
-              <Card className="w-full h-full p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 shadow-lg flex flex-col justify-center items-center text-center">
-                <h3 className="text-2xl font-bold text-slate-800 mb-2">{item.word}</h3>
-                <p className="text-xl font-semibold text-slate-700 mb-3">{item.translation}</p>
-                <p className="text-sm text-slate-600 italic mb-4">"{item.example}"</p>
-                <div className="w-full">
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-slate-600">Độ Thành Thạo</span>
-                    <span className="font-bold" style={{ color: PRIMARY_ORANGE }}>{item.mastery}%</span>
-                  </div>
-                  <Progress value={item.mastery} className="h-2 bg-gray-200" />
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Đã ôn {item.reviewCount} lần</p>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    );
-  };
-
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-mono">
-      <HeaderUser />
+    <div className="min-h-screen bg-card/50 pb-20 font-mono">
+      <main className="container mx-auto px-4 pt-12 max-w-7xl">
+        {/* 1. HERO SECTION & STATS */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          <div className="lg:col-span-8 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-2"
+            >
+              <h1 className="text-4xl font-black tracking-tight text-slate-900">
+                Trung tâm Ôn tập
+              </h1>
+              <p className="text-slate-500 font-medium">
+                Sử dụng phương pháp lặp lại ngắt quãng (SRS) để tối ưu hóa trí
+                nhớ của bạn.
+              </p>
+            </motion.div>
 
-      <main className="flex-1 container mx-auto px-6 py-8">
-        {/* Bố cục 4 cột: 1fr | 3fr | 3fr | 1fr */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 lg:grid-cols-[1fr_3fr_3fr_1fr] gap-6">
-
-          {/* Cột 1: Lề trái (trống) */}
-          <div className="hidden lg:block"></div>
-
-          {/* Cột 2 & 3: Nội dung chính */}
-          <div className="col-span-1 lg:col-span-2 space-y-8">
-
-            {/* Thống kê */}
-            <h2 className="text-2xl font-bold text-slate-800">Thống Kê Tổng Quan</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-
-              {/* Cần Ôn Tập Hôm Nay */}
-              <Card className="p-6 bg-gradient-to-br from-orange-50 to-white border-orange-200 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                    <Clock className="h-6 w-6" style={{ color: PRIMARY_ORANGE }} />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-extrabold" style={{ color: PRIMARY_ORANGE }}>{dueForReview.length}</div>
-                    <div className="text-sm text-slate-600">Từ Cần Ôn Hôm Nay</div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Tổng Số Từ */}
-              <Card className="p-6 bg-white border-gray-200 shadow-md">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <BookOpen className="h-6 w-6 text-slate-600" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-extrabold text-slate-800">{vocabularyItems.length}</div>
-                    <div className="text-sm text-slate-600">Tổng Số Từ</div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Độ Thành Thạo TB */}
-              <Card className="p-6 bg-white border-gray-200 shadow-md">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-extrabold text-green-600">{totalMastery}%</div>
-                    <div className="text-sm text-slate-600">Thành Thạo Trung Bình</div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            {/* Nút Bắt đầu Ôn Tập */}
-            {dueForReview.length > 0 && (
-              <Card className="p-8 bg-gradient-to-br from-orange-100 to-white border-orange-300 shadow-xl">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-slate-800 mb-2">Sẵn Sàng Ôn Tập Chưa?</h2>
-                  <p className="text-slate-600 mb-6">Bạn có **{dueForReview.length} từ** đang chờ được ôn tập.</p>
-                  <Button
-                    size="lg"
-                    asChild
-                    className="bg-[#FF7A00] hover:bg-[#FF8A1C] text-white font-bold text-lg shadow-lg shadow-orange-300/50"
-                  >
-                    <Link href="/review/session">Bắt Đầu Phiên Ôn Tập</Link>
-                  </Button>
-                </div>
-              </Card>
-            )}
-
-            {/* Danh sách Từ Vựng */}
-            <div className="pt-4">
-              <h2 className="text-2xl font-bold text-slate-800 mb-4">Kho Từ Vựng Của Bạn</h2>
-
-              {/* Bộ lọc */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <Button
-                  variant={filter === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("all")}
-                  className={filter === "all" ? "bg-[#FF7A00] hover:bg-[#FF8A1C] text-white" : "border-orange-300 text-orange-600 hover:bg-orange-50"}
-                >
-                  Tất Cả
-                </Button>
-                <Button
-                  variant={filter === "due" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("due")}
-                  className={filter === "due" ? "bg-[#FF7A00] hover:bg-[#FF8A1C] text-white" : "border-orange-300 text-orange-600 hover:bg-orange-50"}
-                >
-                  Cần Ôn Hôm Nay
-                </Button>
-                <Button
-                  variant={filter === "mastered" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("mastered")}
-                  className={filter === "mastered" ? "bg-[#FF7A00] hover:bg-[#FF8A1C] text-white" : "border-orange-300 text-orange-600 hover:bg-orange-50"}
-                >
-                  Đã Thành Thạo
-                </Button>
-                <Button
-                  variant={filter === "learning" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilter("learning")}
-                  className={filter === "learning" ? "bg-[#FF7A00] hover:bg-[#FF8A1C] text-white" : "border-orange-300 text-orange-600 hover:bg-orange-50"}
-                >
-                  Đang Học
-                </Button>
-              </div>
-            </div>
-
-            {/* Danh sách các từ dưới dạng flash cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <FlashCard item={item} getDifficultyText={getDifficultyText} />
-                </motion.div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard
+                icon={<Clock className="text-orange-500" />}
+                value={dueForReview.length}
+                label="Cần ôn hôm nay"
+                highlight
+              />
+              <StatCard
+                icon={<BookOpen className="text-blue-500" />}
+                value={vocabularyItems.length}
+                label="Tổng kho từ vựng"
+              />
+              <StatCard
+                icon={<TrendingUp className="text-emerald-500" />}
+                value={`${totalMastery}%`}
+                label="Độ thành thạo"
+              />
             </div>
           </div>
 
-          {/* Cột 4: Lề phải (trống) */}
-          <div className="hidden lg:block"></div>
+          {/* CTA Card đặc biệt */}
+          <div className="lg:col-span-4">
+            <motion.div
+              whileHover={{ y: -5 }}
+              className="h-full relative overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 text-white shadow-2xl shadow-slate-200"
+            >
+              <div className="relative z-10 space-y-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 shadow-lg shadow-orange-500/50">
+                  <Zap className="h-6 w-6 fill-current" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold">Bắt đầu ngay</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Bạn có {dueForReview.length} thử thách đang chờ. Hoàn thành
+                    để duy trì chuỗi Streak!
+                  </p>
+                </div>
+                <Button
+                  asChild
+                  className="w-full h-12 rounded-xl bg-white text-slate-900 font-bold hover:bg-orange-500 hover:text-white transition-all"
+                >
+                  <Link href="/review/session">
+                    Ôn tập ngay thôi <ChevronRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
+            </motion.div>
+          </div>
         </div>
+
+        {/* 2. FILTER & SEARCH BAR */}
+        <div className="sticky top-4 z-30 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-100 shadow-sm">
+          <div className="flex flex-wrap gap-2">
+            <FilterButton
+              active={filter === "all"}
+              onClick={() => setFilter("all")}
+              label="Tất cả"
+            />
+            <FilterButton
+              active={filter === "due"}
+              onClick={() => setFilter("due")}
+              label="Cần ôn"
+              count={dueForReview.length}
+            />
+            <FilterButton
+              active={filter === "learning"}
+              onClick={() => setFilter("learning")}
+              label="Đang học"
+            />
+            <FilterButton
+              active={filter === "mastered"}
+              onClick={() => setFilter("mastered")}
+              label="Đã thuộc"
+            />
+          </div>
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Tìm từ vựng..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded-full border-slate-100 bg-slate-50 pl-10 focus-visible:ring-orange-500"
+            />
+          </div>
+        </div>
+
+        {/* 3. VOCABULARY GRID */}
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredItems.map((item, index) => (
+              <FlashCard key={item.id} item={item} index={index} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {filteredItems.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
+            <div className="h-20 w-20 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+              <RotateCw className="h-10 w-10 text-slate-300" />
+            </div>
+            <p className="text-slate-500 font-bold">
+              Không tìm thấy từ vựng nào
+            </p>
+          </div>
+        )}
       </main>
-      <FooterLanding />
     </div>
-  )
+  );
+}
+
+// Sub-components tinh chỉnh
+function StatCard({ icon, value, label, highlight = false }: any) {
+  return (
+    <Card
+      className={cn(
+        "p-6 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all hover:shadow-lg",
+        highlight ? "bg-orange-50 ring-1 ring-orange-100" : "bg-white"
+      )}
+    >
+      <div className="flex items-center gap-4">
+        <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+          {icon}
+        </div>
+        <div>
+          <div className="text-2xl font-black text-slate-900">{value}</div>
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            {label}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function FilterButton({ active, onClick, label, count }: any) {
+  return (
+    <Button
+      variant={active ? "default" : "ghost"}
+      onClick={onClick}
+      className={cn(
+        "rounded-full px-6 font-bold transition-all",
+        active
+          ? "bg-slate-900 text-white shadow-lg"
+          : "text-slate-500 hover:bg-slate-100"
+      )}
+    >
+      {label}
+      {count !== undefined && (
+        <span className="ml-2 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] text-white">
+          {count}
+        </span>
+      )}
+    </Button>
+  );
+}
+
+function FlashCard({ item, index }: any) {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: index * 0.05 }}
+      className="perspective-1000 h-64 w-full cursor-pointer group"
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <div
+        className={cn(
+          "relative h-full w-full transition-all duration-500 preserve-3d shadow-sm",
+          isFlipped ? "rotate-y-180" : ""
+        )}
+      >
+        {/* Mặt trước */}
+        <Card className="absolute inset-0 backface-hidden rounded-[2rem] border-none bg-white p-8 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] group-hover:shadow-orange-200/50 group-hover:shadow-2xl transition-all">
+          <div className="flex justify-between items-start">
+            <Badge
+              className={cn(
+                "rounded-full px-3 py-1 font-bold border-none",
+                item.difficulty === "easy"
+                  ? "bg-emerald-50 text-emerald-600"
+                  : item.difficulty === "medium"
+                  ? "bg-amber-50 text-amber-600"
+                  : "bg-rose-50 text-rose-600"
+              )}
+            >
+              {item.difficulty.toUpperCase()}
+            </Badge>
+            {new Date(item.nextReview) <= new Date() && (
+              <div className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+            )}
+          </div>
+          <div className="text-center">
+            <h3 className="text-3xl font-black text-slate-800 tracking-tight">
+              {item.word}
+            </h3>
+            <p className="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
+              Nhấn để lật
+            </p>
+          </div>
+          <div className="flex justify-center gap-1">
+            <div className="h-1 w-8 rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-orange-500"
+                style={{ width: `${item.mastery}%` }}
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Mặt sau */}
+        <Card className="absolute inset-0 rotate-y-180 backface-hidden rounded-[2rem] border-none bg-slate-900 p-8 text-white flex flex-col justify-between shadow-2xl">
+          <div className="space-y-2 text-center">
+            <p className="text-orange-400 font-bold text-sm">Ý nghĩa</p>
+            <h3 className="text-2xl font-bold">{item.translation}</h3>
+            <p className="text-slate-400 text-sm italic leading-relaxed px-2 line-clamp-2">
+              "{item.example}"
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter text-slate-500">
+              <span>Độ thành thạo</span>
+              <span>{item.mastery}%</span>
+            </div>
+            <Progress value={item.mastery} className="h-1.5 bg-white/10" />
+            <div className="flex justify-center">
+              <span className="text-[10px] text-slate-500 font-bold">
+                Đã ôn tập {item.reviewCount} lần
+              </span>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </motion.div>
+  );
 }

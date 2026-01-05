@@ -10,8 +10,6 @@ import {
   ArrowLeft,
   Trophy,
   Crown,
-  Mic,
-  CheckCircle,
   Zap,
   Award,
   BookOpen,
@@ -19,8 +17,6 @@ import {
   Clock,
 } from "lucide-react";
 import { leaderboardData } from "@/lib/data/leaderboard";
-import { HeaderUser } from "@/components/layouts/User/HeaderUser";
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding";
 
 const PRIMARY_COLOR = "#FF7A00";
 
@@ -170,8 +166,6 @@ export default function LeaderboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 font-mono">
-      <HeaderUser />
-
       <main className="flex-1 container mx-auto px-4 py-8 md:py-10">
         {/* ==== PHẦN HEADER ==== */}
         <motion.div
@@ -424,8 +418,6 @@ export default function LeaderboardPage() {
           </div>
         </div>
       </main>
-
-      <FooterLanding />
     </div>
   );
 }

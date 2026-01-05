@@ -1,10 +1,8 @@
-"use client"
+"use client";
 
-import { useParams } from "next/navigation"
-import { useState } from "react"
-import { HeaderUser } from "@/components/layouts/User/HeaderUser"
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
-import { getPostById, blogPosts } from "@/lib/data/blog"
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { getPostById, blogPosts } from "@/lib/data/blog";
 import {
   BlogDetailHero,
   BlogCoverImage,
@@ -16,31 +14,31 @@ import {
   TableOfContents,
   ShareSidebar,
   NotFoundPost,
-} from "@/components/blog"
+} from "@/components/blog";
 
 export default function BlogDetailPage() {
-  const params = useParams()
-  const postId = params.id as string
-  const post = getPostById(postId)
-  const [isLiked, setIsLiked] = useState(false)
-  const [isSaved, setIsSaved] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const params = useParams();
+  const postId = params.id as string;
+  const post = getPostById(postId);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Handle not found state
   if (!post) {
-    return <NotFoundPost />
+    return <NotFoundPost />;
   }
 
   // Get related posts (same category, exclude current post)
   const relatedPosts = blogPosts
     .filter((p) => p.category === post.category && p.id !== post.id)
-    .slice(0, 3)
+    .slice(0, 3);
 
   // Table of contents sections (mock data - in real app, parse from content)
   const tocSections = [
@@ -48,11 +46,10 @@ export default function BlogDetailPage() {
     { id: "noi-dung-chinh", title: "Nội dung chính" },
     { id: "vi-du-thuc-te", title: "Ví dụ thực tế" },
     { id: "ket-luan", title: "Kết luận" },
-  ]
+  ];
 
   return (
     <>
-      <HeaderUser />
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         {/* Hero Section */}
         <BlogDetailHero post={post} />
@@ -96,16 +93,17 @@ export default function BlogDetailPage() {
                 <TableOfContents sections={tocSections} />
 
                 {/* Share Sidebar */}
-                <ShareSidebar 
-                  title={post.title} 
-                  postUrl={typeof window !== 'undefined' ? window.location.href : ''} 
+                <ShareSidebar
+                  title={post.title}
+                  postUrl={
+                    typeof window !== "undefined" ? window.location.href : ""
+                  }
                 />
               </aside>
             </div>
           </div>
         </div>
       </div>
-      <FooterLanding />
     </>
-  )
+  );
 }

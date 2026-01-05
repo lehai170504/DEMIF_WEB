@@ -1,32 +1,36 @@
-import { HeroBanner } from "@/components/home/hero-banner"
-import { ContinueLearning } from "@/components/home/continue-learning"
-import { RecentLessons } from "@/components/home/recent-lessons"
-import { RecommendedLessons } from "@/components/home/recommended-lessons"
-import { PromotionalBanner } from "@/components/home/promotional-banner"
-import { SidebarReview } from "@/components/home/sidebar-review"
-import { SidebarLeaderboard } from "@/components/home/sidebar-leaderboard"
-import { SidebarArticles } from "@/components/home/sidebar-articles"
-import { homeData } from "@/lib/data/home-data"
-import { Button } from "@/components/ui/button"
-import { HeaderUser } from "@/components/layouts/User/HeaderUser"
-import { FooterLanding } from "@/components/layouts/Landing/FooterLanding"
+"use client";
+
+import { HeroBanner } from "@/components/home/hero-banner";
+import { ContinueLearning } from "@/components/home/continue-learning";
+import { RecentLessons } from "@/components/home/recent-lessons";
+import { RecommendedLessons } from "@/components/home/recommended-lessons";
+import { PromotionalBanner } from "@/components/home/promotional-banner";
+import { SidebarReview } from "@/components/home/sidebar-review";
+import { SidebarLeaderboard } from "@/components/home/sidebar-leaderboard";
+import { SidebarArticles } from "@/components/home/sidebar-articles";
+import { homeData } from "@/lib/data/home-data";
 
 export default function HomePage() {
   const recentLessons = [
-    { lessonId: "0001", title: "[Oxford3000] Ep7: Office Work", code: "ESL 25313107" },
-    { lessonId: "0002", title: "[Business] Meeting Basics", code: "BUS 18291045" },
-  ]
+    {
+      lessonId: "0001",
+      title: "[Oxford3000] Ep7: Office Work",
+      code: "ESL 25313107",
+    },
+    {
+      lessonId: "0002",
+      title: "[Business] Meeting Basics",
+      code: "BUS 18291045",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50/30 via-white to-orange-50/20">
-      {/* Header */}
-      <HeaderUser />
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 font-mono">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Content (2/3) */}
-          <div className="lg:col-span-2 space-y-6">
+    <div className="min-h-screen bg-card/50 dark:bg-slate-950">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 font-mono">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT COLUMN - Main Content Area (8/12) */}
+          <div className="lg:col-span-8 space-y-10">
+            {/* Banner nổi bật */}
             <HeroBanner
               title={homeData.featured.title}
               description={homeData.featured.desc}
@@ -35,26 +39,62 @@ export default function HomePage() {
               daysLeft={homeData.featured.daysLeft}
             />
 
-            <RecentLessons lessons={recentLessons} />
+            {/* Mục quan trọng nhất: Học tiếp */}
+            <section className="space-y-4">
+              <ContinueLearning lessons={homeData.continueLearning} />
+            </section>
 
+            {/* Banner quảng cáo/khuyến mãi xen kẽ để giảm bớt sự nhàm chán */}
             <PromotionalBanner />
 
-            <ContinueLearning lessons={homeData.continueLearning} />
+            {/* Đề xuất bài học mới */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">
+                Gợi ý cho bạn hôm nay
+              </h2>
+              <RecommendedLessons
+                lessonsByCategory={homeData.lessonsByCategory}
+              />
+            </section>
 
-            <RecommendedLessons lessonsByCategory={homeData.lessonsByCategory} />
+            {/* Lịch sử học tập */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-700 tracking-tight">
+                Vừa học gần đây
+              </h2>
+              <RecentLessons lessons={recentLessons} />
+            </section>
           </div>
 
-          {/* Right Column - Sidebar (1/3) */}
-          <div className="space-y-6">
-            <SidebarReview reviewDue={homeData.reminders.reviewDue} />
+          {/* RIGHT COLUMN - Sidebar Statistics (4/12) */}
+          <aside className="lg:col-span-4 w-full">
+            {/* sticky: Giữ sidebar đứng yên khi scroll
+                top-24: Cách mép trên một khoảng (thường để chừa chỗ cho Navbar)
+            */}
+            <div className="sticky top-24 space-y-6">
+              <SidebarReview reviewDue={homeData.reminders.reviewDue} />
 
-            <SidebarArticles articles={homeData.blog} />
+              <SidebarLeaderboard entries={homeData.leaderboard} />
 
-            <SidebarLeaderboard entries={homeData.leaderboard} />
-          </div>
+              <SidebarArticles articles={homeData.blog} />
+
+              {/* Footer phụ cho Sidebar (Tùy chọn) */}
+              <div className="px-4 text-[11px] text-slate-400 flex flex-wrap gap-x-4 gap-y-2">
+                <a href="#" className="hover:text-orange-500 transition-colors">
+                  Điều khoản
+                </a>
+                <a href="#" className="hover:text-orange-500 transition-colors">
+                  Quyền riêng tư
+                </a>
+                <a href="#" className="hover:text-orange-500 transition-colors">
+                  Trung tâm trợ giúp
+                </a>
+                <p>© 2024 Learning App</p>
+              </div>
+            </div>
+          </aside>
         </div>
       </main>
-      <FooterLanding />
     </div>
-  )
+  );
 }
