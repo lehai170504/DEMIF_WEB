@@ -136,7 +136,7 @@ export default function ShadowingPage() {
                     className="p-0 text-white font-bold h-auto text-xs"
                     asChild
                   >
-                    <Link href="/dashboard">Xem báo cáo chi tiết →</Link>
+                    <Link href="/user/dashboard">Xem báo cáo chi tiết →</Link>
                   </Button>
                 </div>
               </Card>
@@ -157,7 +157,7 @@ export default function ShadowingPage() {
                     transition={{ delay: index * 0.05 }}
                   >
                     <Link
-                      href={`/shadowing/${lesson.id}`}
+                      href={`/user/shadowing/${lesson.id}`}
                       className="group block h-full"
                     >
                       <Card className="h-full relative overflow-hidden border-none bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] rounded-[2.5rem] transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] group-hover:-translate-y-2">

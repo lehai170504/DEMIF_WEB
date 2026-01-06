@@ -23,9 +23,6 @@ export function SkillBreakdownChart() {
             Dựa trên hiệu suất học tập tháng này
           </p>
         </div>
-        <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
-          <span className="text-orange-600 text-lg">📊</span>
-        </div>
       </div>
 
       <div className="space-y-5">

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 // Import các component con đã tách
 import { ProfileSidebar } from "@/components/profile/profile-sidebar";
@@ -14,6 +15,13 @@ import { BillingSubscription } from "@/components/profile/billing-subscription";
 
 export default function EditProfilePage() {
   const [activeTab, setActiveTab] = useState("account");
+  const RedirectToPage = ({ href }: { href: string }) => {
+    const router = useRouter();
+    useEffect(() => {
+      router.push(href);
+    }, [href, router]);
+    return null;
+  };
 
   // Hàm helper để lấy tiêu đề và mô tả động
   const getTabMetadata = () => {
@@ -37,6 +45,10 @@ export default function EditProfilePage() {
       billing: {
         title: "Gói học & Thanh toán",
         desc: "Quản lý các gói đăng ký và theo dõi lịch sử giao dịch.",
+      },
+      settings: {
+        title: "Cài đặt tài khoản",
+        desc: "Tùy chỉnh trải nghiệm DEMIF theo ý bạn.",
       },
     };
     return meta[activeTab] || meta.account;
@@ -94,6 +106,9 @@ export default function EditProfilePage() {
                   {activeTab === "mfa" && <SecurityMFA />}
                   {activeTab === "devices" && <DeviceManagement />}
                   {activeTab === "billing" && <BillingSubscription />}
+                  {activeTab === "settings" && (
+                    <RedirectToPage href="/user/profile/settings" />
+                  )}
                 </motion.div>
               </AnimatePresence>
 

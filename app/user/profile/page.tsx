@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     // Redirect to edit profile page
-    router.replace("/profile/edit")
-  }, [router])
+    router.replace("/user/profile/edit");
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -18,5 +18,5 @@ export default function ProfilePage() {
         <p className="text-gray-600">Đang chuyển hướng...</p>
       </div>
     </div>
-  )
+  );
 }

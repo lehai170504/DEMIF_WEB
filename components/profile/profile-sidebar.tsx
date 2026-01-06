@@ -7,6 +7,7 @@ import {
   Smartphone,
   CreditCard,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ const menuItems = [
   { id: "mfa", label: "Bảo mật 2FA", icon: Shield },
   { id: "devices", label: "Thiết bị", icon: Smartphone },
   { id: "billing", label: "Thanh toán", icon: CreditCard },
+  { id: "settings", label: "Cài đặt", icon: Settings },
 ];
 
 export function ProfileSidebar({ activeTab, onTabChange }: any) {

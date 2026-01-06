@@ -176,7 +176,7 @@ export default function LeaderboardPage() {
         >
           {/* Nút quay lại */}
           <div className="flex justify-start items-center mb-6">
-            <Link href="/dashboard" passHref>
+            <Link href="/user/dashboard" passHref>
               <Button
                 variant="ghost"
                 className="text-sm text-slate-600 hover:bg-orange-100 hover:text-orange-600 transition-all"

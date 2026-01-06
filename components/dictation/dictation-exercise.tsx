@@ -1,141 +1,99 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { ArrowLeft, Volume2, ListChecks, Lightbulb, NotepadText } from "lucide-react" // Added more icons for sidebars
-import type { Lesson } from "@/lib/data/lessons"
-import { AudioPlayer } from "./audio-player"
-import { TranscriptBox } from "./transcript-box"
-import { NotesPanel } from "./notes-panel"
-import { VocabularyPanel } from "./vocabulary-panel"
-import { LeaderboardTop } from "./leaderboard-top"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronLeft, Trophy, Volume2, Info, Lightbulb } from "lucide-react";
+import type { Lesson } from "@/lib/data/lessons";
+import { AudioPlayer } from "./audio-player";
+import { TranscriptBox } from "./transcript-box";
+import { NotesPanel } from "./notes-panel";
+import { VocabularyPanel } from "./vocabulary-panel";
+import { LeaderboardTop } from "./leaderboard-top";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Progress } from "@radix-ui/react-progress";
 
-interface DictationExerciseProps {
-  lesson: Lesson
-}
-
-export function DictationExercise({ lesson }: DictationExerciseProps) {
-  const [playCount, setPlayCount] = useState(0)
-  const [userAnswer, setUserAnswer] = useState("")
-
-  type LessonLevel = "beginner" | "intermediate" | "advanced";
-
-  const maxPlays = 3
-
-  const getLevelBadgeClasses = (level: LessonLevel): string => {
-    switch (level.toLowerCase()) {
-      case "beginner":
-        return "bg-green-50 text-green-700 border-green-200 dark:bg-green-900 dark:text-green-300 dark:border-green-700";
-      case "intermediate":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-300 dark:border-yellow-700";
-      case "advanced":
-        return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900 dark:text-red-300 dark:border-red-700";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500";
-    }
-  };
-
-  const levelText = lesson.level === "beginner" ? "Sơ cấp" : lesson.level === "intermediate" ? "Trung cấp" : "Nâng cao";
+export function DictationExercise({ lesson }: { lesson: Lesson }) {
+  const [playCount, setPlayCount] = useState(0);
+  const maxPlays = 3;
 
   return (
-    // Updated background to a softer, more professional gradient
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-mono">
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/90 dark:bg-gray-800/90 border-b border-gray-200/70 dark:border-gray-700 shadow-sm">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                asChild 
-                className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
-              >
-                <Link href="/dictation">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Quay lại
-                </Link>
-              </Button>
-              <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
-              <div>
-                <h1 className="text-xl font-extrabold text-slate-800 dark:text-white">{lesson.title}</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{lesson.description}</p>
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 font-mono antialiased text-slate-900">
+      <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+        <div className="container mx-auto max-w-[1440px] h-16 flex items-center justify-between px-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="rounded-full"
+            >
+              <Link href="/user/dictation">
+                <ChevronLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <div className="space-y-0.5">
+              <h1 className="text-sm md:text-base font-bold tracking-tight line-clamp-1">
+                {lesson.title}
+              </h1>
+              <div className="flex items-center gap-2 text-[10px] md:text-[11px] text-muted-foreground uppercase font-black tracking-widest">
+                <span className="px-2 py-0.5 rounded-md border border-orange-100 bg-orange-50 text-orange-600">
+                  {lesson.level === "beginner"
+                    ? "Sơ cấp"
+                    : lesson.level === "intermediate"
+                    ? "Trung cấp"
+                    : "Nâng cao"}
+                </span>
+                <span>• {lesson.duration}s Audio</span>
               </div>
             </div>
-            {/* Level Badge in Header */}
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getLevelBadgeClasses(lesson.level as LessonLevel)} border`}>
-              {levelText}
-            </span>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-full border border-amber-100">
+            <Trophy className="h-4 w-4 text-amber-500" />
+            <span className="text-sm font-bold text-amber-700">Level 12</span>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
-        {/* Leaderboard remains separate, spanning full width */}
-        <div className="mb-6">
-          <LeaderboardTop />
-        </div>
+      <main className="container mx-auto max-w-[1440px] px-6 py-8">
+        <LeaderboardTop />
 
-        {/* 3-Column Layout: 280px | 1fr (main content) | 280px */}
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-6">
-          
-          {/* 1. Cột Trái: Chi tiết & Ghi chú */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
-          >
-            {/* Chi tiết bài học */}
-            <Card className="p-4 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
-              <h3 className="flex items-center font-bold text-base text-primary mb-3">
-                <ListChecks className="h-4 w-4 mr-2" />
-                Chi Tiết Bài Tập
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between pb-1 border-b border-dashed border-gray-100 dark:border-gray-700">
-                  <span className="text-slate-600 dark:text-slate-400">Thời lượng:</span>
-                  <span className="font-semibold text-slate-800 dark:text-white">{lesson.duration} giây</span>
+        {/* 2. BỐ CỤC GRID - LOẠI BỎ items-start ĐỂ CÁC CỘT CUỘN TỰ NHIÊN */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+          {/* CỘT TRÁI - Đã bỏ sticky */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-6">
+            <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[2rem]">
+              <CardContent className="p-6 space-y-6">
+                <div className="flex items-center gap-2 font-black text-slate-400 uppercase text-[10px] tracking-widest">
+                  <Info className="h-4 w-4 text-primary" />
+                  Tiến độ bài học
                 </div>
-                <div className="flex justify-between pb-1 border-b border-dashed border-gray-100 dark:border-gray-700">
-                  <span className="text-slate-600 dark:text-slate-400">Cấp độ:</span>
-                  <span className={`font-semibold text-sm ${lesson.level === 'advanced' ? 'text-red-600' : 'text-primary'}`}>{levelText}</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span className="text-xs font-bold text-slate-500">
+                      Lượt nghe
+                    </span>
+                    <span className="text-sm font-black text-primary">
+                      {playCount} / {maxPlays}
+                    </span>
+                  </div>
+                  <Progress value={33} />{" "}
+                  {/* Giả sử bạn có component Progress */}
                 </div>
-                <div className="flex justify-between pt-1">
-                  <span className="text-slate-600 dark:text-slate-400">Lượt nghe còn lại:</span>
-                  <span className="font-extrabold text-lg text-primary">
-                    {maxPlays - playCount}
-                    <span className="text-sm text-slate-500 font-medium">/{maxPlays}</span>
-                  </span>
-                </div>
-              </div>
+              </CardContent>
             </Card>
-
-            {/* Ghi chú */}
             <NotesPanel />
-          </motion.div>
+          </aside>
 
-          {/* 2. Cột Giữa: Audio & Transcript Input */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-6"
-          >
-            {/* Audio Player Card (Focus Card) */}
-            <Card className="p-6 bg-white dark:bg-gray-800 shadow-xl rounded-xl border-2 border-primary/50 dark:border-primary/50">
-              <div className="text-center mb-5">
-                <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white mb-1 flex items-center justify-center">
-                  <Volume2 className="h-6 w-6 mr-2 text-primary" />
-                  Nghe & Chép Chính Tả
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Sử dụng {maxPlays} lượt nghe của bạn một cách khôn ngoan.
-                </p>
+          {/* CỘT GIỮA - Nội dung chính */}
+          <div className="col-span-1 lg:col-span-6 space-y-6">
+            <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.03)] bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-14 text-center">
+              <div className="inline-flex p-5 rounded-[2rem] bg-primary/10 text-primary mb-8">
+                <Volume2 className="h-10 w-10" />
               </div>
-
+              <h2 className="text-2xl font-black mb-12">Nghe & Chép lại</h2>
               <AudioPlayer
                 audioUrl={lesson.audioUrl}
                 duration={lesson.duration}
@@ -143,54 +101,18 @@ export function DictationExercise({ lesson }: DictationExerciseProps) {
                 onPlayCountChange={setPlayCount}
               />
             </Card>
-
-            {/* Transcript Input Box */}
-            <TranscriptBox 
-              correctTranscript={lesson.transcript} 
-              onSubmit={setUserAnswer} 
+            <TranscriptBox
+              correctTranscript={lesson.transcript}
+              onSubmit={(val) => console.log(val)}
             />
-          </motion.div>
+          </div>
 
-          {/* 3. Cột Phải: Từ vựng & Mẹo */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-6"
-          >
-            {/* Từ vựng */}
+          {/* CỘT PHẢI - Đã bỏ sticky hoàn toàn */}
+          <aside className="col-span-1 lg:col-span-3 space-y-6">
             <VocabularyPanel lessonVocab={lesson.vocabulary} />
-
-            {/* Mẹo nhanh */}
-            <Card className="p-4 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
-              <h3 className="flex items-center font-bold text-base text-primary mb-3">
-                <Lightbulb className="h-4 w-4 mr-2" />
-                Mẹo Nhanh Luyện Tập
-              </h3>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>
-                    **Nghe theo cụm:** Đừng cố gắng nghe từng từ, hãy nghe trọn vẹn một cụm từ hoặc câu ngắn.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>
-                    **Kiểm tra ngữ pháp:** Sau khi gõ, hãy kiểm tra các dấu câu, chữ hoa và lỗi ngữ pháp cơ bản.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  <span>
-                    **Sử dụng Từ vựng:** Xem qua phần **Từ Vựng** trước khi nghe để làm quen với các từ khó.
-                  </span>
-                </li>
-              </ul>
-            </Card>
-          </motion.div>
+          </aside>
         </div>
       </main>
     </div>
-  )
+  );
 }

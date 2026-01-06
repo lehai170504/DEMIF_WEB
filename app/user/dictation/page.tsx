@@ -146,7 +146,7 @@ export default function DictationPage() {
                   className="w-full font-bold rounded-xl text-orange-600"
                   asChild
                 >
-                  <Link href="/dashboard">Xem chi tiết</Link>
+                  <Link href="/user/dashboard">Xem chi tiết</Link>
                 </Button>
               </div>
             </Card>
@@ -167,7 +167,10 @@ export default function DictationPage() {
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <Link href={`/dictation/${lesson.id}`} className="group">
+                      <Link
+                        href={`/user/dictation/${lesson.id}`}
+                        className="group"
+                      >
                         <Card className="h-full p-6 border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] transition-all hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] group-hover:-translate-y-2">
                           <div className="flex flex-col h-full">
                             <div className="flex items-start justify-between mb-4">
@@ -225,7 +228,7 @@ export default function DictationPage() {
                 <p className="text-slate-500 font-bold">
                   Không tìm thấy bài học phù hợp
                 </p>
-                <button
+                <Button
                   onClick={() => {
                     setFilter("Tất cả");
                     setSearchQuery("");
@@ -233,7 +236,7 @@ export default function DictationPage() {
                   className="mt-2 text-sm font-bold text-orange-600 hover:underline"
                 >
                   Xóa bộ lọc
-                </button>
+                </Button>
               </div>
             )}
           </div>

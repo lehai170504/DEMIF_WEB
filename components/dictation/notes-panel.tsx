@@ -1,92 +1,134 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card } from "@/components/ui/card"
-import { Save, Loader2, Check } from "lucide-react" 
-import { motion } from "framer-motion"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Save, Loader2, Check, Edit3, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function NotesPanel() {
-  const [notes, setNotes] = useState("")
-  const [saved, setSaved] = useState(false)
-  const [isSaving, setIsSaving] = useState(false) 
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
+
+  // Load notes từ localStorage khi mount
+  useEffect(() => {
+    const savedNotes = localStorage.getItem("dictation-notes");
+    if (savedNotes) setNotes(savedNotes);
+  }, []);
 
   const handleSave = () => {
-    if (isSaving || notes.trim() === "") return
+    if (status === "saving" || notes.trim() === "") return;
 
-    setIsSaving(true)
-    
+    setStatus("saving");
+    // Giả lập lưu vào DB/Local
     setTimeout(() => {
-      localStorage.setItem("dictation-notes", notes)
-      setIsSaving(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    }, 800)
-  }
-  const buttonContent = saved ? (
-    <>
-      <Check className="h-4 w-4 mr-1" />
-      Đã lưu!
-    </>
-  ) : isSaving ? (
-    <>
-      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-      Đang lưu...
-    </>
-  ) : (
-    <>
-      <Save className="h-4 w-4 mr-1" />
-      Lưu
-    </>
-  )
+      localStorage.setItem("dictation-notes", notes);
+      setStatus("saved");
+      setTimeout(() => setStatus("idle"), 2000);
+    }, 800);
+  };
+
+  const clearNotes = () => {
+    if (confirm("Bạn có chắc chắn muốn xóa tất cả ghi chú?")) {
+      setNotes("");
+      localStorage.removeItem("dictation-notes");
+    }
+  };
 
   return (
-    <Card className="p-6 bg-white rounded-2xl shadow-xl shadow-orange-200/50 sticky top-24 transform transition-shadow duration-300 hover:shadow-orange-300/60">
-      <div className="mb-5 border-b border-orange-100 pb-3">
-        <h3 className="text-xl font-bold text-[#FF7A00] flex items-center gap-2">
-          <Save className="h-5 w-5" />
-          Ghi chú của tôi
-        </h3>
-      </div>
+    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-slate-900 rounded-[2rem] sticky top-24 overflow-hidden">
+      <CardContent className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded-xl">
+              <Edit3 className="h-4 w-4 text-orange-600" />
+            </div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              Ghi chú
+            </h3>
+          </div>
 
-      <Textarea
-        value={notes}
-        onChange={(e) => {
-          setNotes(e.target.value)
-          setSaved(false) 
-        }}
-        placeholder="Viết ghi chú của bạn tại đây..."
-        className="min-h-[250px] border-orange-300/60 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 rounded-xl p-4 text-slate-700 transition-all duration-300"
-      />
-
-      <motion.div 
-        layout 
-        className="mt-4 flex justify-between items-center"
-      >
-        <div className="text-xs text-slate-500">
-          Ghi chú được lưu tự động trên thiết bị của bạn
+          {notes.length > 0 && (
+            <button
+              onClick={clearNotes}
+              className="text-slate-300 hover:text-red-500 transition-colors"
+              title="Xóa ghi chú"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
-        <Button 
-          size="sm" 
-          onClick={handleSave} 
-          disabled={isSaving || notes.trim() === ""} 
-          className={`
-            font-semibold 
-            rounded-full 
-            px-4 py-2 
-            transition-all duration-300
-            ${isSaving 
-              ? "bg-slate-400 cursor-not-allowed" 
-              : saved 
-                ? "bg-green-500 hover:bg-green-600 shadow-lg shadow-green-200/50" 
-                : "bg-[#FF7A00] hover:bg-[#FF8A1C] shadow-lg shadow-orange-300/50"
-            }
-          `}
-        >
-          {buttonContent}
-        </Button>
-      </motion.div>
+
+        {/* Textarea Area */}
+        <div className="relative group">
+          <Textarea
+            value={notes}
+            onChange={(e) => {
+              setNotes(e.target.value);
+              if (status === "saved") setStatus("idle");
+            }}
+            placeholder="Lưu lại từ vựng hoặc cấu trúc hay..."
+            className="min-h-[200px] w-full resize-none border-none bg-slate-50/50 dark:bg-slate-800/50 focus-visible:ring-0 rounded-2xl p-4 text-[14px] leading-relaxed text-slate-700 dark:text-slate-300 placeholder:text-slate-400 transition-all"
+          />
+          {/* Một đường line trang trí tinh tế dưới textarea khi focus */}
+          <div className="absolute bottom-2 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-orange-200 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
+        </div>
+
+        {/* Footer Actions */}
+        <div className="mt-4 flex flex-col gap-3">
+          <Button
+            onClick={handleSave}
+            disabled={status === "saving" || notes.trim() === ""}
+            className={cn(
+              "w-full h-11 rounded-2xl font-bold transition-all duration-300 shadow-lg",
+              status === "saved"
+                ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200"
+                : "bg-slate-900 hover:bg-slate-800 shadow-slate-200"
+            )}
+          >
+            <AnimatePresence mode="wait">
+              {status === "saving" ? (
+                <motion.div
+                  key="saving"
+                  className="flex items-center gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Loader2 className="h-4 w-4 animate-spin" /> ĐANG LƯU...
+                </motion.div>
+              ) : status === "saved" ? (
+                <motion.div
+                  key="saved"
+                  className="flex items-center gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Check className="h-4 w-4" /> ĐÃ LƯU XONG
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="idle"
+                  className="flex items-center gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  LƯU GHI CHÚ
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Button>
+
+          <p className="text-[11px] text-center text-slate-400 font-medium italic">
+            * Dữ liệu được lưu cục bộ trên trình duyệt này
+          </p>
+        </div>
+      </CardContent>
     </Card>
-  )
+  );
 }

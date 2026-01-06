@@ -24,11 +24,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { name: "Trang chủ", href: "/home" },
-  { name: "Chính tả", href: "/dictation" },
-  { name: "Shadowing", href: "/shadowing" },
-  { name: "Ôn tập", href: "/review" },
-  { name: "Bảng xếp hạng", href: "/leaderboard" },
+  { name: "Trang chủ", href: "/user/home" },
+  { name: "Chính tả", href: "/user/dictation" },
+  { name: "Shadowing", href: "/user/shadowing" },
+  { name: "Ôn tập", href: "/user/review" },
+  { name: "Bảng xếp hạng", href: "/user/leaderboard" },
 ];
 
 export function HeaderUser() {
@@ -84,7 +84,7 @@ export function HeaderUser() {
               className="hidden md:flex h-10 px-5 rounded-xl border-orange-200 bg-orange-50 text-orange-600 font-black text-xs hover:bg-orange-100 hover:text-neutral-800 transition-all gap-2 shadow-sm shadow-orange-100"
               asChild
             >
-              <Link href="/upgrade">
+              <Link href="/user/upgrade">
                 <Sparkles className="w-4 h-4 fill-orange-500" />
                 UPGRADE PRO
               </Link>
@@ -134,27 +134,42 @@ export function HeaderUser() {
 
                 <div className="space-y-1">
                   {[
-                    { icon: User, label: "Tài khoản", href: "/profile" },
+                    {
+                      icon: User,
+                      label: "Tài khoản",
+                      href: "/user/profile/edit",
+                    },
                     {
                       icon: LayoutGrid,
                       label: "Bảng quản lý",
-                      href: "/dashboard",
+                      href: "/user/dashboard",
                     },
                     {
                       icon: CreditCard,
                       label: "Gói dịch vụ",
-                      href: "/billing",
+                      href: "/user/upgrade",
                     },
-                    { icon: Settings, label: "Cài đặt", href: "/settings" },
+                    {
+                      icon: Settings,
+                      label: "Cài đặt",
+                      href: "/user/profile/settings",
+                    },
                   ].map((item) => (
+                    /* Sử dụng asChild để tránh việc render 2 thẻ <a> chồng nhau */
                     <DropdownMenuItem
                       key={item.label}
+                      asChild
                       className="rounded-xl cursor-pointer p-3 focus:bg-slate-100 focus:text-slate-900 transition-colors group"
                     >
-                      <item.icon className="mr-3 h-4 w-4 text-slate-400 group-focus:text-orange-500" />
-                      <span className="font-bold text-[11px] uppercase tracking-wider">
-                        {item.label}
-                      </span>
+                      <Link
+                        href={item.href}
+                        className="flex items-center w-full"
+                      >
+                        <item.icon className="mr-3 h-4 w-4 text-slate-400 group-focus:text-orange-500" />
+                        <span className="font-bold text-[11px] uppercase tracking-wider">
+                          {item.label}
+                        </span>
+                      </Link>
                     </DropdownMenuItem>
                   ))}
                 </div>
