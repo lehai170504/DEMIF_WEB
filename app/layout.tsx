@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import "./globals.css";
+import QueryProvider from "./providers";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -34,7 +35,9 @@ export default function RootLayout({
       <body
         className={`font-sans ${poppins.variable} ${inter.variable} antialiased`}
       >
-        <Suspense fallback={null}>{children}</Suspense>
+        <QueryProvider>
+          <Suspense fallback={null}>{children}</Suspense>
+        </QueryProvider>
         <Analytics />
       </body>
     </html>
