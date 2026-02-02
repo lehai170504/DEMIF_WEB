@@ -8,15 +8,24 @@ export default function AuthLayout({
 }) {
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#050505] overflow-hidden font-mono text-zinc-100 selection:bg-orange-500/30">
-      {/* 1. Tái sử dụng nền động 3D */}
       <ParallaxBackground />
 
-      {/* 2. Container chính */}
-      <div className="relative z-10 w-full max-w-md p-4">
-        {/* Hiệu ứng Glow nền phía sau form */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-orange-500/10 blur-[80px] rounded-full -z-10 pointer-events-none" />
+      {/* Grid Pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.15] pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, #FF7A00 1px, transparent 0)`,
+          backgroundSize: "40px 40px",
+          maskImage:
+            "radial-gradient(circle at center, black, transparent 90%)",
+        }}
+      />
 
-        {children}
+      {/* Container chính - Mở rộng lên max-w-5xl để chứa 2 cột */}
+      <div className="relative z-10 w-full max-w-5xl p-6">{children}</div>
+
+      <div className="absolute bottom-6 text-[10px] text-zinc-600 uppercase tracking-[0.4em] pointer-events-none">
+        Secure Access • Demif AI Engine v3.0
       </div>
     </div>
   );

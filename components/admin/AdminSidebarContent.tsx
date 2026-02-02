@@ -29,14 +29,14 @@ const MENU_GROUPS = [
   {
     group: "Nội dung",
     items: [
-      { href: "/admin/lessons", icon: BookOpen, label: "Bài Tập" },
+      { href: "/admin/lessons", icon: BookOpen, label: "Bài tập" },
       { href: "/admin/audio", icon: FileAudio, label: "Audio" },
     ],
   },
   {
     group: "Hệ thống",
     items: [
-      { href: "/admin/users", icon: Users, label: "Người Dùng" },
+      { href: "/admin/users", icon: Users, label: "Người dùng" },
       { href: "/admin/orders", icon: ShoppingCart, label: "Đơn hàng" },
       { href: "/admin/feedback", icon: Bot, label: "AI Feedback" },
       { href: "/admin/progress", icon: BarChart3, label: "Tiến độ" },
@@ -44,99 +44,89 @@ const MENU_GROUPS = [
   },
 ];
 
-interface NavItemProps {
-  href: string;
-  icon: LucideIcon;
-  label: string;
-  isActive: boolean;
-  showText: boolean;
-  variant?: "default" | "dark";
-}
-
-const NavItem = ({
-  href,
-  icon: Icon,
-  label,
-  isActive,
-  showText,
-  variant = "default",
-}: NavItemProps) => {
-  const activeStyles =
-    variant === "dark"
-      ? "bg-foreground text-background"
-      : "bg-orange-500 text-white shadow-md shadow-orange-200";
-
+const NavItem = ({ href, icon: Icon, label, isActive, showText }: any) => {
   return (
     <Link href={href}>
       <div
         className={cn(
-          "group relative flex items-center h-11 rounded-xl transition-all mb-1 px-3",
+          "group relative flex items-center h-11 rounded-xl transition-all duration-300 mb-1.5 px-3 mx-2",
+          "hover:translate-x-1 active:scale-95",
           isActive
-            ? activeStyles
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-          !showText && "justify-center px-0"
+            ? "bg-[#FF7A00] text-white shadow-[0_0_20px_rgba(255,122,0,0.3)]"
+            : "text-zinc-500 hover:bg-white/5 hover:text-zinc-200",
+          !showText && "justify-center px-0 mx-1",
         )}
       >
-        <Icon className={cn("h-5 w-5 shrink-0", showText && "mr-3")} />
+        <Icon
+          className={cn(
+            "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-110",
+            showText && "mr-3",
+          )}
+        />
         {showText && (
-          <span className="text-sm font-medium truncate">{label}</span>
+          // Bỏ italic, bỏ uppercase, sử dụng font-bold hoặc font-medium tùy ý
+          <span className="text-[13px] font-bold tracking-tight truncate capitalize">
+            {label}
+          </span>
+        )}
+        {isActive && (
+          <div className="absolute -left-2 w-1 h-6 bg-white rounded-full blur-[2px]" />
         )}
       </div>
     </Link>
   );
 };
 
-interface Props {
-  isCollapsed?: boolean;
-  forceOpen?: boolean;
-}
-
-export default function AdminSidebarContent({ isCollapsed, forceOpen }: Props) {
+export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
   const pathname = usePathname();
   const showText = forceOpen || !isCollapsed;
 
-  // Hàm kiểm tra active chính xác hơn (bao gồm cả các sub-routes)
   const checkActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
   };
 
   return (
-    <div className="flex flex-col h-full bg-background font-mono border-r">
-      {/* Header Profile */}
-      <div className="flex items-center h-20 px-4 mb-4">
+    <div className="flex flex-col h-full font-mono">
+      {/* Admin Profile Header */}
+      <div className="flex items-center h-24 px-4">
         <div
           className={cn(
-            "flex items-center gap-3 w-full p-2 rounded-2xl transition-all",
-            showText && "bg-muted/50 border border-border shadow-sm"
+            "flex items-center gap-3 w-full p-2 rounded-2xl transition-all duration-500",
+            showText &&
+              "bg-white/5 border border-white/10 shadow-inner backdrop-blur-md",
           )}
         >
-          <Image
-            src="https://ui-avatars.com/api/?name=Lê+Hoàng+Hải&background=FF7A00&color=fff&bold=true"
-            alt="Admin"
-            width={38}
-            height={38}
-            className="rounded-xl shrink-0"
-          />
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 bg-[#FF7A00] blur-md opacity-20 animate-pulse" />
+            <Image
+              src="https://ui-avatars.com/api/?name=Lê+Hoàng+Hải&background=FF7A00&color=fff&bold=true"
+              alt="Admin"
+              width={40}
+              height={40}
+              className="relative rounded-xl border border-white/10"
+            />
+          </div>
           {showText && (
             <div className="flex flex-col truncate">
-              <span className="font-bold text-[13px] truncate">
+              {/* Bỏ italic và uppercase cho tên Admin */}
+              <span className="font-black text-[13px] text-white tracking-tighter">
                 Lê Hoàng Hải
               </span>
-              <span className="text-[10px] text-orange-500 font-bold uppercase">
-                Pro Admin
+              <span className="text-[10px] text-[#FF7A00] font-bold uppercase tracking-[0.1em]">
+                Master Admin
               </span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Navigation */}
-      <ScrollArea className="flex-1 px-3">
+      <ScrollArea className="flex-1 px-2 no-scrollbar">
         {MENU_GROUPS.map((group) => (
           <div key={group.group} className="mb-6">
             {showText && (
-              <h3 className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3">
+              // Bỏ italic cho tiêu đề nhóm
+              <h3 className="px-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 mb-3">
                 {group.group}
               </h3>
             )}
@@ -154,15 +144,13 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: Props) {
         ))}
       </ScrollArea>
 
-      {/* Bottom Actions */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-white/5 bg-black/20">
         <NavItem
-          href="/admin/settings/security"
+          href="/admin/settings"
           icon={Settings}
           label="Cài đặt"
-          isActive={checkActive("/admin/settings/security")}
+          isActive={checkActive("/admin/settings")}
           showText={showText}
-          variant="dark"
         />
       </div>
     </div>

@@ -44,14 +44,10 @@ export default function RootLayout({
     <html lang="vi" className="dark scroll-smooth" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`
-          font-sans ${jetbrainsMono.variable} ${poppins.variable} ${inter.variable} antialiased
-          bg-[#050505] text-zinc-100 min-h-screen selection:bg-[#FF7A00]/30 selection:text-white
-        `}
+        className={`${jetbrainsMono.variable} ${poppins.variable} ${inter.variable} antialiased bg-[#050505] text-zinc-100`}
       >
         <AmbientBackground />
 
-        {/* 2. Đặt nút ở đây để nó hiện trên TẤT CẢ các trang */}
         <ScrollToTopButton />
 
         <div className="relative z-10 flex flex-col min-h-screen">
