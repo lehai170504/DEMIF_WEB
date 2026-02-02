@@ -1,12 +1,21 @@
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { BookOpen } from "lucide-react"
-import { BlogCategory } from "@/lib/data/blog"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  count: number;
+}
 
 interface CategoryFilterProps {
-  categories: BlogCategory[]
-  selectedCategory: string
-  onCategoryChange: (category: string) => void
+  categories: BlogCategory[];
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
 }
 
 export function CategoryFilter({
@@ -15,45 +24,51 @@ export function CategoryFilter({
   onCategoryChange,
 }: CategoryFilterProps) {
   return (
-    <div className="mb-10">
-      <div className="flex items-center gap-3 mb-6">
-        <BookOpen className="h-6 w-6 text-orange-600" />
-        <h2 className="text-2xl font-bold text-gray-900">Danh mục</h2>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        {categories.map((category) => (
+    <div className="flex flex-wrap gap-2">
+      {/* Nút "Tất cả" mặc định (có thể thêm vào mảng categories hoặc xử lý riêng) */}
+      <Button
+        variant="ghost"
+        onClick={() => onCategoryChange("all")}
+        className={cn(
+          "h-10 rounded-xl px-5 font-bold text-sm transition-all duration-300",
+          selectedCategory === "all"
+            ? "bg-white text-black hover:bg-zinc-200"
+            : "bg-transparent text-zinc-400 hover:text-white hover:bg-white/5",
+        )}
+      >
+        Tất cả
+      </Button>
+
+      {categories.map((category) => {
+        const isActive = selectedCategory === category.slug;
+        return (
           <Button
             key={category.id}
-            variant={selectedCategory === category.slug ? "default" : "outline"}
+            variant="ghost"
             onClick={() => onCategoryChange(category.slug)}
-            className={`
-              relative overflow-hidden transition-all duration-300 group
-              ${
-                selectedCategory === category.slug
-                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-200 scale-105"
-                  : "border-2 border-gray-200 text-gray-700 hover:border-orange-400 hover:bg-gradient-to-r hover:from-orange-500 hover:to-amber-500 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-orange-200"
-              }
-            `}
+            className={cn(
+              "h-10 rounded-xl px-4 font-bold text-sm transition-all duration-300 border border-transparent",
+              isActive
+                ? "bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/5"
+                : "bg-transparent text-zinc-400 hover:text-white hover:bg-white/5 hover:border-white/10",
+            )}
           >
-            <span className="relative z-10 flex items-center gap-2">
+            <span className="flex items-center gap-2">
               {category.name}
               <Badge
-                variant="secondary"
-                className={`
-                  transition-colors duration-300
-                  ${
-                    selectedCategory === category.slug
-                      ? "bg-white/20 text-white border-0"
-                      : "bg-gray-100 text-gray-600 group-hover:bg-white/20 group-hover:text-white group-hover:border-0"
-                  }
-                `}
+                className={cn(
+                  "px-1.5 py-0 rounded-md text-[10px] min-w-[20px] justify-center transition-colors h-5",
+                  isActive
+                    ? "bg-black text-white"
+                    : "bg-white/10 text-zinc-400 group-hover:text-white",
+                )}
               >
                 {category.count}
               </Badge>
             </span>
           </Button>
-        ))}
-      </div>
+        );
+      })}
     </div>
-  )
+  );
 }

@@ -1,32 +1,43 @@
-import { blogCategories } from "@/lib/data/blog"
+"use client";
+
+import { blogCategories } from "@/lib/data/blog";
 
 interface ResultsInfoProps {
-  totalResults: number
-  searchQuery: string
-  selectedCategory: string
+  totalResults: number;
+  searchQuery: string;
+  selectedCategory: string;
 }
 
-export function ResultsInfo({ totalResults, searchQuery, selectedCategory }: ResultsInfoProps) {
-  if (!searchQuery && selectedCategory === "all") return null
+export function ResultsInfo({
+  totalResults,
+  searchQuery,
+  selectedCategory,
+}: ResultsInfoProps) {
+  if (!searchQuery && selectedCategory === "all") return null;
 
   return (
-    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-      <p className="text-sm text-blue-800">
-        <span className="font-semibold">Tìm thấy {totalResults} bài viết</span>
+    <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl">
+      <p className="text-sm text-orange-200/80 font-medium">
+        <span className="text-orange-400 font-bold">
+          Tìm thấy {totalResults} bài viết
+        </span>
         {searchQuery && (
           <span>
             {" "}
-            cho từ khóa "<strong>{searchQuery}</strong>"
+            cho từ khóa "
+            <span className="text-white font-bold">{searchQuery}</span>"
           </span>
         )}
         {selectedCategory !== "all" && (
           <span>
             {" "}
             trong danh mục{" "}
-            <strong>{blogCategories.find((c) => c.slug === selectedCategory)?.name}</strong>
+            <span className="text-white font-bold uppercase text-xs tracking-wider border border-white/10 px-1.5 py-0.5 rounded bg-white/5">
+              {blogCategories.find((c) => c.slug === selectedCategory)?.name}
+            </span>
           </span>
         )}
       </p>
     </div>
-  )
+  );
 }

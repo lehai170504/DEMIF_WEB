@@ -22,39 +22,57 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const navLinks = [
-  { name: "Trang chủ", href: "/user/home" },
-  { name: "Chính tả", href: "/user/dictation" },
-  { name: "Shadowing", href: "/user/shadowing" },
-  { name: "Ôn tập", href: "/user/review" },
-  { name: "Bảng xếp hạng", href: "/user/leaderboard" },
+  { name: "Trang chủ", href: "/home" },
+  { name: "Chính tả", href: "/dictation" },
+  { name: "Shadowing", href: "/shadowing" },
+  { name: "Ôn tập", href: "/review" },
+  { name: "Bảng xếp hạng", href: "/leaderboard" },
+  { name: "Bài viết", href: "/blog" },
 ];
 
 export function HeaderUser() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-[100] w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
+    <motion.header
+      // 1. Hiệu ứng trượt từ trên xuống khi tải trang
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      className="sticky top-0 z-[100] w-full border-b border-white/10 bg-black/20 backdrop-blur-xl supports-[backdrop-filter]:bg-black/10"
+    >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
-        <div className="flex h-16 items-center justify-between gap-8 font-mono">
-          {/* 1. LOGO SECTION - Sharp & Clear */}
+        <div className="flex h-20 items-center justify-between gap-8 font-mono">
+          {/* --- LEFT: LOGO SECTION --- */}
           <div className="flex items-center gap-10">
-            <Link href="/home" className="flex items-center gap-2.5 group">
-              <div className="relative flex items-center justify-center w-10 h-10 bg-orange-500 rounded-xl shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
+            <Link href="/home" className="flex items-center gap-3 group">
+              <motion.div
+                // 2. Hiệu ứng 3D Logo: Phóng to và nghiêng nhẹ khi hover
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+                className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] shadow-lg shadow-orange-500/20 border border-white/10"
+              >
                 <img
                   src="/DemifLogo.png"
                   alt="D"
-                  className="w-7 h-7 brightness-0 invert"
+                  className="w-7 h-7 brightness-0 invert drop-shadow-md"
                 />
+                {/* Lớp phủ sáng bóng bên trong logo */}
+                <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.div>
+
+              <div className="flex flex-col">
+                <span className="text-2xl font-black tracking-tighter italic uppercase text-white leading-none group-hover:text-orange-100 transition-colors">
+                  DEMIF<span className="text-[#FF7A00] not-italic">.</span>
+                </span>
               </div>
-              <span className="text-2xl font-black tracking-tighter italic uppercase text-slate-950">
-                DEMIF<span className="text-orange-500 not-italic">.</span>
-              </span>
             </Link>
 
-            {/* 2. DESKTOP NAV - Enhanced Contrast */}
-            <nav className="hidden xl:flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50">
+            {/* --- MIDDLE: DESKTOP NAVIGATION --- */}
+            <nav className="hidden xl:flex items-center gap-1 p-1.5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-md">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -62,70 +80,101 @@ export function HeaderUser() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "px-5 py-2 text-[13px] font-bold rounded-xl transition-all duration-200 whitespace-nowrap",
+                      "relative px-5 py-2.5 text-[12px] font-bold rounded-xl transition-colors duration-200 whitespace-nowrap",
                       isActive
-                        ? "bg-white text-orange-600 shadow-[0_2px_10px_rgba(0,0,0,0.05)] ring-1 ring-slate-200/50"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
+                        ? "text-white"
+                        : "text-zinc-400 hover:text-white",
                     )}
                   >
-                    {link.name}
+                    {/* 3. Layout Animation: Hiệu ứng "Viên thuốc" trượt mượt mà */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-pill"
+                        className="absolute inset-0 bg-gradient-to-r from-[#FF7A00]/20 to-[#FF9E2C]/20 border border-[#FF7A00]/30 rounded-xl shadow-[0_0_20px_rgba(255,122,0,0.15)]"
+                        transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10 uppercase tracking-wider">
+                      {link.name}
+                    </span>
                   </Link>
                 );
               })}
             </nav>
           </div>
 
-          {/* 3. ACTIONS SECTION */}
+          {/* --- RIGHT: ACTIONS SECTION --- */}
           <div className="flex items-center gap-3 sm:gap-5">
-            {/* PRO Badge - More Visible */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hidden md:flex h-10 px-5 rounded-xl border-orange-200 bg-orange-50 text-orange-600 font-black text-xs hover:bg-orange-100 hover:text-neutral-800 transition-all gap-2 shadow-sm shadow-orange-100"
-              asChild
-            >
-              <Link href="/user/upgrade">
-                <Sparkles className="w-4 h-4 fill-orange-500" />
-                UPGRADE PRO
-              </Link>
-            </Button>
+            {/* A. Upgrade PRO Button */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden md:flex h-11 px-6 rounded-xl border-[#FF7A00]/50 bg-[#FF7A00]/10 text-[#FF7A00] font-black text-[10px] uppercase tracking-widest hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] hover:shadow-[0_0_20px_rgba(255,122,0,0.4)] transition-all duration-300 gap-2"
+                asChild
+              >
+                <Link href="/upgrade">
+                  <motion.div
+                    // Hiệu ứng lấp lánh xoay liên tục
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 2,
+                      repeatDelay: 3,
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                  </motion.div>
+                  Upgrade_Pro
+                </Link>
+              </Button>
+            </motion.div>
 
             {/* Divider */}
-            <div className="hidden sm:block w-px h-6 bg-slate-200" />
+            <div className="hidden sm:block w-px h-8 bg-white/10" />
 
-            {/* USER PROFILE - Clean & Bold */}
+            {/* B. User Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 p-1 pr-3 rounded-2xl hover:bg-slate-50 transition-all outline-none group border border-transparent hover:border-slate-200">
-                  <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-sm shadow-md group-hover:bg-orange-600 transition-colors">
-                    HV
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-white/5 transition-all outline-none group border border-transparent hover:border-white/10"
+                >
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-white font-black text-xs shadow-lg relative overflow-hidden">
+                    <span className="relative z-10">HV</span>
+                    <div className="absolute inset-0 bg-[#FF7A00]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="hidden sm:block text-left">
-                    <p className="text-[12px] font-black leading-none uppercase text-slate-900">
+                    <p className="text-[12px] font-bold leading-none text-zinc-200 group-hover:text-white transition-colors">
                       Hà Vi
                     </p>
                     <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-widest">
                       Online
                     </p>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-slate-400 group-data-[state=open]:rotate-180 transition-transform" />
-                </button>
+                  <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-white group-data-[state=open]:rotate-180 transition-all duration-300" />
+                </motion.button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
                 align="end"
-                className="w-64 p-3 rounded-[2rem] shadow-2xl border-slate-200 bg-white font-mono mt-2"
+                className="w-72 p-3 rounded-[1.5rem] border border-white/10 bg-[#09090b]/90 backdrop-blur-xl shadow-2xl shadow-black/50 font-mono mt-4 mr-2"
               >
-                <DropdownMenuLabel className="px-3 py-4 mb-2 bg-slate-50 rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-black">
+                <DropdownMenuLabel className="p-0 mb-2">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20">
                       HV
                     </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-900 uppercase">
+                    <div className="overflow-hidden">
+                      <p className="text-sm font-bold text-white uppercase truncate">
                         Hà Vi
                       </p>
-                      <p className="text-[10px] text-slate-500 font-bold lowercase">
+                      <p className="text-[10px] text-zinc-400 font-medium truncate">
                         havi.student@demif.com
                       </p>
                     </div>
@@ -137,36 +186,35 @@ export function HeaderUser() {
                     {
                       icon: User,
                       label: "Tài khoản",
-                      href: "/user/profile/edit",
+                      href: "/profile/edit",
                     },
                     {
                       icon: LayoutGrid,
                       label: "Bảng quản lý",
-                      href: "/user/dashboard",
+                      href: "/dashboard",
                     },
                     {
                       icon: CreditCard,
                       label: "Gói dịch vụ",
-                      href: "/user/upgrade",
+                      href: "/upgrade",
                     },
                     {
                       icon: Settings,
                       label: "Cài đặt",
-                      href: "/user/profile/settings",
+                      href: "/profile/settings",
                     },
                   ].map((item) => (
-                    /* Sử dụng asChild để tránh việc render 2 thẻ <a> chồng nhau */
                     <DropdownMenuItem
                       key={item.label}
                       asChild
-                      className="rounded-xl cursor-pointer p-3 focus:bg-slate-100 focus:text-slate-900 transition-colors group"
+                      className="rounded-xl cursor-pointer p-3 focus:bg-white/10 focus:text-white text-zinc-400 transition-all duration-200 group border border-transparent focus:border-white/5"
                     >
                       <Link
                         href={item.href}
                         className="flex items-center w-full"
                       >
-                        <item.icon className="mr-3 h-4 w-4 text-slate-400 group-focus:text-orange-500" />
-                        <span className="font-bold text-[11px] uppercase tracking-wider">
+                        <item.icon className="mr-3 h-4 w-4 text-zinc-500 group-focus:text-[#FF7A00] transition-colors" />
+                        <span className="font-bold text-[10px] uppercase tracking-wider">
                           {item.label}
                         </span>
                       </Link>
@@ -174,28 +222,30 @@ export function HeaderUser() {
                   ))}
                 </div>
 
-                <DropdownMenuSeparator className="my-2" />
+                <DropdownMenuSeparator className="my-2 bg-white/10" />
 
-                <DropdownMenuItem className="rounded-xl cursor-pointer p-3 text-red-500 focus:bg-red-50 focus:text-red-600">
+                <DropdownMenuItem className="rounded-xl cursor-pointer p-3 text-red-400 focus:bg-red-500/10 focus:text-red-400 focus:border-red-500/20 border border-transparent">
                   <LogOut className="mr-3 h-4 w-4" />
-                  <span className="font-black text-[11px] uppercase tracking-wider">
+                  <span className="font-bold text-[10px] uppercase tracking-wider">
                     Đăng xuất
                   </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile Burger */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="xl:hidden rounded-xl bg-slate-100"
-            >
-              <Menu className="h-5 w-5 text-slate-900" />
-            </Button>
+            {/* C. Mobile Burger Menu */}
+            <motion.div whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="xl:hidden rounded-xl bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white border border-white/5"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </motion.div>
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

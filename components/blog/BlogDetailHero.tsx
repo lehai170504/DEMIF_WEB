@@ -1,76 +1,120 @@
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Clock, Eye, Heart, Calendar, ArrowLeft } from "lucide-react"
-import { BlogPost, formatDate } from "@/lib/data/blog"
+"use client";
+
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Clock, Eye, Heart, Calendar, ArrowLeft } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
+
+// Định nghĩa kiểu dữ liệu (hoặc import từ file types chung)
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  author: {
+    name: string;
+    role: string;
+    avatar?: string;
+  };
+  publishedAt: string;
+  readTime: number;
+  views: number;
+  likes: number;
+}
 
 interface BlogDetailHeroProps {
-  post: BlogPost
+  post: BlogPost;
 }
+
+// Hàm format date đơn giản
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
 export function BlogDetailHero({ post }: BlogDetailHeroProps) {
   return (
-    <div className="relative bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 border-b border-orange-200">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]"></div>
-      <div className="relative container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
+    <div className="relative pt-20 pb-16 bg-[#050505]">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-orange-500/10 blur-[100px] rounded-full opacity-50" />
+      </div>
+
+      <div className="relative container mx-auto px-4 max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           {/* Back Button */}
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-600 mb-8 transition-colors group"
+            className="inline-flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors group text-sm font-bold uppercase tracking-wider"
           >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Quay lại Blog</span>
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+            Quay lại Blog
           </Link>
 
           {/* Category */}
-          <Badge className="mb-4 bg-white border-2 border-orange-300 text-orange-700 hover:bg-orange-50 shadow-sm">
-            {post.category}
-          </Badge>
+          <div className="mb-6">
+            <Badge className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-3 py-1 text-xs font-bold uppercase tracking-widest hover:bg-orange-500/20">
+              {post.category}
+            </Badge>
+          </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-white leading-[1.15] tracking-tight">
             {post.title}
           </h1>
 
           {/* Excerpt */}
-          <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl text-zinc-400 mb-10 leading-relaxed font-light">
             {post.excerpt}
           </p>
 
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-6 text-gray-600">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
-                {post.author.name.charAt(0)}
-              </div>
+          {/* Meta Info Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-y border-white/10">
+            {/* Author */}
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12 border-2 border-white/10">
+                <AvatarImage src={post.author.avatar} />
+                <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold">
+                  {post.author.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
               <div>
-                <p className="font-semibold text-gray-900">{post.author.name}</p>
-                <p className="text-sm text-gray-500">{post.author.role}</p>
+                <p className="font-bold text-white text-sm">
+                  {post.author.name}
+                </p>
+                <p className="text-xs text-zinc-500 uppercase tracking-wider">
+                  {post.author.role}
+                </p>
               </div>
             </div>
-            <Separator orientation="vertical" className="h-10 hidden md:block" />
-            <div className="flex flex-wrap items-center gap-4 text-sm">
+
+            {/* Stats */}
+            <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs font-bold text-zinc-500 uppercase tracking-wider">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-orange-500" />
+                <Calendar className="h-4 w-4 text-zinc-400" />
                 <span>{formatDate(post.publishedAt)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-orange-500" />
+                <Clock className="h-4 w-4 text-zinc-400" />
                 <span>{post.readTime} phút đọc</span>
               </div>
               <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-orange-500" />
-                <span>{post.views} lượt xem</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Heart className="h-4 w-4 text-red-500" />
-                <span>{post.likes} lượt thích</span>
+                <Eye className="h-4 w-4 text-zinc-400" />
+                <span>{post.views}</span>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
-  )
+  );
 }

@@ -152,3 +152,60 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    /* Tạo môi trường 3D cho toàn bộ trang web */
+    perspective: 1000px;
+  }
+  body {
+    /* Đặt màu nền gốc */
+    @apply bg-[#050505] text-zinc-100 antialiased; 
+  }
+}
+
+@layer utilities {
+  .hover-3d {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-3d:hover {
+    transform: translateY(-2px) rotateX(4deg) rotateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 122, 0, 0.2);
+  }
+
+  /* Hiệu ứng phát sáng logo */
+  .logo-glow {
+    filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.4));
+    animation: pulse-glow 3s infinite ease-in-out;
+  }
+
+  .glass-header {
+    background: rgba(var(--background), 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 122, 0, 0.3)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.6)); }
+  }
+}
+
+@theme {
+ 
+  --animate-shimmer: shimmer 2s linear infinite;
+  
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

@@ -1,20 +1,31 @@
-import { Card } from "@/components/ui/card"
-import { MessageCircle } from "lucide-react"
+"use client";
+
+import { Card } from "@/components/ui/card";
+import { MessageCircle, Construction } from "lucide-react";
 
 export function CommentsSection() {
   return (
-    <Card className="p-8 mt-8 border-2 border-gray-100 shadow-xl bg-white">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-          <MessageCircle className="h-6 w-6" />
+    <Card className="mt-16 p-1 border border-white/10 bg-[#18181b] rounded-[2rem] overflow-hidden">
+      <div className="relative bg-[#18181b] rounded-[1.8rem] p-8 md:p-12 text-center overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.03]" />
+
+        <div className="relative z-10 flex flex-col items-center max-w-md mx-auto">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-6 border border-white/5 shadow-inner">
+            <MessageCircle className="h-8 w-8 text-purple-400" />
+          </div>
+
+          <h3 className="text-2xl font-bold text-white mb-2">Bình luận</h3>
+          <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+            Tính năng thảo luận đang được đội ngũ kỹ thuật xây dựng để mang lại
+            trải nghiệm tốt nhất cho cộng đồng.
+          </p>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-zinc-500 uppercase tracking-widest">
+            <Construction className="h-3 w-3" /> Coming Soon
+          </div>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900">Bình luận</h3>
-      </div>
-      <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
-        <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-        <p className="text-gray-500 font-medium">Chức năng bình luận đang được phát triển.</p>
-        <p className="text-gray-400 text-sm mt-2">Sẽ sớm ra mắt trong thời gian tới!</p>
       </div>
     </Card>
-  )
+  );
 }

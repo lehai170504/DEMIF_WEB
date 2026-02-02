@@ -1,88 +1,128 @@
-import Link from "next/link"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Clock, Eye, Heart, Calendar, ArrowRight } from "lucide-react"
-import { BlogPost, formatDate } from "@/lib/data/blog"
+"use client";
 
-interface BlogPostCardProps {
-  post: BlogPost
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Clock, Eye, Heart, Calendar, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+
+// Giả sử interface này được import từ types
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  readTime: number;
+  views: number;
+  likes: number;
+  publishedAt: string;
+  author: {
+    name: string;
+    role: string;
+  };
 }
 
-export function BlogPostCard({ post }: BlogPostCardProps) {
+// Hàm format date đơn giản
+const formatDate = (date: string) => new Date(date).toLocaleDateString("vi-VN");
+
+export function BlogPostCard({ post }: { post: BlogPost }) {
+  // Hàm lấy icon dựa trên category (bạn có thể tách ra utility riêng)
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "Mẹo học tập":
+        return "💡";
+      case "Phát âm":
+        return "🎤";
+      case "Ngữ pháp":
+        return "📖";
+      case "Từ vựng":
+        return "📚";
+      default:
+        return "🚀";
+    }
+  };
+
   return (
-    <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-orange-200 bg-white">
-      {/* Cover Image */}
-      <Link href={`/blog/${post.id}`}>
-        <div className="relative h-52 bg-gradient-to-br from-orange-100 via-amber-50 to-orange-50 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-10 group-hover:scale-110 transition-transform duration-500">
-            {post.category === "Mẹo học tập" && "💡"}
-            {post.category === "Phát âm" && "🎤"}
-            {post.category === "Ngữ pháp" && "📖"}
-            {post.category === "Từ vựng" && "📚"}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div className="flex flex-col h-full bg-[#18181b] rounded-[2rem] overflow-hidden group relative">
+      {/* Cover Image Area */}
+      <Link
+        href={`/blog/${post.id}`}
+        className="block relative h-56 overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-[#27272a] to-[#09090b] transition-transform duration-700 group-hover:scale-105" />
+
+        {/* Category Icon Background */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500 select-none text-9xl grayscale group-hover:grayscale-0">
+          {getCategoryIcon(post.category)}
+        </div>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#18181b] via-transparent to-transparent opacity-80" />
+
+        {/* Floating Category Badge */}
+        <div className="absolute top-4 left-4">
+          <Badge className="bg-black/50 backdrop-blur-md text-white border border-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider hover:bg-black/70 transition-colors">
+            {post.category}
+          </Badge>
         </div>
       </Link>
 
-      <div className="p-6">
-        {/* Category Badge */}
-        <Badge className="mb-3 bg-orange-100 text-orange-700 hover:bg-orange-200 border-0">
-          {post.category}
-        </Badge>
-
+      <div className="flex-1 p-6 pt-2 flex flex-col relative z-10">
         {/* Title */}
-        <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors leading-tight">
-          <Link href={`/blog/${post.id}`}>{post.title}</Link>
-        </h2>
+        <Link href={`/blog/${post.id}`} className="block group/title">
+          <h2 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover/title:text-orange-500 transition-colors">
+            {post.title}
+          </h2>
+        </Link>
 
         {/* Excerpt */}
-        <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed">{post.excerpt}</p>
+        <p className="text-zinc-400 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+          {post.excerpt}
+        </p>
 
-        {/* Meta Info */}
-        <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{post.readTime} phút</span>
+        {/* Meta Stats */}
+        <div className="flex items-center gap-4 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-6 border-t border-white/5 pt-4">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{post.readTime}p</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Eye className="h-4 w-4" />
+          <div className="flex items-center gap-1.5">
+            <Eye className="h-3.5 w-3.5" />
             <span>{post.views}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Heart className="h-4 w-4 text-red-400" />
-            <span>{post.likes}</span>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <Heart className="h-3.5 w-3.5 text-red-500/70" />
+            <span className="text-zinc-400">{post.likes}</span>
           </div>
         </div>
 
-        {/* Author & Date */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        {/* Footer: Author & Action */}
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-xs shadow-lg">
               {post.author.name.charAt(0)}
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">{post.author.name}</p>
-              <p className="text-xs text-gray-500">{post.author.role}</p>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-white leading-none mb-1">
+                {post.author.name}
+              </span>
+              <span className="text-[10px] text-zinc-500 font-medium">
+                {formatDate(post.publishedAt)}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-sm text-gray-500">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate(post.publishedAt)}</span>
-          </div>
-        </div>
 
-        {/* Read More Button */}
-        <Button
-          className="w-full mt-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg hover:shadow-xl transition-all group"
-          asChild
-        >
-          <Link href={`/blog/${post.id}`}>
-            Đọc tiếp
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </Button>
+          <Button
+            size="icon"
+            className="h-10 w-10 rounded-full bg-white text-black hover:bg-orange-500 hover:text-white transition-all shadow-lg hover:shadow-orange-500/25 group/btn"
+            asChild
+          >
+            <Link href={`/blog/${post.id}`}>
+              <ArrowRight className="h-4 w-4 group-hover/btn:-rotate-45 transition-transform duration-300" />
+            </Link>
+          </Button>
+        </div>
       </div>
-    </Card>
-  )
+    </div>
+  );
 }

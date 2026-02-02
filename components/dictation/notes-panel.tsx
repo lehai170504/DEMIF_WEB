@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Save, Loader2, Check, Edit3, Trash2 } from "lucide-react";
+import { Edit3, Trash2, Loader2, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,6 @@ export function NotesPanel() {
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
 
-  // Load notes từ localStorage khi mount
   useEffect(() => {
     const savedNotes = localStorage.getItem("dictation-notes");
     if (savedNotes) setNotes(savedNotes);
@@ -20,9 +19,7 @@ export function NotesPanel() {
 
   const handleSave = () => {
     if (status === "saving" || notes.trim() === "") return;
-
     setStatus("saving");
-    // Giả lập lưu vào DB/Local
     setTimeout(() => {
       localStorage.setItem("dictation-notes", notes);
       setStatus("saved");
@@ -31,38 +28,34 @@ export function NotesPanel() {
   };
 
   const clearNotes = () => {
-    if (confirm("Bạn có chắc chắn muốn xóa tất cả ghi chú?")) {
+    if (confirm("Xóa ghi chú?")) {
       setNotes("");
       localStorage.removeItem("dictation-notes");
     }
   };
 
   return (
-    <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-slate-900 rounded-[2rem] sticky top-24 overflow-hidden">
+    <Card className="border border-white/10 bg-[#18181b] rounded-[2rem] shadow-xl overflow-hidden sticky top-24">
       <CardContent className="p-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4 px-1">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded-xl">
-              <Edit3 className="h-4 w-4 text-orange-600" />
+            <div className="p-2 bg-orange-500/10 rounded-xl">
+              <Edit3 className="h-4 w-4 text-orange-500" />
             </div>
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
               Ghi chú
             </h3>
           </div>
-
           {notes.length > 0 && (
             <button
               onClick={clearNotes}
-              className="text-slate-300 hover:text-red-500 transition-colors"
-              title="Xóa ghi chú"
+              className="text-zinc-600 hover:text-red-400 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
             </button>
           )}
         </div>
 
-        {/* Textarea Area */}
         <div className="relative group">
           <Textarea
             value={notes}
@@ -70,23 +63,21 @@ export function NotesPanel() {
               setNotes(e.target.value);
               if (status === "saved") setStatus("idle");
             }}
-            placeholder="Lưu lại từ vựng hoặc cấu trúc hay..."
-            className="min-h-[200px] w-full resize-none border-none bg-slate-50/50 dark:bg-slate-800/50 focus-visible:ring-0 rounded-2xl p-4 text-[14px] leading-relaxed text-slate-700 dark:text-slate-300 placeholder:text-slate-400 transition-all"
+            placeholder="Ghi chú nhanh..."
+            className="min-h-[150px] w-full resize-none border-none bg-black/20 focus-visible:ring-0 rounded-2xl p-4 text-sm leading-relaxed text-zinc-300 placeholder:text-zinc-700 transition-all"
           />
-          {/* Một đường line trang trí tinh tế dưới textarea khi focus */}
-          <div className="absolute bottom-2 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-orange-200 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
+          <div className="absolute bottom-2 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-orange-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
         </div>
 
-        {/* Footer Actions */}
-        <div className="mt-4 flex flex-col gap-3">
+        <div className="mt-4">
           <Button
             onClick={handleSave}
             disabled={status === "saving" || notes.trim() === ""}
             className={cn(
-              "w-full h-11 rounded-2xl font-bold transition-all duration-300 shadow-lg",
+              "w-full h-10 rounded-xl font-bold text-xs uppercase tracking-widest transition-all",
               status === "saved"
-                ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200"
-                : "bg-slate-900 hover:bg-slate-800 shadow-slate-200"
+                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                : "bg-white text-black hover:bg-zinc-200",
             )}
           >
             <AnimatePresence mode="wait">
@@ -96,9 +87,8 @@ export function NotesPanel() {
                   className="flex items-center gap-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                 >
-                  <Loader2 className="h-4 w-4 animate-spin" /> ĐANG LƯU...
+                  <Loader2 className="h-3 w-3 animate-spin" /> Đang lưu...
                 </motion.div>
               ) : status === "saved" ? (
                 <motion.div
@@ -106,27 +96,20 @@ export function NotesPanel() {
                   className="flex items-center gap-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                 >
-                  <Check className="h-4 w-4" /> ĐÃ LƯU XONG
+                  <Check className="h-3 w-3" /> Đã lưu
                 </motion.div>
               ) : (
                 <motion.div
                   key="idle"
-                  className="flex items-center gap-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                 >
-                  LƯU GHI CHÚ
+                  Lưu ghi chú
                 </motion.div>
               )}
             </AnimatePresence>
           </Button>
-
-          <p className="text-[11px] text-center text-slate-400 font-medium italic">
-            * Dữ liệu được lưu cục bộ trên trình duyệt này
-          </p>
         </div>
       </CardContent>
     </Card>

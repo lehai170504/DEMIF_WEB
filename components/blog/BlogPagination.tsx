@@ -1,13 +1,16 @@
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BlogPaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
-  startIndex: number
-  endIndex: number
-  totalPosts: number
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  startIndex: number;
+  endIndex: number;
+  totalPosts: number;
 }
 
 export function BlogPagination({
@@ -18,20 +21,19 @@ export function BlogPagination({
   endIndex,
   totalPosts,
 }: BlogPaginationProps) {
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) return null;
 
   return (
-    <div className="mt-12 flex flex-col items-center gap-4">
-      <div className="flex items-center gap-2">
+    <div className="mt-16 flex flex-col items-center gap-6">
+      <div className="flex items-center gap-3">
         <Button
           variant="outline"
-          size="lg"
+          size="icon"
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="border-2 border-gray-200 text-gray-700 hover:border-orange-400 hover:bg-gradient-to-r hover:from-orange-500 hover:to-amber-500 hover:text-white hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-700"
+          className="h-12 w-12 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 transition-all"
         >
-          <ChevronLeft className="h-5 w-5 mr-1" />
-          Trước
+          <ChevronLeft className="h-5 w-5" />
         </Button>
 
         <div className="flex gap-2">
@@ -39,16 +41,13 @@ export function BlogPagination({
             <Button
               key={page}
               variant={currentPage === page ? "default" : "outline"}
-              size="lg"
               onClick={() => onPageChange(page)}
-              className={`
-                min-w-[48px] transition-all duration-300
-                ${
-                  currentPage === page
-                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg border-0"
-                    : "border-2 border-gray-200 text-gray-700 hover:border-orange-400 hover:bg-gradient-to-r hover:from-orange-500 hover:to-amber-500 hover:text-white hover:shadow-lg hover:scale-105"
-                }
-              `}
+              className={cn(
+                "h-12 w-12 rounded-xl font-bold text-base transition-all duration-300",
+                currentPage === page
+                  ? "bg-orange-500 text-white hover:bg-orange-600 border-none shadow-lg shadow-orange-500/25"
+                  : "bg-transparent border-white/10 text-zinc-400 hover:text-white hover:border-white/20 hover:bg-white/5",
+              )}
             >
               {page}
             </Button>
@@ -57,24 +56,22 @@ export function BlogPagination({
 
         <Button
           variant="outline"
-          size="lg"
+          size="icon"
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="border-2 border-gray-200 text-gray-700 hover:border-orange-400 hover:bg-gradient-to-r hover:from-orange-500 hover:to-amber-500 hover:text-white hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-700"
+          className="h-12 w-12 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 transition-all"
         >
-          Sau
-          <ChevronRight className="h-5 w-5 ml-1" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
-      <p className="text-sm text-gray-600">
-        Trang <span className="font-semibold text-orange-600">{currentPage}</span> /{" "}
-        <span className="font-semibold">{totalPages}</span> • Hiển thị{" "}
-        <span className="font-semibold">
+      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+        Hiển thị{" "}
+        <span className="text-white">
           {startIndex + 1}-{Math.min(endIndex, totalPosts)}
         </span>{" "}
-        trong <span className="font-semibold">{totalPosts}</span> bài viết
+        trong <span className="text-white">{totalPosts}</span> bài viết
       </p>
     </div>
-  )
+  );
 }

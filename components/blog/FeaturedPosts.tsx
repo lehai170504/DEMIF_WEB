@@ -1,74 +1,109 @@
-import Link from "next/link"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Clock, Eye, ArrowRight, Sparkles } from "lucide-react"
-import { BlogPost } from "@/lib/data/blog"
+"use client";
+
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Eye, ArrowRight, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  readTime: number;
+  views: number;
+}
 
 interface FeaturedPostsProps {
-  posts: BlogPost[]
+  posts: BlogPost[];
 }
 
 export function FeaturedPosts({ posts }: FeaturedPostsProps) {
+  // Utility get icon (có thể tách riêng)
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "Mẹo học tập":
+        return "💡";
+      case "Phát âm":
+        return "🎤";
+      case "Ngữ pháp":
+        return "📖";
+      case "Từ vựng":
+        return "📚";
+      default:
+        return "🚀";
+    }
+  };
+
   return (
     <div className="mb-16">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white">
-          <Sparkles className="h-6 w-6" />
-        </div>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Bài viết nổi bật</h2>
-          <p className="text-gray-600">Những bài viết được quan tâm nhiều nhất</p>
-        </div>
-      </div>
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {posts.map((post) => (
-          <Link key={post.id} href={`/blog/${post.id}`}>
-            <Card className="group h-full overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-orange-200 bg-white">
-              <div className="relative h-56 bg-gradient-to-br from-orange-100 via-amber-50 to-orange-50 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-10 group-hover:scale-110 transition-transform duration-300">
-                  {post.category === "Mẹo học tập" && "💡"}
-                  {post.category === "Phát âm" && "🎤"}
-                  {post.category === "Ngữ pháp" && "📖"}
-                  {post.category === "Từ vựng" && "📚"}
+        {posts.map((post, index) => (
+          <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Link href={`/blog/${post.id}`}>
+              <div className="group h-full flex flex-col bg-[#18181b] border border-white/10 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1 relative">
+                {/* Image Area */}
+                <div className="relative h-56 bg-gradient-to-br from-[#27272a] to-black overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-20 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-30 grayscale group-hover:grayscale-0">
+                    {getCategoryIcon(post.category)}
+                  </div>
+
+                  {/* Featured Badge */}
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-orange-500 text-white border-0 shadow-lg shadow-orange-500/20 px-3 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur-md flex items-center gap-1.5">
+                      <Sparkles className="h-3 w-3 fill-current" />
+                      Nổi bật
+                    </Badge>
+                  </div>
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#18181b] via-transparent to-transparent opacity-90" />
                 </div>
-                <Badge className="absolute top-4 left-4 bg-white/90 text-orange-600 border-0 shadow-md">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Nổi bật
-                </Badge>
-              </div>
 
-              <div className="p-6">
-                <Badge className="mb-3 bg-orange-100 text-orange-700 hover:bg-orange-200">
-                  {post.category}
-                </Badge>
+                <div className="p-6 pt-0 flex-1 flex flex-col relative z-10 -mt-12">
+                  <div className="mb-4">
+                    <Badge
+                      variant="outline"
+                      className="bg-white/5 text-zinc-300 border-white/10 hover:bg-white/10 transition-colors"
+                    >
+                      {post.category}
+                    </Badge>
+                  </div>
 
-                <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors">
-                  {post.title}
-                </h3>
+                  <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-orange-500 transition-colors">
+                    {post.title}
+                  </h3>
 
-                <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">
-                  {post.excerpt}
-                </p>
+                  <p className="text-zinc-400 mb-6 line-clamp-2 text-sm leading-relaxed flex-1">
+                    {post.excerpt}
+                  </p>
 
-                <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{post.readTime} phút</span>
+                  <div className="flex items-center justify-between text-xs font-bold text-zinc-500 uppercase tracking-wider pt-4 border-t border-white/5 mt-auto">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{post.readTime}p</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>{post.views}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{post.views}</span>
+                    <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                      <ArrowRight className="h-4 w-4 group-hover:-rotate-45 transition-transform duration-300" />
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-orange-500 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
-            </Card>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </div>
-  )
+  );
 }

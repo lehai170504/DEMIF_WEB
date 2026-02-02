@@ -1,52 +1,80 @@
 "use client";
 
-import { ShieldCheck, Smartphone, Check } from "lucide-react";
+import { ShieldCheck, Smartphone, Check, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function SecurityMFA() {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex items-center justify-between p-6 rounded-[2rem] bg-emerald-50 border border-emerald-100">
-        <div className="flex gap-4 items-center">
-          <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-            <ShieldCheck className="h-6 w-6" />
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
+      {/* Status Banner */}
+      <div className="relative overflow-hidden flex items-center justify-between p-8 rounded-[2.5rem] bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/20">
+        <div className="flex gap-6 items-center relative z-10">
+          <div className="h-16 w-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+            <ShieldCheck className="h-8 w-8" />
           </div>
-          <div>
-            <h4 className="font-bold text-emerald-900">
-              Bảo mật hai lớp đang BẬT
+          <div className="space-y-1">
+            <h4 className="font-black text-xl text-white tracking-tight">
+              Bảo mật 2 lớp đang BẬT
             </h4>
-            <p className="text-xs text-emerald-700">
-              Tài khoản của bạn đang được bảo vệ bởi TOTP Authenticator.
+            <p className="text-sm text-emerald-200/70 font-medium">
+              Tài khoản của bạn được bảo vệ bởi TOTP Authenticator.
             </p>
           </div>
         </div>
-        <Badge className="bg-emerald-500 text-white border-none px-3 py-1 uppercase text-[10px]">
+        <Badge className="bg-emerald-500 text-white border-none px-4 py-1.5 uppercase text-[10px] font-black tracking-widest shadow-lg shadow-emerald-500/30">
           An toàn
         </Badge>
+
+        {/* Glow */}
+        <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-500/20 blur-[60px] rounded-full pointer-events-none" />
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 pl-2">
           Phương thức xác thực
         </h3>
-        <div className="group flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-orange-200 transition-all">
-          <div className="flex items-center gap-4">
-            <Smartphone className="h-5 w-5 text-slate-400" />
+
+        <div className="group flex items-center justify-between p-6 rounded-[2rem] border border-white/5 bg-[#18181b] hover:border-orange-500/30 transition-all shadow-lg hover:shadow-orange-500/5">
+          <div className="flex items-center gap-5">
+            <div className="p-3 rounded-xl bg-white/5 text-zinc-400 group-hover:text-orange-500 transition-colors">
+              <Smartphone className="h-6 w-6" />
+            </div>
             <div>
-              <p className="font-bold text-slate-700">
-                Google Authenticator / Authy
+              <p className="font-bold text-white text-sm mb-1">
+                Authenticator App
               </p>
-              <p className="text-xs text-slate-400">
-                Sử dụng mã số 6 chữ số từ ứng dụng bảo mật.
+              <p className="text-xs text-zinc-500">
+                Google Authenticator, Authy, Microsoft Auth...
               </p>
             </div>
           </div>
           <Button
             variant="outline"
-            className="rounded-full text-xs font-bold border-rose-100 text-rose-500 hover:bg-rose-50"
+            className="rounded-xl h-10 border-white/10 bg-transparent text-zinc-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 text-xs font-bold uppercase tracking-wider transition-all"
           >
-            Gỡ bỏ
+            Gỡ cài đặt
+          </Button>
+        </div>
+
+        {/* Recovery Codes Section (Optional) */}
+        <div className="group flex items-center justify-between p-6 rounded-[2rem] border border-white/5 bg-[#18181b] hover:border-blue-500/30 transition-all">
+          <div className="flex items-center gap-5">
+            <div className="p-3 rounded-xl bg-white/5 text-zinc-400 group-hover:text-blue-500 transition-colors">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm mb-1">Mã dự phòng</p>
+              <p className="text-xs text-zinc-500">
+                Sử dụng khi mất thiết bị xác thực.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            className="rounded-xl h-10 border-white/10 bg-transparent text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20 text-xs font-bold uppercase tracking-wider transition-all"
+          >
+            Xem mã
           </Button>
         </div>
       </div>

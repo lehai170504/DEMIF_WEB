@@ -1,29 +1,46 @@
-import { Separator } from "@/components/ui/separator"
+"use client";
+
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface AuthorCardProps {
   author: {
-    name: string
-    role: string
-    bio: string
-  }
+    name: string;
+    role: string;
+    bio: string;
+    avatar?: string;
+  };
 }
 
 export function AuthorCard({ author }: AuthorCardProps) {
   return (
     <>
-      <Separator className="my-8" />
-      <div className="p-6 md:p-8 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 rounded-2xl border-2 border-orange-200">
-        <div className="flex items-start gap-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-semibold text-3xl flex-shrink-0 shadow-xl">
-            {author.name.charAt(0)}
-          </div>
-          <div className="flex-1">
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">{author.name}</h3>
-            <p className="text-sm text-orange-600 font-medium mb-3">{author.role}</p>
-            <p className="text-gray-700 leading-relaxed">{author.bio}</p>
+      <Separator className="my-8 bg-white/10" />
+      <div className="p-8 rounded-[2rem] bg-[#18181b] border border-white/10 relative overflow-hidden group">
+        {/* Glow Effect */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] group-hover:bg-orange-500/10 transition-colors duration-500 pointer-events-none" />
+
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
+          <Avatar className="w-20 h-20 border-2 border-orange-500/50 shadow-lg shadow-orange-500/20">
+            <AvatarImage src={author.avatar} />
+            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-amber-600 text-white font-bold text-2xl">
+              {author.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="text-xl font-bold text-white mb-1 group-hover:text-orange-400 transition-colors">
+              {author.name}
+            </h3>
+            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+              {author.role}
+            </p>
+            <p className="text-zinc-400 text-sm leading-relaxed">
+              {author.bio}
+            </p>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }

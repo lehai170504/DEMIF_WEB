@@ -1,49 +1,45 @@
-import Link from "next/link"
-import { Card } from "@/components/ui/card"
-import { Eye, Heart, TrendingUp } from "lucide-react"
-import { BlogPost } from "@/lib/data/blog"
+"use client";
 
-interface PopularPostsProps {
-  posts: BlogPost[]
+import Link from "next/link";
+import { Eye, Heart, TrendingUp } from "lucide-react";
+
+// Types
+interface BlogPost {
+  id: string;
+  title: string;
+  views: number;
+  likes: number;
 }
 
-export function PopularPosts({ posts }: PopularPostsProps) {
+export function PopularPosts({ posts }: { posts: BlogPost[] }) {
   return (
-    <Card className="p-6 border-2 border-gray-100 bg-white shadow-lg">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 text-white">
-          <TrendingUp className="h-5 w-5" />
-        </div>
-        <h3 className="text-xl font-bold text-gray-900">Bài viết phổ biến</h3>
-      </div>
-      <div className="space-y-4">
-        {posts.map((post, index) => (
-          <Link key={post.id} href={`/blog/${post.id}`} className="block group">
-            <div className="flex gap-4 p-3 rounded-xl hover:bg-orange-50 transition-all duration-300">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center text-2xl font-bold text-orange-600 shadow-md group-hover:scale-110 transition-transform">
-                  {index + 1}
-                </div>
+    <div className="space-y-4">
+      {posts.map((post, index) => (
+        <Link key={post.id} href={`/blog/${post.id}`} className="block group">
+          <div className="flex gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all duration-300 border border-transparent hover:border-white/5">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#27272a] border border-white/5 flex items-center justify-center text-lg font-black text-zinc-500 group-hover:text-orange-500 group-hover:border-orange-500/30 transition-all shadow-inner">
+                {index + 1}
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors mb-2 text-sm leading-snug">
-                  {post.title}
-                </h4>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    <span>{post.views}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-3 w-3 text-red-400" />
-                    <span>{post.likes}</span>
-                  </div>
+            </div>
+            <div className="flex-1 min-w-0 py-0.5">
+              <h4 className="font-bold text-zinc-300 text-sm line-clamp-2 group-hover:text-white transition-colors mb-2 leading-snug">
+                {post.title}
+              </h4>
+              <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-600 uppercase tracking-wider group-hover:text-zinc-500 transition-colors">
+                <div className="flex items-center gap-1.5">
+                  <Eye className="h-3 w-3" />
+                  <span>{post.views}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Heart className="h-3 w-3 group-hover:text-red-500/70 transition-colors" />
+                  <span>{post.likes}</span>
                 </div>
               </div>
             </div>
-          </Link>
-        ))}
-      </div>
-    </Card>
-  )
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
 }

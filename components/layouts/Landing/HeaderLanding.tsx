@@ -1,65 +1,93 @@
-// src/components/Header.tsx
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+
+const navLinks = [
+  { name: "Tính năng", href: "#features" },
+  { name: "Giải pháp", href: "#how-it-works" },
+  { name: "Bảng giá", href: "#pricing" },
+  { name: "Khách hàng", href: "#testimonials" },
+];
 
 export function HeaderLanding() {
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between font-mono">
-        <div className="flex items-center gap-4 p-2 rounded-lg hover:bg-orange-50/50 transition-colors">
-          <img
-            src="/DemifLogo.png"
-            alt="DEMIF Logo"
-            className="w-12 h-12 rounded-xl shadow-lg"
-          />
-          <span className="text-3xl font-extrabold bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] bg-clip-text text-transparent tracking-wide">
-            DEMIF
-          </span>
-        </div>
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="#features"
-            className="text-sm font-medium text-foreground/70 hover:text-[#FF7A00] transition-colors"
+    <motion.header
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-[#050505]/60"
+    >
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between font-mono">
+        <Link href="/">
+          <motion.div
+            whileHover={{
+              rotateY: 15,
+              rotateX: -10,
+              scale: 1.05,
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="flex items-center gap-3 cursor-pointer group"
           >
-            Tính năng
-          </Link>
-          <Link
-            href="#how-it-works"
-            className="text-sm font-medium text-foreground/70 hover:text-[#FF7A00] transition-colors"
-          >
-            Cách hoạt động
-          </Link>
-          <Link
-            href="#pricing"
-            className="text-sm font-medium text-foreground/70 hover:text-[#FF7A00] transition-colors"
-          >
-            Bảng giá
-          </Link>
-          <Link
-            href="#testimonials"
-            className="text-sm font-medium text-foreground/70 hover:text-[#FF7A00] transition-colors"
-          >
-            Phản hồi
-          </Link>
+            <div className="relative">
+              <img
+                src="/DemifLogo.png"
+                alt="DEMIF Logo"
+                className="w-10 h-10 rounded-xl shadow-lg shadow-orange-500/10"
+              />
+              <div className="absolute inset-0 bg-[#FF7A00] blur-xl scale-50 group-hover:scale-100 transition-transform opacity-0 group-hover:opacity-60 duration-500" />
+            </div>
+          </motion.div>
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-10">
+          {navLinks.map((link) => (
+            <motion.div
+              key={link.name}
+              whileHover={{ y: -2 }}
+              className="relative group"
+            >
+              <Link
+                href={link.href}
+                className="text-[14px] font-bold text-zinc-400 hover:text-white transition-colors duration-300 tracking-wide"
+              >
+                {link.name}
+              </Link>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#FF7A00] transition-all duration-300 group-hover:w-full box-shadow-glow" />
+            </motion.div>
+          ))}
         </nav>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-foreground/70 hover:text-white hover:bg-[#FF7A00] transition-colors"
-            asChild
+
+        <div className="flex items-center gap-4">
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-zinc-300 font-bold hover:text-white hover:bg-white/10 transition-all"
+              asChild
+            >
+              <Link href="/login">Đăng nhập</Link>
+            </Button>
+          </motion.div>
+
+          <motion.div
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 0 20px -5px rgba(255, 122, 0, 0.5)",
+            }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Link href="/login">Đăng nhập</Link>
-          </Button>
-          <Button
-            size="sm"
-            className="bg-[#FF7A00] hover:bg-[#FF9E2C] text-white shadow-lg shadow-orange-500/30"
-            asChild
-          >
-            <Link href="/signup">Bắt đầu ngay</Link>
-          </Button>
+            <Button
+              size="sm"
+              className="bg-[#FF7A00] hover:bg-[#FF8A10] text-white font-bold px-6 rounded-full shadow-lg shadow-orange-900/20 border border-white/10"
+              asChild
+            >
+              <Link href="/signup">Bắt đầu</Link>
+            </Button>
+          </motion.div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

@@ -28,7 +28,6 @@ export function AudioPlayer({
   const playsRemaining = maxPlays - playCount;
   const isLimitReached = playsRemaining <= 0;
 
-  // Tạo dữ liệu sóng âm cố định (Static Waveform data) để không bị nhảy lung tung
   const barsData = useMemo(() => {
     return Array.from({ length: 60 }, () => Math.random() * 0.6 + 0.2);
   }, []);
@@ -55,7 +54,7 @@ export function AudioPlayer({
     };
   }, [playCount, onPlayCountChange]);
 
-  // Canvas Drawing Logic
+  // Canvas Drawing (Neon Style)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -72,20 +71,32 @@ export function AudioPlayer({
 
       barsData.forEach((val, i) => {
         const x = i * (barWidth + gap);
-        // Hiệu ứng "nhảy" nhẹ khi đang phát
-        const bounce = isPlaying ? Math.sin(Date.now() / 150 + i) * 5 : 0;
-        const barHeight = val * height + bounce;
+        const bounce = isPlaying ? Math.sin(Date.now() / 150 + i) * 8 : 0; // Tăng độ nảy
+        const barHeight = val * height * 0.6 + bounce; // Giảm chiều cao gốc để nảy đẹp hơn
 
         const isPast = i / barsData.length < progress;
 
-        ctx.fillStyle = isPast ? "#FF7A00" : "#E2E8F0"; // Orange if past, Slate-200 if future
+        // Gradient & Glow
+        if (isPast) {
+          ctx.fillStyle = "#FF7A00";
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "rgba(255, 122, 0, 0.5)";
+        } else {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.shadowBlur = 0;
+        }
 
-        // Vẽ bo góc cho các thanh bar
         const radius = 2;
         const y = (height - barHeight) / 2;
-        ctx.beginPath();
-        ctx.roundRect(x, y, barWidth, barHeight, radius);
-        ctx.fill();
+
+        // Vẽ Rounded Rect thủ công (hoặc dùng roundRect nếu browser support)
+        if (ctx.roundRect) {
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, Math.max(barHeight, 2), radius);
+          ctx.fill();
+        } else {
+          ctx.fillRect(x, y, barWidth, Math.max(barHeight, 2));
+        }
       });
     };
 
@@ -113,47 +124,49 @@ export function AudioPlayer({
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 dark:border-slate-800">
-        {/* Lượt nghe - Badge Design */}
-        <div className="flex justify-between items-center mb-8">
+      <div className="relative bg-[#18181b] rounded-[2.5rem] p-8 shadow-2xl border border-white/10 overflow-hidden">
+        {/* Ambient Glow Background */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-orange-500/5 blur-[60px] pointer-events-none" />
+
+        {/* Info Bar */}
+        <div className="relative z-10 flex justify-between items-center mb-8">
           <div
             className={cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold transition-colors",
+              "flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold transition-colors border",
               isLimitReached
-                ? "bg-red-50 text-red-600"
-                : "bg-orange-50 text-orange-600"
+                ? "bg-red-500/10 text-red-400 border-red-500/20"
+                : "bg-orange-500/10 text-orange-400 border-orange-500/20",
             )}
           >
             {isLimitReached ? (
-              <Lock className="h-3.5 w-3.5" />
+              <Lock className="h-3 w-3" />
             ) : (
-              <Headset className="h-3.5 w-3.5" />
+              <Headset className="h-3 w-3" />
             )}
-            {isLimitReached
-              ? "Hết lượt nghe"
-              : `Còn ${playsRemaining} lượt nghe`}
+            {isLimitReached ? "Hết lượt nghe" : `Còn ${playsRemaining} lượt`}
           </div>
 
-          <div className="text-xs font-bold font-mono text-slate-400">
-            {Math.floor(currentTime)}s / {duration}s
+          <div className="text-xs font-bold font-mono text-zinc-500">
+            {Math.floor(currentTime)}s <span className="text-zinc-700">/</span>{" "}
+            {duration}s
           </div>
         </div>
 
-        {/* Waveform Display */}
-        <div className="relative h-24 mb-10 flex items-center justify-center">
+        {/* Waveform */}
+        <div className="relative z-10 h-24 mb-10 flex items-center justify-center">
           <canvas
             ref={canvasRef}
             width={420}
             height={80}
             className="w-full h-full cursor-pointer"
             onClick={(e) => {
-              // Logic tua nhanh nếu cần (tùy chọn)
+              // Add seek logic here if needed
             }}
           />
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center gap-6">
+        <div className="relative z-10 flex items-center justify-center gap-6">
           <Button
             variant="ghost"
             size="icon"
@@ -161,7 +174,7 @@ export function AudioPlayer({
               if (audioRef.current) audioRef.current.currentTime = 0;
               setCurrentTime(0);
             }}
-            className="rounded-full w-12 h-12 hover:bg-slate-100 text-slate-400"
+            className="rounded-full w-12 h-12 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
           >
             <RotateCcw className="h-5 w-5" />
           </Button>
@@ -171,10 +184,10 @@ export function AudioPlayer({
               onClick={togglePlay}
               disabled={isLimitReached && !isPlaying}
               className={cn(
-                "w-56 h-16 rounded-[2rem] text-base font-heavy shadow-xl transition-all duration-500",
+                "w-56 h-16 rounded-[2rem] text-base font-black shadow-lg transition-all duration-500 border border-white/5",
                 isPlaying
-                  ? "bg-slate-900 hover:bg-slate-800 shadow-slate-200"
-                  : "bg-[#FF7A00] hover:bg-[#FF8A1C] shadow-orange-200"
+                  ? "bg-zinc-800 hover:bg-zinc-700 text-white shadow-black/50"
+                  : "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:shadow-orange-500/30 text-white",
               )}
             >
               <AnimatePresence mode="wait">
@@ -182,9 +195,9 @@ export function AudioPlayer({
                   <motion.div
                     key="pause"
                     className="flex items-center gap-2"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
                   >
                     <Pause className="h-6 w-6 fill-current" /> TẠM DỪNG
                   </motion.div>
@@ -192,9 +205,9 @@ export function AudioPlayer({
                   <motion.div
                     key="play"
                     className="flex items-center gap-2"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
                   >
                     {isLimitReached ? (
                       <Lock className="h-5 w-5" />
@@ -208,7 +221,7 @@ export function AudioPlayer({
             </Button>
           </motion.div>
 
-          <div className="w-12 h-12 flex items-center justify-center text-slate-300">
+          <div className="w-12 h-12 flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors">
             <Info className="h-5 w-5 cursor-help" />
           </div>
         </div>

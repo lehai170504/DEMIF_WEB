@@ -1,30 +1,34 @@
-import { Card } from "@/components/ui/card"
-import { List } from "lucide-react"
+"use client";
+
+import { Card } from "@/components/ui/card";
+import { List } from "lucide-react";
 
 interface TableOfContentsProps {
-  sections: Array<{ id: string; title: string }>
+  sections: Array<{ id: string; title: string }>;
 }
 
 export function TableOfContents({ sections }: TableOfContentsProps) {
-  if (sections.length === 0) return null
+  if (sections.length === 0) return null;
 
   return (
-    <Card className="sticky top-24 border-2 border-orange-100 overflow-hidden shadow-lg">
-      <div className="p-5 bg-gradient-to-r from-orange-50 to-amber-50">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 text-white">
+    <Card className="sticky top-28 border border-white/10 bg-[#18181b] overflow-hidden rounded-[2rem]">
+      <div className="p-6">
+        <div className="flex items-center gap-2 mb-6 text-zinc-400">
+          <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
             <List className="h-4 w-4" />
           </div>
-          <h3 className="font-bold text-gray-900">Mục lục</h3>
+          <h3 className="font-bold text-sm uppercase tracking-widest">
+            Mục lục
+          </h3>
         </div>
-        <ul className="space-y-3">
+        <ul className="space-y-3 relative border-l border-white/10 ml-2.5 pl-4">
           {sections.map((section) => (
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
-                className="text-sm text-gray-700 hover:text-orange-600 transition-colors flex items-start gap-2 group"
+                className="text-sm font-medium text-zinc-500 hover:text-orange-500 transition-colors flex items-start gap-3 group relative"
               >
-                <span className="text-orange-400 group-hover:text-orange-600 font-bold mt-0.5">•</span>
+                <span className="absolute -left-[21px] top-1.5 w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-orange-500 transition-colors" />
                 <span className="group-hover:translate-x-1 transition-transform leading-relaxed">
                   {section.title}
                 </span>
@@ -34,5 +38,5 @@ export function TableOfContents({ sections }: TableOfContentsProps) {
         </ul>
       </div>
     </Card>
-  )
+  );
 }

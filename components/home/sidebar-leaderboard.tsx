@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { Trophy, Flame, Crown, ChevronRight, Star } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -24,33 +23,39 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
       case 1:
         return {
           container:
-            "bg-gradient-to-r from-amber-50 to-transparent border-l-4 border-amber-500",
-          rankBadge: "bg-amber-500 text-white ring-4 ring-amber-100",
-          name: "text-amber-900 font-black",
-          icon: <Crown className="h-4 w-4 fill-amber-500 text-amber-500" />,
+            "bg-gradient-to-r from-amber-500/10 to-transparent border-l-2 border-amber-500",
+          rankBadge: "text-amber-400 font-black",
+          name: "text-amber-100 font-bold",
+          icon: <Crown className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />,
+          avatarBorder: "border-amber-500",
         };
       case 2:
         return {
           container:
-            "bg-gradient-to-r from-slate-50 to-transparent border-l-4 border-slate-400",
-          rankBadge: "bg-slate-400 text-white ring-4 ring-slate-100",
-          name: "text-slate-800 font-bold",
-          icon: <Star className="h-4 w-4 fill-slate-400 text-slate-400" />,
+            "bg-gradient-to-r from-zinc-500/10 to-transparent border-l-2 border-zinc-400",
+          rankBadge: "text-zinc-300 font-black",
+          name: "text-zinc-200 font-bold",
+          icon: <Star className="h-3.5 w-3.5 fill-zinc-400 text-zinc-400" />,
+          avatarBorder: "border-zinc-400",
         };
       case 3:
         return {
           container:
-            "bg-gradient-to-r from-orange-50 to-transparent border-l-4 border-orange-400",
-          rankBadge: "bg-orange-400 text-white ring-4 ring-orange-100",
-          name: "text-orange-900 font-bold",
-          icon: <Trophy className="h-4 w-4 fill-orange-400 text-orange-400" />,
+            "bg-gradient-to-r from-orange-500/10 to-transparent border-l-2 border-orange-500",
+          rankBadge: "text-orange-400 font-black",
+          name: "text-orange-100 font-bold",
+          icon: (
+            <Trophy className="h-3.5 w-3.5 fill-orange-500 text-orange-500" />
+          ),
+          avatarBorder: "border-orange-500",
         };
       default:
         return {
-          container: "hover:bg-slate-50 border-l-4 border-transparent",
-          rankBadge: "bg-slate-100 text-slate-500",
-          name: "text-slate-700 font-semibold",
+          container: "hover:bg-white/5 border-l-2 border-transparent",
+          rankBadge: "text-zinc-500 font-bold",
+          name: "text-zinc-400 font-medium",
           icon: null,
+          avatarBorder: "border-white/10",
         };
     }
   };
@@ -61,29 +66,29 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
       animate={{ opacity: 1, scale: 1 }}
       className="relative"
     >
-      {/* 1. Glassmorphism Card */}
-      <Card className="overflow-hidden border-none bg-white/80 backdrop-blur-xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem]">
+      {/* Glass Card */}
+      <div className="overflow-hidden bg-[#18181b] border border-white/10 p-5 rounded-[2rem] shadow-xl">
         <div className="space-y-6">
-          {/* 2. Enhanced Header */}
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <h3 className="text-lg font-black tracking-tight text-slate-900 flex items-center gap-2">
+            <div className="space-y-1">
+              <h3 className="text-lg font-black tracking-tight text-white flex items-center gap-2">
                 Bảng vàng tuần
               </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                 Cập nhật 5 phút trước
               </p>
             </div>
             <Link
               href="/leaderboard"
-              className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-orange-500 hover:text-white transition-all border border-white/5"
             >
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
 
-          {/* 3. Leaderboard List */}
-          <div className="space-y-1">
+          {/* List */}
+          <div className="space-y-2">
             {entries.slice(0, 5).map((entry, index) => {
               const styles = getRankStyles(entry.rank);
 
@@ -94,36 +99,32 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   className={cn(
-                    "group relative flex items-center gap-3 p-3 rounded-xl transition-all duration-300",
-                    styles.container
+                    "group relative flex items-center gap-3 p-2.5 rounded-xl transition-all duration-300",
+                    styles.container,
                   )}
                 >
-                  {/* Rank Position */}
+                  {/* Rank Number */}
                   <div
-                    className={cn(
-                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black transition-transform group-hover:scale-110",
-                      styles.rankBadge
-                    )}
+                    className={cn("w-4 text-center text-sm", styles.rankBadge)}
                   >
                     {entry.rank}
                   </div>
 
-                  {/* Avatar with Glow for Top 1 */}
-                  <div className="relative">
-                    <div
-                      className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-inner border-2 border-white",
-                        entry.rank === 1
-                          ? "bg-amber-500"
-                          : "bg-slate-200 text-slate-500"
-                      )}
-                    >
-                      {entry.avatar || entry.name[0]}
-                    </div>
-                    {entry.rank === 1 && (
-                      <div className="absolute -top-1 -right-1 animate-pulse">
-                        <Crown className="h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-md" />
-                      </div>
+                  {/* Avatar */}
+                  <div
+                    className={cn(
+                      "h-8 w-8 rounded-full border-2 bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden",
+                      styles.avatarBorder,
+                    )}
+                  >
+                    {entry.avatar ? (
+                      <img
+                        src={entry.avatar}
+                        alt={entry.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{entry.name[0]}</span>
                     )}
                   </div>
 
@@ -135,26 +136,21 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
                       </p>
                       {styles.icon}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Flame className="h-3 w-3 text-orange-500 fill-orange-500" />
-                        <span className="text-[11px] font-bold text-slate-500">
-                          {entry.streak}
-                        </span>
-                      </div>
-                      <div className="h-1 w-1 rounded-full bg-slate-300" />
-                      <span className="text-[11px] font-medium text-slate-400">
-                        Streak
+                    {/* Streak Info (Optional) */}
+                    <div className="flex items-center gap-1">
+                      <Flame className="h-3 w-3 text-orange-500 fill-orange-500/20" />
+                      <span className="text-[10px] text-zinc-500 font-mono">
+                        {entry.streak} 🔥
                       </span>
                     </div>
                   </div>
 
-                  {/* XP Score - High Contrast */}
-                  <div className="text-right shrink-0">
-                    <p className="text-[14px] font-black text-slate-900 tracking-tight">
+                  {/* XP */}
+                  <div className="text-right">
+                    <p className="text-[12px] font-black text-white tracking-tight">
                       {entry.xp.toLocaleString()}
                     </p>
-                    <p className="text-[9px] font-black uppercase text-slate-400 leading-none">
+                    <p className="text-[8px] font-bold uppercase text-zinc-500">
                       XP
                     </p>
                   </div>
@@ -163,15 +159,12 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
             })}
           </div>
 
-          {/* 4. Interactive Call-to-Action */}
-          <button className="w-full py-3 rounded-2xl bg-slate-900 text-white text-xs font-bold transition-all hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 active:scale-95">
+          {/* CTA Button */}
+          <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-orange-500 hover:text-white hover:border-orange-500 shadow-lg hover:shadow-orange-500/25">
             Thách đấu ngay
           </button>
         </div>
-      </Card>
-
-      {/* Decorative Blur Background */}
-      <div className="absolute -z-10 top-0 right-0 h-32 w-32 bg-orange-200/20 blur-[60px] rounded-full" />
+      </div>
     </motion.div>
   );
 }

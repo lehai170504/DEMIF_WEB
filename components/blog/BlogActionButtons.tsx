@@ -1,14 +1,17 @@
-import { Button } from "@/components/ui/button"
-import { Heart, BookmarkPlus, Copy, Check } from "lucide-react"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Heart, Bookmark, Share2, Check, Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BlogActionButtonsProps {
-  isLiked: boolean
-  isSaved: boolean
-  copied: boolean
-  likesCount: number
-  onLike: () => void
-  onSave: () => void
-  onCopyLink: () => void
+  isLiked: boolean;
+  isSaved: boolean;
+  copied: boolean;
+  likesCount: number;
+  onLike: () => void;
+  onSave: () => void;
+  onCopyLink: () => void;
 }
 
 export function BlogActionButtons({
@@ -22,53 +25,54 @@ export function BlogActionButtons({
 }: BlogActionButtonsProps) {
   return (
     <div className="flex flex-wrap gap-3 mb-8">
+      {/* Like Button */}
       <Button
         variant="outline"
-        className={`flex items-center gap-2 border-2 hover:scale-105 transition-all duration-300 ${
-          isLiked
-            ? "bg-gradient-to-r from-red-500 to-pink-500 border-red-400 text-white shadow-lg"
-            : "border-gray-200 text-gray-700 hover:border-red-400 hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-500 hover:text-white hover:shadow-lg"
-        }`}
         onClick={onLike}
+        className={cn(
+          "flex items-center gap-2 h-10 rounded-xl border font-bold transition-all duration-300",
+          isLiked
+            ? "bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20"
+            : "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20",
+        )}
       >
-        <Heart className={`h-4 w-4 ${isLiked ? "fill-white" : ""}`} />
+        <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
         <span>Thích ({isLiked ? likesCount + 1 : likesCount})</span>
       </Button>
 
+      {/* Save Button */}
       <Button
         variant="outline"
-        className={`flex items-center gap-2 border-2 hover:scale-105 transition-all duration-300 ${
-          isSaved
-            ? "bg-gradient-to-r from-blue-500 to-indigo-500 border-blue-400 text-white shadow-lg"
-            : "border-gray-200 text-gray-700 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-500 hover:to-indigo-500 hover:text-white hover:shadow-lg"
-        }`}
         onClick={onSave}
+        className={cn(
+          "flex items-center gap-2 h-10 rounded-xl border font-bold transition-all duration-300",
+          isSaved
+            ? "bg-blue-500/10 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+            : "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20",
+        )}
       >
-        <BookmarkPlus className={`h-4 w-4 ${isSaved ? "fill-white" : ""}`} />
+        <Bookmark className={cn("h-4 w-4", isSaved && "fill-current")} />
         <span>{isSaved ? "Đã lưu" : "Lưu bài viết"}</span>
       </Button>
 
+      {/* Copy Link Button */}
       <Button
         variant="outline"
-        className={`flex items-center gap-2 border-2 transition-all duration-300 ${
-          copied
-            ? "bg-gradient-to-r from-green-500 to-emerald-500 border-green-400 text-white shadow-lg scale-105"
-            : "border-gray-200 text-gray-700 hover:border-green-400 hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-500 hover:text-white hover:scale-105 hover:shadow-lg"
-        }`}
         onClick={onCopyLink}
+        className={cn(
+          "flex items-center gap-2 h-10 rounded-xl border font-bold transition-all duration-300",
+          copied
+            ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
+            : "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20",
+        )}
       >
         {copied ? (
-          <>
-            <Check className="h-4 w-4" />
-            <span>Đã sao chép!</span>
-          </>
+          <Check className="h-4 w-4" />
         ) : (
-          <>
-            <Copy className="h-4 w-4" />
-            <span>Sao chép link</span>
-          </>
+          <Share2 className="h-4 w-4" />
         )}
+        <span>{copied ? "Đã sao chép" : "Chia sẻ"}</span>
       </Button>
     </div>
-  )
+  );
 }

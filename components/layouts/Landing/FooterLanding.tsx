@@ -1,39 +1,36 @@
-// src/components/layouts/Landing/FooterLanding.jsx
+"use client";
 
 import Link from "next/link";
 import { Facebook, Instagram, Twitter, Github, Globe } from "lucide-react";
 
 export function FooterLanding() {
   return (
-    <footer className="relative border-t border-slate-200 pt-20 pb-10 font-mono overflow-hidden bg-card/50">
-      {/* Hiệu ứng nền nhẹ */}
-      <div className="absolute top-0 left-1/4 w-64 h-64 bg-orange-100/50 blur-[100px] rounded-full -z-10" />
-
+    <footer className="relative border-t border-white/5 pt-20 pb-10 font-mono overflow-hidden bg-[#050505]/80 backdrop-blur-xl">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          {/* 1. Brand Section - Cột lớn chiếm 4/12 */}
+          {/* 1. Brand Section */}
           <div className="lg:col-span-4 space-y-6">
             <div className="flex items-center gap-3 group w-fit">
-              <div className="relative flex items-center justify-center w-12 h-12 bg-slate-900 rounded-2xl shadow-xl transition-transform group-hover:-rotate-6">
+              <div className="relative flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] rounded-xl shadow-lg shadow-orange-500/20 transition-transform group-hover:-rotate-6">
                 <img
                   src="/DemifLogo.png"
                   alt="D"
-                  className="w-8 h-8 brightness-0 invert"
+                  className="w-6 h-6 brightness-0 invert" // Logo trắng
                 />
               </div>
-              <span className="text-3xl font-black tracking-tighter italic uppercase text-slate-950">
-                DEMIF<span className="text-orange-500 not-italic">.</span>
+              <span className="text-2xl font-black tracking-tighter italic uppercase text-white">
+                DEMIF<span className="text-[#FF7A00] not-italic">.</span>
               </span>
             </div>
 
-            <p className="text-slate-500 text-sm leading-relaxed max-w-sm font-medium">
+            <p className="text-zinc-500 text-sm leading-relaxed max-w-sm font-medium">
               Nâng tầm kỹ năng ngôn ngữ với AI thông qua phương pháp
-              <span className="text-slate-900 font-bold italic">
+              <span className="text-zinc-200 font-bold italic">
                 {" "}
                 Dictation
               </span>{" "}
               và
-              <span className="text-slate-900 font-bold italic">
+              <span className="text-zinc-200 font-bold italic">
                 {" "}
                 Shadowing
               </span>{" "}
@@ -41,22 +38,22 @@ export function FooterLanding() {
             </p>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-4 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               {[Facebook, Instagram, Twitter, Github].map((Icon, i) => (
                 <Link
                   key={i}
                   href="#"
-                  className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-orange-500 hover:text-white transition-all"
+                  className="p-2.5 rounded-xl bg-white/5 text-zinc-400 hover:bg-[#FF7A00] hover:text-white transition-all border border-white/5 hover:border-[#FF7A00]"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4" />
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* 2. Links Sections - 3 cột nhỏ mỗi cột 2/12 */}
+          {/* 2. Links Sections */}
           <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
               Sản phẩm
             </h4>
             <ul className="space-y-3">
@@ -64,7 +61,7 @@ export function FooterLanding() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm font-bold text-slate-500 hover:text-slate-950 transition-colors"
+                    className="text-sm font-bold text-zinc-500 hover:text-white transition-colors"
                   >
                     {item}
                   </Link>
@@ -74,7 +71,7 @@ export function FooterLanding() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
               Công ty
             </h4>
             <ul className="space-y-3">
@@ -82,7 +79,7 @@ export function FooterLanding() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm font-bold text-slate-500 hover:text-slate-950 transition-colors"
+                    className="text-sm font-bold text-zinc-500 hover:text-white transition-colors"
                   >
                     {item}
                   </Link>
@@ -92,7 +89,7 @@ export function FooterLanding() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
               Pháp lý
             </h4>
             <ul className="space-y-3">
@@ -100,7 +97,7 @@ export function FooterLanding() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm font-bold text-slate-500 hover:text-slate-950 transition-colors"
+                    className="text-sm font-bold text-zinc-500 hover:text-white transition-colors"
                   >
                     {item}
                   </Link>
@@ -109,16 +106,16 @@ export function FooterLanding() {
             </ul>
           </div>
 
-          {/* 3. Newsletter - Cột 2/12 cuối */}
+          {/* 3. Language */}
           <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
               Ngôn ngữ
             </h4>
             <div className="flex flex-col gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50 transition-all">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:bg-white/10 transition-all">
                 <Globe className="w-3.5 h-3.5" /> Tiếng Việt
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50 transition-all text-slate-400">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/5 text-xs font-bold text-zinc-600 hover:text-zinc-400 hover:border-white/10 transition-all">
                 English
               </button>
             </div>
@@ -126,23 +123,27 @@ export function FooterLanding() {
         </div>
 
         {/* Bottom Section */}
-        <div className="pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6">
-            <p className="text-xs font-bold text-slate-400">
+            <p className="text-xs font-bold text-zinc-600">
               © 2026 DEMIF SYSTEM. All rights reserved.
             </p>
-            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-300">
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-zinc-700">
               <span>Hà Nội</span>
-              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+              <span className="w-1 h-1 bg-zinc-800 rounded-full" />
               <span>Sài Gòn</span>
-              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+              <span className="w-1 h-1 bg-zinc-800 rounded-full" />
               <span>Đà Nẵng</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-4 py-2 rounded-full">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            Hệ thống đang hoạt động tốt
+          {/* System Status - Dark Mode Style */}
+          <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-full">
+            <div className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </div>
+            Hệ thống ổn định
           </div>
         </div>
       </div>

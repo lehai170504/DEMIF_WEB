@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Sparkles, Zap, ArrowRight } from "lucide-react";
+import { BookOpen, Zap, ArrowRight } from "lucide-react";
 import Image from "next/image";
 
 interface SidebarReviewProps {
@@ -18,13 +17,13 @@ export function SidebarReview({ reviewDue }: SidebarReviewProps) {
       whileHover={{ y: -5 }}
       transition={{ duration: 0.4 }}
     >
-      <Card className="relative overflow-hidden border-none bg-slate-900 p-6 shadow-2xl rounded-[2rem]">
-        {/* Background Decor - Tạo hiệu ứng ánh sáng mờ */}
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-orange-500/20 blur-[50px]" />
-        <div className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-blue-500/10 blur-[50px]" />
+      <div className="relative overflow-hidden border border-white/10 bg-[#18181b] p-6 shadow-2xl rounded-[2rem] group">
+        {/* Background Gradients */}
+        <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-orange-500/10 blur-[50px] group-hover:bg-orange-500/20 transition-colors duration-500" />
+        <div className="absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-blue-500/10 blur-[50px]" />
 
         <div className="relative z-10 space-y-6">
-          {/* Header với Badge thông báo */}
+          {/* Header */}
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -32,75 +31,77 @@ export function SidebarReview({ reviewDue }: SidebarReviewProps) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-400">
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500">
                   Daily Mission
                 </span>
               </div>
-              <h3 className="font-display text-xl font-bold leading-tight text-white">
+              <h3 className="font-bold text-xl leading-none text-white">
                 Ôn tập định kỳ
               </h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
-              <Zap className="h-5 w-5 text-orange-400 fill-orange-400" />
+
+            {/* Icon Box */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:border-orange-500/50 group-hover:bg-orange-500/10 transition-all">
+              <Zap className="h-5 w-5 text-orange-500 fill-orange-500" />
             </div>
           </div>
 
-          {/* Nội dung chính: Hiển thị số lượng từ cực kỳ nổi bật */}
-          <div className="flex items-center justify-between gap-4 py-2">
+          {/* Content: Count */}
+          <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-white tracking-tighter">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-5xl font-black text-white tracking-tighter drop-shadow-lg">
                   {reviewDue}
                 </span>
-                <span className="text-sm font-bold text-slate-400">
+                <span className="text-xs font-bold text-zinc-500 uppercase">
                   từ vựng
                 </span>
               </div>
-              <p className="text-xs font-medium text-slate-400 leading-relaxed">
-                Đang chờ bạn củng cố để ghi nhớ vĩnh viễn
+              <p className="text-[11px] font-medium text-zinc-400 leading-snug">
+                Đang chờ bạn củng cố để <br /> ghi nhớ vĩnh viễn
               </p>
             </div>
 
-            {/* Illustration thu nhỏ với hiệu ứng nổi */}
-            <div className="relative h-20 w-20 flex-shrink-0 drop-shadow-[0_10px_20px_rgba(249,115,22,0.3)]">
+            {/* 3D Floating Illustration Placeholder */}
+            <div className="relative h-16 w-16 flex-shrink-0">
               <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
+                animate={{ y: [0, -8, 0], rotate: [0, 5, 0] }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl shadow-lg shadow-orange-500/20 flex items-center justify-center border border-white/20"
               >
-                <Image
-                  src="/review-illustration.png"
-                  alt="Review"
-                  width={80}
-                  height={80}
-                  className="object-contain"
-                />
+                <BookOpen className="text-white h-8 w-8" />
               </motion.div>
             </div>
           </div>
 
-          {/* Progress Bar ảo (Tạo thêm động lực) */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
-              <span>Mục tiêu hôm nay</span>
-              <span>80%</span>
+          {/* Progress Bar Mockup */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+              <span>Tiến độ ngày</span>
+              <span className="text-white">80%</span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "80%" }}
-                className="h-full bg-gradient-to-r from-orange-500 to-amber-400"
+                transition={{ delay: 0.5, duration: 1 }}
+                className="h-full bg-gradient-to-r from-orange-500 to-orange-300 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
               />
             </div>
           </div>
 
-          {/* Action Button: Gradient mạnh mẽ */}
-          <Button className="group w-full h-12 rounded-2xl bg-orange-500 font-bold text-white shadow-lg shadow-orange-500/20 transition-all hover:bg-orange-600 hover:shadow-orange-500/40 active:scale-95">
+          {/* Action Button */}
+          <Button className="group w-full h-12 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:from-orange-600 hover:to-orange-600 font-black text-white text-[10px] uppercase tracking-widest shadow-lg shadow-orange-900/20 border border-white/10 transition-all active:scale-95">
             <BookOpen className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12" />
             Học ngay thôi
             <ArrowRight className="ml-auto h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
           </Button>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }
