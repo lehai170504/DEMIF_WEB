@@ -1,14 +1,17 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { TrendingUp, Activity, Calendar } from "lucide-react";
 import {
-  Line,
+  TrendingUp,
+  Activity,
+  Calendar,
+  BarChart as BarIcon,
+} from "lucide-react";
+import {
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   Bar,
   BarChart,
@@ -16,6 +19,7 @@ import {
   Area,
 } from "recharts";
 
+// ... (Giữ nguyên weeklyData và monthlyProgress)
 const weeklyData = [
   { day: "T2", lessons: 3, accuracy: 75, minutes: 25 },
   { day: "T3", lessons: 5, accuracy: 82, minutes: 40 },
@@ -39,27 +43,31 @@ export function LearningAnalyticsChart() {
   return (
     <div className="grid grid-cols-1 gap-6 font-mono">
       {/* 1. Biểu đồ Tuần - Bar Chart */}
-      <Card className="p-8 border-none bg-white dark:bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem]">
-        <div className="flex items-center justify-between mb-8">
+      <Card className="p-8 border border-white/10 bg-[#18181b] shadow-2xl rounded-[2.5rem] relative overflow-hidden">
+        {/* Background Decor */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full pointer-events-none" />
+
+        <div className="relative z-10 flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/20">
+            <div className="p-2.5 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/20 border border-orange-400/20">
               <Calendar className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-black uppercase tracking-tighter italic text-slate-900 dark:text-white">
+              <h3 className="text-sm font-black uppercase tracking-tighter italic text-white">
                 TIẾN ĐỘ TUẦN
               </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
                 Hoạt động 7 ngày gần nhất
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-[10px] font-black uppercase">
+          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-zinc-500">
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-orange-500" /> Bài học
+              <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.8)]" />{" "}
+              Bài học
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-slate-200" /> Phút học
+              <div className="w-2 h-2 rounded-full bg-zinc-700" /> Phút học
             </div>
           </div>
         </div>
@@ -69,67 +77,71 @@ export function LearningAnalyticsChart() {
             <BarChart
               data={weeklyData}
               margin={{ top: 0, right: 0, left: -25, bottom: 0 }}
+              barGap={4}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#f1f5f9"
+                stroke="rgba(255,255,255,0.05)"
               />
               <XAxis
                 dataKey="day"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }}
+                tick={{ fontSize: 10, fontWeight: "bold", fill: "#52525b" }}
+                dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }}
+                tick={{ fontSize: 10, fontWeight: "bold", fill: "#52525b" }}
               />
               <Tooltip
-                cursor={{ fill: "#f8fafc" }}
+                cursor={{ fill: "rgba(255,255,255,0.02)", radius: 8 }}
                 contentStyle={{
-                  borderRadius: "16px",
-                  border: "none",
-                  boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                  backgroundColor: "#09090b",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)",
                   fontSize: "11px",
                   fontWeight: "bold",
                   fontFamily: "monospace",
+                  color: "#e4e4e7",
                 }}
               />
               <Bar
                 dataKey="lessons"
                 fill="#f97316"
-                radius={[6, 6, 0, 0]}
-                barSize={20}
+                radius={[4, 4, 4, 4]}
+                barSize={12}
               />
               <Bar
                 dataKey="minutes"
-                fill="#e2e8f0"
-                radius={[6, 6, 0, 0]}
-                barSize={20}
+                fill="#3f3f46"
+                radius={[4, 4, 4, 4]}
+                barSize={12}
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </Card>
 
-      {/* 2. Biểu đồ Tháng - Area Chart (Độ chính xác) */}
-      <Card className="p-8 border-none bg-slate-900 shadow-2xl rounded-[2.5rem] relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-8 opacity-10">
-          <Activity className="w-24 h-24 text-orange-500" />
+      {/* 2. Biểu đồ Tháng - Area Chart */}
+      <Card className="p-8 border border-white/10 bg-black shadow-2xl rounded-[2.5rem] relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+          <Activity className="w-32 h-32 text-white" />
         </div>
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-8">
-            <div className="p-2.5 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/20">
+            <div className="p-2.5 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/20 border border-emerald-400/20">
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
             <div>
               <h3 className="text-sm font-black uppercase tracking-tighter italic text-white">
                 ĐỘ CHÍNH XÁC
               </h3>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
                 Phân tích hiệu suất theo tháng
               </p>
             </div>
@@ -156,20 +168,21 @@ export function LearningAnalyticsChart() {
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
-                  stroke="#1e293b"
+                  stroke="rgba(255,255,255,0.05)"
                 />
                 <XAxis
                   dataKey="month"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: "bold", fill: "#475569" }}
+                  tick={{ fontSize: 10, fontWeight: "bold", fill: "#52525b" }}
+                  dy={10}
                 />
                 <YAxis hide domain={[0, 100]} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderRadius: "16px",
-                    border: "1px solid #334155",
+                    backgroundColor: "#09090b",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(255,255,255,0.1)",
                     fontSize: "11px",
                     color: "white",
                     fontFamily: "monospace",
@@ -179,7 +192,7 @@ export function LearningAnalyticsChart() {
                   type="monotone"
                   dataKey="accuracy"
                   stroke="#10b981"
-                  strokeWidth={4}
+                  strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#colorAccuracy)"
                 />
@@ -188,8 +201,9 @@ export function LearningAnalyticsChart() {
                   dataKey="completed"
                   stroke="#f97316"
                   strokeWidth={2}
-                  strokeDasharray="5 5"
+                  strokeDasharray="4 4"
                   fill="none"
+                  opacity={0.5}
                 />
               </AreaChart>
             </ResponsiveContainer>
