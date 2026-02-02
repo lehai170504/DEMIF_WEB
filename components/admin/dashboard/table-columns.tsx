@@ -7,6 +7,7 @@ import {
   IconGripVertical,
   IconLoader,
   IconDotsVertical,
+  IconAlertCircle,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,11 +30,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useSortable } from "@dnd-kit/sortable";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 // --- Import Component Viewer ---
 import TableCellViewer from "./table-cell-viewer";
-import LessonDetailDialog from "@/components/admin/lesson/LessonDetailDialog";
-import { useState } from "react";
+import LessonDetailDialog from "@/components/admin/lesson/lesson-detail-dialog";
 // -----------------------------
 
 export const schema = z.object({
@@ -48,7 +50,6 @@ export const schema = z.object({
   highlighted: z.boolean().optional().default(false),
 });
 
-// Tạo component DragHandle ở đây hoặc trong file riêng
 function DragHandle({ id }: { id: number }) {
   const { attributes, listeners } = useSortable({
     id,
@@ -60,9 +61,9 @@ function DragHandle({ id }: { id: number }) {
       {...listeners}
       variant="ghost"
       size="icon"
-      className="text-muted-foreground size-7 hover:bg-transparent"
+      className="text-zinc-500 hover:text-white size-7 hover:bg-white/10 cursor-grab active:cursor-grabbing transition-colors"
     >
-      <IconGripVertical className="text-muted-foreground size-3" />
+      <IconGripVertical className="size-4" />
       <span className="sr-only">Kéo để sắp xếp</span>
     </Button>
   );
@@ -87,6 +88,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Chọn tất cả"
+          className="border-white/20 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
         />
       </div>
     ),
@@ -96,6 +98,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Chọn dòng"
+          className="border-white/20 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
         />
       </div>
     ),
@@ -105,10 +108,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "title",
     header: "Tiêu đề Bài tập",
-    cell: ({ row }) => {
-      // Dùng TableCellViewer đã tách
-      return <TableCellViewer item={row.original} />;
-    },
+    cell: ({ row }) => <TableCellViewer item={row.original} />,
     enableHiding: false,
   },
   {
@@ -116,7 +116,15 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Loại Bài Tập",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="px-1.5">
+        <Badge
+          variant="outline"
+          className={cn(
+            "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border",
+            row.original.type === "Dictation"
+              ? "border-blue-500/30 text-blue-400 bg-blue-500/5"
+              : "border-purple-500/30 text-purple-400 bg-purple-500/5",
+          )}
+        >
           {row.original.type}
         </Badge>
       </div>
@@ -128,11 +136,15 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
     cell: ({ row }) => (
       <Badge
         variant="secondary"
-        className={
-          row.original.level === "Advanced"
-            ? "bg-primary/10 text-primary"
-            : "text-muted-foreground"
-        }
+        className={cn(
+          "bg-white/5 text-zinc-400 hover:bg-white/10 transition-colors border border-transparent",
+          row.original.level === "Advanced" &&
+            "text-orange-400 border-orange-500/20 bg-orange-500/5",
+          row.original.level === "Intermediate" &&
+            "text-yellow-400 border-yellow-500/20 bg-yellow-500/5",
+          row.original.level === "Beginner" &&
+            "text-emerald-400 border-emerald-500/20 bg-emerald-500/5",
+        )}
       >
         {row.original.level}
       </Badge>
@@ -142,19 +154,36 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => (
-      <Badge variant="outline" className="px-1.5">
+      <div className="flex items-center gap-2">
         {row.original.status === "Published" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          <IconCircleCheckFilled className="size-4 text-emerald-500" />
+        ) : row.original.status === "Draft" ? (
+          <div className="size-2 rounded-full bg-zinc-600 ml-1 mr-1" />
         ) : (
-          <IconLoader className="animate-spin" />
+          <IconAlertCircle className="size-4 text-yellow-500" />
         )}
-        {row.original.status}
-      </Badge>
+        <span
+          className={cn(
+            "text-xs font-medium",
+            row.original.status === "Published"
+              ? "text-emerald-400"
+              : row.original.status === "Draft"
+                ? "text-zinc-500"
+                : "text-yellow-400",
+          )}
+        >
+          {row.original.status}
+        </span>
+      </div>
     ),
   },
   {
     accessorKey: "min_accuracy",
-    header: () => <div className="w-full text-right">Độ chính xác Y/C</div>,
+    header: () => (
+      <div className="w-full text-right text-xs font-bold text-zinc-500 uppercase">
+        Min Acc
+      </div>
+    ),
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
@@ -170,7 +199,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
           Độ chính xác Y/C
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border-orange-500 focus-visible:bg-white/5 text-zinc-300 font-mono text-xs hover:bg-white/5 transition-all"
           defaultValue={row.original.min_accuracy}
           id={`${row.original.id}-min_accuracy`}
         />
@@ -179,7 +208,11 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
   {
     accessorKey: "max_attempts",
-    header: "Số lần thử TĐ",
+    header: () => (
+      <div className="w-full text-right text-xs font-bold text-zinc-500 uppercase">
+        Max Try
+      </div>
+    ),
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
@@ -195,7 +228,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
           Số lần thử TĐ
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border-orange-500 focus-visible:bg-white/5 text-zinc-300 font-mono text-xs hover:bg-white/5 transition-all"
           defaultValue={row.original.max_attempts}
           id={`${row.original.id}-max_attempts`}
         />
@@ -209,7 +242,21 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
       const isAssigned = row.original.reviewer !== "Chỉ định";
 
       if (isAssigned) {
-        return row.original.reviewer;
+        return (
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                row.original.reviewer === "AI Voice Check"
+                  ? "bg-purple-500 shadow-[0_0_5px_#a855f7]"
+                  : "bg-blue-500",
+              )}
+            />
+            <span className="text-xs text-zinc-300">
+              {row.original.reviewer}
+            </span>
+          </div>
+        );
       }
 
       return (
@@ -219,15 +266,18 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
           </Label>
           <Select defaultValue={row.original.reviewer}>
             <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
+              className="w-32 h-8 text-xs bg-white/5 border-white/10 text-zinc-400 focus:ring-orange-500/50"
               size="sm"
               id={`${row.original.id}-reviewer`}
             >
               <SelectValue placeholder="Chỉ định" />
             </SelectTrigger>
-            <SelectContent align="end">
+            <SelectContent
+              align="end"
+              className="bg-[#18181b] border-white/10 text-zinc-300"
+            >
               <SelectItem value="AI Voice Check">AI Voice Check</SelectItem>
-              <SelectItem value="Admin A">Admin A</SelectItem>F
+              <SelectItem value="Admin A">Admin A</SelectItem>
               <SelectItem value="Admin B">Admin B</SelectItem>
             </SelectContent>
           </Select>
@@ -251,28 +301,24 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
         toast.success("Đã xóa bài học!");
       };
 
-      // 🧩 Hàm sao chép bài học
       const handleDuplicate = () => {
         const newLesson = {
           ...lesson,
-          id: Date.now(), // tạo id giả mới
+          id: Date.now(),
           title: `${lesson.title} (Copy)`,
         };
         console.log("Duplicated lesson:", newLesson);
         toast.success(`Đã sao chép bài học "${lesson.title}"`);
-        // TODO: Gọi API tạo mới bài học từ newLesson
       };
 
-      // 🧩 Hàm làm nổi bật bài học
       const handleHighlight = () => {
         const updated = { ...lesson, highlighted: !lesson.highlighted };
         console.log("Highlight toggled:", updated);
         toast.success(
           updated.highlighted
             ? `Đã làm nổi bật bài "${lesson.title}"`
-            : `Đã bỏ nổi bật bài "${lesson.title}"`
+            : `Đã bỏ nổi bật bài "${lesson.title}"`,
         );
-        // TODO: Gọi API updateLesson(updated)
       };
 
       return (
@@ -281,27 +327,39 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/10 data-[state=open]:text-white"
                 size="icon"
               >
-                <IconDotsVertical />
+                <IconDotsVertical className="size-4" />
                 <span className="sr-only">Mở menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setOpen(true)}>
+            <DropdownMenuContent
+              align="end"
+              className="w-48 bg-[#18181b] border-white/10 text-zinc-300"
+            >
+              <DropdownMenuItem
+                onClick={() => setOpen(true)}
+                className="focus:bg-white/10 focus:text-white cursor-pointer"
+              >
                 Chỉnh sửa
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDuplicate}>
+              <DropdownMenuItem
+                onClick={handleDuplicate}
+                className="focus:bg-white/10 focus:text-white cursor-pointer"
+              >
                 Sao chép
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleHighlight}>
+              <DropdownMenuItem
+                onClick={handleHighlight}
+                className="focus:bg-white/10 focus:text-white cursor-pointer"
+              >
                 {lesson.highlighted ? "Bỏ nổi bật" : "Làm nổi bật"}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem
                 onClick={() => handleDelete(lesson.id.toString())}
-                className="text-red-500"
+                className="text-red-500 focus:bg-red-500/10 focus:text-red-400 cursor-pointer"
               >
                 Xóa
               </DropdownMenuItem>

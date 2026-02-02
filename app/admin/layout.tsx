@@ -1,7 +1,7 @@
 // app/admin/layout.tsx
 
 import { ReactNode } from "react";
-import AdminNavbar from "../../components/admin/AdminNavbar";
+import AdminNavbar from "../../components/admin/navbar";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminFooter from "../../components/admin/AdminFooter";
 

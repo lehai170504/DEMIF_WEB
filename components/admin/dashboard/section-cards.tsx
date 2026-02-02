@@ -18,9 +18,10 @@ const stats = [
     description: "+12% tháng này",
     icon: Users,
     trend: "up",
-    gradient: "from-blue-500/10 to-transparent",
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-600",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+    glow: "group-hover:shadow-blue-500/20",
   },
   {
     title: "Câu đã chép",
@@ -28,9 +29,10 @@ const stats = [
     description: "+5.2% hôm nay",
     icon: Headphones,
     trend: "up",
-    gradient: "from-orange-500/10 to-transparent",
-    iconColor: "text-orange-500",
-    bgColor: "bg-orange-500",
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+    border: "border-orange-500/20",
+    glow: "group-hover:shadow-orange-500/20",
   },
   {
     title: "Giờ Shadowing",
@@ -38,9 +40,10 @@ const stats = [
     description: "-2% tuần trước",
     icon: Mic2,
     trend: "down",
-    gradient: "from-purple-500/10 to-transparent",
-    iconColor: "text-purple-500",
-    bgColor: "bg-purple-500",
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    border: "border-purple-500/20",
+    glow: "group-hover:shadow-purple-500/20",
   },
   {
     title: "Hoàn thành",
@@ -48,53 +51,58 @@ const stats = [
     description: "Mục tiêu: 90%",
     icon: FileCheck,
     trend: "up",
-    gradient: "from-emerald-500/10 to-transparent",
-    iconColor: "text-emerald-500",
-    bgColor: "bg-emerald-500",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20",
+    glow: "group-hover:shadow-emerald-500/20",
   },
 ];
 
 export default function SectionCards() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-2">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 px-2">
       {stats.map((stat, index) => (
         <Card
           key={index}
-          className="group relative overflow-hidden border-none bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500"
+          className={cn(
+            "group relative overflow-hidden border border-white/10 bg-[#18181b] backdrop-blur-xl shadow-lg transition-all duration-300 hover:-translate-y-1 rounded-[1.5rem]",
+            stat.glow,
+          )}
         >
-          {/* Decorative Gradient */}
+          {/* Background Glow */}
           <div
             className={cn(
-              "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500",
-              stat.gradient
+              "absolute -right-6 -top-6 w-24 h-24 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+              stat.bg.replace("/10", "/20"),
             )}
           />
 
-          <CardHeader className="relative flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground/80">
+          <CardHeader className="relative flex flex-row items-center justify-between pb-2 space-y-0 z-10">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-zinc-300 transition-colors">
               {stat.title}
             </CardTitle>
             <div
               className={cn(
-                "p-2 rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
-                "bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700",
-                stat.iconColor
+                "p-2 rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 border",
+                stat.bg,
+                stat.border,
+                stat.color,
               )}
             >
               <stat.icon className="h-4 w-4" />
             </div>
           </CardHeader>
-          <CardContent className="relative">
-            <div className="text-3xl font-black tracking-tighter italic">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-black tracking-tighter italic text-white mb-2">
               {stat.value}
             </div>
-            <div className="flex items-center mt-1">
+            <div className="flex items-center">
               <div
                 className={cn(
-                  "flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold",
+                  "flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold border",
                   stat.trend === "up"
-                    ? "bg-emerald-100 text-emerald-600"
-                    : "bg-red-100 text-red-600"
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border-red-500/20",
                 )}
               >
                 {stat.trend === "up" ? (
@@ -104,7 +112,7 @@ export default function SectionCards() {
                 )}
                 {stat.description.split(" ")[0]}
               </div>
-              <span className="ml-2 text-[10px] text-muted-foreground font-medium">
+              <span className="ml-2 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
                 {stat.description.split(" ").slice(1).join(" ")}
               </span>
             </div>
