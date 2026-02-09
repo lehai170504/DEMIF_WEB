@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Activity,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -37,6 +38,12 @@ const MENU_GROUPS = [
     group: "Hệ thống",
     items: [
       { href: "/admin/users", icon: Users, label: "Người dùng" },
+      {
+        href: "/admin/subscriptions",
+        icon: CreditCard,
+        label: "Gói dịch vụ",
+      },
+      // ------------------------
       { href: "/admin/orders", icon: ShoppingCart, label: "Đơn hàng" },
       { href: "/admin/feedback", icon: Bot, label: "AI Feedback" },
       { href: "/admin/progress", icon: BarChart3, label: "Tiến độ" },
