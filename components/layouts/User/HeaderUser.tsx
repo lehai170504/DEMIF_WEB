@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react"; // 1. Import hook
 
 const navLinks = [
   { name: "Trang chủ", href: "/home" },
@@ -35,10 +37,27 @@ const navLinks = [
 
 export function HeaderUser() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  // 2. Thêm state isMounted để kiểm tra client-side rendering
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const firstLetter = user?.username
+    ? user.username.charAt(0).toUpperCase()
+    : "U";
+  const displayName = user?.username || "Người dùng";
+  const displayEmail = user?.email || "Chưa cập nhật email";
 
   return (
     <motion.header
-      // 1. Hiệu ứng trượt từ trên xuống khi tải trang
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -50,17 +69,15 @@ export function HeaderUser() {
           <div className="flex items-center gap-10">
             <Link href="/home" className="flex items-center gap-3 group">
               <motion.div
-                // 2. Hiệu ứng 3D Logo: Phóng to và nghiêng nhẹ khi hover
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] shadow-lg shadow-orange-500/20 border border-white/10"
               >
                 <img
                   src="/DemifLogo.png"
-                  alt="D"
+                  alt="Demif Logo"
                   className="w-7 h-7 brightness-0 invert drop-shadow-md"
                 />
-                {/* Lớp phủ sáng bóng bên trong logo */}
                 <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.div>
 
@@ -86,7 +103,6 @@ export function HeaderUser() {
                         : "text-zinc-400 hover:text-white",
                     )}
                   >
-                    {/* 3. Layout Animation: Hiệu ứng "Viên thuốc" trượt mượt mà */}
                     {isActive && (
                       <motion.div
                         layoutId="active-pill"
@@ -119,7 +135,6 @@ export function HeaderUser() {
               >
                 <Link href="/upgrade">
                   <motion.div
-                    // Hiệu ứng lấp lánh xoay liên tục
                     animate={{ rotate: [0, 15, -15, 0] }}
                     transition={{
                       repeat: Infinity,
@@ -134,7 +149,6 @@ export function HeaderUser() {
               </Button>
             </motion.div>
 
-            {/* Divider */}
             <div className="hidden sm:block w-px h-8 bg-white/10" />
 
             {/* B. User Profile Dropdown */}
@@ -145,13 +159,26 @@ export function HeaderUser() {
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-white/5 transition-all outline-none group border border-transparent hover:border-white/10"
                 >
+                  {/* --- 3. Avatar động (Đã fix Hydration) --- */}
                   <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-white font-black text-xs shadow-lg relative overflow-hidden">
-                    <span className="relative z-10">HV</span>
+                    {/* Chỉ render img khi client đã load (isMounted = true) */}
+                    {isMounted && user?.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={displayName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      // Server và Client render lần đầu sẽ giống nhau ở đây
+                      <span className="relative z-10">{firstLetter}</span>
+                    )}
                     <div className="absolute inset-0 bg-[#FF7A00]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
+
+                  {/* --- 4. Tên hiển thị động --- */}
                   <div className="hidden sm:block text-left">
-                    <p className="text-[12px] font-bold leading-none text-zinc-200 group-hover:text-white transition-colors">
-                      Hà Vi
+                    <p className="text-[12px] font-bold leading-none text-zinc-200 group-hover:text-white transition-colors max-w-[100px] truncate">
+                      {displayName}
                     </p>
                     <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-widest">
                       Online
@@ -167,15 +194,28 @@ export function HeaderUser() {
               >
                 <DropdownMenuLabel className="p-0 mb-2">
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20">
-                      HV
+                    {/* Avatar Lớn trong Menu (Cũng cần fix tương tự) */}
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20 overflow-hidden">
+                      {isMounted && user?.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={displayName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        firstLetter
+                      )}
                     </div>
+
                     <div className="overflow-hidden">
                       <p className="text-sm font-bold text-white uppercase truncate">
-                        Hà Vi
+                        {displayName}
                       </p>
-                      <p className="text-[10px] text-zinc-400 font-medium truncate">
-                        havi.student@demif.com
+                      <p
+                        className="text-[10px] text-zinc-400 font-medium truncate"
+                        title={displayEmail}
+                      >
+                        {displayEmail}
                       </p>
                     </div>
                   </div>
@@ -224,7 +264,11 @@ export function HeaderUser() {
 
                 <DropdownMenuSeparator className="my-2 bg-white/10" />
 
-                <DropdownMenuItem className="rounded-xl cursor-pointer p-3 text-red-400 focus:bg-red-500/10 focus:text-red-400 focus:border-red-500/20 border border-transparent">
+                {/* --- 5. Nút Logout --- */}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="rounded-xl cursor-pointer p-3 text-red-400 focus:bg-red-500/10 focus:text-red-400 focus:border-red-500/20 border border-transparent"
+                >
                   <LogOut className="mr-3 h-4 w-4" />
                   <span className="font-bold text-[10px] uppercase tracking-wider">
                     Đăng xuất

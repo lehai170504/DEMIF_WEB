@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
@@ -16,18 +17,18 @@ export default function QueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            // CẤU HÌNH CACHE TOÀN CỤC (để đỡ gọi API nhiều)
-            // Với Next.js, nên set staleTime > 0 để tránh fetch lại ngay lập tức khi client hydration
-            staleTime: 1000 * 60 * 5, // 5 phút
+            // CẤU HÌNH CACHE TOÀN CỤC (để đỡ gọ để tránh fetch lại ngay lập tức khi client hydration
+            staleTime: 1000 * 60 * 5, // 5 phúti API nhiều)
+            // Với Next.js, nên set staleTime > 0
             refetchOnWindowFocus: false,
           },
         },
-      })
+      }),
   );
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthProvider>{children}</AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

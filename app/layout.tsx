@@ -7,7 +7,8 @@ import { Suspense } from "react";
 import "./globals.css";
 import QueryProvider from "./providers";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
-import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton"; // <--- 1. Import component
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,14 +23,13 @@ const inter = Inter({
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono", // Ghi đè biến font-mono mặc định
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
   title: "DEMIF - Nền tảng luyện nói tiếng Anh cùng AI",
   description:
     "Làm chủ tiếng Anh thông qua các bài tập chính tả và Shadowing thông minh.",
-  generator: "v0.app",
   icons: {
     icon: "/DemifLogo.png",
   },
@@ -47,7 +47,6 @@ export default function RootLayout({
         className={`${jetbrainsMono.variable} ${poppins.variable} ${inter.variable} antialiased bg-[#050505] text-zinc-100`}
       >
         <AmbientBackground />
-
         <ScrollToTopButton />
 
         <div className="relative z-10 flex flex-col min-h-screen">
@@ -55,6 +54,21 @@ export default function RootLayout({
             <Suspense fallback={null}>{children}</Suspense>
           </QueryProvider>
         </div>
+
+        {/* --- FIX LỖI --- */}
+        <Toaster
+          position="top-right"
+          richColors
+          theme="dark"
+          closeButton
+          className="fixed"
+          style={{
+            position: "fixed", // Bắt buộc cố định
+            top: 20, // Cách đỉnh 20px
+            right: 20, // Cách phải 20px
+            zIndex: 99999, // Luôn nằm trên cùng
+          }}
+        />
 
         <Analytics />
       </body>

@@ -2,35 +2,46 @@
 
 import { motion } from "framer-motion";
 import { Sparkles, ShieldCheck, Zap, Globe, Cpu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 
-export const AuthVisual = () => {
-  // Fix lỗi Hydration bằng cách chỉ tạo hạt sau khi component mount ở Client
-  const [particles, setParticles] = useState<
-    { top: string; left: string; duration: number; delay: number }[]
-  >([]);
+// Định nghĩa kiểu dữ liệu cho hạt
+type Particle = {
+  top: string;
+  left: string;
+  duration: number;
+  delay: number;
+};
+
+// Sử dụng memo để ngăn component này render lại khi cha (LoginPage) thay đổi state (nhập liệu)
+export const AuthVisual = memo(() => {
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    const newParticles = [...Array(8)].map(() => ({
+    // Chỉ tạo hạt ở phía Client để tránh lỗi Hydration (Server HTML != Client HTML)
+    const newParticles = [...Array(12)].map(() => ({
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
-      duration: 4 + Math.random() * 6,
+      duration: 5 + Math.random() * 5, // Random từ 5s -> 10s
       delay: Math.random() * 5,
     }));
     setParticles(newParticles);
   }, []);
 
   return (
-    <div className="hidden lg:flex w-1/2 relative flex-col items-center justify-center p-12 overflow-hidden border-l border-white/5 bg-gradient-to-b from-transparent via-orange-500/[0.03] to-transparent">
-      {/* 1. HIỆU ỨNG HẠT NĂNG LƯỢNG TRÔI NỔI */}
+    <div className="hidden lg:flex w-1/2 relative flex-col items-center justify-center p-12 overflow-hidden border-l border-white/5 bg-[#050505]">
+      {/* BACKGROUND GRADIENT */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FF7A00]/[0.02] to-transparent pointer-events-none" />
+
+      {/* 1. HIỆU ỨNG HẠT NĂNG LƯỢNG (Particles) */}
       {particles.map((p, i) => (
         <motion.div
           key={i}
+          initial={{ opacity: 0, scale: 0 }}
           animate={{
-            y: [0, -120, 0],
-            x: [0, 30, -30, 0],
-            opacity: [0, 0.5, 0],
-            scale: [0, 1.5, 0],
+            y: [0, -100, 0],
+            x: [0, 50, -50, 0],
+            opacity: [0, 0.4, 0],
+            scale: [0, 1.2, 0],
           }}
           transition={{
             duration: p.duration,
@@ -38,140 +49,188 @@ export const AuthVisual = () => {
             delay: p.delay,
             ease: "easeInOut",
           }}
-          className="absolute w-1 h-1 bg-orange-500 rounded-full blur-[1px]"
+          className="absolute w-1 h-1 bg-[#FF7A00] rounded-full blur-[1px]"
           style={{ top: p.top, left: p.left }}
         />
       ))}
 
-      {/* 2. CÁC LỚP ÁNH SÁNG MÔI TRƯỜNG (Ambient Glow) */}
-      <div className="absolute w-[500px] h-[500px] bg-[#FF7A00]/5 blur-[120px] rounded-full animate-pulse" />
-      <div className="absolute top-[20%] right-[-10%] w-[300px] h-[300px] bg-purple-600/10 blur-[100px] rounded-full" />
+      {/* 2. ÁNH SÁNG MÔI TRƯỜNG (Ambient Glow) */}
+      <div className="absolute w-[600px] h-[600px] bg-[#FF7A00]/5 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute top-[10%] right-[-20%] w-[400px] h-[400px] bg-purple-600/10 blur-[100px] rounded-full" />
 
-      {/* 3. TRUNG TÂM THỊ GIÁC 3D */}
+      {/* 3. TRUNG TÂM THỊ GIÁC 3D (Core) */}
       <div
-        className="relative flex items-center justify-center w-full h-[450px]"
-        style={{ perspective: "1200px" }}
+        className="relative flex items-center justify-center w-full h-[500px]"
+        style={{ perspective: "1000px" }}
       >
-        {/* Hệ thống vòng quỹ đạo */}
-        <div className="absolute w-80 h-80 border border-white/5 rounded-full" />
-        <div className="absolute w-[400px] h-[400px] border border-white/[0.02] rounded-full" />
+        {/* Các vòng quỹ đạo tĩnh */}
+        <div className="absolute w-[350px] h-[350px] border border-white/5 rounded-full opacity-50" />
+        <div className="absolute w-[480px] h-[480px] border border-white/[0.03] rounded-full opacity-30" />
 
-        {/* Khối Core AI xoay đa trục */}
+        {/* Khối Core xoay 3D */}
         <motion.div
           animate={{
             rotateY: [0, 360],
-            rotateX: [0, 15, 0],
+            rotateX: [10, -10, 10], // Xoay nhẹ trục X để tạo cảm giác 3D
           }}
           transition={{
-            rotateY: { duration: 20, repeat: Infinity, ease: "linear" },
-            rotateX: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+            rotateY: { duration: 25, repeat: Infinity, ease: "linear" },
+            rotateX: { duration: 10, repeat: Infinity, ease: "easeInOut" },
           }}
           style={{ transformStyle: "preserve-3d" }}
-          className="w-72 h-72 relative flex items-center justify-center"
+          className="w-80 h-80 relative flex items-center justify-center"
         >
-          {/* Vòng quét năng lượng lan tỏa */}
+          {/* Vòng năng lượng tỏa ra (Pulse) */}
           <motion.div
-            animate={{ scale: [1, 2], opacity: [0.6, 0] }}
+            animate={{ scale: [0.8, 1.5], opacity: [0.3, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeOut" }}
-            className="absolute inset-0 border border-[#FF7A00]/40 rounded-full"
+            className="absolute inset-0 border border-[#FF7A00]/30 rounded-full"
           />
 
-          {/* Quỹ đạo hạt công nghệ */}
-          <div className="absolute inset-0 border-2 border-white/5 rounded-full rotate-45 border-t-[#FF7A00]/50 animate-[spin_10s_linear_infinite]" />
-          <div className="absolute inset-10 border border-white/5 rounded-full -rotate-45 border-b-purple-500/50 animate-[spin_15s_linear_infinite_reverse]" />
+          {/* Vòng quay Orbit 1 */}
+          <div className="absolute inset-0 border border-white/10 rounded-full rotate-45 border-t-[#FF7A00]/60 animate-[spin_8s_linear_infinite]" />
 
-          {/* Khối cầu gương trung tâm */}
-          <div className="relative w-36 h-36 bg-black/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/20 shadow-[0_0_80px_rgba(255,122,0,0.2)] flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#FF7A00]/20 to-purple-600/20" />
+          {/* Vòng quay Orbit 2 (Ngược chiều) */}
+          <div className="absolute inset-8 border border-white/5 rounded-full -rotate-45 border-b-purple-500/60 animate-[spin_12s_linear_infinite_reverse]" />
 
-            {/* Zap Icon phát sáng */}
+          {/* KHỐI CẦU GƯƠNG TRUNG TÂM */}
+          <div className="relative w-40 h-40 bg-black/60 backdrop-blur-3xl rounded-full border border-white/10 shadow-[0_0_60px_rgba(255,122,0,0.15)] flex items-center justify-center overflow-hidden z-10">
+            {/* Gradient nền bên trong cầu */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#FF7A00]/10 to-purple-600/10" />
+
+            {/* Icon Sét (Zap) */}
             <motion.div
               animate={{
-                filter: ["brightness(1)", "brightness(1.8)", "brightness(1)"],
+                filter: ["brightness(1)", "brightness(1.5)", "brightness(1)"],
+                scale: [1, 1.1, 1],
               }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: 3, repeat: Infinity }}
             >
-              <Zap className="w-16 h-16 text-white fill-[#FF7A00] drop-shadow-[0_0_20px_#FF7A00]" />
+              <Zap className="w-16 h-16 text-zinc-100 fill-[#FF7A00] drop-shadow-[0_0_15px_rgba(255,122,0,0.8)]" />
             </motion.div>
 
-            {/* Hiệu ứng tia sáng quét qua */}
+            {/* Hiệu ứng tia sáng quét qua bề mặt (Shine effect) */}
             <motion.div
-              animate={{ x: [-200, 200] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12"
+              animate={{ x: ["-150%", "150%"] }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
             />
           </div>
         </motion.div>
 
-        {/* 4. CÁC THẺ TRẠNG THÁI (Floating Labels) */}
-        {/* Thẻ AI Verified */}
-        <motion.div
-          animate={{ y: [0, -30, 0], x: [0, 10, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-10 right-4 p-4 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl flex items-center gap-4 shadow-2xl z-20"
-        >
-          <div className="p-2.5 bg-emerald-500/20 rounded-2xl border border-emerald-500/20">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
-              Xác thực AI
-            </span>
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-tight">
-              Hệ thống an toàn
-            </span>
-          </div>
-        </motion.div>
+        {/* 4. FLOATING CARDS (Thẻ trôi nổi) */}
+        <FloatingCard
+          icon={<ShieldCheck className="w-5 h-5 text-emerald-400" />}
+          label="AI Verified"
+          sub="Secure Core"
+          color="emerald"
+          className="top-20 right-10"
+          delay={0}
+        />
 
-        {/* Thẻ Neural Processing */}
-        <motion.div
-          animate={{ y: [0, 30, 0], x: [0, -10, 0] }}
-          transition={{ duration: 7, repeat: Infinity, delay: 0.5 }}
-          className="absolute bottom-10 left-4 p-4 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl flex items-center gap-4 shadow-2xl z-20"
-        >
-          <div className="p-2.5 bg-[#FF7A00]/20 rounded-2xl border border-[#FF7A00]/20">
-            <Cpu className="w-6 h-6 text-[#FF7A00]" />
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
-              Mạng thần kinh
-            </span>
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-tight">
-              Đang tối ưu dữ liệu
-            </span>
-          </div>
-        </motion.div>
+        <FloatingCard
+          icon={<Cpu className="w-5 h-5 text-[#FF7A00]" />}
+          label="Neural Engine"
+          sub="Processing..."
+          color="orange"
+          className="bottom-20 left-10"
+          delay={1.5}
+        />
 
-        {/* Thẻ Global Connect */}
+        {/* Hành tinh nhỏ quay quanh */}
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-[85%] -translate-y-1/2 p-3 bg-white/5 rounded-full border border-white/10"
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0"
         >
-          <Globe className="w-5 h-5 text-purple-400 opacity-50" />
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 p-2 bg-[#0D0D0D] border border-white/10 rounded-full shadow-lg">
+            <Globe className="w-4 h-4 text-purple-400" />
+          </div>
         </motion.div>
       </div>
 
-      {/* 5. PHẦN CHỮ THƯƠNG HIỆU */}
-      <div className="mt-12 text-center relative z-10 font-mono">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-orange-500/50" />
-          <span className="text-[10px] font-black text-[#FF7A00] uppercase tracking-[0.5em]">
-            Hệ sinh thái Demif
+      {/* 5. TEXT BRANDING */}
+      <div className="mt-8 text-center relative z-10">
+        <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
+          <Sparkles className="w-3 h-3 text-[#FF7A00]" />
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            Demif Ecosystem
           </span>
-          <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-orange-500/50" />
         </div>
-        <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-3 leading-none">
-          Nâng Tầm <span className="text-[#FF7A00]">Tiếng Anh</span>
+
+        <h2 className="text-3xl lg:text-4xl font-black text-white italic uppercase tracking-tighter mb-2">
+          Master{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-purple-500">
+            English
+          </span>
         </h2>
-        <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.25em] max-w-[320px] leading-relaxed mx-auto">
-          Trải nghiệm học tập cá nhân hóa bằng trí tuệ nhân tạo thế hệ mới
+        <p className="text-zinc-500 text-xs font-medium uppercase tracking-[0.3em] max-w-xs mx-auto">
+          with Advanced AI Intelligence
         </p>
       </div>
-
-      {/* Trang trí góc Tech Style */}
-      <div className="absolute top-10 right-10 w-24 h-24 border-r border-t border-orange-500/20 rounded-tr-[3rem]" />
-      <div className="absolute bottom-10 left-10 w-24 h-24 border-l border-b border-[#FF7A00]/20 rounded-bl-[3rem]" />
     </div>
   );
+});
+
+// Tách nhỏ component FloatingCard để code gọn hơn
+const FloatingCard = ({ icon, label, sub, color, className, delay }: any) => {
+  // Map màu sắc cụ thể để Tailwind có thể detect được class khi build
+  const colorStyles: Record<
+    string,
+    { bg: string; border: string; text: string }
+  > = {
+    emerald: {
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/10",
+      text: "text-emerald-400",
+    },
+    orange: {
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/10",
+      text: "text-orange-400",
+    },
+    // Thêm các màu khác nếu cần (mặc định fallback về orange)
+    default: {
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/10",
+      text: "text-orange-400",
+    },
+  };
+
+  const currentStyle = colorStyles[color] || colorStyles.default;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: [0, -15, 0] }}
+      transition={{
+        y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: delay },
+        opacity: { duration: 0.5 },
+      }}
+      className={`absolute ${className} p-3 bg-[#0D0D0D]/80 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center gap-3 shadow-2xl z-20`}
+    >
+      <div
+        className={`p-2 rounded-xl ${currentStyle.bg} border ${currentStyle.border}`}
+      >
+        {icon}
+      </div>
+      <div className="flex flex-col text-left">
+        <span
+          className={`text-[10px] font-black uppercase tracking-wider ${currentStyle.text}`}
+        >
+          {label}
+        </span>
+        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-tight">
+          {sub}
+        </span>
+      </div>
+    </motion.div>
+  );
 };
+
+AuthVisual.displayName = "AuthVisual";
