@@ -2,6 +2,8 @@
 import axiosClient from "@/lib/axios-client";
 import {
   ChangePasswordPayload,
+  FirebaseLoginPayload,
+  FirebaseLoginResponse,
   LoginResponse,
   RegisterPayload,
   RegisterResponse,
@@ -34,5 +36,11 @@ export const authService = {
 
   register: async (payload: RegisterPayload): Promise<RegisterResponse> => {
     return await axiosClient.post("/Auth/register", payload);
+  },
+
+  firebaseLogin: async (
+    payload: FirebaseLoginPayload,
+  ): Promise<FirebaseLoginResponse> => {
+    return await axiosClient.post("/Auth/firebase-login", payload);
   },
 };

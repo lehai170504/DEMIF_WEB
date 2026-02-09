@@ -12,7 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { AuthVisual } from "@/components/auth/AuthVisual";
+import { AuthVisual } from "@/components/auth/auth-visual";
 import { useRegister } from "@/hooks/use-auth";
 import { registerSchema, RegisterFormValues } from "@/schemas/auth.schema";
 
@@ -280,27 +280,6 @@ export default function SignupPage() {
           </form>
 
           {/* FOOTER */}
-          <div className="relative my-6 text-center relative z-10">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-white/5" />
-            </div>
-            <div className="relative flex justify-center text-[10px] uppercase font-black tracking-[0.2em]">
-              <span className="bg-[#0D0D0D] px-3 text-zinc-500 italic">
-                Hoặc đăng ký với
-              </span>
-            </div>
-          </div>
-
-          <div className="relative z-10">
-            <Button
-              variant="outline"
-              className="w-full bg-white/5 border-white/10 hover:bg-white/10 rounded-xl h-12 font-bold gap-3 text-zinc-200 transition-all active:scale-95 shadow-xl"
-            >
-              <Chrome className="w-5 h-5 text-[#FF7A00]" />
-              Tiếp tục với Google
-            </Button>
-          </div>
-
           <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
             <p className="text-zinc-500 text-sm">
               Đã có tài khoản?{" "}

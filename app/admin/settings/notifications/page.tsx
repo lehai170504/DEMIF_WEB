@@ -5,9 +5,12 @@ import { Switch } from "@/components/ui/switch";
 
 export default function NotificationsPage() {
   return (
-    <Card className="border-none shadow-xl bg-white rounded-[2rem]">
+    <Card className="border-border shadow-xl bg-card rounded-[2rem] animate-in fade-in duration-500 font-mono">
       <CardHeader>
-        <CardTitle className="text-2xl font-black">Cài đặt thông báo</CardTitle>
+        <CardTitle className="text-2xl font-black text-foreground flex items-center gap-3">
+          <Bell className="w-6 h-6 text-primary" />
+          Cài đặt thông báo
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {[
@@ -29,18 +32,24 @@ export default function NotificationsPage() {
         ].map((item, i) => (
           <div
             key={i}
-            className="flex items-center justify-between py-4 border-b border-slate-50 last:border-0"
+            className="flex items-center justify-between py-4 border-b border-border last:border-0 hover:bg-muted/20 p-2 rounded-xl transition-colors"
           >
-            <div className="flex gap-4">
-              <item.icon className="text-orange-500 w-5 h-5" />
+            <div className="flex gap-4 items-center">
+              <div className="p-3 bg-muted rounded-xl">
+                <item.icon className="text-primary w-5 h-5" />
+              </div>
               <div>
-                <h4 className="font-bold text-slate-900">{item.title}</h4>
-                <p className="text-sm text-slate-500">{item.desc}</p>
+                <h4 className="font-bold text-foreground text-sm uppercase tracking-wide">
+                  {item.title}
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">
+                  {item.desc}
+                </p>
               </div>
             </div>
             <Switch
               defaultChecked={i === 2}
-              className="data-[state=checked]:bg-orange-600"
+              className="data-[state=checked]:bg-primary"
             />
           </div>
         ))}

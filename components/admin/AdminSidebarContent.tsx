@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Users,
@@ -13,10 +12,11 @@ import {
   ShoppingCart,
   LayoutDashboard,
   Activity,
-  LucideIcon,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUserProfile } from "@/hooks/use-user";
 
 const MENU_GROUPS = [
   {
@@ -64,7 +64,6 @@ const NavItem = ({ href, icon: Icon, label, isActive, showText }: any) => {
           )}
         />
         {showText && (
-          // Bỏ italic, bỏ uppercase, sử dụng font-bold hoặc font-medium tùy ý
           <span className="text-[13px] font-bold tracking-tight truncate capitalize">
             {label}
           </span>
@@ -79,12 +78,22 @@ const NavItem = ({ href, icon: Icon, label, isActive, showText }: any) => {
 
 export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
   const pathname = usePathname();
+  const { data: user, isLoading } = useUserProfile();
+
   const showText = forceOpen || !isCollapsed;
 
   const checkActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
   };
+
+  const avatarSrc =
+    user?.avatarUrl ||
+    `https://ui-avatars.com/api/?name=${user?.username || "Admin"}&background=FF7A00&color=fff&bold=true`;
+  const displayName = user?.username || "Admin User";
+  const roleDisplay = user?.roles?.includes("Admin")
+    ? "Master Admin"
+    : "Moderator";
 
   return (
     <div className="flex flex-col h-full font-mono">
@@ -97,26 +106,35 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
               "bg-white/5 border border-white/10 shadow-inner backdrop-blur-md",
           )}
         >
-          <div className="relative shrink-0">
-            <div className="absolute inset-0 bg-[#FF7A00] blur-md opacity-20 animate-pulse" />
-            <Image
-              src="https://ui-avatars.com/api/?name=Lê+Hoàng+Hải&background=FF7A00&color=fff&bold=true"
-              alt="Admin"
-              width={40}
-              height={40}
-              className="relative rounded-xl border border-white/10"
-            />
-          </div>
-          {showText && (
-            <div className="flex flex-col truncate">
-              {/* Bỏ italic và uppercase cho tên Admin */}
-              <span className="font-black text-[13px] text-white tracking-tighter">
-                Lê Hoàng Hải
-              </span>
-              <span className="text-[10px] text-[#FF7A00] font-bold uppercase tracking-[0.1em]">
-                Master Admin
-              </span>
+          {isLoading ? (
+            // Loading State
+            <div className="flex items-center justify-center w-full py-2">
+              <Loader2 className="h-5 w-5 animate-spin text-[#FF7A00]" />
             </div>
+          ) : (
+            <>
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-[#FF7A00] blur-md opacity-20 animate-pulse" />
+                <img
+                  src={avatarSrc}
+                  alt={displayName}
+                  className="relative h-10 w-10 rounded-xl border border-white/10 object-cover"
+                />
+              </div>
+              {showText && (
+                <div className="flex flex-col truncate">
+                  <span
+                    className="font-black text-[13px] text-white tracking-tighter truncate"
+                    title={displayName}
+                  >
+                    {displayName}
+                  </span>
+                  <span className="text-[10px] text-[#FF7A00] font-bold uppercase tracking-[0.1em]">
+                    {roleDisplay}
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -125,7 +143,6 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
         {MENU_GROUPS.map((group) => (
           <div key={group.group} className="mb-6">
             {showText && (
-              // Bỏ italic cho tiêu đề nhóm
               <h3 className="px-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 mb-3">
                 {group.group}
               </h3>

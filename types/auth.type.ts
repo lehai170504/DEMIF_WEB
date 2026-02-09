@@ -63,7 +63,7 @@ export interface RegisterPayload {
   targetLanguage: string; // Trường mới
 }
 
-// 2. Response chuẩn theo ảnh Swagger (trả về Token luôn)
+//==================================
 export interface RegisterResponse {
   userId: string;
   email: string;
@@ -72,4 +72,18 @@ export interface RegisterResponse {
   refreshToken: string;
   expiresAt: string;
   roles: string[];
+}
+
+//==================================
+export interface FirebaseLoginPayload {
+  idToken: string;
+}
+
+export interface FirebaseLoginResponse {
+  userId: string;
+  email: string;
+  username: string;
+  accessToken: string;
+  roles: string[];
+  isNewUser: boolean;
 }
