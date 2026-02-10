@@ -1,8 +1,6 @@
 "use client";
 
-import { LayoutGrid, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import AddLessonDialog from "@/components/admin/lesson/add-lesson-dialog";
+import { LayoutGrid } from "lucide-react";
 
 export function LessonHeader() {
   return (
@@ -23,12 +21,6 @@ export function LessonHeader() {
           Quản lý và biên tập nội dung luyện nghe, shadowing hệ thống.
         </p>
       </div>
-
-      <AddLessonDialog>
-        <Button className="h-12 px-6 bg-white text-black hover:bg-zinc-200 font-bold rounded-2xl shadow-lg shadow-white/10 transition-all active:scale-95 border border-transparent hover:border-white/20">
-          <Plus className="h-4 w-4 mr-2" /> Tạo bài học mới
-        </Button>
-      </AddLessonDialog>
     </div>
   );
 }

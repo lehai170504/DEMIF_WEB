@@ -1,16 +1,15 @@
-// components/dashboardAdmin/draggable-row.tsx
+// src/components/dashboardAdmin/draggable-row.tsx
 
 import * as React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { flexRender, Row } from "@tanstack/react-table";
-import { z } from "zod";
 
 import { TableCell, TableRow } from "@/components/ui/table";
-import { schema } from "./table-columns";
+import { LessonDto } from "@/types/lesson.type";
 
 interface DraggableRowProps {
-  row: Row<z.infer<typeof schema>>;
+  row: Row<LessonDto>;
 }
 
 export default function DraggableRow({ row }: DraggableRowProps) {
@@ -18,11 +17,11 @@ export default function DraggableRow({ row }: DraggableRowProps) {
     id: row.original.id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition: transition,
-    zIndex: isDragging ? 10 : "auto", // Đưa row đang kéo lên trên cùng
-    position: isDragging ? "relative" : ("static" as any), // Fix type issue
+    zIndex: isDragging ? 10 : "auto",
+    position: isDragging ? "relative" : "static",
   };
 
   return (

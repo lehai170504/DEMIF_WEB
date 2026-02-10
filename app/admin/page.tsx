@@ -11,44 +11,7 @@ import {
 } from "lucide-react";
 import SectionCards from "@/components/admin/dashboard/section-cards";
 import ChartAreaInteractive from "@/components/admin/dashboard/chart-area-interactive";
-import DataTable from "@/components/admin/dashboard/DataTable";
 import { Button } from "@/components/ui/button";
-
-// Dữ liệu mẫu (Thực tế sẽ fetch từ API)
-const submissionsData = [
-  {
-    id: "1",
-    user: "Lê Hoàng Hải",
-    lesson: "IELTS Listening Part 1",
-    type: "Dictation",
-    score: 98,
-    status: "Vừa xong",
-  },
-  {
-    id: "2",
-    user: "Nguyễn Minh",
-    lesson: "Business Meeting Skills",
-    type: "Shadowing",
-    score: 85,
-    status: "2 phút trước",
-  },
-  {
-    id: "3",
-    user: "Trần An",
-    lesson: "Daily Conversation #4",
-    type: "Dictation",
-    score: 72,
-    status: "5 phút trước",
-  },
-  {
-    id: "4",
-    user: "Phạm Bình",
-    lesson: "Shadowing với Steve Jobs",
-    type: "Shadowing",
-    score: 92,
-    status: "10 phút trước",
-  },
-];
 
 export default function AdminDashboard() {
   return (
@@ -187,36 +150,6 @@ export default function AdminDashboard() {
                 Realtime sync active
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Table Section */}
-        <div className="rounded-[2.5rem] border border-white/10 bg-[#18181b] shadow-xl overflow-hidden transition-all hover:shadow-2xl relative">
-          <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.02] pointer-events-none" />
-
-          <div className="p-8 border-b border-white/5 flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-orange-500/10 rounded-2xl border border-orange-500/20">
-                <FileText className="h-6 w-6 text-orange-500" />
-              </div>
-              <div>
-                <h2 className="font-black text-xl italic uppercase text-white">
-                  Bài nộp gần đây
-                </h2>
-                <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-0.5">
-                  Cập nhật theo giây
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/5 transition-colors rounded-xl h-10"
-            >
-              Xem báo cáo chi tiết
-            </Button>
-          </div>
-          <div className="relative z-10">
-            <DataTable data={submissionsData} />
           </div>
         </div>
       </div>

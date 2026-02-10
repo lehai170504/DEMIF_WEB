@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
-import AddLessonDialog from "@/components/admin/lesson/add-lesson-dialog";
+import CreateLessonDialog from "@/components/admin/lesson/create-lesson-dialog";
 import AddAdminDialog from "@/components/admin/user/add-admin-dialog";
 
 export function QuickCreate() {
@@ -35,7 +35,7 @@ export function QuickCreate() {
           Lối tắt nhanh
         </DropdownMenuLabel>
 
-        <AddLessonDialog>
+        <CreateLessonDialog>
           <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
             className="cursor-pointer focus:bg-orange-500/10 focus:text-orange-500 rounded-lg"
@@ -46,7 +46,7 @@ export function QuickCreate() {
               ⌘N
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-        </AddLessonDialog>
+        </CreateLessonDialog>
 
         <AddAdminDialog>
           <DropdownMenuItem
