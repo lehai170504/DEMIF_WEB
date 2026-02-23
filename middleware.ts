@@ -6,12 +6,15 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("accessToken")?.value;
   const { pathname } = request.nextUrl;
 
-  // 1. Nếu chưa login mà vào các trang protect -> Redirect về /login
-  if (!token && pathname.startsWith("/home")) {
+  // 1. CẬP NHẬT: Nếu chưa login mà vào trang protect (/home, /admin) -> Về login
+  if (
+    !token &&
+    (pathname.startsWith("/home") || pathname.startsWith("/admin"))
+  ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 2. Nếu đã login mà cố tình vào /login hoặc /signup -> Redirect về /home
+  // 2. CẬP NHẬT: Nếu ĐÃ login mà ở trang /login hoặc /signup
   if (
     token &&
     (pathname.startsWith("/login") || pathname.startsWith("/signup"))
@@ -22,7 +25,7 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Chỉ định các route cần chạy middleware
+// Thêm /admin/:path* vào matcher
 export const config = {
-  matcher: ["/home/:path*", "/login", "/signup"],
+  matcher: ["/home/:path*", "/admin/:path*", "/login", "/signup"],
 };

@@ -1,7 +1,6 @@
 // src/hooks/use-auth.ts
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { authService } from "@/services/auth.service";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import {
   FirebaseLoginPayload,
@@ -9,27 +8,34 @@ import {
   RegisterPayload,
 } from "@/types/auth.type";
 import { toast } from "sonner";
-import { getRedirectPath } from "@/lib/utils"; // Import hàm tiện ích
+import { getRedirectPath } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext"; 
 
 export const useLogin = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const { handleSuccessfulLogin } = useAuth(); 
 
   return useMutation({
     mutationFn: (payload: any) => authService.login(payload),
-    onSuccess: (data: LoginResponse) => {
-      // Lưu token
-      Cookies.set("accessToken", data.accessToken, { expires: 1, path: "/" });
-      Cookies.set("refreshToken", data.refreshToken, { expires: 7, path: "/" });
+    onSuccess: async (data: LoginResponse) => {
+      try {
+        // 1. Giao việc set cookie và fetch profile cho AuthContext
+        const fetchedUser = await handleSuccessfulLogin({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
 
-      // Cache user
-      queryClient.setQueryData(["authUser"], data);
+        toast.success("Đăng nhập thành công!");
 
-      toast.success("Đăng nhập thành công!");
+        // 2. Sử dụng roles ĐÃ ĐƯỢC FETCH CHUẨN từ server để điều hướng
+        // (Hoặc fallback về roles trả về từ API login nếu API profile không có)
+        const userRoles = fetchedUser?.roles || (data as any).roles || [];
+        const targetPath = getRedirectPath(userRoles);
 
-      // --- ĐIỀU HƯỚNG THEO ROLE ---
-      const targetPath = getRedirectPath(data.roles);
-      router.push(targetPath);
+        router.push(targetPath);
+      } catch (error) {
+        toast.error("Lỗi đồng bộ dữ liệu sau khi đăng nhập.");
+      }
     },
     onError: (error: any) => {
       const message =
@@ -41,57 +47,66 @@ export const useLogin = () => {
 
 export const useRegister = () => {
   const router = useRouter();
+  const { handleSuccessfulLogin } = useAuth();
 
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authService.register(payload),
-    onSuccess: (data) => {
-      // API mới trả về token luôn -> Auto Login
-      Cookies.set("accessToken", data.accessToken);
-      Cookies.set("refreshToken", data.refreshToken);
+    onSuccess: async (data: any) => {
+      try {
+        const fetchedUser = await handleSuccessfulLogin({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
 
-      toast.success("Đăng ký thành công!", {
-        description: `Chào mừng ${data.username} đến với Demif!`,
-      });
+        toast.success("Đăng ký thành công!", {
+          description: `Chào mừng ${fetchedUser?.username || data.username} đến với Demif!`,
+        });
 
-      // --- ĐIỀU HƯỚNG THEO ROLE ---
-      const targetPath = getRedirectPath(data.roles);
-      router.push(targetPath);
+        const userRoles = fetchedUser?.roles || data.roles || [];
+        const targetPath = getRedirectPath(userRoles);
+        router.push(targetPath);
+      } catch (e) {
+        toast.error("Lỗi sau khi đăng ký.");
+      }
     },
     onError: (error: any) => {
       const msg =
         error?.response?.data?.message ||
         error?.response?.data?.detail ||
         "Đăng ký thất bại.";
-
-      toast.error("Lỗi đăng ký", {
-        description: msg,
-      });
+      toast.error("Lỗi đăng ký", { description: msg });
     },
   });
 };
 
 export const useFirebaseLogin = () => {
   const router = useRouter();
+  const { handleSuccessfulLogin } = useAuth();
 
   return useMutation({
     mutationFn: (payload: FirebaseLoginPayload) =>
       authService.firebaseLogin(payload),
-    onSuccess: (data) => {
-      Cookies.set("accessToken", data.accessToken);
+    onSuccess: async (data: any) => {
+      try {
+        const fetchedUser = await handleSuccessfulLogin({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
 
-      if (data.isNewUser) {
-        toast.success("Tạo tài khoản thành công!", {
-          description: "Chào mừng bạn đến với Demif.",
-        });
-      } else {
-        toast.success("Đăng nhập thành công!", {
-          description: `Chào mừng trở lại, ${data.username}.`,
-        });
+        if (data.isNewUser) {
+          toast.success("Tạo tài khoản thành công!");
+        } else {
+          toast.success("Đăng nhập thành công!", {
+            description: `Chào mừng trở lại, ${fetchedUser?.username || data.username}.`,
+          });
+        }
+
+        const userRoles = fetchedUser?.roles || data.roles || [];
+        const targetPath = getRedirectPath(userRoles);
+        router.push(targetPath);
+      } catch (e) {
+        toast.error("Lỗi đồng bộ dữ liệu sau Google Login.");
       }
-
-      // --- ĐIỀU HƯỚNG THEO ROLE ---
-      const targetPath = getRedirectPath(data.roles);
-      router.push(targetPath);
     },
     onError: (error: any) => {
       const msg =

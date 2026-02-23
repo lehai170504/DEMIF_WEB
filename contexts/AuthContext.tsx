@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 "use client";
 
 import React, { createContext, useContext, useEffect, useMemo } from "react";
@@ -13,7 +14,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => Promise<void>;
-  refetchProfile: () => void;
+  refetchProfile: () => Promise<any>;
+  handleSuccessfulLogin: (tokens: {
+    accessToken: string;
+    refreshToken: string;
+  }) => Promise<UserProfile | undefined>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,23 +41,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [queryClient, router]);
 
+  // Hàm xử lý tập trung sau khi gọi API login/register xong
+  const handleSuccessfulLogin = async (tokens: {
+    accessToken: string;
+    refreshToken: string;
+  }) => {
+    // 1. Set cookie ngay lập tức
+    Cookies.set("accessToken", tokens.accessToken, { path: "/" });
+    Cookies.set("refreshToken", tokens.refreshToken, { path: "/" });
+
+    // 2. Xóa cache cũ để tránh dính data của user trước
+    queryClient.removeQueries({ queryKey: ["userProfile"] });
+
+    // 3. Gọi API lấy profile mới nhất với token vừa set
+    const result = await refetch();
+
+    return result.data;
+  };
+
   const logout = async () => {
     try {
-      const refreshToken = Cookies.get("refreshToken");
-      if (refreshToken) {
-        await authService.logout(refreshToken);
+      const rt = Cookies.get("refreshToken");
+      if (rt) {
+        await authService.logout(rt);
       }
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
+      // Xóa Cookie và Cache
       Cookies.remove("accessToken", { path: "/" });
       Cookies.remove("refreshToken", { path: "/" });
+      queryClient.clear();
 
-      queryClient.clear(); // Xóa cache
-
+      // Đánh dấu event logout để các tab khác tự out theo
       if (typeof window !== "undefined") {
         localStorage.setItem("logout-event", Date.now().toString());
       }
+
       router.push("/login");
     }
   };
@@ -63,9 +88,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isAuthenticated: !!user,
       isLoading,
       logout,
-      refetchProfile: refetch, // Expose hàm refetch ra ngoài
+      refetchProfile: refetch,
+      handleSuccessfulLogin,
     }),
-    [user, isLoading, refetch],
+    [user, isLoading, handleSuccessfulLogin],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

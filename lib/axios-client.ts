@@ -1,7 +1,7 @@
+// src/services/axiosClient.ts
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
-// Cập nhật đúng endpoint từ hình ảnh API của bạn
 const REFRESH_TOKEN_URL = "/api/Auth/refresh-token";
 
 const axiosClient = axios.create({
@@ -12,7 +12,6 @@ const axiosClient = axios.create({
   timeout: 15000,
 });
 
-// --- BIẾN PHỤ TRỢ QUẢN LÝ LUỒNG ---
 let isRefreshing = false;
 let failedQueue: any[] = [];
 
@@ -27,7 +26,7 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// --- 1. REQUEST INTERCEPTOR: Tự động gắn Token vào mỗi Request ---
+// 1. REQUEST INTERCEPTOR
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = Cookies.get("accessToken");
@@ -39,18 +38,19 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// --- 2. RESPONSE INTERCEPTOR: Xử lý Data và Refresh Token khi lỗi 401 ---
+// 2. RESPONSE INTERCEPTOR
 axiosClient.interceptors.response.use(
   (response) => {
-    // API trả về trực tiếp Object chứa accessToken, refreshToken...
+    // Rút gọn data trả về
     return response.data;
   },
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
 
-    // Kiểm tra lỗi 401 và đảm bảo không bị lặp vô tận trên chính request refresh
+    // Check 401 và không phải là route refresh token
     if (
       error.response?.status === 401 &&
+      originalRequest &&
       !originalRequest._retry &&
       originalRequest.url !== REFRESH_TOKEN_URL
     ) {
@@ -60,7 +60,14 @@ axiosClient.interceptors.response.use(
         })
           .then((token) => {
             originalRequest.headers["Authorization"] = "Bearer " + token;
-            return axiosClient(originalRequest);
+            // FIX: Sử dụng axios(originalRequest) thay vì axiosClient(originalRequest)
+            // Lệnh này gọi axios thô, nó sẽ trả về Response Full, sau đó sẽ được
+            // Promise chain hiện tại trả ngược ra ngoài (hoặc bạn có thể phải tự bóc tách nếu cần)
+
+            // Cách an toàn nhất: Dùng chính axiosClient nhưng phải đảm bảo không bị double `.data`
+            // Do mình đã bóc `.data` ở trên, nên khi gọi lại axiosClient, nó SẼ bóc data 1 lần nữa.
+            // Sửa lại cách gọi:
+            return axios(originalRequest).then((res) => res.data);
           })
           .catch((err) => Promise.reject(err));
       }
@@ -72,38 +79,34 @@ axiosClient.interceptors.response.use(
         const currentRefreshToken = Cookies.get("refreshToken");
         if (!currentRefreshToken) throw new Error("No refresh token stored");
 
-        // Gọi API refresh với body { refreshToken: "..." } theo đúng spec ảnh
+        // Dùng axios CƠ BẢN (không dùng axiosClient) để gọi refresh token
+        // Tránh việc bị Interceptor chặn hoặc tự ý gán access token cũ (đã hết hạn)
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}${REFRESH_TOKEN_URL}`,
           { refreshToken: currentRefreshToken },
         );
 
-        // Theo ảnh: response trả về { accessToken, refreshToken, expiresAt }
         const { accessToken, refreshToken } = response.data;
 
-        // Cập nhật Cookie mới
         Cookies.set("accessToken", accessToken, { expires: 1, path: "/" });
         if (refreshToken) {
           Cookies.set("refreshToken", refreshToken, { expires: 7, path: "/" });
         }
 
-        // Chạy tiếp các request đang đợi trong hàng đợi
         processQueue(null, accessToken);
 
-        // Thực thi lại request bị lỗi ban đầu với token mới
         originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
-        return axiosClient(originalRequest);
+
+        // FIX TƯƠNG TỰ: Sử dụng axios gốc để retry, rồi chủ động bóc `.data`
+        const retryResponse = await axios(originalRequest);
+        return retryResponse.data;
       } catch (refreshError) {
-        // Nếu Refresh Token cũng lỗi (hết hạn hoàn toàn)
         processQueue(refreshError, null);
 
-        // Clear sạch rác
-        const cookieOptions = { path: "/" };
-        Cookies.remove("accessToken", cookieOptions);
-        Cookies.remove("refreshToken", cookieOptions);
+        Cookies.remove("accessToken", { path: "/" });
+        Cookies.remove("refreshToken", { path: "/" });
 
         if (typeof window !== "undefined") {
-          // Có thể dùng event để báo cho các tab khác cùng logout
           localStorage.setItem("logout-event", Date.now().toString());
           window.location.href = "/login";
         }
