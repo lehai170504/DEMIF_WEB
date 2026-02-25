@@ -10,7 +10,6 @@ import {
 export const lessonService = {
   // GET List
   getLessons: async (params: GetLessonsParams): Promise<GetLessonsResponse> => {
-    // Map params sang query string chuẩn BE (nếu cần)
     const response = await axiosClient.get("/admin/lessons", { params });
     return (response as any).data ?? response;
   },

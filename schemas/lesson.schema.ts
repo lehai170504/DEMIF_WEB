@@ -3,11 +3,11 @@ import { z } from "zod";
 export const LessonSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
   description: z.string().optional().default(""),
-  lessonType: z.string().min(1, "Vui lòng chọn loại bài học"), // Dictation, Shadowing...
-  level: z.string().min(1, "Vui lòng chọn cấp độ"), // Beginner, Intermediate...
+  lessonType: z.coerce.number().min(0, "Vui lòng chọn loại bài học"),
+  level: z.coerce.number().min(0, "Vui lòng chọn cấp độ"),
+
   category: z.string().min(1, "Vui lòng nhập danh mục"),
 
-  // URLs
   audioUrl: z
     .string()
     .url("Link audio không hợp lệ")
@@ -25,14 +25,15 @@ export const LessonSchema = z.object({
     .or(z.literal("")),
 
   // Content
+  mediaType: z.string().default("audio"),
   fullTranscript: z.string().optional(),
-  dictationTemplate: z.string().optional(), // Có thể check regex [...] nếu cần
+  timedTranscript: z.string().optional(),
 
   // Settings
   durationSeconds: z.coerce.number().min(0),
   displayOrder: z.coerce.number().min(0),
   isPremiumOnly: z.boolean().default(false),
-  status: z.string().default("Draft"), // Published, Draft
+  status: z.string().default("draft"),
   tags: z.string().optional(),
 });
 

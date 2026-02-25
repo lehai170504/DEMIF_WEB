@@ -4,20 +4,27 @@ export interface LessonDto {
   id: string;
   title: string;
   description: string;
-  lessonType: "Dictation" | "Shadowing" | "Test" | string; // Linh hoạt cho string từ BE
-  level: "Beginner" | "Intermediate" | "Advanced" | string;
-  category: string;
-  audioUrl: string;
-  mediaUrl: string;
-  mediaType: string;
+  lessonType: "Dictation" | "Shadowing" | "Test" | "0" | "1" | "2" | string;
+  level: "Beginner" | "Intermediate" | "Advanced" | "0" | "1" | "2" | string;
+
+  category: string | null; // Có bài học bị null
+
+  // URLs có thể null
+  audioUrl: string | null;
+  mediaUrl: string | null;
+  mediaType: string | null;
+  thumbnailUrl: string | null;
+
   durationSeconds: number;
-  thumbnailUrl: string;
   fullTranscript: string;
-  dictationTemplate: string;
+  timedTranscript: string | null;
+  hasDictationTemplates: boolean;
+
   isPremiumOnly: boolean;
   displayOrder: number;
-  tags: string;
-  status: "Published" | "Draft" | "Review" | string;
+  tags: string | null;
+  status: "published" | "draft" | "review" | "archived" | string;
+
   completionsCount: number;
   avgScore: number;
   createdAt: string;
@@ -40,22 +47,22 @@ export interface GetLessonsResponse {
   totalPages: number;
 }
 
-// Request Payload cho Create/Update
+// Request gửi lên khi Create / Update
 export interface CreateLessonRequest {
   title: string;
   description: string;
-  lessonType: string;
-  level: string;
+  lessonType: number;
+  level: number;
   category: string;
-  audioUrl: string;
-  mediaUrl: string;
-  mediaType: string;
+  audioUrl?: string;
+  mediaUrl?: string;
+  mediaType?: string;
   durationSeconds: number;
-  thumbnailUrl: string;
+  thumbnailUrl?: string;
   fullTranscript: string;
-  dictationTemplate: string;
+  timedTranscript?: string;
   isPremiumOnly: boolean;
   displayOrder: number;
-  tags: string;
+  tags?: string;
   status: string;
 }

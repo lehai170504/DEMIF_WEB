@@ -12,7 +12,9 @@ import {
   IconHeadphones,
   IconVideo,
   IconCrown,
-  IconArchive, // --- IMPORT THÊM ICON ARCHIVE ---
+  IconArchive,
+  IconClock,
+  IconCalendar,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,7 +34,49 @@ import LessonDetailDialog from "@/components/admin/lesson/lesson-detail-drawer";
 import { useLessonActions } from "@/hooks/use-lesson";
 import { toast } from "sonner";
 
-// Helper Drag Handle
+// --- HELPERS (Chuẩn hóa dữ liệu từ API) ---
+
+export const normalizeStatus = (status?: string | null) => {
+  if (!status) return "Draft";
+  const s = status.toLowerCase();
+  if (s === "published") return "Published";
+  if (s === "archived") return "Archived";
+  if (s === "review") return "Review";
+  return "Draft";
+};
+
+// Chuyển đổi Số (từ BE) thành Chữ (để FE hiển thị)
+export const normalizeType = (type?: string | number | null) => {
+  const t = String(type).toLowerCase(); // Ép về chuỗi để dễ so sánh
+  if (t === "0" || t === "dictation") return "Dictation";
+  if (t === "1" || t === "shadowing") return "Shadowing";
+  return "Dictation"; // Mặc định nếu bị lỗi
+};
+
+// Chuyển đổi Số (từ BE) thành Chữ (để FE hiển thị)
+export const normalizeLevel = (level?: string | number | null) => {
+  const l = String(level).toLowerCase(); // Ép về chuỗi để dễ so sánh
+  if (l === "0" || l === "beginner") return "Beginner";
+  if (l === "1" || l === "intermediate") return "Intermediate";
+  if (l === "2" || l === "advanced") return "Advanced";
+  return "Beginner"; // Mặc định nếu bị lỗi
+};
+
+const formatDuration = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
+
+const formatDate = (dateString: string) => {
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(dateString));
+};
+
+// --- DRAG HANDLE ---
 function DragHandle({ id }: { id: string }) {
   const { attributes, listeners } = useSortable({ id });
   return (
@@ -60,7 +104,7 @@ export const columns: ColumnDef<LessonDto>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center pl-2">
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
@@ -72,7 +116,7 @@ export const columns: ColumnDef<LessonDto>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center pl-2">
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -87,52 +131,69 @@ export const columns: ColumnDef<LessonDto>[] = [
   {
     accessorKey: "title",
     header: "Bài học",
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span
-          className="font-bold text-white truncate max-w-[250px]"
-          title={row.original.title}
-        >
-          {row.original.title}
-        </span>
-        <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
-          {row.original.category}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const title = row.original.title || "Chưa có tiêu đề";
+      const category = row.original.category || "Chưa phân loại";
+
+      return (
+        <div className="flex flex-col gap-1 min-w-[200px]">
+          <span
+            className={cn(
+              "font-bold truncate max-w-[300px]",
+              !row.original.title ? "text-zinc-500 italic" : "text-white",
+            )}
+            title={title}
+          >
+            {title}
+          </span>
+          <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+            {category}
+          </span>
+        </div>
+      );
+    },
   },
-  // --- TYPE (Media Icon) ---
+  // --- TYPE ---
   {
     accessorKey: "lessonType",
-    header: "Loại",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        {row.original.mediaType === "video" ? (
-          <IconVideo className="size-4 text-blue-400" />
-        ) : (
-          <IconHeadphones className="size-4 text-purple-400" />
-        )}
-        <Badge
-          variant="outline"
-          className={cn(
-            "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border",
-            row.original.lessonType === "Dictation"
-              ? "border-blue-500/30 text-blue-400 bg-blue-500/5"
-              : "border-purple-500/30 text-purple-400 bg-purple-500/5",
+    header: "Loại bài",
+    cell: ({ row }) => {
+      // Đã tự động dịch từ số sang chữ qua hàm normalizeType
+      const type = normalizeType(row.original.lessonType);
+      const isVideo =
+        row.original.mediaType === "video" || row.original.mediaUrl;
+
+      return (
+        <div className="flex items-center gap-2">
+          {isVideo ? (
+            <IconVideo className="size-4 text-blue-400" />
+          ) : (
+            <IconHeadphones className="size-4 text-purple-400" />
           )}
-        >
-          {row.original.lessonType}
-        </Badge>
-      </div>
-    ),
+          <Badge
+            variant="outline"
+            className={cn(
+              "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap",
+              type === "Dictation"
+                ? "border-blue-500/30 text-blue-400 bg-blue-500/5"
+                : "border-purple-500/30 text-purple-400 bg-purple-500/5",
+            )}
+          >
+            {type}
+          </Badge>
+        </div>
+      );
+    },
   },
   // --- LEVEL & PREMIUM ---
   {
     accessorKey: "level",
     header: "Cấp độ",
     cell: ({ row }) => {
-      const level = row.original.level;
+      // Đã tự động dịch từ số sang chữ qua hàm normalizeLevel
+      const level = normalizeLevel(row.original.level);
       let colorClass = "text-zinc-400 border-zinc-500/20 bg-white/5";
+
       if (level === "Advanced")
         colorClass = "text-orange-400 border-orange-500/20 bg-orange-500/5";
       else if (level === "Intermediate")
@@ -144,13 +205,16 @@ export const columns: ColumnDef<LessonDto>[] = [
         <div className="flex items-center gap-2">
           <Badge
             variant="secondary"
-            className={cn("border transition-colors", colorClass)}
+            className={cn(
+              "border transition-colors whitespace-nowrap",
+              colorClass,
+            )}
           >
             {level}
           </Badge>
           {row.original.isPremiumOnly && (
             <IconCrown
-              className="size-4 text-yellow-500 animate-pulse"
+              className="size-4 text-yellow-500 animate-pulse shrink-0"
               title="Premium Only"
             />
           )}
@@ -158,15 +222,33 @@ export const columns: ColumnDef<LessonDto>[] = [
       );
     },
   },
-  // --- STATUS (ĐÃ CHỈNH SỬA) ---
+  // --- THÔNG TIN BỔ SUNG (DURATION & DATE) ---
+  {
+    id: "details",
+    header: "Thông tin",
+    cell: ({ row }) => (
+      <div className="flex flex-col gap-1.5 text-[11px] text-zinc-400 font-medium whitespace-nowrap">
+        <div className="flex items-center gap-1.5">
+          <IconClock className="size-3.5 text-zinc-500" />
+          {formatDuration(row.original.durationSeconds || 0)}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <IconCalendar className="size-3.5 text-zinc-500" />
+          {row.original.createdAt
+            ? formatDate(row.original.createdAt)
+            : "--/--/----"}
+        </div>
+      </div>
+    ),
+  },
+  // --- STATUS ---
   {
     accessorKey: "status",
     header: "Trạng thái",
     cell: ({ row }) => {
-      const status = row.original.status;
+      const status = normalizeStatus(row.original.status);
       return (
         <div className="flex items-center gap-2">
-          {/* Logic hiển thị Icon theo status */}
           {status === "Published" && (
             <IconCircleCheckFilled className="size-4 text-emerald-500" />
           )}
@@ -180,13 +262,12 @@ export const columns: ColumnDef<LessonDto>[] = [
             <IconAlertCircle className="size-4 text-yellow-500" />
           )}
 
-          {/* Logic hiển thị Text màu theo status */}
           <span
             className={cn(
-              "text-xs font-medium",
+              "text-xs font-medium uppercase tracking-wider",
               status === "Published" && "text-emerald-400",
               status === "Draft" && "text-zinc-500",
-              status === "Archived" && "text-zinc-600 italic line-through", // Style riêng cho Archived
+              status === "Archived" && "text-zinc-600 italic line-through",
               status === "Review" && "text-yellow-400",
             )}
           >
@@ -196,16 +277,6 @@ export const columns: ColumnDef<LessonDto>[] = [
       );
     },
   },
-  // --- STATS (Completions) ---
-  {
-    accessorKey: "completionsCount",
-    header: () => <div className="text-right">Lượt học</div>,
-    cell: ({ row }) => (
-      <div className="text-right font-mono text-zinc-300">
-        {row.original.completionsCount}
-      </div>
-    ),
-  },
   // --- ACTIONS ---
   {
     id: "actions",
@@ -213,40 +284,74 @@ export const columns: ColumnDef<LessonDto>[] = [
       const lesson = row.original;
       const [openDetail, setOpenDetail] = useState(false);
       const { deleteLesson, updateLesson, isDeleting } = useLessonActions();
+      const currentStatus = normalizeStatus(lesson.status);
 
-      // --- LOGIC XÓA DÙNG TOAST ---
       const handleDelete = () => {
         toast("Xác nhận xóa bài học?", {
-          description: `Bài học "${lesson.title}" sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.`,
-          action: {
-            label: "Xóa ngay",
-            onClick: () => deleteLesson(lesson.id),
-          },
-          cancel: {
-            label: "Hủy",
-            onClick: () => console.log("Cancelled delete"),
-          },
-          actionButtonStyle: {
-            backgroundColor: "#ef4444",
-            color: "white",
-          },
+          description: `Bài học "${lesson.title || "Không tên"}" sẽ bị xóa vĩnh viễn.`,
+          action: { label: "Xóa ngay", onClick: () => deleteLesson(lesson.id) },
+          cancel: { label: "Hủy", onClick: () => {} },
+          actionButtonStyle: { backgroundColor: "#ef4444", color: "white" },
         });
       };
 
-      // Đổi trạng thái Publish/Draft
+      // ĐÃ FIX: Gửi toàn bộ payload cũ kèm theo status mới để BE không xóa mất dữ liệu
       const handleToggleStatus = () => {
-        const newStatus = lesson.status === "Published" ? "Draft" : "Published";
-        updateLesson({ id: lesson.id, data: { status: newStatus } });
+        const newStatus = currentStatus === "Published" ? "draft" : "published";
+
+        const payload: any = {
+          ...lesson,
+          status: newStatus,
+        };
+
+        // Ép kiểu lại lessonType và level về Number để khớp với DB
+        if (typeof payload.lessonType === "string") {
+          payload.lessonType =
+            payload.lessonType === "Shadowing" || payload.lessonType === "1"
+              ? 1
+              : 0;
+        }
+        if (typeof payload.level === "string") {
+          payload.level =
+            payload.level === "Advanced" || payload.level === "2"
+              ? 2
+              : payload.level === "Intermediate" || payload.level === "1"
+                ? 1
+                : 0;
+        }
+
+        updateLesson({ id: lesson.id, data: payload });
       };
 
-      // Chuyển sang Archived
+      // ĐÃ FIX: Tương tự như trên cho chức năng Archive
       const handleArchive = () => {
-        updateLesson({ id: lesson.id, data: { status: "Archived" } });
-        toast.success(`Đã lưu trữ bài học "${lesson.title}"`);
+        const payload: any = {
+          ...lesson,
+          status: "archived",
+        };
+
+        // Ép kiểu
+        if (typeof payload.lessonType === "string") {
+          payload.lessonType =
+            payload.lessonType === "Shadowing" || payload.lessonType === "1"
+              ? 1
+              : 0;
+        }
+        if (typeof payload.level === "string") {
+          payload.level =
+            payload.level === "Advanced" || payload.level === "2"
+              ? 2
+              : payload.level === "Intermediate" || payload.level === "1"
+                ? 1
+                : 0;
+        }
+
+        updateLesson({ id: lesson.id, data: payload });
+        toast.success(`Đã lưu trữ bài học`);
       };
 
       return (
-        <>
+        <div className="flex justify-end pr-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -268,19 +373,17 @@ export const columns: ColumnDef<LessonDto>[] = [
                 <IconEdit className="mr-2 h-4 w-4" /> Chỉnh sửa
               </DropdownMenuItem>
 
-              {/* Toggle Publish/Draft */}
               <DropdownMenuItem
                 onClick={handleToggleStatus}
                 className="cursor-pointer hover:bg-white/10"
               >
                 <IconStar className="mr-2 h-4 w-4" />
-                {lesson.status === "Published"
+                {currentStatus === "Published"
                   ? "Gỡ bài (Draft)"
                   : "Đăng bài (Publish)"}
               </DropdownMenuItem>
 
-              {/* Toggle Archive (Chỉ hiện khi chưa Archive) */}
-              {lesson.status !== "Archived" && (
+              {currentStatus !== "Archived" && (
                 <DropdownMenuItem
                   onClick={handleArchive}
                   className="cursor-pointer hover:bg-white/10 text-zinc-400"
@@ -300,13 +403,12 @@ export const columns: ColumnDef<LessonDto>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Drawer Chi Tiết */}
           <LessonDetailDialog
             open={openDetail}
             onOpenChange={setOpenDetail}
             lesson={lesson}
           />
-        </>
+        </div>
       );
     },
   },
