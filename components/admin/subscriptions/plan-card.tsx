@@ -1,4 +1,4 @@
-"use client"; // Client component để dùng state
+"use client";
 
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +23,26 @@ interface PlanCardProps {
   plan: SubscriptionPlanDto;
 }
 
+// --- HELPERS HIỂN THỊ UI ---
+const getTierLabel = (tier: string | number) => {
+  const t = String(tier);
+  if (t === "0") return "Basic";
+  if (t === "1") return "Premium";
+  if (t === "2") return "Enterprise";
+  return t; // Trả về chính nó nếu đã là chữ
+};
+
+const getCycleLabel = (cycle: string | number) => {
+  const c = String(cycle);
+  if (c === "0") return "Monthly";
+  if (c === "1") return "Yearly";
+  if (c === "2") return "Lifetime";
+  return c;
+};
+
 export function PlanCard({ plan }: PlanCardProps) {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
-  const { deletePlan, isDeleting } = useManagePlan(); // Hook xóa
+  const { deletePlan, isDeleting } = useManagePlan();
 
   const formattedPrice = new Intl.NumberFormat("vi-VN").format(plan.price);
 
@@ -45,7 +62,6 @@ export function PlanCard({ plan }: PlanCardProps) {
             : "opacity-75 grayscale hover:grayscale-0 hover:opacity-100",
         )}
       >
-        {/* ... (Phần Background & Header giữ nguyên) ... */}
         {/* Background Glow */}
         <div
           className={cn(
@@ -56,7 +72,7 @@ export function PlanCard({ plan }: PlanCardProps) {
           )}
         />
 
-        {/* Header Info: Active Status & Date */}
+        {/* Header Info: Active Status & Tier */}
         <div className="flex items-center justify-between mb-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
           <div className="flex items-center gap-2">
             <div
@@ -72,7 +88,8 @@ export function PlanCard({ plan }: PlanCardProps) {
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-white/10 bg-white/5 text-zinc-400">
               <Layers className="h-3 w-3" />
-              {plan.tier}
+              {/* FIX: Hiển thị Label thay vì ID số */}
+              {getTierLabel(plan.tier)}
             </div>
           </div>
           <span title="Ngày tạo">
@@ -91,7 +108,8 @@ export function PlanCard({ plan }: PlanCardProps) {
                 variant="outline"
                 className="bg-white/5 border-white/10 text-zinc-400 text-[10px] uppercase tracking-wider"
               >
-                {plan.billingCycle}
+                {/* FIX: Hiển thị Label thay vì ID số */}
+                {getCycleLabel(plan.billingCycle)}
                 {plan.durationDays && (
                   <span className="ml-1 opacity-50">
                     ({plan.durationDays}d)
@@ -137,7 +155,7 @@ export function PlanCard({ plan }: PlanCardProps) {
           ))}
         </div>
 
-        {/* === UPDATED FOOTER: Edit & Delete Buttons === */}
+        {/* Footer: Subscribers & Actions */}
         <div className="relative z-10 pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
           <div className="flex flex-col">
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-1">
@@ -154,7 +172,6 @@ export function PlanCard({ plan }: PlanCardProps) {
           </div>
 
           <div className="flex gap-2">
-            {/* Nút Xóa */}
             <Button
               variant="ghost"
               size="icon"
@@ -169,19 +186,18 @@ export function PlanCard({ plan }: PlanCardProps) {
               )}
             </Button>
 
-            {/* Nút Sửa (Mở Modal) */}
             <Button
               variant="outline"
               onClick={() => setIsEditOpen(true)}
               className="h-9 gap-2 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 hover:text-white text-zinc-400 font-bold text-xs"
             >
               <Edit2 className="h-3 w-3" />
+              Sửa
             </Button>
           </div>
         </div>
       </div>
 
-      {/* MODAL EDIT */}
       <EditPlanDialog
         plan={plan}
         open={isEditOpen}

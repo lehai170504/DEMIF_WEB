@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const CreatePlanSchema = z.object({
   name: z.string().min(1, "Tên gói không được để trống"),
-  tier: z.string().min(1, "Vui lòng chọn cấp độ"),
+  tier: z.coerce.number(),
   price: z.coerce.number().min(0, "Giá không hợp lệ"),
   currency: z.string().default("VND"),
-  billingCycle: z.string().min(1, "Vui lòng chọn chu kỳ"),
+  billingCycle: z.coerce.number(),
 
   durationDays: z.coerce.number().nullable().optional(),
 

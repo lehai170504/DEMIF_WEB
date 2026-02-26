@@ -1,15 +1,11 @@
-// src/types/lesson.type.ts
-
 export interface LessonDto {
   id: string;
   title: string;
   description: string;
-  lessonType: "Dictation" | "Shadowing" | "Test" | "0" | "1" | "2" | string;
-  level: "Beginner" | "Intermediate" | "Advanced" | "0" | "1" | "2" | string;
+  lessonType: "Dictation" | "Shadowing" | "Test" | string;
+  level: "Beginner" | "Intermediate" | "Advanced" | string;
 
-  category: string | null; // Có bài học bị null
-
-  // URLs có thể null
+  category: string | null;
   audioUrl: string | null;
   mediaUrl: string | null;
   mediaType: string | null;
@@ -51,8 +47,8 @@ export interface GetLessonsResponse {
 export interface CreateLessonRequest {
   title: string;
   description: string;
-  lessonType: number;
-  level: number;
+  lessonType: string;
+  level: string;
   category: string;
   audioUrl?: string;
   mediaUrl?: string;

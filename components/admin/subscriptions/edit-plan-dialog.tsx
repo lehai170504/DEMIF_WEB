@@ -48,6 +48,21 @@ interface EditPlanDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// --- HELPER MAPPING (Số từ BE -> Chữ cho Select UI) ---
+const mapTierToString = (tier: string | number) => {
+  const t = String(tier);
+  if (t === "1" || t === "Premium") return "1";
+  if (t === "2" || t === "Enterprise") return "2";
+  return "0"; // Basic
+};
+
+const mapCycleToString = (cycle: string | number) => {
+  const c = String(cycle);
+  if (c === "1" || c === "Yearly") return "1";
+  if (c === "2" || c === "Lifetime") return "2";
+  return "0"; // Monthly
+};
+
 export function EditPlanDialog({
   plan,
   open,
@@ -59,11 +74,11 @@ export function EditPlanDialog({
     resolver: zodResolver(CreatePlanSchema),
     defaultValues: {
       name: "",
-      tier: "",
+      tier: 1,
       price: 0,
       currency: "VND",
-      billingCycle: "",
-      durationDays: 0,
+      billingCycle: 1,
+      durationDays: 30,
       featuresString: "",
       badgeText: "",
       badgeColor: "",
@@ -76,11 +91,11 @@ export function EditPlanDialog({
     if (open && plan) {
       form.reset({
         name: plan.name,
-        tier: plan.tier, // Giữ nguyên string "Premium"
+        tier: Number(mapTierToString(plan.tier)), // Chuyển về số cho Schema
         price: plan.price,
         currency: plan.currency,
-        billingCycle: plan.billingCycle, // Giữ nguyên string "Monthly"
-        durationDays: plan.durationDays ?? 0,
+        billingCycle: Number(mapCycleToString(plan.billingCycle)), // Chuyển về số cho Schema
+        durationDays: plan.durationDays ?? 30,
         featuresString: plan.features ? plan.features.join("\n") : "",
         badgeText: plan.badgeText || "",
         badgeColor: plan.badgeColor || "#3B82F6",
@@ -96,11 +111,11 @@ export function EditPlanDialog({
       .map((f) => f.trim())
       .filter((f) => f.length > 0);
 
-    // 2. Xử lý DurationDays cho gói Vĩnh viễn (Lifetime)
+    // 2. Fix lỗi logic: Khi là Lifetime (2) thì truyền số 0 để BE C# không bị lỗi NULL
     const finalDuration =
-      values.billingCycle === "Lifetime" ? null : values.durationDays || 30;
+      values.billingCycle === 2 ? 0 : (values.durationDays ?? 30);
 
-    // 3. Tạo Payload chuẩn
+    // 3. Tạo Payload chuẩn khớp với CreatePlanRequest
     const payload: CreatePlanRequest = {
       name: values.name,
       tier: values.tier,
@@ -109,8 +124,8 @@ export function EditPlanDialog({
       billingCycle: values.billingCycle,
       durationDays: finalDuration,
       features: featuresArray,
-      badgeText: values.badgeText,
-      badgeColor: values.badgeColor,
+      badgeText: values.badgeText || "",
+      badgeColor: values.badgeColor || "",
       isActive: values.isActive,
     };
 
@@ -125,9 +140,6 @@ export function EditPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* ĐÃ FIX: Sử dụng class "no-scrollbar" từ globals.css 
-          Thay vì viết dài dòng inline style.
-      */}
       <DialogContent className="sm:max-w-[600px] bg-[#18181b] border-white/10 text-white font-mono max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase">
@@ -135,7 +147,7 @@ export function EditPlanDialog({
             Cập nhật gói dịch vụ
           </DialogTitle>
           <DialogDescription className="text-zinc-400 text-xs">
-            Chỉnh sửa thông tin chi tiết của gói dịch vụ.
+            Chỉnh sửa thông tin chi tiết của gói dịch vụ ID: {plan.id}
           </DialogDescription>
         </DialogHeader>
 
@@ -172,16 +184,19 @@ export function EditPlanDialog({
                     <FormLabel className="text-xs font-bold uppercase text-zinc-500">
                       Cấp độ
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      value={String(field.value)}
+                    >
                       <FormControl>
                         <SelectTrigger className="bg-black/20 border-white/10">
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Basic">Basic</SelectItem>
-                        <SelectItem value="Premium">Premium</SelectItem>
-                        <SelectItem value="Enterprise">Enterprise</SelectItem>
+                      <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
+                        <SelectItem value="0">Basic</SelectItem>
+                        <SelectItem value="1">Premium</SelectItem>
+                        <SelectItem value="2">Enterprise</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -219,16 +234,19 @@ export function EditPlanDialog({
                     <FormLabel className="text-xs font-bold uppercase text-zinc-500">
                       Chu kỳ
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      value={String(field.value)}
+                    >
                       <FormControl>
                         <SelectTrigger className="bg-black/20 border-white/10">
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Monthly">Theo Tháng</SelectItem>
-                        <SelectItem value="Yearly">Theo Năm</SelectItem>
-                        <SelectItem value="Lifetime">Vĩnh viễn</SelectItem>
+                      <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
+                        <SelectItem value="0">Theo Tháng</SelectItem>
+                        <SelectItem value="1">Theo Năm</SelectItem>
+                        <SelectItem value="2">Vĩnh viễn</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -249,7 +267,7 @@ export function EditPlanDialog({
                         className="bg-black/20 border-white/10 disabled:opacity-50"
                         {...field}
                         value={field.value ?? ""}
-                        disabled={form.watch("billingCycle") === "Lifetime"}
+                        disabled={Number(form.watch("billingCycle")) === 2}
                       />
                     </FormControl>
                     <FormMessage />
@@ -309,9 +327,9 @@ export function EditPlanDialog({
                     <FormControl>
                       <div className="flex gap-2">
                         <div
-                          className="w-10 h-10 rounded border border-white/10"
+                          className="w-10 h-10 rounded border border-white/10 shrink-0"
                           style={{ backgroundColor: field.value }}
-                        ></div>
+                        />
                         <Input
                           className="bg-black/20 border-white/10 flex-1"
                           {...field}
@@ -335,8 +353,7 @@ export function EditPlanDialog({
                       Trạng thái Kích hoạt
                     </FormLabel>
                     <FormDescription className="text-xs text-zinc-500">
-                      Tắt gói này sẽ ẩn nó khỏi danh sách hiển thị cho người
-                      dùng.
+                      Ẩn/Hiện gói dịch vụ trên giao diện người dùng.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -367,7 +384,7 @@ export function EditPlanDialog({
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
-                )}{" "}
+                )}
                 {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
               </Button>
             </DialogFooter>

@@ -48,41 +48,45 @@ export function CreatePlanDialog() {
     resolver: zodResolver(CreatePlanSchema),
     defaultValues: {
       name: "",
-      tier: "Premium",
+      tier: 1, // Mặc định Premium
       price: 0,
       currency: "VND",
-      billingCycle: "Monthly",
+      billingCycle: 1, // Mặc định Theo Năm
       durationDays: 30,
       featuresString: "",
       badgeText: "",
-      badgeColor: "#3B82F6",
+      badgeColor: "#3B82F6", // Màu xanh mặc định
       isActive: true,
     },
   });
 
   const onSubmit = (values: CreatePlanFormValues) => {
-    // 1. Convert featuresString to array
     const featuresArray = values.featuresString
       .split("\n")
       .map((f) => f.trim())
       .filter((f) => f.length > 0);
 
-    // 2. Logic xử lý Duration cho gói Lifetime
-    // Nếu là Lifetime -> durationDays = null
-    const finalDuration =
-      values.billingCycle === "Lifetime" ? null : values.durationDays || 30;
+    // Xử lý tự động gán ngày dựa trên Chu kỳ (nếu không tự nhập)
+    let finalDuration = values.durationDays;
 
-    // 3. Construct Payload chuẩn
+    if (values.billingCycle === 2) {
+      finalDuration = 0; // Vĩnh viễn -> 0 ngày
+    } else if (values.billingCycle === 3) {
+      finalDuration = 7; // Dùng thử -> 7 ngày
+    } else {
+      finalDuration = values.durationDays ?? 30; // Nếu trống thì 30
+    }
+
     const payload: CreatePlanRequest = {
       name: values.name,
-      tier: values.tier, // Giữ nguyên string nếu BE nhận string
+      tier: values.tier,
       price: values.price,
       currency: values.currency,
-      billingCycle: values.billingCycle, // Giữ nguyên string nếu BE nhận string
+      billingCycle: values.billingCycle,
       durationDays: finalDuration,
       features: featuresArray,
-      badgeText: values.badgeText,
-      badgeColor: values.badgeColor,
+      badgeText: values.badgeText || "",
+      badgeColor: values.badgeColor || "",
       isActive: values.isActive,
     };
 
@@ -94,6 +98,15 @@ export function CreatePlanDialog() {
     });
   };
 
+  // Lắng nghe sự thay đổi của Chu kỳ để tự động cập nhật số ngày lên ô UI
+  const watchCycle = form.watch("billingCycle");
+  React.useEffect(() => {
+    if (watchCycle === 0) form.setValue("durationDays", 30);
+    else if (watchCycle === 1) form.setValue("durationDays", 365);
+    else if (watchCycle === 2) form.setValue("durationDays", 0);
+    else if (watchCycle === 3) form.setValue("durationDays", 7);
+  }, [watchCycle, form]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -101,13 +114,14 @@ export function CreatePlanDialog() {
           <Plus className="h-4 w-4" /> Tạo gói mới
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] bg-[#18181b] border-white/10 text-white font-mono max-h-[90vh] overflow-y-auto">
+
+      <DialogContent className="sm:max-w-[600px] bg-[#18181b] border-white/10 text-white font-mono max-h-[90vh] overflow-y-auto no-scrollbar focus:outline-none">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase">
+          <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase tracking-tighter">
             <PackagePlus className="h-5 w-5 text-orange-500" />
             Tạo Gói Dịch Vụ Mới
           </DialogTitle>
-          <DialogDescription className="text-zinc-400 text-xs">
+          <DialogDescription className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
             Thiết lập thông tin gói, giá bán và các tính năng đi kèm.
           </DialogDescription>
         </DialogHeader>
@@ -115,22 +129,22 @@ export function CreatePlanDialog() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5 py-4"
+            className="space-y-6 py-4"
           >
-            {/* Row 1: Name & Tier */}
+            {/* Tên gói & Cấp độ */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
                       Tên gói
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ví dụ: Premium Tháng"
-                        className="bg-black/20 border-white/10"
+                        className="bg-black/20 border-white/10 focus:border-orange-500/50"
                         {...field}
                       />
                     </FormControl>
@@ -143,22 +157,22 @@ export function CreatePlanDialog() {
                 name="tier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
                       Cấp độ (Tier)
                     </FormLabel>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      defaultValue={String(field.value)}
                     >
                       <FormControl>
                         <SelectTrigger className="bg-black/20 border-white/10">
                           <SelectValue placeholder="Chọn cấp độ" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Basic">Basic</SelectItem>
-                        <SelectItem value="Premium">Premium</SelectItem>
-                        <SelectItem value="Enterprise">Enterprise</SelectItem>
+                      <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
+                        <SelectItem value="0">Basic</SelectItem>
+                        <SelectItem value="1">Premium</SelectItem>
+                        <SelectItem value="2">Enterprise</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -167,20 +181,20 @@ export function CreatePlanDialog() {
               />
             </div>
 
-            {/* Row 2: Price & Cycle */}
+            {/* Giá, Chu kỳ & Thời hạn */}
             <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
                       Giá bán (VND)
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        className="bg-black/20 border-white/10"
+                        className="bg-black/20 border-white/10 focus:border-orange-500/50"
                         {...field}
                       />
                     </FormControl>
@@ -193,22 +207,23 @@ export function CreatePlanDialog() {
                 name="billingCycle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
                       Chu kỳ
                     </FormLabel>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      defaultValue={String(field.value)}
                     >
                       <FormControl>
                         <SelectTrigger className="bg-black/20 border-white/10">
                           <SelectValue placeholder="Chọn chu kỳ" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Monthly">Theo Tháng</SelectItem>
-                        <SelectItem value="Yearly">Theo Năm</SelectItem>
-                        <SelectItem value="Lifetime">Vĩnh viễn</SelectItem>
+                      <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
+                        <SelectItem value="0">Theo Tháng</SelectItem>
+                        <SelectItem value="1">Theo Năm</SelectItem>
+                        <SelectItem value="2">Vĩnh viễn</SelectItem>
+                        <SelectItem value="3">Dùng thử (Trial)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -220,17 +235,16 @@ export function CreatePlanDialog() {
                 name="durationDays"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
                       Số ngày
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        className="bg-black/20 border-white/10 disabled:opacity-50"
+                        className="bg-black/20 border-white/10 focus:border-orange-500/50 disabled:opacity-50"
                         {...field}
-                        // Nếu chọn Lifetime thì disable ô nhập ngày
-                        disabled={form.watch("billingCycle") === "Lifetime"}
                         value={field.value ?? ""}
+                        disabled={watchCycle === 2 || watchCycle === 3} // Khóa ô này nếu là Vĩnh viễn hoặc Trial
                       />
                     </FormControl>
                     <FormMessage />
@@ -239,19 +253,19 @@ export function CreatePlanDialog() {
               />
             </div>
 
-            {/* Features (Textarea) */}
+            {/* Tính năng */}
             <FormField
               control={form.control}
               name="featuresString"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                    Tính năng (Mỗi dòng 1 tính năng)
+                  <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
+                    Tính năng (Mỗi dòng 1 mục)
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="- Không giới hạn bài học&#10;- Hỗ trợ 24/7&#10;- Không quảng cáo"
-                      className="bg-black/20 border-white/10 h-24 font-mono text-xs"
+                      placeholder="Không quảng cáo&#10;Học mọi bài học&#10;Hỗ trợ ưu tiên"
+                      className="bg-black/20 border-white/10 h-24 font-sans text-sm"
                       {...field}
                     />
                   </FormControl>
@@ -260,24 +274,23 @@ export function CreatePlanDialog() {
               )}
             />
 
-            {/* Row 3: Badge Info */}
+            {/* Badge Info */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="badgeText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Badge Text (Optional)
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
+                      Nhãn (Badge)
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="vd: Phổ biến nhất"
-                        className="bg-black/20 border-white/10"
+                        className="bg-black/20 border-white/10 focus:border-orange-500/50"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -286,40 +299,47 @@ export function CreatePlanDialog() {
                 name="badgeColor"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Mã màu Badge (Hex)
+                    <FormLabel className="text-[10px] font-bold uppercase text-zinc-500">
+                      Màu Badge
                     </FormLabel>
                     <FormControl>
-                      <div className="flex gap-2">
-                        <div
-                          className="w-10 h-10 rounded border border-white/10"
-                          style={{ backgroundColor: field.value }}
-                        ></div>
+                      <div className="flex items-center gap-2">
+                        {/* Thay thế div ảo bằng thẻ input type="color" */}
+                        <div className="relative w-10 h-10 overflow-hidden rounded-lg border border-white/10 shrink-0 cursor-pointer">
+                          <input
+                            type="color"
+                            className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer"
+                            value={field.value || "#3B82F6"}
+                            onChange={(e) => field.onChange(e.target.value)}
+                          />
+                        </div>
                         <Input
                           placeholder="#3B82F6"
-                          className="bg-black/20 border-white/10 flex-1"
+                          className="bg-black/20 border-white/10 focus:border-orange-500/50 uppercase"
                           {...field}
+                          onChange={(e) =>
+                            field.onChange(e.target.value.toUpperCase())
+                          }
                         />
                       </div>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Is Active Switch */}
+            {/* Trạng thái Kích hoạt */}
             <FormField
               control={form.control}
               name="isActive"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4 transition-all hover:bg-white/[0.08]">
                   <div className="space-y-0.5">
                     <FormLabel className="text-sm font-bold text-white">
                       Kích hoạt ngay
                     </FormLabel>
-                    <FormDescription className="text-xs text-zinc-500">
-                      Gói này sẽ hiển thị ngay lập tức cho người dùng.
+                    <FormDescription className="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">
+                      Gói này sẽ hiển thị ngay cho người dùng.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -332,18 +352,18 @@ export function CreatePlanDialog() {
               )}
             />
 
-            <DialogFooter>
+            <DialogFooter className="pt-2">
               <Button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-white text-black hover:bg-zinc-200 font-bold"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98]"
               >
                 {isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <PackagePlus className="mr-2 h-4 w-4" />
                 )}
-                {isPending ? "Đang xử lý..." : "Xác nhận tạo gói"}
+                {isPending ? "Đang tạo gói..." : "Xác nhận tạo gói"}
               </Button>
             </DialogFooter>
           </form>

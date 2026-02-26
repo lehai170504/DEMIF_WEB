@@ -45,14 +45,14 @@ export default function CreateLessonDialog({
   const [open, setOpen] = React.useState(false);
   const { createLesson, isCreating } = useLessonActions();
 
-  // Khởi tạo Form với LessonFormValues từ Zod
+  // Khởi tạo Form với chuỗi mặc định
   const form = useForm<LessonFormValues>({
     resolver: zodResolver(LessonSchema),
     defaultValues: {
       title: "",
       description: "",
-      lessonType: 0, // 0 = Dictation
-      level: 0, // 0 = Beginner
+      lessonType: "Dictation", // <-- Đổi thành chuỗi
+      level: "Beginner", // <-- Đổi thành chuỗi
       category: "",
       status: "draft",
       isPremiumOnly: false,
@@ -164,10 +164,9 @@ export default function CreateLessonDialog({
                       <FormLabel className="text-xs font-bold text-zinc-500">
                         Loại bài
                       </FormLabel>
-                      {/* field.value là Number, chuyển thành String để Select đọc được */}
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={String(field.value)}
+                        defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-black/20 border-white/10">
@@ -175,11 +174,12 @@ export default function CreateLessonDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {/* Sửa value thành số (String format) */}
-                          <SelectItem value="0">Dictation</SelectItem>
-                          <SelectItem value="1">Shadowing</SelectItem>
+                          {/* <-- Dùng trực tiếp String --> */}
+                          <SelectItem value="Dictation">Dictation</SelectItem>
+                          <SelectItem value="Shadowing">Shadowing</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -205,6 +205,7 @@ export default function CreateLessonDialog({
                           <SelectItem value="published">Công khai</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -221,7 +222,7 @@ export default function CreateLessonDialog({
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={String(field.value)}
+                        defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-black/20 border-white/10">
@@ -229,12 +230,15 @@ export default function CreateLessonDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {/* Giả sử 0 = Beginner, 1 = Intermediate, 2 = Advanced */}
-                          <SelectItem value="0">Beginner</SelectItem>
-                          <SelectItem value="1">Intermediate</SelectItem>
-                          <SelectItem value="2">Advanced</SelectItem>
+                          {/* <-- Dùng trực tiếp String --> */}
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -252,6 +256,7 @@ export default function CreateLessonDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -272,6 +277,7 @@ export default function CreateLessonDialog({
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -298,6 +304,7 @@ export default function CreateLessonDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -315,6 +322,7 @@ export default function CreateLessonDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -335,6 +343,7 @@ export default function CreateLessonDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -360,6 +369,7 @@ export default function CreateLessonDialog({
                           <SelectItem value="video">Video</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -433,6 +443,7 @@ export default function CreateLessonDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -451,6 +462,7 @@ export default function CreateLessonDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

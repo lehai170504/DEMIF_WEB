@@ -35,28 +35,17 @@ import { Loader2, Save, Trash2, X } from "lucide-react";
 import { useLessonActions } from "@/hooks/use-lesson";
 import { LessonSchema, LessonFormValues } from "@/schemas/lesson.schema";
 import { LessonDto } from "@/types/lesson.type";
-import { normalizeStatus } from "./table-columns";
+import {
+  normalizeStatus,
+  normalizeType,
+  normalizeLevel,
+} from "./table-columns";
 
 interface LessonDetailDrawerProps {
   lesson: LessonDto | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-// --- MAPPING LOGIC ---
-// Chuyển đổi dữ liệu từ BE thành Number cho đúng Schema
-const typeToNumber = (type: any): number => {
-  const t = String(type).toLowerCase();
-  if (t === "shadowing" || t === "1") return 1;
-  return 0; // Dictation
-};
-
-const levelToNumber = (level: any): number => {
-  const l = String(level).toLowerCase();
-  if (l === "intermediate" || l === "1") return 1;
-  if (l === "advanced" || l === "2") return 2;
-  return 0; // Beginner
-};
 
 const parseTags = (tagsRaw?: string | null) => {
   if (!tagsRaw) return "";
@@ -82,8 +71,8 @@ export default function LessonDetailDrawer({
     defaultValues: {
       title: "",
       description: "",
-      lessonType: 0,
-      level: 0,
+      lessonType: "Dictation", // Mặc định là chuỗi
+      level: "Beginner", // Mặc định là chuỗi
       category: "",
       status: "draft",
       isPremiumOnly: false,
@@ -105,8 +94,9 @@ export default function LessonDetailDrawer({
       form.reset({
         title: lesson.title || "",
         description: lesson.description || "",
-        lessonType: typeToNumber(lesson.lessonType),
-        level: levelToNumber(lesson.level),
+        // Lấy dữ liệu dưới dạng chuỗi
+        lessonType: normalizeType(lesson.lessonType),
+        level: normalizeLevel(lesson.level),
         category: lesson.category || "",
         status: normalizeStatus(lesson.status).toLowerCase(),
         isPremiumOnly: lesson.isPremiumOnly || false,
@@ -232,9 +222,10 @@ export default function LessonDetailDrawer({
                         <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
                           Loại bài
                         </FormLabel>
+                        {/* Sử dụng onChange truyền thẳng chuỗi */}
                         <Select
-                          onValueChange={(val) => field.onChange(Number(val))}
-                          value={String(field.value)}
+                          onValueChange={field.onChange}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-black/20 border-white/10 text-zinc-200">
@@ -242,8 +233,8 @@ export default function LessonDetailDrawer({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                            <SelectItem value="0">Dictation</SelectItem>
-                            <SelectItem value="1">Shadowing</SelectItem>
+                            <SelectItem value="Dictation">Dictation</SelectItem>
+                            <SelectItem value="Shadowing">Shadowing</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -258,9 +249,10 @@ export default function LessonDetailDrawer({
                         <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
                           Cấp độ
                         </FormLabel>
+                        {/* Sử dụng onChange truyền thẳng chuỗi */}
                         <Select
-                          onValueChange={(val) => field.onChange(Number(val))}
-                          value={String(field.value)}
+                          onValueChange={field.onChange}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-black/20 border-white/10 text-zinc-200">
@@ -268,9 +260,11 @@ export default function LessonDetailDrawer({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                            <SelectItem value="0">Beginner</SelectItem>
-                            <SelectItem value="1">Intermediate</SelectItem>
-                            <SelectItem value="2">Advanced</SelectItem>
+                            <SelectItem value="Beginner">Beginner</SelectItem>
+                            <SelectItem value="Intermediate">
+                              Intermediate
+                            </SelectItem>
+                            <SelectItem value="Advanced">Advanced</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

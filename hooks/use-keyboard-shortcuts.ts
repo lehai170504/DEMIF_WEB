@@ -15,6 +15,7 @@ export function useKeyboardShortcuts(shortcuts: ShortcutConfig[]) {
         const { key, ctrl, shift, alt, action } = shortcut;
 
         // Kiểm tra phím chính (không phân biệt hoa thường)
+        if (!event.key || !key) return;
         const isKeyMatch = event.key.toLowerCase() === key.toLowerCase();
 
         // Kiểm tra các phím bổ trợ (Modifier keys)

@@ -3,8 +3,9 @@ import { z } from "zod";
 export const LessonSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
   description: z.string().optional().default(""),
-  lessonType: z.coerce.number().min(0, "Vui lòng chọn loại bài học"),
-  level: z.coerce.number().min(0, "Vui lòng chọn cấp độ"),
+
+  lessonType: z.string().min(1, "Vui lòng chọn loại bài học"),
+  level: z.string().min(1, "Vui lòng chọn cấp độ"),
 
   category: z.string().min(1, "Vui lòng nhập danh mục"),
 
