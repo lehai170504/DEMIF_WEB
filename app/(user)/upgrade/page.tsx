@@ -3,11 +3,16 @@
 import { motion, Variants } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, Star, Zap, Crown, Shield, Mic, Headphones } from "lucide-react";
+import { Check, Star, Zap, Crown, Shield, Mic, Headphones, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useActivePlans, useMySubscription } from "@/hooks/use-subscription";
+import { SubscriptionPlanDto } from "@/types/subscription.type";
 
 export default function UpgradePage() {
+  const { data: plans, isLoading: isLoadingPlans, error: plansError } = useActivePlans();
+  const { data: mySubscription, isLoading: isLoadingSubscription } = useMySubscription();
+
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -23,6 +28,25 @@ export default function UpgradePage() {
       y: 0,
       transition: { type: "spring", stiffness: 50 },
     },
+  };
+
+  // Helper function to format billing cycle
+  const formatBillingCycle = (cycle: string) => {
+    // Handle both number string ("0", "1", "2") and text string
+    const cycleMap: Record<string, string> = {
+      "0": "/năm",
+      "1": "/tháng",
+      "2": "/vĩnh viễn",
+      "Monthly": "/tháng",
+      "Yearly": "/năm",
+      "Lifetime": "/vĩnh viễn"
+    };
+    return cycleMap[cycle] || "";
+  };
+
+  // Helper function to check if user has this plan
+  const isCurrentPlan = (planId: string) => {
+    return mySubscription?.planId === planId && mySubscription?.status === "Active";
   };
 
   return (
@@ -69,6 +93,44 @@ export default function UpgradePage() {
           </motion.p>
         </motion.div>
 
+        {/* --- CURRENT SUBSCRIPTION --- */}
+        {mySubscription && mySubscription.status === "Active" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="max-w-2xl mx-auto mb-12"
+          >
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 backdrop-blur-sm">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-orange-500/20 rounded-2xl">
+                    <Crown className="w-6 h-6 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-zinc-400 font-medium">
+                      Gói hiện tại
+                    </p>
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                      {mySubscription.plan?.name || "Premium"}
+                    </h3>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {mySubscription.endDate && (
+                    <p className="text-sm text-gray-600 dark:text-zinc-400">
+                      Hết hạn: {new Date(mySubscription.endDate).toLocaleDateString("vi-VN")}
+                    </p>
+                  )}
+                  <Badge className="mt-2 bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30">
+                    {mySubscription.autoRenew ? "Tự động gia hạn" : "Không tự động gia hạn"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* --- PRICING CARDS --- */}
         <motion.div
           variants={containerVariants}
@@ -76,63 +138,52 @@ export default function UpgradePage() {
           animate="visible"
           className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-center"
         >
-          {/* Gói 1: Free */}
-          <PricingCard
-            title="Free"
-            description="Trải nghiệm cơ bản"
-            price="0đ"
-            period="mãi mãi"
-            features={[
-              "5 Bài Nghe chép chính tả/tuần",
-              "3 Bài Shadowing cơ bản/tuần",
-              "Phân tích lỗi sai cơ bản",
-              "Truy cập cộng đồng",
-            ]}
-            buttonText="Đang sử dụng"
-            buttonHref="#"
-            disabled
-            delay={0.1}
-          />
-
-          {/* Gói 2: Monthly (Hero) */}
-          <PricingCard
-            title="Standard"
-            description="Tăng tốc toàn diện"
-            price="59.000đ"
-            period="/tháng"
-            features={[
-              "Không giới hạn bài Dictation",
-              "Không giới hạn bài Shadowing",
-              "Chấm điểm phát âm AI chi tiết",
-              "Phân tích lỗi sai chuyên sâu",
-              "Chế độ ôn tập SRS thông minh",
-              "Tải xuống bài học offline",
-            ]}
-            buttonText="Nâng cấp ngay"
-            buttonHref="/checkout-monthly"
-            isPopular
-            delay={0.2}
-          />
-
-          {/* Gói 3: Yearly */}
-          <PricingCard
-            title="Prenium"
-            description="Cam kết dài hạn"
-            price="499.000đ"
-            period="/năm"
-            features={[
-              "Tất cả quyền lợi gói Chiến Binh",
-              "Kho bài luyện thi IELTS/TOEIC",
-              "AI Coach phân tích lộ trình",
-              "Hỗ trợ ưu tiên 24/7",
-              "Early access tính năng mới",
-              "Huy hiệu Legend độc quyền",
-            ]}
-            buttonText="Tiết kiệm 30%"
-            buttonHref="/checkout-yearly"
-            highlightBorder
-            delay={0.3}
-          />
+          {isLoadingPlans ? (
+            // Loading state
+            <div className="col-span-full flex justify-center items-center py-20">
+              <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
+              <span className="ml-4 text-gray-600 dark:text-zinc-400 font-medium">
+                Đang tải gói đăng ký...
+              </span>
+            </div>
+          ) : plansError ? (
+            // Error state
+            <div className="col-span-full text-center py-20">
+              <p className="text-red-500 font-medium">
+                Không thể tải danh sách gói. Vui lòng thử lại sau.
+              </p>
+            </div>
+          ) : plans && plans.length > 0 ? (
+            // Display plans from API
+            plans
+              .filter((plan) => plan.isActive !== false) // Chỉ filter out nếu isActive = false
+              .map((plan, index) => (
+                <PricingCard
+                  key={plan.id}
+                  planId={plan.id}
+                  title={plan.name}
+                  description={plan.tier}
+                  price={`${plan.price.toLocaleString("vi-VN")}${plan.currency === "VND" ? "đ" : ` ${plan.currency}`}`}
+                  period={formatBillingCycle(plan.billingCycle)}
+                  features={plan.features}
+                  buttonText={isCurrentPlan(plan.id) ? "Đang sử dụng" : "Nâng cấp ngay"}
+                  buttonHref={isCurrentPlan(plan.id) ? "#" : `/payment?planId=${plan.id}`}
+                  badge={plan.badgeText}
+                  badgeColor={plan.badgeColor}
+                  isPopular={plan.badgeText?.toLowerCase().includes("phổ biến")}
+                  highlightBorder={plan.badgeText?.toLowerCase().includes("tiết kiệm")}
+                  disabled={isCurrentPlan(plan.id)}
+                  delay={0.1 + index * 0.1}
+                />
+              ))
+          ) : (
+            // No plans available
+            <div className="col-span-full text-center py-20">
+              <p className="text-gray-600 dark:text-zinc-400 font-medium">
+                Hiện chưa có gói đăng ký nào.
+              </p>
+            </div>
+          )}
         </motion.div>
 
         {/* --- FEATURE HIGHLIGHTS --- */}
@@ -182,6 +233,7 @@ export default function UpgradePage() {
 
 // Sub-component cho thẻ giá
 interface PricingCardProps {
+  planId: string;
   title: string;
   description: string;
   price: string;
@@ -189,6 +241,8 @@ interface PricingCardProps {
   features: string[];
   buttonText: string;
   buttonHref: string;
+  badge?: string | null;
+  badgeColor?: string | null;
   isPopular?: boolean;
   highlightBorder?: boolean;
   disabled?: boolean;
@@ -196,6 +250,7 @@ interface PricingCardProps {
 }
 
 function PricingCard({
+  planId,
   title,
   description,
   price,
@@ -203,6 +258,8 @@ function PricingCard({
   features,
   buttonText,
   buttonHref,
+  badge,
+  badgeColor,
   isPopular,
   highlightBorder,
   disabled,
@@ -227,11 +284,18 @@ function PricingCard({
             : "bg-gray-50 dark:bg-[#0a0a0c] border-gray-200 dark:border-white/5 shadow-xl opacity-90 dark:opacity-80 hover:opacity-100",
       )}
     >
-      {/* Popular Badge */}
-      {isPopular && (
+      {/* Badge from Database */}
+      {badge && (
         <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-full text-center">
-          <Badge className="bg-gradient-to-r from-orange-500 to-red-600 border-none text-white px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-500/40">
-            <Star className="w-3 h-3 mr-2 fill-current" /> Phổ biến nhất
+          <Badge 
+            className="border-none text-white px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-lg"
+            style={{ 
+              backgroundColor: badgeColor || "#f97316",
+              boxShadow: `0 10px 25px -5px ${badgeColor || "#f97316"}40`
+            }}
+          >
+            {isPopular && <Star className="w-3 h-3 mr-2 fill-current inline" />}
+            {badge}
           </Badge>
         </div>
       )}
@@ -260,13 +324,6 @@ function PricingCard({
           {price}
         </span>
         <span className="text-gray-500 dark:text-zinc-500 font-bold mb-1.5">{period}</span>
-
-        {/* Yearly Saving Note */}
-        {price.includes("499") && (
-          <div className="md:ml-auto inline-flex items-center px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wide">
-            <Zap className="w-3 h-3 mr-1 fill-current" /> -30%
-          </div>
-        )}
       </div>
 
       {/* Features List */}
