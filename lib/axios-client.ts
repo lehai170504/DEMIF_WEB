@@ -47,6 +47,22 @@ axiosClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
 
+    // Special handling: Không logout khi my-subscription trả về 404 (user chưa có subscription)
+    if (
+      error.response?.status === 404 &&
+      originalRequest?.url?.includes("/subscription-plans/my-subscription")
+    ) {
+      return Promise.reject(error);
+    }
+
+    // Special handling: Không logout khi my-subscription trả về 401 (có thể user chưa có gói)
+    if (
+      error.response?.status === 401 &&
+      originalRequest?.url?.includes("/subscription-plans/my-subscription")
+    ) {
+      return Promise.reject(error);
+    }
+
     // Check 401 và không phải là route refresh token
     if (
       error.response?.status === 401 &&
@@ -118,6 +134,21 @@ axiosClient.interceptors.response.use(
 
     return Promise.reject(error);
   },
+);
+
+// Public axios client (không gửi token) - dùng cho public endpoints
+export const publicAxiosClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 15000,
+});
+
+// Public client chỉ rút gọn response, không có auth logic
+publicAxiosClient.interceptors.response.use(
+  (response) => response.data,
+  (error) => Promise.reject(error)
 );
 
 export default axiosClient;
