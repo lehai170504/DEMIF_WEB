@@ -5,7 +5,7 @@ import { Facebook, Instagram, Twitter, Github, Globe } from "lucide-react";
 
 export function FooterLanding() {
   return (
-    <footer className="relative border-t border-white/5 pt-20 pb-10 font-mono overflow-hidden bg-[#050505]/80 backdrop-blur-xl">
+    <footer className="relative border-t border-gray-200 dark:border-white/5 pt-20 pb-10 font-mono overflow-hidden bg-gray-50/80 dark:bg-[#050505]/80 backdrop-blur-xl">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
           {/* 1. Brand Section */}
@@ -18,19 +18,19 @@ export function FooterLanding() {
                   className="w-6 h-6 brightness-0 invert" // Logo trắng
                 />
               </div>
-              <span className="text-2xl font-black tracking-tighter italic uppercase text-white">
+              <span className="text-2xl font-black tracking-tighter italic uppercase text-gray-900 dark:text-white">
                 DEMIF<span className="text-[#FF7A00] not-italic">.</span>
               </span>
             </div>
 
-            <p className="text-zinc-500 text-sm leading-relaxed max-w-sm font-medium">
+            <p className="text-gray-600 dark:text-zinc-500 text-sm leading-relaxed max-w-sm font-medium">
               Nâng tầm kỹ năng ngôn ngữ với AI thông qua phương pháp
-              <span className="text-zinc-200 font-bold italic">
+              <span className="text-gray-900 dark:text-zinc-200 font-bold italic">
                 {" "}
                 Dictation
               </span>{" "}
               và
-              <span className="text-zinc-200 font-bold italic">
+              <span className="text-gray-900 dark:text-zinc-200 font-bold italic">
                 {" "}
                 Shadowing
               </span>{" "}
@@ -43,7 +43,7 @@ export function FooterLanding() {
                 <Link
                   key={i}
                   href="#"
-                  className="p-2.5 rounded-xl bg-white/5 text-zinc-400 hover:bg-[#FF7A00] hover:text-white transition-all border border-white/5 hover:border-[#FF7A00]"
+                  className="p-2.5 rounded-xl bg-gray-200 dark:bg-white/5 text-gray-600 dark:text-zinc-400 hover:bg-[#FF7A00] hover:text-white transition-all border border-gray-300 dark:border-white/5 hover:border-[#FF7A00]"
                 >
                   <Icon className="w-4 h-4" />
                 </Link>
@@ -61,7 +61,7 @@ export function FooterLanding() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm font-bold text-zinc-500 hover:text-white transition-colors"
+                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     {item}
                   </Link>
@@ -79,7 +79,7 @@ export function FooterLanding() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm font-bold text-zinc-500 hover:text-white transition-colors"
+                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     {item}
                   </Link>
@@ -97,7 +97,7 @@ export function FooterLanding() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm font-bold text-zinc-500 hover:text-white transition-colors"
+                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     {item}
                   </Link>
@@ -112,10 +112,10 @@ export function FooterLanding() {
               Ngôn ngữ
             </h4>
             <div className="flex flex-col gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:bg-white/10 transition-all">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 dark:border-white/10 bg-gray-100 dark:bg-white/5 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
                 <Globe className="w-3.5 h-3.5" /> Tiếng Việt
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/5 text-xs font-bold text-zinc-600 hover:text-zinc-400 hover:border-white/10 transition-all">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-zinc-600 hover:text-gray-700 dark:hover:text-zinc-400 hover:border-gray-300 dark:hover:border-white/10 transition-all">
                 English
               </button>
             </div>
@@ -123,16 +123,16 @@ export function FooterLanding() {
         </div>
 
         {/* Bottom Section */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6">
-            <p className="text-xs font-bold text-zinc-600">
+            <p className="text-xs font-bold text-gray-500 dark:text-zinc-600">
               © 2026 DEMIF SYSTEM. All rights reserved.
             </p>
-            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-zinc-700">
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-700">
               <span>Hà Nội</span>
-              <span className="w-1 h-1 bg-zinc-800 rounded-full" />
+              <span className="w-1 h-1 bg-gray-400 dark:bg-zinc-800 rounded-full" />
               <span>Sài Gòn</span>
-              <span className="w-1 h-1 bg-zinc-800 rounded-full" />
+              <span className="w-1 h-1 bg-gray-400 dark:bg-zinc-800 rounded-full" />
               <span>Đà Nẵng</span>
             </div>
           </div>

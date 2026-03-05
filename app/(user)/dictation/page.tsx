@@ -69,13 +69,13 @@ export default function DictationPage() {
           </motion.div>
 
           <div className="space-y-4 max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
               Thư Viện{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C]">
                 Bài Học
               </span>
             </h2>
-            <p className="text-lg text-zinc-400">
+            <p className="text-lg text-gray-600 dark:text-zinc-400">
               Tăng khả năng nghe và vốn từ vựng thông qua phương pháp chép chính
               tả trực quan.
             </p>
@@ -86,28 +86,28 @@ export default function DictationPage() {
           {/* --- SIDEBAR FILTERS (Sticky) --- */}
           <aside className="lg:col-span-3 space-y-8 sticky top-28">
             {/* Filter Panel */}
-            <div className="p-6 rounded-[1.5rem] bg-[#18181b] border border-white/10 shadow-xl">
+            <div className="p-6 rounded-[1.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 shadow-xl">
               <div className="space-y-8">
                 {/* Search */}
                 <div>
-                  <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-4">
+                  <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 mb-4">
                     <Search className="h-3 w-3 mr-2" />
                     Tìm kiếm
                   </h4>
                   <div className="relative group">
                     <Input
                       placeholder="Tên bài học..."
-                      className="pl-10 h-11 rounded-xl border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-orange-500 focus-visible:border-orange-500 transition-all group-hover:bg-white/10"
+                      className="pl-10 h-11 rounded-xl border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-zinc-600 focus-visible:ring-orange-500 focus-visible:border-orange-500 transition-all group-hover:bg-gray-100 dark:group-hover:bg-white/10"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors" />
                   </div>
                 </div>
 
                 {/* Level Filter */}
                 <div>
-                  <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-4">
+                  <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 mb-4">
                     <Filter className="h-3 w-3 mr-2" />
                     Cấp độ
                   </h4>
@@ -121,7 +121,7 @@ export default function DictationPage() {
                             "flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all duration-300 border",
                             filter === level
                               ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20"
-                              : "bg-transparent text-zinc-400 border-transparent hover:bg-white/5 hover:text-zinc-200",
+                              : "bg-transparent text-gray-600 dark:text-zinc-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-zinc-200",
                           )}
                         >
                           {level}
@@ -196,13 +196,13 @@ export default function DictationPage() {
                         href={`/dictation/${lesson.id}`}
                         className="group block h-full"
                       >
-                        <div className="relative h-full flex flex-col p-6 rounded-[2rem] bg-[#18181b] border border-white/5 transition-all duration-300 hover:bg-[#202023] hover:border-orange-500/30 hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
+                        <div className="relative h-full flex flex-col p-6 rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/5 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-[#202023] hover:border-orange-500/30 hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
                           {/* Hover Glow */}
                           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                           {/* Top Section */}
                           <div className="relative z-10 flex items-start justify-between mb-6">
-                            <div className="p-3 rounded-2xl bg-white/5 text-zinc-400 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-orange-500/40">
+                            <div className="p-3 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-400 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-orange-500/40">
                               <BookOpen className="h-6 w-6" />
                             </div>
                             <Badge
@@ -218,29 +218,29 @@ export default function DictationPage() {
 
                           {/* Content */}
                           <div className="relative z-10 space-y-3 mb-6 flex-1">
-                            <h4 className="text-lg font-bold text-white line-clamp-1 group-hover:text-orange-400 transition-colors">
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
                               {lesson.title}
                             </h4>
-                            <p className="text-sm text-zinc-500 line-clamp-2 leading-relaxed group-hover:text-zinc-400 transition-colors">
+                            <p className="text-sm text-gray-600 dark:text-zinc-500 line-clamp-2 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-zinc-400 transition-colors">
                               {lesson.description}
                             </p>
                           </div>
 
                           {/* Footer */}
-                          <div className="relative z-10 flex items-center justify-between pt-4 border-t border-white/5">
+                          <div className="relative z-10 flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/5">
                             <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 group-hover:text-zinc-400">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-400">
                                 <Clock className="h-3.5 w-3.5" />
                                 <span>{lesson.duration}s</span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 group-hover:text-zinc-400">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-400">
                                 <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                                <span className="text-white">4.9</span>
+                                <span className="text-gray-900 dark:text-white">4.9</span>
                               </div>
                             </div>
 
                             {/* Play Button Icon */}
-                            <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-orange-500">
+                            <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-orange-500">
                               <Play className="h-3.5 w-3.5 fill-current ml-0.5" />
                             </div>
                           </div>
@@ -257,15 +257,15 @@ export default function DictationPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-32 rounded-[2rem] bg-white/5 border border-dashed border-white/10"
+                className="flex flex-col items-center justify-center py-32 rounded-[2rem] bg-gray-50 dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10"
               >
-                <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                  <Search className="h-8 w-8 text-zinc-500" />
+                <div className="h-16 w-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
+                  <Search className="h-8 w-8 text-gray-400 dark:text-zinc-500" />
                 </div>
-                <p className="text-zinc-300 font-bold text-lg mb-2">
+                <p className="text-gray-900 dark:text-zinc-300 font-bold text-lg mb-2">
                   Không tìm thấy bài học phù hợp
                 </p>
-                <p className="text-zinc-500 text-sm mb-6">
+                <p className="text-gray-600 dark:text-zinc-500 text-sm mb-6">
                   Thử thay đổi từ khóa hoặc bộ lọc xem sao nhé!
                 </p>
                 <Button

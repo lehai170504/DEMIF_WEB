@@ -88,7 +88,7 @@ export default function BlogPage() {
   return (
     // THÊM: overflow-x-hidden để ẩn thanh cuộn ngang
     // THÊM: style tùy chỉnh cho thanh cuộn (scrollbar) để đẹp hơn trên nền tối
-    <div className="w-full min-h-screen bg-[#050505] font-mono text-zinc-100 selection:bg-orange-500/30 pb-20 relative overflow-x-hidden">
+    <div className="w-full min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 pb-20 relative overflow-x-hidden">
       {/* --- 1. 3D Background Effects --- */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] bg-orange-500/5 blur-[120px] rounded-full opacity-60" />
@@ -118,7 +118,7 @@ export default function BlogPage() {
               <motion.section variants={itemVariants}>
                 <div className="mb-8 flex items-center gap-3 px-2">
                   <div className="h-8 w-1.5 bg-gradient-to-b from-orange-500 to-red-500 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.6)]" />
-                  <h2 className="text-3xl font-black text-white tracking-tight">
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                     Tiêu điểm tuần
                   </h2>
                 </div>
@@ -138,7 +138,7 @@ export default function BlogPage() {
                 {/* Control Bar (Filter & Results) */}
                 <motion.div variants={itemVariants} className="space-y-6">
                   {/* Category Filter Wrapper với scroll ngang ẩn thanh cuộn */}
-                  <div className="p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl inline-block shadow-lg max-w-full overflow-x-auto scrollbar-none">
+                  <div className="p-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl backdrop-blur-xl inline-block shadow-lg max-w-full overflow-x-auto scrollbar-none">
                     <CategoryFilter
                       categories={blogCategories}
                       selectedCategory={selectedCategory}
@@ -183,8 +183,8 @@ export default function BlogPage() {
                             className="group h-full"
                           >
                             {/* Card Wrapper với hiệu ứng viền Neon */}
-                            <div className="h-full rounded-[2.2rem] bg-gradient-to-br from-white/5 to-transparent p-[1px] hover:from-orange-500/50 hover:to-purple-500/50 transition-all duration-500 shadow-lg hover:shadow-orange-500/10">
-                              <div className="h-full rounded-[2.2rem] bg-[#050505] overflow-hidden relative backface-hidden">
+                            <div className="h-full rounded-[2.2rem] bg-gradient-to-br from-gray-200 dark:from-white/5 to-transparent p-[1px] hover:from-orange-500/50 hover:to-purple-500/50 transition-all duration-500 shadow-lg hover:shadow-orange-500/10">
+                              <div className="h-full rounded-[2.2rem] bg-white dark:bg-[#050505] overflow-hidden relative backface-hidden">
                                 {" "}
                                 {/* backface-hidden giúp fix lỗi nháy trên 1 số trình duyệt */}
                                 <BlogPostCard post={post} />
@@ -218,8 +218,8 @@ export default function BlogPage() {
                 {/* Popular Posts Wrapper */}
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-[2.2rem] blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-                  <div className="relative p-8 rounded-[2rem] bg-[#18181b]/90 border border-white/10 backdrop-blur-xl shadow-2xl">
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-6 flex items-center gap-2">
+                  <div className="relative p-8 rounded-[2rem] bg-white dark:bg-[#18181b]/90 border border-gray-200 dark:border-white/10 backdrop-blur-xl shadow-2xl">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 mb-6 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
                       Đang thịnh hành
                     </h3>
@@ -228,8 +228,8 @@ export default function BlogPage() {
                 </div>
 
                 {/* Tags Cloud Wrapper */}
-                <div className="p-8 rounded-[2rem] bg-[#18181b]/80 border border-white/10 backdrop-blur-xl shadow-2xl">
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-6 flex items-center gap-2">
+                <div className="p-8 rounded-[2rem] bg-white dark:bg-[#18181b]/80 border border-gray-200 dark:border-white/10 backdrop-blur-xl shadow-2xl">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 mb-6 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500" />
                     Chủ đề hot
                   </h3>

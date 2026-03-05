@@ -19,7 +19,7 @@ const tabs = [
 export function SortControls({ sortBy, onSortChange }: SortControlsProps) {
   return (
     <div className="flex justify-center mb-10">
-      <div className="flex p-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+      <div className="flex p-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full backdrop-blur-md">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -28,7 +28,7 @@ export function SortControls({ sortBy, onSortChange }: SortControlsProps) {
               "relative px-6 py-2.5 text-sm font-bold rounded-full transition-colors z-10",
               sortBy === tab.id
                 ? "text-black"
-                : "text-zinc-400 hover:text-white",
+                : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white",
             )}
           >
             {sortBy === tab.id && (

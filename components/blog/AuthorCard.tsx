@@ -15,8 +15,8 @@ interface AuthorCardProps {
 export function AuthorCard({ author }: AuthorCardProps) {
   return (
     <>
-      <Separator className="my-8 bg-white/10" />
-      <div className="p-8 rounded-[2rem] bg-[#18181b] border border-white/10 relative overflow-hidden group">
+      <Separator className="my-8 bg-gray-200 dark:bg-white/10" />
+      <div className="p-8 rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 relative overflow-hidden group">
         {/* Glow Effect */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] group-hover:bg-orange-500/10 transition-colors duration-500 pointer-events-none" />
 
@@ -29,13 +29,13 @@ export function AuthorCard({ author }: AuthorCardProps) {
           </Avatar>
 
           <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-xl font-bold text-white mb-1 group-hover:text-orange-400 transition-colors">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-orange-400 transition-colors">
               {author.name}
             </h3>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+            <p className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-3">
               {author.role}
             </p>
-            <p className="text-zinc-400 text-sm leading-relaxed">
+            <p className="text-gray-600 dark:text-zinc-400 text-sm leading-relaxed">
               {author.bio}
             </p>
           </div>

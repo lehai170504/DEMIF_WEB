@@ -17,7 +17,7 @@ export function SidebarReview({ reviewDue }: SidebarReviewProps) {
       whileHover={{ y: -5 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="relative overflow-hidden border border-white/10 bg-[#18181b] p-6 shadow-2xl rounded-[2rem] group">
+      <div className="relative overflow-hidden border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] p-6 shadow-2xl rounded-[2rem] group">
         {/* Background Gradients */}
         <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-orange-500/10 blur-[50px] group-hover:bg-orange-500/20 transition-colors duration-500" />
         <div className="absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-blue-500/10 blur-[50px]" />
@@ -35,13 +35,13 @@ export function SidebarReview({ reviewDue }: SidebarReviewProps) {
                   Daily Mission
                 </span>
               </div>
-              <h3 className="font-bold text-xl leading-none text-white">
+              <h3 className="font-bold text-xl leading-none text-gray-900 dark:text-white">
                 Ôn tập định kỳ
               </h3>
             </div>
 
             {/* Icon Box */}
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:border-orange-500/50 group-hover:bg-orange-500/10 transition-all">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 dark:bg-white/5 border border-orange-200 dark:border-white/10 group-hover:border-orange-500/50 group-hover:bg-orange-500/10 transition-all">
               <Zap className="h-5 w-5 text-orange-500 fill-orange-500" />
             </div>
           </div>
@@ -50,14 +50,14 @@ export function SidebarReview({ reviewDue }: SidebarReviewProps) {
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-5xl font-black text-white tracking-tighter drop-shadow-lg">
+                <span className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter drop-shadow-lg">
                   {reviewDue}
                 </span>
-                <span className="text-xs font-bold text-zinc-500 uppercase">
+                <span className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase">
                   từ vựng
                 </span>
               </div>
-              <p className="text-[11px] font-medium text-zinc-400 leading-snug">
+              <p className="text-[11px] font-medium text-gray-600 dark:text-zinc-400 leading-snug">
                 Đang chờ bạn củng cố để <br /> ghi nhớ vĩnh viễn
               </p>
             </div>
@@ -80,11 +80,11 @@ export function SidebarReview({ reviewDue }: SidebarReviewProps) {
 
           {/* Progress Bar Mockup */}
           <div className="space-y-1.5">
-            <div className="flex justify-between text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+            <div className="flex justify-between text-[9px] font-black text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
               <span>Tiến độ ngày</span>
-              <span className="text-white">80%</span>
+              <span className="text-gray-900 dark:text-white">80%</span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+            <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "80%" }}

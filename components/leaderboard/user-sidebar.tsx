@@ -20,17 +20,17 @@ export function UserSidebar({ stats }: { stats: UserStats }) {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.4 }}
-        className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#18181b] to-black border border-white/10 p-6 shadow-xl"
+        className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-white to-gray-50 dark:from-[#18181b] dark:to-black border border-gray-200 dark:border-white/10 p-6 shadow-xl"
       >
         {/* Glow */}
         <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 blur-[60px] rounded-full pointer-events-none" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-white/5 rounded-xl border border-white/5">
+            <div className="p-2 bg-gray-100 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5">
               <Target className="h-5 w-5 text-orange-500" />
             </div>
-            <h3 className="text-sm font-black uppercase tracking-widest text-white">
+            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">
               Lộ trình của bạn
             </h3>
           </div>
@@ -56,9 +56,9 @@ export function UserSidebar({ stats }: { stats: UserStats }) {
             />
           </div>
 
-          <div className="mt-8 pt-6 border-t border-white/5">
+          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/5">
             <Button
-              className="w-full h-12 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-all uppercase text-xs tracking-widest"
+              className="w-full h-12 bg-orange-500 dark:bg-white text-white dark:text-black font-bold rounded-xl hover:bg-orange-600 dark:hover:bg-zinc-200 transition-all uppercase text-xs tracking-widest"
               asChild
             >
               <Link href="/roadmap">
@@ -91,10 +91,10 @@ export function UserSidebar({ stats }: { stats: UserStats }) {
 
 function StatRow({ icon, label, value, color }: any) {
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+    <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
       <div className="flex items-center gap-3">
         {icon}
-        <span className="text-xs font-medium text-zinc-400">{label}</span>
+        <span className="text-xs font-medium text-gray-600 dark:text-zinc-400">{label}</span>
       </div>
       <span className={cn("text-sm font-black", color)}>{value}</span>
     </div>

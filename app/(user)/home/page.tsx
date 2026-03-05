@@ -92,7 +92,7 @@ export default function HomePage() {
 
           {/* Học tiếp */}
           <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-1.5 h-6 bg-orange-500 rounded-full inline-block shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
               Tiếp tục học
             </h2>
@@ -106,7 +106,7 @@ export default function HomePage() {
 
           {/* Đề xuất bài học */}
           <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
               Gợi ý hôm nay
             </h2>
@@ -117,8 +117,8 @@ export default function HomePage() {
 
           {/* Lịch sử học tập */}
           <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-xl font-bold text-zinc-400 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-zinc-700 rounded-full inline-block" />
+            <h2 className="text-xl font-bold text-gray-600 dark:text-zinc-400 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-gray-400 dark:bg-zinc-700 rounded-full inline-block" />
               Vừa học gần đây
             </h2>
             <RecentLessons lessons={recentLessons} />
@@ -148,7 +148,7 @@ export default function HomePage() {
             {/* Footer phụ */}
             <motion.div
               variants={sidebarItemVariants}
-              className="px-4 text-[10px] text-zinc-600 font-bold uppercase tracking-widest flex flex-wrap gap-x-6 gap-y-3"
+              className="px-4 text-[10px] text-gray-500 dark:text-zinc-600 font-bold uppercase tracking-widest flex flex-wrap gap-x-6 gap-y-3"
             >
               <a href="#" className="hover:text-orange-500 transition-colors">
                 Điều khoản

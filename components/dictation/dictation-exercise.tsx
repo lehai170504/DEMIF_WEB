@@ -46,13 +46,13 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
   };
 
   return (
-    <div className="min-h-screen font-mono text-zinc-100 selection:bg-orange-500/30 pb-20 bg-[#050505]">
+    <div className="min-h-screen font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 pb-20 bg-white dark:bg-[#050505]">
       {/* 1. GLASS HEADER - Animated Slide Down */}
       <motion.header
         variants={headerVariants}
         initial="hidden"
         animate="show"
-        className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#050505]/80 backdrop-blur-xl"
+        className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl"
       >
         <div className="container mx-auto max-w-[1600px] h-16 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
@@ -60,7 +60,7 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
               variant="ghost"
               size="icon"
               asChild
-              className="rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
+              className="rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
             >
               <Link href="/user/dictation">
                 <ChevronLeft className="h-5 w-5" />
@@ -68,10 +68,10 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
             </Button>
 
             <div className="space-y-0.5">
-              <h1 className="text-sm md:text-base font-bold tracking-tight text-white line-clamp-1">
+              <h1 className="text-sm md:text-base font-bold tracking-tight text-gray-900 dark:text-white line-clamp-1">
                 {lesson.title}
               </h1>
-              <div className="flex items-center gap-2 text-[10px] md:text-[11px] text-zinc-500 uppercase font-black tracking-widest">
+              <div className="flex items-center gap-2 text-[10px] md:text-[11px] text-gray-500 dark:text-zinc-500 uppercase font-black tracking-widest">
                 <span
                   className={cn(
                     "px-2 py-0.5 rounded-md border text-[9px]",
@@ -126,34 +126,34 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
             className="hidden lg:block lg:col-span-3 space-y-6 sticky top-24"
           >
             {/* Progress Card */}
-            <div className="relative overflow-hidden rounded-[2rem] bg-[#18181b] border border-white/10 p-6 shadow-xl">
+            <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl">
               <div className="relative z-10 space-y-6">
-                <div className="flex items-center gap-2 font-black text-zinc-500 uppercase text-[10px] tracking-[0.2em]">
+                <div className="flex items-center gap-2 font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em]">
                   <Info className="h-4 w-4 text-orange-500" />
                   Tiến độ bài học
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <span className="text-xs font-bold text-zinc-400">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5">
+                    <span className="text-xs font-bold text-gray-600 dark:text-zinc-400">
                       Lượt nghe
                     </span>
                     <div className="flex items-baseline gap-1 text-orange-500">
                       <span className="text-xl font-black">{playCount}</span>
-                      <span className="text-xs font-bold text-zinc-600">
+                      <span className="text-xs font-bold text-gray-400 dark:text-zinc-600">
                         / {maxPlays}
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase">
+                    <div className="flex justify-between text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase">
                       <span>Completion</span>
-                      <span className="text-white">33%</span>
+                      <span className="text-gray-900 dark:text-white">33%</span>
                     </div>
                     <Progress
                       value={33}
-                      className="h-2 bg-white/5"
+                      className="h-2 bg-gray-200 dark:bg-white/5"
                       indicatorClassName="bg-gradient-to-r from-orange-500 to-orange-400"
                     />
                   </div>
@@ -171,7 +171,7 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
             className="col-span-1 lg:col-span-6 space-y-8"
           >
             {/* Audio Player Card */}
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-[#18181b] border border-white/10 p-8 md:p-12 text-center shadow-2xl">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-8 md:p-12 text-center shadow-2xl">
               {/* Background Glow */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-orange-500/10 blur-[80px] rounded-full pointer-events-none" />
 
@@ -180,10 +180,10 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
                   <Volume2 className="h-12 w-12" />
                 </div>
 
-                <h2 className="text-3xl font-black text-white mb-2 tracking-tight">
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
                   Nghe & Chép lại
                 </h2>
-                <p className="text-sm text-zinc-500 mb-10 max-w-md mx-auto">
+                <p className="text-sm text-gray-600 dark:text-zinc-500 mb-10 max-w-md mx-auto">
                   Lắng nghe kỹ đoạn hội thoại và điền vào chỗ trống bên dưới.
                   Bạn có thể nghe lại tối đa 3 lần.
                 </p>
@@ -212,9 +212,9 @@ export function DictationExercise({ lesson }: { lesson: Lesson }) {
             <VocabularyPanel lessonVocab={lesson.vocabulary} />
 
             {/* Tip Card (Optional) */}
-            <div className="p-5 rounded-[1.5rem] bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 text-blue-200 text-xs font-medium leading-relaxed">
+            <div className="p-5 rounded-[1.5rem] bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 text-blue-600 dark:text-blue-200 text-xs font-medium leading-relaxed">
               <p>
-                <span className="text-blue-400 font-bold uppercase tracking-wider block mb-1">
+                <span className="text-blue-500 dark:text-blue-400 font-bold uppercase tracking-wider block mb-1">
                   Mẹo nhỏ:
                 </span>{" "}
                 Hãy chú ý đến các từ nối âm (linking sounds) để nghe chính xác

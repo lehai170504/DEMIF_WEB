@@ -59,13 +59,13 @@ export default function ShadowingPage() {
           </motion.div>
 
           <div className="space-y-4 max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
               Luyện Tập{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
                 Shadowing
               </span>
             </h2>
-            <p className="text-lg text-zinc-400 font-medium">
+            <p className="text-lg text-gray-600 dark:text-zinc-400 font-medium">
               Kỹ thuật nói đuổi giúp bạn làm chủ ngữ điệu và tốc độ nói như
               người bản xứ.
             </p>
@@ -76,28 +76,28 @@ export default function ShadowingPage() {
           {/* --- SIDEBAR: CONTROLS & PROGRESS --- */}
           <aside className="lg:col-span-3 space-y-8 sticky top-28">
             {/* Filter Panel */}
-            <div className="p-6 rounded-[1.5rem] bg-[#18181b] border border-white/10 shadow-xl">
+            <div className="p-6 rounded-[1.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 shadow-xl">
               <div className="space-y-8">
                 {/* Search */}
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-4 block">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 mb-4 block">
                     <Search className="inline-block h-3 w-3 mr-2 mb-0.5" />
                     Tìm kiếm bài tập
                   </label>
                   <div className="relative group">
                     <Input
                       placeholder="VD: Daily life..."
-                      className="pl-10 h-11 rounded-xl border-white/10 bg-white/5 text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-all group-hover:bg-white/10"
+                      className="pl-10 h-11 rounded-xl border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-zinc-600 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-all group-hover:bg-gray-100 dark:group-hover:bg-white/10"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors" />
                   </div>
                 </div>
 
                 {/* Level Filter */}
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-4 block">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 mb-4 block">
                     <Filter className="inline-block h-3 w-3 mr-2 mb-0.5" />
                     Cấp độ học thuật
                   </label>
@@ -111,7 +111,7 @@ export default function ShadowingPage() {
                             "flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all duration-300 border",
                             activeLevel === lvl
                               ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20"
-                              : "bg-transparent text-zinc-400 border-transparent hover:bg-white/5 hover:text-zinc-200",
+                              : "bg-transparent text-gray-600 dark:text-zinc-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-zinc-200",
                           )}
                         >
                           {lvl}
@@ -187,14 +187,14 @@ export default function ShadowingPage() {
                         href={`/shadowing/${lesson.id}`}
                         className="group block h-full"
                       >
-                        <div className="relative h-full flex flex-col p-6 rounded-[2rem] bg-[#18181b] border border-white/5 transition-all duration-300 hover:bg-[#202023] hover:border-blue-500/30 hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
+                        <div className="relative h-full flex flex-col p-6 rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/5 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-[#202023] hover:border-blue-500/30 hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
                           {/* Hover Glow */}
                           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                           <div className="relative z-10 flex flex-col h-full">
                             {/* Header */}
                             <div className="flex items-center justify-between mb-6">
-                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-zinc-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-blue-500/40">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-blue-500/40">
                                 <PlayCircle className="h-6 w-6 fill-current" />
                               </div>
                               <Badge
@@ -214,29 +214,29 @@ export default function ShadowingPage() {
 
                             {/* Content */}
                             <div className="space-y-3 flex-1 mb-6">
-                              <h4 className="text-xl font-bold text-white leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
+                              <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                                 {lesson.title}
                               </h4>
-                              <p className="text-sm text-zinc-500 font-medium line-clamp-2 leading-relaxed group-hover:text-zinc-400 transition-colors">
+                              <p className="text-sm text-gray-600 dark:text-zinc-500 font-medium line-clamp-2 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-zinc-400 transition-colors">
                                 {lesson.description}
                               </p>
                             </div>
 
                             {/* Footer */}
-                            <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                              <div className="flex items-center gap-4 text-xs font-bold text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                            <div className="pt-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">
+                              <div className="flex items-center gap-4 text-xs font-bold text-gray-600 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-400 transition-colors">
                                 <div className="flex items-center gap-1.5">
                                   <Clock className="h-3.5 w-3.5" />
                                   <span>{lesson.duration}s</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                                  <span className="text-white">4.8</span>
+                                  <span className="text-gray-900 dark:text-white">4.8</span>
                                 </div>
                               </div>
 
                               {/* Action Icon */}
-                              <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-blue-600">
+                              <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-blue-600">
                                 <ChevronRight className="h-4 w-4" />
                               </div>
                             </div>
@@ -254,15 +254,15 @@ export default function ShadowingPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-24 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5"
+                className="flex flex-col items-center justify-center py-24 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5"
               >
-                <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                  <Search className="h-8 w-8 text-zinc-500" />
+                <div className="h-16 w-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
+                  <Search className="h-8 w-8 text-gray-400 dark:text-zinc-500" />
                 </div>
-                <h3 className="text-lg font-bold text-zinc-300 mb-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-300 mb-2">
                   Không tìm thấy kết quả
                 </h3>
-                <p className="text-sm text-zinc-500 mb-6 text-center max-w-xs">
+                <p className="text-sm text-gray-600 dark:text-zinc-500 mb-6 text-center max-w-xs">
                   Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm bài tập khác bạn
                   nhé!
                 </p>
@@ -272,7 +272,7 @@ export default function ShadowingPage() {
                     setActiveLevel("Tất cả");
                     setSearchQuery("");
                   }}
-                  className="rounded-xl font-bold border-white/10 bg-transparent text-white hover:bg-white/10"
+                  className="rounded-xl font-bold border-gray-300 dark:border-white/10 bg-transparent text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10"
                 >
                   Làm mới bộ lọc
                 </Button>

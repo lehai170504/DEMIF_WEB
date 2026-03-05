@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#050505] overflow-hidden font-mono text-zinc-100 selection:bg-orange-500/30">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-[#050505] overflow-hidden font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30">
       <ParallaxBackground />
 
       {/* Grid Pattern */}
@@ -24,7 +24,7 @@ export default function AuthLayout({
       {/* Container chính - Mở rộng lên max-w-5xl để chứa 2 cột */}
       <div className="relative z-10 w-full max-w-5xl p-6">{children}</div>
 
-      <div className="absolute bottom-6 text-[10px] text-zinc-600 uppercase tracking-[0.4em] pointer-events-none">
+      <div className="absolute bottom-6 text-[10px] text-gray-400 dark:text-zinc-600 uppercase tracking-[0.4em] pointer-events-none">
         Secure Access • Demif AI Engine v3.0
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, Lock, Info, Headset } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -19,6 +20,7 @@ export function AudioPlayer({
   maxPlays,
   onPlayCountChange,
 }: AudioPlayerProps) {
+  const { theme } = useTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const [playCount, setPlayCount] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -63,16 +65,17 @@ export function AudioPlayer({
 
     const draw = () => {
       const { width, height } = canvas;
-      const barWidth = 4;
-      const gap = 3;
+      const barWidth = 6;
+      const gap = 4;
       const progress = currentTime / duration;
+      const isLightMode = theme === "light";
 
       ctx.clearRect(0, 0, width, height);
 
       barsData.forEach((val, i) => {
         const x = i * (barWidth + gap);
-        const bounce = isPlaying ? Math.sin(Date.now() / 150 + i) * 8 : 0; // Tăng độ nảy
-        const barHeight = val * height * 0.6 + bounce; // Giảm chiều cao gốc để nảy đẹp hơn
+        const bounce = isPlaying ? Math.sin(Date.now() / 150 + i) * 10 : 0;
+        const barHeight = val * height * 0.7 + bounce + 20;
 
         const isPast = i / barsData.length < progress;
 
@@ -82,7 +85,7 @@ export function AudioPlayer({
           ctx.shadowBlur = 10;
           ctx.shadowColor = "rgba(255, 122, 0, 0.5)";
         } else {
-          ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.fillStyle = isLightMode ? "rgba(0, 0, 0, 0.3)" : "rgba(255, 255, 255, 0.1)";
           ctx.shadowBlur = 0;
         }
 
@@ -108,7 +111,7 @@ export function AudioPlayer({
     render();
 
     return () => cancelAnimationFrame(animationId);
-  }, [currentTime, duration, isPlaying, barsData]);
+  }, [currentTime, duration, isPlaying, barsData, theme]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -124,7 +127,7 @@ export function AudioPlayer({
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="relative bg-[#18181b] rounded-[2.5rem] p-8 shadow-2xl border border-white/10 overflow-hidden">
+      <div className="relative bg-white dark:bg-[#18181b] rounded-[2.5rem] p-8 shadow-2xl border border-gray-200 dark:border-white/10 overflow-hidden">
         {/* Ambient Glow Background */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-orange-500/5 blur-[60px] pointer-events-none" />
 
@@ -146,7 +149,7 @@ export function AudioPlayer({
             {isLimitReached ? "Hết lượt nghe" : `Còn ${playsRemaining} lượt`}
           </div>
 
-          <div className="text-xs font-bold font-mono text-zinc-500">
+          <div className="text-xs font-bold font-mono text-gray-500 dark:text-zinc-500">
             {Math.floor(currentTime)}s <span className="text-zinc-700">/</span>{" "}
             {duration}s
           </div>

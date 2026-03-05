@@ -57,7 +57,7 @@ export default function BlogDetailPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] font-mono text-zinc-100 selection:bg-orange-500/30 relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 relative overflow-hidden">
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full opacity-60" />

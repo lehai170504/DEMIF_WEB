@@ -34,11 +34,11 @@ export function LeaderboardList({
               "group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300",
               isMe
                 ? "bg-orange-500/10 border-orange-500/50 shadow-[0_0_20px_rgba(255,122,0,0.1)]"
-                : "bg-[#18181b] border-white/5 hover:border-white/10 hover:bg-[#202023]",
+                : "bg-white dark:bg-[#18181b] border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-50 dark:hover:bg-[#202023]",
             )}
           >
             {/* Rank Number */}
-            <div className="w-8 text-center font-black text-lg text-zinc-500 group-hover:text-white transition-colors">
+            <div className="w-8 text-center font-black text-lg text-gray-400 dark:text-zinc-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
               {entry.rank}
             </div>
 
@@ -63,7 +63,7 @@ export function LeaderboardList({
                     "font-bold text-sm truncate",
                     isMe
                       ? "text-orange-400"
-                      : "text-zinc-200 group-hover:text-white",
+                      : "text-gray-900 dark:text-zinc-200 group-hover:text-gray-900 dark:group-hover:text-white",
                   )}
                 >
                   {entry.username}
@@ -74,15 +74,15 @@ export function LeaderboardList({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-zinc-500">{entry.country}</p>
+              <p className="text-xs text-gray-500 dark:text-zinc-500">{entry.country}</p>
             </div>
 
             {/* Score */}
             <div className="text-right">
-              <div className="text-base font-black text-white tracking-tight">
+              <div className="text-base font-black text-gray-900 dark:text-white tracking-tight">
                 {entry.totalScore.toLocaleString()}
               </div>
-              <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">
+              <div className="text-[9px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-wider">
                 XP
               </div>
             </div>

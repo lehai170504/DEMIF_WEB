@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navLinks = [
   { name: "Tính năng", href: "#features" },
@@ -17,7 +18,7 @@ export function HeaderLanding() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-[#050505]/60"
+      className="sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-[#050505]/60"
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between font-mono">
         <Link href="/">
@@ -50,7 +51,7 @@ export function HeaderLanding() {
             >
               <Link
                 href={link.href}
-                className="text-[14px] font-bold text-zinc-400 hover:text-white transition-colors duration-300 tracking-wide"
+                className="text-[14px] font-bold text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 tracking-wide"
               >
                 {link.name}
               </Link>
@@ -60,11 +61,14 @@ export function HeaderLanding() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
+
           <motion.div whileTap={{ scale: 0.95 }}>
             <Button
               variant="ghost"
               size="sm"
-              className="text-zinc-300 font-bold hover:text-white hover:bg-white/10 transition-all"
+              className="text-gray-700 dark:text-zinc-300 font-bold hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
               asChild
             >
               <Link href="/login">Đăng nhập</Link>

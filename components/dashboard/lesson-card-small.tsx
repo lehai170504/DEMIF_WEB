@@ -22,7 +22,7 @@ export function LessonCardSmall({
   thumbnail,
 }: LessonCardSmallProps) {
   return (
-    <Card className="group p-3 border border-white/5 bg-[#18181b] hover:bg-[#202023] hover:border-orange-500/30 transition-all cursor-pointer rounded-2xl">
+    <Card className="group p-3 border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] hover:bg-gray-50 dark:hover:bg-[#202023] hover:border-orange-500/30 transition-all cursor-pointer rounded-2xl">
       <div className="flex gap-4 items-center">
         {/* Thumbnail Area */}
         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-orange-600 to-red-600 shadow-lg">
@@ -41,16 +41,16 @@ export function LessonCardSmall({
             >
               {code}
             </Badge>
-            <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-wide">
+            <span className="text-[9px] text-gray-500 dark:text-zinc-600 font-bold uppercase tracking-wide">
               ESL
             </span>
           </div>
 
-          <h3 className="font-bold text-sm text-white line-clamp-1 mb-1.5 group-hover:text-orange-400 transition-colors">
+          <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1 mb-1.5 group-hover:text-orange-400 transition-colors">
             {title}
           </h3>
 
-          <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wide">
+          <div className="flex items-center gap-3 text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wide">
             <div className="flex items-center gap-1">
               <Play className="h-2.5 w-2.5" />
               <span>{views}</span>

@@ -55,13 +55,13 @@ export default function ReviewSessionPage() {
   if (isComplete) {
     const accuracy = Math.round((results.correct / dueItems.length) * 100);
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 font-mono text-white selection:bg-orange-500/30">
+      <div className="min-h-screen bg-white dark:bg-[#050505] flex items-center justify-center p-6 font-mono text-gray-900 dark:text-white selection:bg-orange-500/30">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-lg"
         >
-          <div className="relative overflow-hidden rounded-[3rem] bg-[#18181b] border border-white/10 p-10 text-center shadow-2xl">
+          <div className="relative overflow-hidden rounded-[3rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-10 text-center shadow-2xl">
             {/* Background Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-orange-500/20 blur-[100px] rounded-full pointer-events-none" />
 
@@ -73,10 +73,10 @@ export default function ReviewSessionPage() {
                 </div>
               </div>
 
-              <h2 className="mb-2 text-3xl font-black text-white leading-tight tracking-tight">
+              <h2 className="mb-2 text-3xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                 Tuyệt vời!
               </h2>
-              <p className="mb-10 text-zinc-400 font-medium">
+              <p className="mb-10 text-gray-600 dark:text-zinc-400 font-medium">
                 Bạn vừa củng cố thêm{" "}
                 <span className="text-orange-500 font-bold">
                   {results.correct}
@@ -108,14 +108,14 @@ export default function ReviewSessionPage() {
               <div className="flex flex-col gap-4">
                 <Button
                   asChild
-                  className="h-14 rounded-2xl bg-white text-black text-lg font-black uppercase tracking-widest shadow-lg hover:bg-zinc-200 transition-all active:scale-95"
+                  className="h-14 rounded-2xl bg-orange-500 dark:bg-white text-white dark:text-black text-lg font-black uppercase tracking-widest shadow-lg hover:bg-orange-600 dark:hover:bg-zinc-200 transition-all active:scale-95"
                 >
                   <Link href="/review">Tiếp tục ôn tập</Link>
                 </Button>
                 <Button
                   variant="ghost"
                   asChild
-                  className="h-12 rounded-2xl font-bold text-zinc-500 hover:text-white hover:bg-white/5"
+                  className="h-12 rounded-2xl font-bold text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"
                 >
                   <Link href="/dashboard">Về trang chủ</Link>
                 </Button>
@@ -129,14 +129,14 @@ export default function ReviewSessionPage() {
 
   // 2. Giao diện Đang ôn tập (Session Screen)
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col font-mono text-white overflow-hidden selection:bg-orange-500/30">
+    <div className="min-h-screen bg-white dark:bg-[#050505] flex flex-col font-mono text-gray-900 dark:text-white overflow-hidden selection:bg-orange-500/30">
       {/* Header */}
       <nav className="flex items-center justify-between px-6 py-6 max-w-2xl mx-auto w-full relative z-20">
         <Button
           variant="ghost"
           size="icon"
           asChild
-          className="rounded-full hover:bg-white/10 text-zinc-400 hover:text-white"
+          className="rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
         >
           <Link href="/review">
             <ArrowLeft className="h-6 w-6" />
@@ -144,7 +144,7 @@ export default function ReviewSessionPage() {
         </Button>
 
         <div className="flex-1 px-8 max-w-xs mx-auto">
-          <div className="flex justify-between mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+          <div className="flex justify-between mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500">
             <span>Tiến độ</span>
             <span>
               {currentIndex + 1} / {dueItems.length}
@@ -152,7 +152,7 @@ export default function ReviewSessionPage() {
           </div>
           <Progress
             value={progress}
-            className="h-1.5 bg-white/10"
+            className="h-1.5 bg-gray-200 dark:bg-white/10"
             indicatorClassName="bg-gradient-to-r from-orange-500 to-amber-500"
           />
         </div>
@@ -192,34 +192,34 @@ export default function ReviewSessionPage() {
               onClick={() => !showAnswer && setShowAnswer(true)}
             >
               {/* MẶT TRƯỚC (CÂU HỎI) */}
-              <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-10 bg-[#18181b] border border-white/10 rounded-[3rem] shadow-2xl">
+              <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-10 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[3rem] shadow-2xl">
                 {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-[3rem] pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100/50 dark:from-white/5 to-transparent rounded-[3rem] pointer-events-none" />
 
                 <div className="absolute top-8 left-0 w-full flex justify-center">
-                  <span className="bg-white/5 border border-white/5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+                  <span className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 flex items-center gap-2">
                     <Sparkles className="h-3 w-3 text-orange-500" /> Question
                   </span>
                 </div>
 
-                <h2 className="text-5xl font-black text-white tracking-tight mb-6 select-none text-center leading-tight">
+                <h2 className="text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-6 select-none text-center leading-tight">
                   {currentItem?.word}
                 </h2>
 
-                <div className="flex items-center gap-6 text-zinc-500 mb-8">
-                  <div className="h-px w-8 bg-white/10" />
+                <div className="flex items-center gap-6 text-gray-500 dark:text-zinc-500 mb-8">
+                  <div className="h-px w-8 bg-gray-200 dark:bg-white/10" />
                   <button
                     onClick={(e) => {
                       e.stopPropagation(); /* Play audio logic here */
                     }}
-                    className="p-3 rounded-full bg-white/5 hover:bg-orange-500 hover:text-white hover:scale-110 transition-all duration-300"
+                    className="p-3 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-orange-500 hover:text-white hover:scale-110 transition-all duration-300"
                   >
                     <Volume2 className="h-6 w-6" />
                   </button>
-                  <div className="h-px w-8 bg-white/10" />
+                  <div className="h-px w-8 bg-gray-200 dark:bg-white/10" />
                 </div>
 
-                <p className="text-center text-zinc-400 font-medium italic px-4 line-clamp-3">
+                <p className="text-center text-gray-600 dark:text-zinc-400 font-medium italic px-4 line-clamp-3">
                   "{currentItem?.example}"
                 </p>
 
@@ -229,7 +229,7 @@ export default function ReviewSessionPage() {
               </div>
 
               {/* MẶT SAU (ĐÁP ÁN) */}
-              <div className="absolute inset-0 rotate-y-180 backface-hidden flex flex-col items-center justify-center p-10 bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 rotate-y-180 backface-hidden flex flex-col items-center justify-center p-10 bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-gray-200 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden">
                 {/* Background Decor */}
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 blur-[80px] rounded-full pointer-events-none" />
 
@@ -237,14 +237,14 @@ export default function ReviewSessionPage() {
                   Meaning
                 </div>
 
-                <h3 className="text-3xl font-bold mb-8 text-center text-white leading-snug">
+                <h3 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white leading-snug">
                   {currentItem?.translation}
                 </h3>
 
-                <div className="w-full max-w-[120px] h-1 rounded-full bg-white/10 mb-8" />
+                <div className="w-full max-w-[120px] h-1 rounded-full bg-gray-200 dark:bg-white/10 mb-8" />
 
-                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl">
-                  <p className="text-zinc-400 text-center italic text-sm">
+                <div className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 p-4 rounded-2xl">
+                  <p className="text-gray-600 dark:text-zinc-400 text-center italic text-sm">
                     "{currentItem?.example}"
                   </p>
                 </div>
@@ -268,7 +268,7 @@ export default function ReviewSessionPage() {
               >
                 <Button
                   onClick={() => setShowAnswer(true)}
-                  className="w-full h-16 rounded-2xl bg-white text-black font-black text-lg uppercase tracking-widest shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:bg-zinc-200 transition-all active:scale-[0.98]"
+                  className="w-full h-16 rounded-2xl bg-orange-500 dark:bg-white text-white dark:text-black font-black text-lg uppercase tracking-widest shadow-lg hover:bg-orange-600 dark:hover:bg-zinc-200 transition-all active:scale-[0.98]"
                 >
                   <Eye className="mr-2 h-5 w-5" /> Hiện đáp án
                 </Button>
@@ -311,7 +311,7 @@ function ResultStat({ label, value, color, bg }: any) {
       )}
     >
       <div className={cn("text-3xl font-black mb-1", color)}>{value}</div>
-      <div className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+      <div className="text-[9px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-widest">
         {label}
       </div>
     </div>

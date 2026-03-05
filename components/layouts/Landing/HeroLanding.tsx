@@ -52,8 +52,8 @@ function FloatingFeatureCard({
         rotateX: { duration: 5, repeat: Infinity, ease: "easeInOut", delay },
       }}
       className={`absolute hidden lg:flex items-center gap-4 p-4 pr-6 rounded-2xl 
-        bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl 
-        hover:bg-white/10 transition-colors duration-300 font-mono
+        bg-white dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-2xl 
+        hover:bg-gray-50 dark:hover:bg-white/10 transition-colors duration-300 font-mono
         ${className}`}
       style={{ transformStyle: "preserve-3d" }}
     >
@@ -62,10 +62,10 @@ function FloatingFeatureCard({
         <div className="absolute inset-0 bg-[#FF7A00] blur-lg opacity-20" />
       </div>
       <div className="flex flex-col">
-        <span className="text-white/90 font-bold text-sm tracking-wide">
+        <span className="text-gray-900 dark:text-white/90 font-bold text-sm tracking-wide">
           {title}
         </span>
-        <span className="text-white/50 text-xs font-medium">{sub}</span>
+        <span className="text-gray-500 dark:text-white/50 text-xs font-medium">{sub}</span>
       </div>
     </motion.div>
   );
@@ -153,7 +153,7 @@ export function HeroLanding() {
             variants={textVariants}
             className="flex justify-center mb-8"
           >
-            <Badge className="bg-white/5 hover:bg-white/10 text-orange-400 border border-orange-500/30 px-4 py-1.5 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(255,122,0,0.1)] transition-all duration-300">
+            <Badge className="bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-orange-600 dark:text-orange-400 border border-orange-500/50 dark:border-orange-500/30 px-4 py-1.5 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(255,122,0,0.1)] transition-all duration-300">
               <Sparkles className="w-3.5 h-3.5 mr-2 text-[#FF7A00]" />
               <span className="tracking-wide font-medium font-mono text-xs md:text-sm">
                 Nền tảng học ngôn ngữ ứng dụng AI
@@ -164,7 +164,7 @@ export function HeroLanding() {
           {/* HEADLINE */}
           <motion.h1
             variants={textVariants}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tighter text-white drop-shadow-2xl font-mono leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tighter text-gray-900 dark:text-white drop-shadow-2xl font-mono leading-tight"
           >
             Chinh phục ngôn ngữ <br className="hidden md:block" />
             với{" "}
@@ -179,7 +179,7 @@ export function HeroLanding() {
           {/* DESCRIPTION */}
           <motion.p
             variants={textVariants}
-            className="text-base md:text-xl text-zinc-400 font-normal mb-10 max-w-2xl mx-auto leading-relaxed font-mono"
+            className="text-base md:text-xl text-gray-600 dark:text-zinc-400 font-normal mb-10 max-w-2xl mx-auto leading-relaxed font-mono"
           >
             Nâng cao kỹ năng nói với công nghệ Shadowing AI tiên tiến. Phản hồi
             thời gian thực, lộ trình cá nhân hóa và trải nghiệm học tập nhập vai
@@ -204,7 +204,7 @@ export function HeroLanding() {
               <Button
                 size="lg"
                 asChild
-                className="relative h-14 px-8 bg-black text-white rounded-2xl border border-white/10 overflow-hidden font-bold text-lg font-mono cursor-pointer"
+                className="relative h-14 px-8 bg-gray-900 dark:bg-black text-white rounded-2xl border border-gray-700 dark:border-white/10 overflow-hidden font-bold text-lg font-mono cursor-pointer hover:bg-gray-800 dark:hover:bg-black/80 transition-colors"
               >
                 <Link href="/signup">
                   <motion.div
@@ -232,7 +232,7 @@ export function HeroLanding() {
                 size="lg"
                 variant="ghost"
                 asChild
-                className="h-14 px-8 text-zinc-300 hover:text-white hover:bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-all font-bold text-lg font-mono cursor-pointer"
+                className="h-14 px-8 text-gray-700 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 transition-all font-bold text-lg font-mono cursor-pointer"
               >
                 <Link href="#demo">
                   <PlayCircle className="w-5 h-5 mr-2" />
@@ -245,7 +245,7 @@ export function HeroLanding() {
           {/* FOOTER TEXT */}
           <motion.div
             variants={textVariants}
-            className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-zinc-500 font-medium font-mono"
+            className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-gray-500 dark:text-zinc-500 font-medium font-mono"
           >
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-orange-500" />
@@ -260,7 +260,7 @@ export function HeroLanding() {
       </div>
 
       {/* Giữ lại gradient đáy để chuyển tiếp mượt mà sang section Features */}
-      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-20"></div>
+      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-white dark:from-[#050505] to-transparent pointer-events-none z-20"></div>
     </section>
   );
 }

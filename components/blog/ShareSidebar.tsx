@@ -14,10 +14,10 @@ export function ShareSidebar({ title, postUrl }: ShareSidebarProps) {
   const encodedUrl = encodeURIComponent(postUrl);
 
   return (
-    <Card className="border border-white/10 bg-[#18181b] overflow-hidden rounded-[2rem]">
+    <Card className="border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] overflow-hidden rounded-[2rem]">
       <div className="p-6">
-        <div className="flex items-center gap-3 mb-4 text-white">
-          <div className="p-2 rounded-xl bg-white/5 border border-white/10">
+        <div className="flex items-center gap-3 mb-4 text-gray-900 dark:text-white">
+          <div className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
             <Share2 className="h-4 w-4" />
           </div>
           <h3 className="font-bold text-sm uppercase tracking-widest">
@@ -28,7 +28,7 @@ export function ShareSidebar({ title, postUrl }: ShareSidebarProps) {
         <div className="space-y-3">
           <Button
             variant="outline"
-            className="w-full justify-start gap-3 h-12 rounded-xl border-white/10 bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white font-bold transition-all text-sm"
+            className="w-full justify-start gap-3 h-12 rounded-xl border-gray-200 dark:border-white/10 bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white font-bold transition-all text-sm"
             asChild
           >
             <a
@@ -45,7 +45,7 @@ export function ShareSidebar({ title, postUrl }: ShareSidebarProps) {
 
           <Button
             variant="outline"
-            className="w-full justify-start gap-3 h-12 rounded-xl border-white/10 bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2] hover:text-white font-bold transition-all text-sm"
+            className="w-full justify-start gap-3 h-12 rounded-xl border-gray-200 dark:border-white/10 bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2] hover:text-white font-bold transition-all text-sm"
             asChild
           >
             <a
@@ -62,7 +62,7 @@ export function ShareSidebar({ title, postUrl }: ShareSidebarProps) {
 
           <Button
             variant="outline"
-            className="w-full justify-start gap-3 h-12 rounded-xl border-white/10 bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white font-bold transition-all text-sm"
+            className="w-full justify-start gap-3 h-12 rounded-xl border-gray-200 dark:border-white/10 bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white font-bold transition-all text-sm"
             asChild
           >
             <a

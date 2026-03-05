@@ -36,7 +36,7 @@ export function LeaderboardHeader() {
           <Trophy className="h-10 w-10 text-orange-500 drop-shadow-[0_0_15px_rgba(255,122,0,0.6)]" />
         </motion.div>
 
-        <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-3">
+        <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
           Bảng Xếp Hạng{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
             Huyền Thoại

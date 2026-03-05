@@ -9,6 +9,7 @@ import QueryProvider from "./providers";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -41,36 +42,44 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className="dark scroll-smooth" suppressHydrationWarning>
+    <html lang="vi" className="scroll-smooth" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${jetbrainsMono.variable} ${poppins.variable} ${inter.variable} antialiased bg-[#050505] text-zinc-100`}
+        className={`${jetbrainsMono.variable} ${poppins.variable} ${inter.variable} antialiased bg-white dark:bg-[#050505] text-gray-900 dark:text-zinc-100 transition-colors duration-300`}
       >
-        <AmbientBackground />
-        <ScrollToTopButton />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange={false}
+          storageKey="demif-user-theme"
+        >
+          <AmbientBackground />
+          <ScrollToTopButton />
 
-        <div className="relative z-10 flex flex-col min-h-screen">
-          <QueryProvider>
-            <Suspense fallback={null}>{children}</Suspense>
-          </QueryProvider>
-        </div>
+          <div className="relative z-10 flex flex-col min-h-screen">
+            <QueryProvider>
+              <Suspense fallback={null}>{children}</Suspense>
+            </QueryProvider>
+          </div>
 
-        {/* --- FIX LỖI --- */}
-        <Toaster
-          position="top-right"
-          richColors
-          theme="dark"
-          closeButton
-          className="fixed"
-          style={{
-            position: "fixed", // Bắt buộc cố định
-            top: 20, // Cách đỉnh 20px
-            right: 20, // Cách phải 20px
-            zIndex: 99999, // Luôn nằm trên cùng
-          }}
-        />
+          {/* --- FIX LỖI --- */}
+          <Toaster
+            position="top-right"
+            richColors
+            theme="dark"
+            closeButton
+            className="fixed"
+            style={{
+              position: "fixed", // Bắt buộc cố định
+              top: 20, // Cách đỉnh 20px
+              right: 20, // Cách phải 20px
+              zIndex: 99999, // Luôn nằm trên cùng
+            }}
+          />
 
-        <Analytics />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

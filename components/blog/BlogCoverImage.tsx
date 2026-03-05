@@ -28,10 +28,10 @@ export function BlogCoverImage({ category }: BlogCoverImageProps) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative h-[400px] w-full rounded-[2.5rem] mb-10 overflow-hidden border border-white/10 shadow-2xl group"
+      className="relative h-[400px] w-full rounded-[2.5rem] mb-10 overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl group"
     >
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#18181b] to-black" />
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#18181b] dark:to-black" />
 
       {/* Abstract Shapes */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px] group-hover:bg-orange-500/20 transition-all duration-700" />
@@ -50,11 +50,11 @@ export function BlogCoverImage({ category }: BlogCoverImageProps) {
       </div>
 
       {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-black/80 via-transparent dark:via-black/20 to-transparent" />
 
       {/* Category Badge */}
       <div className="absolute bottom-8 left-8">
-        <Badge className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 text-sm font-bold uppercase tracking-widest shadow-lg">
+        <Badge className="bg-white/90 dark:bg-white/10 backdrop-blur-md border border-gray-200 dark:border-white/20 text-gray-900 dark:text-white px-4 py-2 text-sm font-bold uppercase tracking-widest shadow-lg">
           {category}
         </Badge>
       </div>
