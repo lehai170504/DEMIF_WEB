@@ -22,7 +22,7 @@ export function HeroBanner({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="group relative overflow-hidden rounded-[2.5rem] bg-[#0F0F11] border border-white/10 shadow-2xl shadow-black/50"
+      className="group relative overflow-hidden rounded-[2.5rem] bg-gray-100 dark:bg-[#0F0F11] border border-gray-200 dark:border-white/10 shadow-2xl shadow-gray-300/50 dark:shadow-black/50"
     >
       {/* 1. Dynamic Ambient Background */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
@@ -52,7 +52,7 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]"
+            className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-gray-900 dark:text-white leading-[1.1]"
           >
             {title}
           </motion.h2>
@@ -62,7 +62,7 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-lg text-zinc-400 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            className="text-lg text-gray-600 dark:text-zinc-400 leading-relaxed max-w-xl mx-auto lg:mx-0"
           >
             {description}
           </motion.p>
@@ -80,20 +80,20 @@ export function HeroBanner({
             </Button>
 
             <div className="flex items-center gap-6 text-sm font-medium">
-              <div className="flex items-center gap-2 text-zinc-300">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-zinc-300">
                 <Users className="h-5 w-5 text-blue-400" />
                 <span>
-                  <strong className="text-white">
+                  <strong className="text-gray-900 dark:text-white">
                     {participants.toLocaleString()}
                   </strong>{" "}
                   học viên
                 </span>
               </div>
-              <div className="w-px h-4 bg-white/10" />
-              <div className="flex items-center gap-2 text-zinc-300">
+              <div className="w-px h-4 bg-gray-200 dark:bg-white/10" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-zinc-300">
                 <Clock className="h-5 w-5 text-orange-400" />
                 <span>
-                  Còn <strong className="text-white">{daysLeft}</strong> ngày
+                  Còn <strong className="text-gray-900 dark:text-white">{daysLeft}</strong> ngày
                 </span>
               </div>
             </div>
@@ -120,7 +120,7 @@ export function HeroBanner({
             <div className="absolute top-10 right-10 w-3/4 h-3/4 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-[2rem] border border-white/5 opacity-40 blur-sm transform translate-z-[-50px] rotate-6" />
 
             {/* 3D Element 2: Main Card (Clear) */}
-            <div className="absolute inset-4 bg-black/40 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl shadow-black flex flex-col items-center justify-center p-8 transform translate-z-[20px]">
+            <div className="absolute inset-4 bg-white/60 dark:bg-black/40 backdrop-blur-xl rounded-[2.5rem] border border-gray-200 dark:border-white/10 shadow-2xl shadow-gray-300/50 dark:shadow-black flex flex-col items-center justify-center p-8 transform translate-z-[20px]">
               {/* Decorative Circle */}
               <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center shadow-lg shadow-orange-500/30 mb-6 relative">
                 <Trophy className="w-16 h-16 text-white drop-shadow-md" />
@@ -136,15 +136,15 @@ export function HeroBanner({
                 />
               </div>
 
-              <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">
                 Thử thách
               </h3>
-              <div className="px-4 py-1 rounded-lg bg-white/10 border border-white/5 text-orange-400 font-mono text-sm mb-6">
+              <div className="px-4 py-1 rounded-lg bg-gray-200 dark:bg-white/10 border border-gray-300 dark:border-white/5 text-orange-500 font-mono text-sm mb-6">
                 LEVEL UP YOUR SKILLS
               </div>
 
               {/* Progress Bar Mockup */}
-              <div className="w-full bg-white/5 h-3 rounded-full overflow-hidden">
+              <div className="w-full bg-gray-200 dark:bg-white/5 h-3 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: "75%" }}
@@ -152,7 +152,7 @@ export function HeroBanner({
                   className="h-full bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C]"
                 />
               </div>
-              <div className="w-full flex justify-between mt-2 text-xs text-zinc-500 font-mono">
+              <div className="w-full flex justify-between mt-2 text-xs text-gray-500 dark:text-zinc-500 font-mono">
                 <span>Progress</span>
                 <span>75%</span>
               </div>
@@ -167,16 +167,16 @@ export function HeroBanner({
                 ease: "easeInOut",
                 delay: 1,
               }}
-              className="absolute -bottom-4 -left-4 bg-[#1e1e20] border border-white/10 p-4 rounded-2xl shadow-xl flex items-center gap-3 transform translate-z-[60px]"
+              className="absolute -bottom-4 -left-4 bg-white dark:bg-[#1e1e20] border border-gray-200 dark:border-white/10 p-4 rounded-2xl shadow-xl flex items-center gap-3 transform translate-z-[60px]"
             >
               <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
                 <Zap className="w-6 h-6 fill-current" />
               </div>
               <div>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase">
+                <p className="text-[10px] text-gray-500 dark:text-zinc-400 font-bold uppercase">
                   Điểm thưởng
                 </p>
-                <p className="text-lg font-black text-white leading-none">
+                <p className="text-lg font-black text-gray-900 dark:text-white leading-none">
                   +500 XP
                 </p>
               </div>

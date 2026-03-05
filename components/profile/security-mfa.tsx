@@ -14,10 +14,10 @@ export function SecurityMFA() {
             <ShieldCheck className="h-8 w-8" />
           </div>
           <div className="space-y-1">
-            <h4 className="font-black text-xl text-white tracking-tight">
+            <h4 className="font-black text-xl text-gray-900 dark:text-white tracking-tight">
               Bảo mật 2 lớp đang BẬT
             </h4>
-            <p className="text-sm text-emerald-200/70 font-medium">
+            <p className="text-sm text-emerald-600 dark:text-emerald-200/70 font-medium">
               Tài khoản của bạn được bảo vệ bởi TOTP Authenticator.
             </p>
           </div>
@@ -31,48 +31,48 @@ export function SecurityMFA() {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 pl-2">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 pl-2">
           Phương thức xác thực
         </h3>
 
-        <div className="group flex items-center justify-between p-6 rounded-[2rem] border border-white/5 bg-[#18181b] hover:border-orange-500/30 transition-all shadow-lg hover:shadow-orange-500/5">
+        <div className="group flex items-center justify-between p-6 rounded-[2rem] border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] hover:border-orange-500/30 transition-all shadow-lg hover:shadow-orange-500/5">
           <div className="flex items-center gap-5">
-            <div className="p-3 rounded-xl bg-white/5 text-zinc-400 group-hover:text-orange-500 transition-colors">
+            <div className="p-3 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-zinc-400 group-hover:text-orange-500 transition-colors">
               <Smartphone className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm mb-1">
+              <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">
                 Authenticator App
               </p>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-gray-500 dark:text-zinc-500">
                 Google Authenticator, Authy, Microsoft Auth...
               </p>
             </div>
           </div>
           <Button
             variant="outline"
-            className="rounded-xl h-10 border-white/10 bg-transparent text-zinc-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 text-xs font-bold uppercase tracking-wider transition-all"
+            className="rounded-xl h-10 border-gray-200 dark:border-white/10 bg-transparent text-gray-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 text-xs font-bold uppercase tracking-wider transition-all"
           >
             Gỡ cài đặt
           </Button>
         </div>
 
         {/* Recovery Codes Section (Optional) */}
-        <div className="group flex items-center justify-between p-6 rounded-[2rem] border border-white/5 bg-[#18181b] hover:border-blue-500/30 transition-all">
+        <div className="group flex items-center justify-between p-6 rounded-[2rem] border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] hover:border-blue-500/30 transition-all">
           <div className="flex items-center gap-5">
-            <div className="p-3 rounded-xl bg-white/5 text-zinc-400 group-hover:text-blue-500 transition-colors">
+            <div className="p-3 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm mb-1">Mã dự phòng</p>
-              <p className="text-xs text-zinc-500">
+              <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">Mã dự phòng</p>
+              <p className="text-xs text-gray-500 dark:text-zinc-500">
                 Sử dụng khi mất thiết bị xác thực.
               </p>
             </div>
           </div>
           <Button
             variant="outline"
-            className="rounded-xl h-10 border-white/10 bg-transparent text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20 text-xs font-bold uppercase tracking-wider transition-all"
+            className="rounded-xl h-10 border-gray-200 dark:border-white/10 bg-transparent text-gray-500 dark:text-zinc-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20 text-xs font-bold uppercase tracking-wider transition-all"
           >
             Xem mã
           </Button>

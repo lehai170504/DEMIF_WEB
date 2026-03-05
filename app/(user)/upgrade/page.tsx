@@ -26,7 +26,7 @@ export default function UpgradePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] font-mono text-zinc-100 selection:bg-orange-500/30 pb-20 overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 pb-20 overflow-hidden">
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-orange-500/5 blur-[120px] rounded-full" />
@@ -43,14 +43,14 @@ export default function UpgradePage() {
         >
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-orange-400 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 dark:bg-white/5 border border-orange-200 dark:border-white/10 text-orange-500 dark:text-orange-400 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md"
           >
             <Crown className="w-3.5 h-3.5 fill-current" /> Premium Access
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter text-white leading-[1.1]"
+            className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter text-gray-900 dark:text-white leading-[1.1]"
           >
             Làm Chủ{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
@@ -61,7 +61,7 @@ export default function UpgradePage() {
 
           <motion.p
             variants={itemVariants}
-            className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium"
+            className="text-gray-600 dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium"
           >
             Tối ưu hóa khả năng Nghe & Nói với công nghệ AI tiên tiến.
             <br className="hidden md:block" /> Mở khóa toàn bộ bài tập Dictation
@@ -161,9 +161,9 @@ export default function UpgradePage() {
           transition={{ delay: 0.6 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/5 border border-white/5">
-            <Shield className="w-8 h-8 text-zinc-500" />
-            <p className="text-zinc-400 text-sm font-medium">
+          <div className="inline-flex flex-col items-center gap-4 p-6 rounded-3xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5">
+            <Shield className="w-8 h-8 text-gray-500 dark:text-zinc-500" />
+            <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium">
               Cam kết hoàn tiền trong 7 ngày nếu không hài lòng. <br />
               Hủy đăng ký bất cứ lúc nào.
             </p>
@@ -221,10 +221,10 @@ function PricingCard({
       className={cn(
         "relative p-8 md:p-10 rounded-[2.5rem] border flex flex-col h-full transition-all duration-300",
         isPopular
-          ? "bg-[#18181b] border-orange-500/50 shadow-[0_20px_80px_-20px_rgba(249,115,22,0.4)] z-20 scale-105 md:scale-110"
+          ? "bg-white dark:bg-[#18181b] border-orange-500/50 shadow-[0_20px_80px_-20px_rgba(249,115,22,0.4)] z-20 scale-105 md:scale-110"
           : highlightBorder
-            ? "bg-gradient-to-b from-[#18181b] to-black border-white/20 shadow-2xl"
-            : "bg-[#0a0a0c] border-white/5 shadow-xl opacity-80 hover:opacity-100",
+            ? "bg-gradient-to-b from-white to-gray-50 dark:from-[#18181b] dark:to-black border-gray-300 dark:border-white/20 shadow-2xl"
+            : "bg-gray-50 dark:bg-[#0a0a0c] border-gray-200 dark:border-white/5 shadow-xl opacity-90 dark:opacity-80 hover:opacity-100",
       )}
     >
       {/* Popular Badge */}
@@ -241,25 +241,25 @@ function PricingCard({
         <h3
           className={cn(
             "text-2xl font-black uppercase tracking-wide mb-2",
-            isPopular ? "text-white" : "text-zinc-200",
+            isPopular ? "text-gray-900 dark:text-white" : "text-gray-800 dark:text-zinc-200",
           )}
         >
           {title}
         </h3>
-        <p className="text-zinc-500 text-sm font-bold">{description}</p>
+        <p className="text-gray-500 dark:text-zinc-500 text-sm font-bold">{description}</p>
       </div>
 
       {/* Price */}
-      <div className="mb-8 flex flex-col md:flex-row items-baseline gap-2 pb-8 border-b border-white/5">
+      <div className="mb-8 flex flex-col md:flex-row items-baseline gap-2 pb-8 border-b border-gray-200 dark:border-white/5">
         <span
           className={cn(
             "text-5xl font-black tracking-tighter",
-            isPopular ? "text-orange-500" : "text-white",
+            isPopular ? "text-orange-500" : "text-gray-900 dark:text-white",
           )}
         >
           {price}
         </span>
-        <span className="text-zinc-500 font-bold mb-1.5">{period}</span>
+        <span className="text-gray-500 dark:text-zinc-500 font-bold mb-1.5">{period}</span>
 
         {/* Yearly Saving Note */}
         {price.includes("499") && (
@@ -278,7 +278,7 @@ function PricingCard({
                 "mt-0.5 p-1 rounded-full flex-shrink-0 transition-colors",
                 isPopular
                   ? "bg-orange-500/20 text-orange-500 group-hover:bg-orange-500 group-hover:text-white"
-                  : "bg-white/10 text-zinc-400 group-hover:bg-white/20 group-hover:text-white",
+                  : "bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-zinc-400 group-hover:bg-gray-300 dark:group-hover:bg-white/20 group-hover:text-gray-900 dark:group-hover:text-white",
               )}
             >
               <Check className="w-3 h-3" strokeWidth={4} />
@@ -286,7 +286,7 @@ function PricingCard({
             <span
               className={cn(
                 "text-sm font-medium leading-relaxed",
-                isPopular ? "text-zinc-200" : "text-zinc-400",
+                isPopular ? "text-gray-700 dark:text-zinc-200" : "text-gray-600 dark:text-zinc-400",
               )}
             >
               {feature}
@@ -304,8 +304,8 @@ function PricingCard({
           isPopular
             ? "bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-orange-500/50 hover:scale-[1.02]"
             : highlightBorder
-              ? "bg-white text-black hover:bg-zinc-200 hover:scale-[1.02]"
-              : "bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-400 cursor-not-allowed",
+              ? "bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200 hover:scale-[1.02]"
+              : "bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-500 dark:text-zinc-400 cursor-not-allowed",
         )}
       >
         {disabled ? (
@@ -328,13 +328,13 @@ function FeatureCard({
   desc: string;
 }) {
   return (
-    <div className="flex items-start gap-4 p-6 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-      <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
+    <div className="flex items-start gap-4 p-6 rounded-3xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
+      <div className="p-3 bg-gray-200 dark:bg-white/5 rounded-2xl border border-gray-300 dark:border-white/5">
         {icon}
       </div>
       <div>
-        <h4 className="text-lg font-bold text-white mb-2">{title}</h4>
-        <p className="text-sm text-zinc-400 leading-relaxed">{desc}</p>
+        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{title}</h4>
+        <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">{desc}</p>
       </div>
     </div>
   );

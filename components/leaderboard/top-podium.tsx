@@ -62,7 +62,7 @@ export function TopPodium({ topThree }: { topThree: LeaderboardEntry[] }) {
                     : "w-20 h-20 bg-gradient-to-b from-amber-700 to-amber-900",
               )}
             >
-              <Avatar className="w-full h-full border-4 border-[#18181b]">
+              <Avatar className="w-full h-full border-4 border-white dark:border-[#18181b]">
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback>{user.username[0]}</AvatarFallback>
               </Avatar>
@@ -70,7 +70,7 @@ export function TopPodium({ topThree }: { topThree: LeaderboardEntry[] }) {
               {/* Rank Badge */}
               <div
                 className={cn(
-                  "absolute -bottom-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center font-black border-4 border-[#18181b] text-xs",
+                  "absolute -bottom-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center font-black border-4 border-white dark:border-[#18181b] text-xs",
                   isFirst
                     ? "bg-yellow-400 text-black"
                     : isSecond
@@ -86,7 +86,7 @@ export function TopPodium({ topThree }: { topThree: LeaderboardEntry[] }) {
             <div className="text-center mt-6">
               <h3
                 className={cn(
-                  "font-bold text-white truncate max-w-[120px]",
+                  "font-bold text-gray-900 dark:text-white truncate max-w-[120px]",
                   isFirst ? "text-lg" : "text-sm",
                 )}
               >
@@ -97,7 +97,7 @@ export function TopPodium({ topThree }: { topThree: LeaderboardEntry[] }) {
                   "font-black tracking-tight",
                   isFirst
                     ? "text-orange-400 text-xl"
-                    : "text-zinc-400 text-base",
+                    : "text-gray-500 dark:text-zinc-400 text-base",
                 )}
               >
                 {user.totalScore.toLocaleString()}

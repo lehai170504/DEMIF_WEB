@@ -48,7 +48,7 @@ export function StatsRow() {
       {stats.map((stat, index) => (
         <Card
           key={index}
-          className={`relative overflow-hidden p-5 border border-white/5 bg-[#18181b] rounded-[2rem] transition-all hover:-translate-y-1 hover:border-white/10 group`}
+          className={`relative overflow-hidden p-5 border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] rounded-[2rem] transition-all hover:-translate-y-1 hover:border-gray-300 dark:hover:border-white/10 group`}
         >
           {/* Background Icon Decor */}
           <stat.icon
@@ -66,11 +66,11 @@ export function StatsRow() {
             {/* Value & Label */}
             <div className="space-y-1">
               <div
-                className={`text-4xl font-black italic tracking-tighter text-white`}
+                className={`text-4xl font-black italic tracking-tighter text-gray-900 dark:text-white`}
               >
                 {stat.value}
               </div>
-              <div className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-zinc-300 transition-colors">
+              <div className="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors">
                 {stat.label}
               </div>
             </div>

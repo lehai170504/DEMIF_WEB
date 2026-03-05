@@ -43,7 +43,7 @@ export function LearningAnalyticsChart() {
   return (
     <div className="grid grid-cols-1 gap-6 font-mono">
       {/* 1. Biểu đồ Tuần - Bar Chart */}
-      <Card className="p-8 border border-white/10 bg-[#18181b] shadow-2xl rounded-[2.5rem] relative overflow-hidden">
+      <Card className="p-8 border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] shadow-2xl rounded-[2.5rem] relative overflow-hidden">
         {/* Background Decor */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full pointer-events-none" />
 
@@ -53,15 +53,15 @@ export function LearningAnalyticsChart() {
               <Calendar className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-black uppercase tracking-tighter italic text-white">
+              <h3 className="text-sm font-black uppercase tracking-tighter italic text-gray-900 dark:text-white">
                 TIẾN ĐỘ TUẦN
               </h3>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
                 Hoạt động 7 ngày gần nhất
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.8)]" />{" "}
               Bài học
@@ -82,31 +82,34 @@ export function LearningAnalyticsChart() {
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="rgba(255,255,255,0.05)"
+                stroke="rgba(0,0,0,0.05)"
+                className="dark:stroke-white/5"
               />
               <XAxis
                 dataKey="day"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 10, fontWeight: "bold", fill: "#52525b" }}
+                tick={{ fontSize: 10, fontWeight: "bold", fill: "#71717a" }}
+                className="dark:fill-zinc-600"
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 10, fontWeight: "bold", fill: "#52525b" }}
+                tick={{ fontSize: 10, fontWeight: "bold", fill: "#71717a" }}
+                className="dark:fill-zinc-600"
               />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.02)", radius: 8 }}
+                cursor={{ fill: "rgba(0,0,0,0.02)", radius: 8 }}
                 contentStyle={{
-                  backgroundColor: "#09090b",
+                  backgroundColor: "#ffffff",
                   borderRadius: "12px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)",
+                  border: "1px solid rgba(0,0,0,0.1)",
+                  boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)",
                   fontSize: "11px",
                   fontWeight: "bold",
                   fontFamily: "monospace",
-                  color: "#e4e4e7",
+                  color: "#18181b",
                 }}
               />
               <Bar
@@ -127,9 +130,9 @@ export function LearningAnalyticsChart() {
       </Card>
 
       {/* 2. Biểu đồ Tháng - Area Chart */}
-      <Card className="p-8 border border-white/10 bg-black shadow-2xl rounded-[2.5rem] relative overflow-hidden">
+      <Card className="p-8 border border-gray-200 dark:border-white/10 bg-white dark:bg-black shadow-2xl rounded-[2.5rem] relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
-          <Activity className="w-32 h-32 text-white" />
+          <Activity className="w-32 h-32 text-gray-900 dark:text-white" />
         </div>
 
         <div className="relative z-10">
@@ -138,10 +141,10 @@ export function LearningAnalyticsChart() {
               <TrendingUp className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-black uppercase tracking-tighter italic text-white">
+              <h3 className="text-sm font-black uppercase tracking-tighter italic text-gray-900 dark:text-white">
                 ĐỘ CHÍNH XÁC
               </h3>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
                 Phân tích hiệu suất theo tháng
               </p>
             </div>
@@ -168,23 +171,25 @@ export function LearningAnalyticsChart() {
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
-                  stroke="rgba(255,255,255,0.05)"
+                  stroke="rgba(0,0,0,0.05)"
+                  className="dark:stroke-white/5"
                 />
                 <XAxis
                   dataKey="month"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: "bold", fill: "#52525b" }}
+                  tick={{ fontSize: 10, fontWeight: "bold", fill: "#71717a" }}
+                  className="dark:fill-zinc-600"
                   dy={10}
                 />
                 <YAxis hide domain={[0, 100]} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#09090b",
+                    backgroundColor: "#ffffff",
                     borderRadius: "12px",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid rgba(0,0,0,0.1)",
                     fontSize: "11px",
-                    color: "white",
+                    color: "#18181b",
                     fontFamily: "monospace",
                   }}
                 />

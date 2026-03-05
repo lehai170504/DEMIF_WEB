@@ -18,11 +18,11 @@ export function ShadowingResult({
   onRestart,
 }: ShadowingResultProps) {
   return (
-    <div className="min-h-screen bg-[#050505] font-mono text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-white flex items-center justify-center p-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl bg-[#18181b] border border-white/10 rounded-[3rem] p-10 text-center relative overflow-hidden shadow-2xl"
+        className="w-full max-w-2xl bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[3rem] p-10 text-center relative overflow-hidden shadow-2xl"
       >
         {/* Confetti / Glow Effect */}
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5" />
@@ -33,30 +33,30 @@ export function ShadowingResult({
             <Trophy className="h-12 w-12 text-white fill-white" />
           </div>
 
-          <h2 className="text-4xl font-black mb-2 tracking-tight">
+          <h2 className="text-4xl font-black mb-2 tracking-tight text-gray-900 dark:text-white">
             Hoàn thành xuất sắc!
           </h2>
-          <p className="text-zinc-400 mb-10">
+          <p className="text-gray-600 dark:text-zinc-400 mb-10">
             Bạn đã hoàn thành bài tập Shadowing.
           </p>
 
           <div className="flex justify-center items-end gap-2 mb-12">
-            <span className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400">
+            <span className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-gray-900 dark:from-white to-gray-500 dark:to-zinc-400">
               {score}
             </span>
-            <span className="text-xl font-bold text-zinc-500 mb-2">%</span>
+            <span className="text-xl font-bold text-gray-500 dark:text-zinc-500 mb-2">%</span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-10">
             {details.map((item) => (
               <div
                 key={item.label}
-                className="bg-white/5 border border-white/5 rounded-2xl p-4"
+                className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-4"
               >
                 <div className={cn("text-2xl font-black mb-1", item.color)}>
                   {item.value}%
                 </div>
-                <div className="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">
+                <div className="text-[10px] font-bold uppercase text-gray-500 dark:text-zinc-500 tracking-widest">
                   {item.label}
                 </div>
               </div>
@@ -67,7 +67,7 @@ export function ShadowingResult({
             <Button
               onClick={onRestart}
               variant="outline"
-              className="h-12 px-8 rounded-xl border-white/10 bg-transparent hover:bg-white/5 text-white"
+              className="h-12 px-8 rounded-xl border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 text-gray-900 dark:text-white"
             >
               <RotateCcw className="h-4 w-4 mr-2" /> Luyện tập lại
             </Button>

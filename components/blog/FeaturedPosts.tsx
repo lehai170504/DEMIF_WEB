@@ -47,9 +47,9 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
             transition={{ delay: index * 0.1 }}
           >
             <Link href={`/blog/${post.id}`}>
-              <div className="group h-full flex flex-col bg-[#18181b] border border-white/10 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1 relative">
+              <div className="group h-full flex flex-col bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1 relative">
                 {/* Image Area */}
-                <div className="relative h-56 bg-gradient-to-br from-[#27272a] to-black overflow-hidden">
+                <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#27272a] dark:to-black overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-20 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-30 grayscale group-hover:grayscale-0">
                     {getCategoryIcon(post.category)}
                   </div>
@@ -62,28 +62,28 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
                     </Badge>
                   </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#18181b] via-transparent to-transparent opacity-90" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#18181b] via-transparent to-transparent opacity-90" />
                 </div>
 
                 <div className="p-6 pt-0 flex-1 flex flex-col relative z-10 -mt-12">
                   <div className="mb-4">
                     <Badge
                       variant="outline"
-                      className="bg-white/5 text-zinc-300 border-white/10 hover:bg-white/10 transition-colors"
+                      className="bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
                     >
                       {post.category}
                     </Badge>
                   </div>
 
-                  <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-orange-500 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-orange-500 transition-colors">
                     {post.title}
                   </h3>
 
-                  <p className="text-zinc-400 mb-6 line-clamp-2 text-sm leading-relaxed flex-1">
+                  <p className="text-gray-600 dark:text-zinc-400 mb-6 line-clamp-2 text-sm leading-relaxed flex-1">
                     {post.excerpt}
                   </p>
 
-                  <div className="flex items-center justify-between text-xs font-bold text-zinc-500 uppercase tracking-wider pt-4 border-t border-white/5 mt-auto">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider pt-4 border-t border-gray-200 dark:border-white/5 mt-auto">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
@@ -94,7 +94,7 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
                         <span>{post.views}</span>
                       </div>
                     </div>
-                    <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                    <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
                       <ArrowRight className="h-4 w-4 group-hover:-rotate-45 transition-transform duration-300" />
                     </div>
                   </div>

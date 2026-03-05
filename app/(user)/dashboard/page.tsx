@@ -35,15 +35,15 @@ const GlassCard = ({
     transition={{ type: "spring", stiffness: 300 }}
     className={`
       relative overflow-hidden
-      bg-white/5 backdrop-blur-xl 
-      border border-white/10 
+      bg-white dark:bg-white/5 backdrop-blur-xl 
+      border border-gray-200 dark:border-white/10 
       rounded-[2rem] 
-      shadow-lg shadow-black/20 
+      shadow-lg shadow-gray-200/50 dark:shadow-black/20 
       ${className}
     `}
   >
     {/* Hiệu ứng ánh sáng viền khi hover */}
-    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    <div className="absolute inset-0 bg-gradient-to-br from-gray-100/50 dark:from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     {children}
   </motion.div>
 );
@@ -95,7 +95,7 @@ export default function DashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-6"
         >
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[#FF7A00] mb-1">
@@ -104,11 +104,11 @@ export default function DashboardPage() {
                 Trung tâm điều khiển
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-none text-white">
-              Tổng quan <span className="text-zinc-600">Học tập</span>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-none text-gray-900 dark:text-white">
+              Tổng quan <span className="text-gray-400 dark:text-zinc-600">Học tập</span>
             </h1>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest bg-gray-100 dark:bg-white/5 px-4 py-2 rounded-full border border-gray-200 dark:border-white/5">
             <History className="h-3 w-3" /> Cập nhật: Vừa xong
           </div>
         </motion.div>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
             <motion.div variants={itemVariants}>
               <GlassCard className="p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-400">
                     Bài học gần đây
                   </h3>
                   <div className="p-1.5 bg-orange-500/20 rounded-md">
@@ -154,7 +154,7 @@ export default function DashboardPage() {
 
                 <Button
                   variant="ghost"
-                  className="w-full mt-4 h-9 border border-white/10 rounded-lg font-bold text-[9px] uppercase tracking-widest text-zinc-400 hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] transition-all duration-300"
+                  className="w-full mt-4 h-9 border border-gray-200 dark:border-white/10 rounded-lg font-bold text-[9px] uppercase tracking-widest text-gray-500 dark:text-zinc-400 hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] transition-all duration-300"
                 >
                   Xem tất cả <ArrowRight className="ml-2 h-3 w-3" />
                 </Button>
@@ -177,10 +177,10 @@ export default function DashboardPage() {
             {/* Analytics Row */}
             <div className="grid grid-cols-1 gap-6">
               <motion.div variants={itemVariants}>
-                <GlassCard className="p-6 bg-black/20" hoverEffect>
+                <GlassCard className="p-6 bg-gray-50 dark:bg-black/20" hoverEffect>
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4 text-[#FF7A00]" />
-                    <h3 className="text-sm font-bold text-white">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                       Biểu đồ học tập
                     </h3>
                   </div>
@@ -222,7 +222,7 @@ export default function DashboardPage() {
               <div className="relative rounded-[2rem] p-[1px] bg-gradient-to-b from-[#FF7A00] to-transparent overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#FF7A00]/20 to-transparent blur-xl transition-opacity opacity-50 group-hover:opacity-100" />
 
-                <div className="relative p-6 bg-[#121212]/80 backdrop-blur-md rounded-[1.9rem] h-full overflow-hidden">
+                <div className="relative p-6 bg-white dark:bg-[#121212]/80 backdrop-blur-md rounded-[1.9rem] h-full overflow-hidden">
                   <div className="absolute top-[-20px] right-[-20px] opacity-20 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
                     <Sparkles className="w-24 h-24 text-orange-500" />
                   </div>
@@ -230,14 +230,14 @@ export default function DashboardPage() {
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-2 h-2 rounded-full bg-[#FF7A00] animate-pulse" />
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-400">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 dark:text-orange-400">
                         AI Assistant
                       </h4>
                     </div>
 
-                    <p className="text-sm font-medium leading-relaxed text-zinc-300 italic mb-6 border-l-2 border-orange-500/50 pl-3">
+                    <p className="text-sm font-medium leading-relaxed text-gray-700 dark:text-zinc-300 italic mb-6 border-l-2 border-orange-500/50 pl-3">
                       "Kỹ năng{" "}
-                      <span className="text-white font-bold">Shadowing</span>{" "}
+                      <span className="text-gray-900 dark:text-white font-bold">Shadowing</span>{" "}
                       của bạn đang cải thiện rõ rệt. Hãy thử thách với các bài
                       học có tốc độ nhanh hơn để đột phá!"
                     </p>

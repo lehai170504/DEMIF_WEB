@@ -16,10 +16,10 @@ export function CtaLanding() {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="relative overflow-hidden rounded-[3rem] border border-white/10 bg-white/5 backdrop-blur-2xl p-8 md:p-16 text-center shadow-2xl"
+        className="relative overflow-hidden rounded-[3rem] border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-2xl p-8 md:p-16 text-center shadow-2xl"
       >
         {/* Inner Highlight Gradient */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-white/20 to-transparent" />
         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#FF7A00]/50 to-transparent" />
 
         {/* Decorative Elements */}
@@ -32,14 +32,14 @@ export function CtaLanding() {
             <span>Ưu đãi giới hạn</span>
           </div>
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white tracking-tight">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">
             Sẵn sàng bứt phá <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C]">
               ngôn ngữ mới?
             </span>
           </h2>
 
-          <p className="text-zinc-400 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-zinc-400 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto">
             Tham gia cùng cộng đồng người học thông minh. Không còn học vẹt, chỉ
             có thực hành thực tế với AI Mentor 24/7.
           </p>
@@ -62,7 +62,7 @@ export function CtaLanding() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 px-8 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl text-lg backdrop-blur-md"
+                className="h-14 px-8 border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-bold rounded-2xl text-lg backdrop-blur-md"
                 asChild
               >
                 <Link href="#pricing">Xem Bảng giá</Link>
@@ -70,7 +70,7 @@ export function CtaLanding() {
             </motion.div>
           </div>
 
-          <p className="mt-8 text-xs text-zinc-500 font-medium">
+          <p className="mt-8 text-xs text-gray-500 dark:text-zinc-500 font-medium">
             Không cần thẻ tín dụng • Hủy bất kỳ lúc nào
           </p>
         </div>

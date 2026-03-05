@@ -35,21 +35,21 @@ export function NotesPanel() {
   };
 
   return (
-    <Card className="border border-white/10 bg-[#18181b] rounded-[2rem] shadow-xl overflow-hidden sticky top-24">
+    <Card className="border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] rounded-[2rem] shadow-xl overflow-hidden sticky top-24">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4 px-1">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-orange-500/10 rounded-xl">
               <Edit3 className="h-4 w-4 text-orange-500" />
             </div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
               Ghi chú
             </h3>
           </div>
           {notes.length > 0 && (
             <button
               onClick={clearNotes}
-              className="text-zinc-600 hover:text-red-400 transition-colors"
+              className="text-gray-400 dark:text-zinc-600 hover:text-red-400 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -64,7 +64,7 @@ export function NotesPanel() {
               if (status === "saved") setStatus("idle");
             }}
             placeholder="Ghi chú nhanh..."
-            className="min-h-[150px] w-full resize-none border-none bg-black/20 focus-visible:ring-0 rounded-2xl p-4 text-sm leading-relaxed text-zinc-300 placeholder:text-zinc-700 transition-all"
+            className="min-h-[150px] w-full resize-none border-none bg-gray-50 dark:bg-black/20 focus-visible:ring-0 rounded-2xl p-4 text-sm leading-relaxed text-gray-900 dark:text-zinc-300 placeholder:text-gray-400 dark:placeholder:text-zinc-700 transition-all"
           />
           <div className="absolute bottom-2 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-orange-500/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
         </div>
@@ -77,7 +77,7 @@ export function NotesPanel() {
               "w-full h-10 rounded-xl font-bold text-xs uppercase tracking-widest transition-all",
               status === "saved"
                 ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                : "bg-white text-black hover:bg-zinc-200",
+                : "bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200",
             )}
           >
             <AnimatePresence mode="wait">

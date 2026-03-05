@@ -51,7 +51,7 @@ export function RecommendedLessons({
               Recommended
             </span>
           </div>
-          <h3 className="text-3xl font-black tracking-tight text-white">
+          <h3 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
             Dành riêng cho bạn
           </h3>
         </div>
@@ -61,14 +61,14 @@ export function RecommendedLessons({
           onValueChange={(v) => setActiveTab(v as any)}
           className="w-full md:w-auto"
         >
-          <TabsList className="grid w-full grid-cols-4 h-10 bg-white/5 p-1 rounded-full border border-white/10">
+          <TabsList className="grid w-full grid-cols-4 h-10 bg-gray-100 dark:bg-white/5 p-1 rounded-full border border-gray-200 dark:border-white/10">
             {["all", "beginner", "intermediate", "advanced"].map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
                 className="rounded-full text-[10px] font-bold uppercase tracking-wider transition-all 
                 data-[state=active]:bg-[#FF7A00] data-[state=active]:text-white data-[state=active]:shadow-lg
-                text-zinc-400 hover:text-white"
+                text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
               >
                 {tab === "all" ? "Tất cả" : tab}
               </TabsTrigger>
@@ -93,7 +93,7 @@ export function RecommendedLessons({
                 href={`/dictation/${lesson.lessonId}`}
                 className="group block h-full"
               >
-                <div className="relative flex flex-col justify-between h-full border border-white/5 bg-[#18181b] p-6 transition-all duration-500 rounded-[2rem] overflow-hidden group-hover:border-orange-500/30 group-hover:bg-[#202023]">
+                <div className="relative flex flex-col justify-between h-full border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] p-6 transition-all duration-500 rounded-[2rem] overflow-hidden group-hover:border-orange-500/30 group-hover:bg-gray-50 dark:group-hover:bg-[#202023]">
                   {/* Hover Glow */}
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -109,27 +109,27 @@ export function RecommendedLessons({
                       </div>
 
                       {lesson.rating && (
-                        <div className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 border border-white/5">
+                        <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-full px-2 py-1 border border-gray-200 dark:border-white/5">
                           <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                          <span className="text-[10px] font-bold text-white">
+                          <span className="text-[10px] font-bold text-gray-900 dark:text-white">
                             {lesson.rating.toFixed(1)}
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <h4 className="text-lg font-bold text-zinc-100 leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 leading-snug group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors line-clamp-2">
                       {lesson.title}
                     </h4>
                   </div>
 
-                  <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-2 text-zinc-500 font-medium text-xs group-hover:text-zinc-400">
+                  <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-white/5">
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-zinc-500 font-medium text-xs group-hover:text-gray-700 dark:group-hover:text-zinc-400">
                       <Clock className="h-3.5 w-3.5" />
                       <span>{lesson.duration} phút</span>
                     </div>
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-orange-500 group-hover:shadow-lg">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-orange-500 group-hover:shadow-lg">
                       <ArrowUpRight className="h-4 w-4" />
                     </div>
                   </div>

@@ -30,7 +30,7 @@ export function ReviewCard3D({ item, index }: ReviewCard3DProps) {
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* MẶT TRƯỚC */}
-        <Card className="absolute inset-0 backface-hidden rounded-[2rem] border border-white/10 bg-[#18181b] p-8 flex flex-col justify-between shadow-xl group-hover:shadow-2xl group-hover:shadow-orange-500/10 group-hover:border-orange-500/30 transition-all">
+        <Card className="absolute inset-0 backface-hidden rounded-[2rem] border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] p-8 flex flex-col justify-between shadow-xl group-hover:shadow-2xl group-hover:shadow-orange-500/10 group-hover:border-orange-500/30 transition-all">
           <div className="flex justify-between items-start">
             <Badge
               className={cn(
@@ -50,20 +50,20 @@ export function ReviewCard3D({ item, index }: ReviewCard3DProps) {
           </div>
 
           <div className="text-center space-y-2">
-            <h3 className="text-3xl font-black text-white tracking-tight break-words">
+            <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight break-words">
               {item.word}
             </h3>
-            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
+            <p className="text-[10px] text-gray-500 dark:text-zinc-500 font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
               Click để lật
             </p>
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex justify-between text-[9px] font-bold text-zinc-600 uppercase">
+            <div className="flex justify-between text-[9px] font-bold text-gray-500 dark:text-zinc-600 uppercase">
               <span>Mastery</span>
-              <span className="text-zinc-400">{item.mastery}%</span>
+              <span className="text-gray-700 dark:text-zinc-400">{item.mastery}%</span>
             </div>
-            <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-gray-100 dark:bg-black/40 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
                 style={{ width: `${item.mastery}%` }}
@@ -73,7 +73,7 @@ export function ReviewCard3D({ item, index }: ReviewCard3DProps) {
         </Card>
 
         {/* MẶT SAU */}
-        <Card className="absolute inset-0 rotate-y-180 backface-hidden rounded-[2rem] border border-white/10 bg-zinc-900 p-8 text-white flex flex-col justify-between shadow-2xl overflow-hidden">
+        <Card className="absolute inset-0 rotate-y-180 backface-hidden rounded-[2rem] border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-900 p-8 text-gray-900 dark:text-white flex flex-col justify-between shadow-2xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent pointer-events-none" />
 
           <div className="relative z-10 space-y-4 text-center mt-4">
@@ -86,15 +86,15 @@ export function ReviewCard3D({ item, index }: ReviewCard3DProps) {
               </h3>
             </div>
 
-            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-              <p className="text-zinc-400 text-xs italic leading-relaxed">
+            <div className="bg-gray-100 dark:bg-white/5 rounded-xl p-3 border border-gray-200 dark:border-white/5">
+              <p className="text-gray-600 dark:text-zinc-400 text-xs italic leading-relaxed">
                 "{item.example}"
               </p>
             </div>
           </div>
 
           <div className="relative z-10 flex justify-center pb-2">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest border border-white/5 px-3 py-1 rounded-full bg-black/20">
+            <span className="text-[10px] text-gray-600 dark:text-zinc-500 font-bold uppercase tracking-widest border border-gray-200 dark:border-white/5 px-3 py-1 rounded-full bg-gray-100 dark:bg-black/20">
               Đã ôn {item.reviewCount} lần
             </span>
           </div>

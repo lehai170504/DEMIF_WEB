@@ -43,13 +43,13 @@ export function BlogPostCard({ post }: { post: BlogPost }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#18181b] rounded-[2rem] overflow-hidden group relative">
+    <div className="flex flex-col h-full bg-white dark:bg-[#18181b] rounded-[2rem] overflow-hidden group relative">
       {/* Cover Image Area */}
       <Link
         href={`/blog/${post.id}`}
         className="block relative h-56 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[#27272a] to-[#09090b] transition-transform duration-700 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#27272a] dark:to-[#09090b] transition-transform duration-700 group-hover:scale-105" />
 
         {/* Category Icon Background */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500 select-none text-9xl grayscale group-hover:grayscale-0">
@@ -57,11 +57,11 @@ export function BlogPostCard({ post }: { post: BlogPost }) {
         </div>
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#18181b] via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#18181b] via-transparent to-transparent opacity-80" />
 
         {/* Floating Category Badge */}
         <div className="absolute top-4 left-4">
-          <Badge className="bg-black/50 backdrop-blur-md text-white border border-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider hover:bg-black/70 transition-colors">
+          <Badge className="bg-white/90 dark:bg-black/50 backdrop-blur-md text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-black/70 transition-colors">
             {post.category}
           </Badge>
         </div>
@@ -70,18 +70,18 @@ export function BlogPostCard({ post }: { post: BlogPost }) {
       <div className="flex-1 p-6 pt-2 flex flex-col relative z-10">
         {/* Title */}
         <Link href={`/blog/${post.id}`} className="block group/title">
-          <h2 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover/title:text-orange-500 transition-colors">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-tight group-hover/title:text-orange-500 transition-colors">
             {post.title}
           </h2>
         </Link>
 
         {/* Excerpt */}
-        <p className="text-zinc-400 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+        <p className="text-gray-600 dark:text-zinc-400 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
           {post.excerpt}
         </p>
 
         {/* Meta Stats */}
-        <div className="flex items-center gap-4 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-6 border-t border-white/5 pt-4">
+        <div className="flex items-center gap-4 text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-6 border-t border-gray-200 dark:border-white/5 pt-4">
           <div className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
             <span>{post.readTime}p</span>
@@ -92,7 +92,7 @@ export function BlogPostCard({ post }: { post: BlogPost }) {
           </div>
           <div className="flex items-center gap-1.5 ml-auto">
             <Heart className="h-3.5 w-3.5 text-red-500/70" />
-            <span className="text-zinc-400">{post.likes}</span>
+            <span className="text-gray-500 dark:text-zinc-400">{post.likes}</span>
           </div>
         </div>
 

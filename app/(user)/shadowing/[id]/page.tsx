@@ -151,7 +151,7 @@ export default function ShadowingPracticePage({
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] font-mono text-zinc-100 selection:bg-orange-500/30">
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30">
       <ShadowingHeader
         title={lesson.title}
         current={currentIdx + 1}

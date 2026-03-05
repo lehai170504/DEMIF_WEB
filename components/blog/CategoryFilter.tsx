@@ -32,8 +32,8 @@ export function CategoryFilter({
         className={cn(
           "h-10 rounded-xl px-5 font-bold text-sm transition-all duration-300",
           selectedCategory === "all"
-            ? "bg-white text-black hover:bg-zinc-200"
-            : "bg-transparent text-zinc-400 hover:text-white hover:bg-white/5",
+            ? "bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200"
+            : "bg-transparent text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5",
         )}
       >
         Tất cả
@@ -49,8 +49,8 @@ export function CategoryFilter({
             className={cn(
               "h-10 rounded-xl px-4 font-bold text-sm transition-all duration-300 border border-transparent",
               isActive
-                ? "bg-white text-black hover:bg-zinc-200 shadow-lg shadow-white/5"
-                : "bg-transparent text-zinc-400 hover:text-white hover:bg-white/5 hover:border-white/10",
+                ? "bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200 shadow-lg shadow-orange-500/20 dark:shadow-white/5"
+                : "bg-transparent text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 hover:border-gray-200 dark:hover:border-white/10",
             )}
           >
             <span className="flex items-center gap-2">
@@ -59,8 +59,8 @@ export function CategoryFilter({
                 className={cn(
                   "px-1.5 py-0 rounded-md text-[10px] min-w-[20px] justify-center transition-colors h-5",
                   isActive
-                    ? "bg-black text-white"
-                    : "bg-white/10 text-zinc-400 group-hover:text-white",
+                    ? "bg-white dark:bg-black text-orange-600 dark:text-white"
+                    : "bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-white",
                 )}
               >
                 {category.count}

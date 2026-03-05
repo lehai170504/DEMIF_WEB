@@ -79,14 +79,14 @@ export function TestimonialsLanding() {
         transition={{ duration: 0.6 }}
         className="text-center mb-16"
       >
-        <Badge className="mb-6 bg-white/5 hover:bg-white/10 text-[#FF7A00] border border-[#FF7A00]/30 backdrop-blur-md px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(255,122,0,0.1)]">
+        <Badge className="mb-6 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-orange-600 dark:text-[#FF7A00] border border-orange-500/50 dark:border-[#FF7A00]/30 backdrop-blur-md px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(255,122,0,0.1)]">
           Lời chứng thực
         </Badge>
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">
           Yêu thích bởi{" "}
           <span className="text-[#FF7A00]">cộng đồng toàn cầu</span>
         </h2>
-        <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+        <p className="text-gray-600 dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
           Hàng ngàn người học đã cải thiện khả năng giao tiếp nhờ DEMIF. Đây là
           câu chuyện của họ.
         </p>
@@ -104,10 +104,10 @@ export function TestimonialsLanding() {
           <motion.div
             key={index}
             variants={cardVariants}
-            className="group relative flex flex-col p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-[#FF7A00]/50 transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm"
+            className="group relative flex flex-col p-8 rounded-3xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF7A00]/50 transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none"
           >
             {/* Quote Icon Background */}
-            <div className="absolute top-6 right-8 text-white/5 group-hover:text-[#FF7A00]/10 transition-colors duration-300">
+            <div className="absolute top-6 right-8 text-gray-100 dark:text-white/5 group-hover:text-orange-500/10 dark:group-hover:text-[#FF7A00]/10 transition-colors duration-300">
               <Quote size={80} strokeWidth={0.5} />
             </div>
 
@@ -119,14 +119,14 @@ export function TestimonialsLanding() {
                   className={`w-4 h-4 ${
                     i < item.rating
                       ? "fill-[#FF7A00] text-[#FF7A00]"
-                      : "text-zinc-600"
+                      : "text-gray-300 dark:text-zinc-600"
                   }`}
                 />
               ))}
             </div>
 
             {/* Content */}
-            <p className="text-zinc-300 mb-8 leading-relaxed relative z-10 flex-grow text-sm md:text-base">
+            <p className="text-gray-700 dark:text-zinc-300 mb-8 leading-relaxed relative z-10 flex-grow text-sm md:text-base">
               &quot;{item.content}&quot;
             </p>
 
@@ -138,12 +138,12 @@ export function TestimonialsLanding() {
               </div>
 
               <div>
-                <p className="font-bold text-white group-hover:text-[#FF7A00] transition-colors">
+                <p className="font-bold text-gray-900 dark:text-white group-hover:text-[#FF7A00] transition-colors">
                   {item.name}
                 </p>
-                <div className="flex items-center text-xs text-zinc-500 gap-2">
+                <div className="flex items-center text-xs text-gray-500 dark:text-zinc-500 gap-2">
                   <span>{item.role}</span>
-                  <span className="w-1 h-1 rounded-full bg-zinc-600" />
+                  <span className="w-1 h-1 rounded-full bg-gray-400 dark:bg-zinc-600" />
                   <span>{item.location}</span>
                 </div>
               </div>

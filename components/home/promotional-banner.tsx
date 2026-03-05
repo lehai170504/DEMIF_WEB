@@ -77,7 +77,7 @@ export function PromotionalBanner() {
   }, [handleNext]);
 
   return (
-    <div className="group relative h-[320px] w-full overflow-hidden rounded-[2.5rem] bg-[#0F0F11] border border-white/10 shadow-2xl">
+    <div className="group relative h-[320px] w-full overflow-hidden rounded-[2.5rem] bg-gray-100 dark:bg-[#0F0F11] border border-gray-200 dark:border-white/10 shadow-2xl">
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-[length:30px_30px] opacity-[0.03] z-0" />
 
@@ -101,7 +101,7 @@ export function PromotionalBanner() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[10px] font-bold backdrop-blur-md border border-white/10 text-white uppercase tracking-widest"
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 dark:bg-white/5 px-3 py-1 text-[10px] font-bold backdrop-blur-md border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white uppercase tracking-widest"
             >
               <Sparkles className="h-3 w-3 text-yellow-400 animate-pulse" />
               Tính năng mới
@@ -112,7 +112,7 @@ export function PromotionalBanner() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl md:text-5xl font-black tracking-tight text-white leading-none"
+                className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-none"
               >
                 {banners[currentIndex].title}
               </motion.h3>
@@ -120,7 +120,7 @@ export function PromotionalBanner() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-lg text-zinc-400 font-medium max-w-sm"
+                className="text-lg text-gray-700 dark:text-zinc-400 font-medium max-w-sm"
               >
                 {banners[currentIndex].subtitle}
               </motion.p>
@@ -165,13 +165,13 @@ export function PromotionalBanner() {
       <div className="absolute inset-x-6 top-1/2 z-20 flex -translate-y-1/2 justify-between pointer-events-none">
         <button
           onClick={handlePrevious}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white/50 backdrop-blur-md border border-white/5 transition-all hover:bg-black/40 hover:text-white hover:scale-110"
+          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/50 dark:bg-black/20 text-gray-700 dark:text-white/50 backdrop-blur-md border border-gray-300 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-black/40 hover:text-gray-900 dark:hover:text-white hover:scale-110"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <button
           onClick={handleNext}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white/50 backdrop-blur-md border border-white/5 transition-all hover:bg-black/40 hover:text-white hover:scale-110"
+          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/50 dark:bg-black/20 text-gray-700 dark:text-white/50 backdrop-blur-md border border-gray-300 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-black/40 hover:text-gray-900 dark:hover:text-white hover:scale-110"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -188,8 +188,8 @@ export function PromotionalBanner() {
             }}
             className={`h-1.5 rounded-full transition-all duration-300 ${
               index === currentIndex
-                ? "w-8 bg-white"
-                : "w-2 bg-white/20 hover:bg-white/40"
+                ? "w-8 bg-gray-900 dark:bg-white"
+                : "w-2 bg-gray-900/20 dark:bg-white/20 hover:bg-gray-900/40 dark:hover:bg-white/40"
             }`}
           />
         ))}

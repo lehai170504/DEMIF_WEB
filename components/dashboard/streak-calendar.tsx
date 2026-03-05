@@ -27,7 +27,7 @@ export function StreakCalendar() {
     );
 
   return (
-    <Card className="p-8 border border-white/10 bg-[#18181b] rounded-[2.5rem] shadow-2xl font-mono relative overflow-hidden">
+    <Card className="p-8 border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] rounded-[2.5rem] shadow-2xl font-mono relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-[-20%] left-[-10%] w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full pointer-events-none" />
 
@@ -38,15 +38,15 @@ export function StreakCalendar() {
             <Flame className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-black uppercase tracking-tighter italic text-white">
+            <h3 className="text-sm font-black uppercase tracking-tighter italic text-gray-900 dark:text-white">
               HOẠT ĐỘNG STREAK
             </h3>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+            <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
               2 ngày học tập trong 9 tháng qua
             </p>
           </div>
         </div>
-        <button className="p-2 text-zinc-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-xl">
+        <button className="p-2 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl">
           <Info className="h-4 w-4" />
         </button>
       </div>
@@ -56,7 +56,7 @@ export function StreakCalendar() {
           {/* Month labels */}
           <div className="flex justify-between mb-4 ml-8 px-1">
             {months.map((month) => (
-              <div key={month} className="text-[9px] font-black text-zinc-500">
+              <div key={month} className="text-[9px] font-black text-gray-500 dark:text-zinc-500">
                 {month}
               </div>
             ))}
@@ -68,7 +68,7 @@ export function StreakCalendar() {
               {days.map((day, i) => (
                 <div
                   key={i}
-                  className="text-[9px] font-black text-zinc-600 h-3 flex items-center"
+                  className="text-[9px] font-black text-gray-500 dark:text-zinc-600 h-3 flex items-center"
                 >
                   {day}
                 </div>
@@ -85,7 +85,7 @@ export function StreakCalendar() {
                       className={`w-[13px] h-[13px] rounded-[4px] transition-all duration-300 border border-transparent ${
                         isActive
                           ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)] hover:scale-125 border-orange-400/50"
-                          : "bg-white/5 hover:bg-white/10 hover:border-white/10"
+                          : "bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/10"
                       } cursor-pointer`}
                       title={
                         isActive ? "Ngày học tập tích cực" : "Không có dữ liệu"
@@ -98,12 +98,12 @@ export function StreakCalendar() {
           </div>
 
           {/* Legend Section */}
-          <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-white/5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+          <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/5">
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
               Cường độ:
             </span>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-[3px] bg-white/5" />
+              <div className="w-3 h-3 rounded-[3px] bg-gray-200 dark:bg-white/5" />
               <div className="w-3 h-3 rounded-[3px] bg-orange-900/40" />
               <div className="w-3 h-3 rounded-[3px] bg-orange-700/60" />
               <div className="w-3 h-3 rounded-[3px] bg-orange-500/80" />

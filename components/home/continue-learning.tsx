@@ -59,7 +59,7 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
               <motion.div
                 whileHover={{ y: -6, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative w-[280px] flex-shrink-0 overflow-hidden rounded-[1.5rem] bg-[#18181b] border border-white/10 p-5 shadow-xl transition-all hover:shadow-[0_15px_30px_-10px_rgba(255,122,0,0.15)] hover:border-orange-500/30"
+                className="group relative w-[280px] flex-shrink-0 overflow-hidden rounded-[1.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl transition-all hover:shadow-[0_15px_30px_-10px_rgba(255,122,0,0.15)] hover:border-orange-500/30"
               >
                 {/* Background Glow Effect */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[50px] rounded-full -mr-12 -mt-12 pointer-events-none group-hover:bg-orange-500/10 transition-colors duration-500" />
@@ -71,7 +71,7 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
                       <span className="text-[9px] font-black uppercase tracking-widest text-orange-500">
                         {lesson.category}
                       </span>
-                      <h4 className="line-clamp-2 font-bold text-base text-white leading-snug group-hover:text-orange-100 transition-colors">
+                      <h4 className="line-clamp-2 font-bold text-base text-gray-900 dark:text-white leading-snug group-hover:text-orange-500 dark:group-hover:text-orange-100 transition-colors">
                         {lesson.title}
                       </h4>
                     </div>
@@ -90,14 +90,14 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
                   {/* Progress Bar - Neon Style */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider">
-                      <span className="text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                      <span className="text-gray-500 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-zinc-400 transition-colors">
                         Tiến độ
                       </span>
-                      <span className="font-bold text-white">
+                      <span className="font-bold text-gray-900 dark:text-white">
                         {Math.round(lesson.progress * 100)}%
                       </span>
                     </div>
-                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/5">
+                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${lesson.progress * 100}%` }}
@@ -112,22 +112,22 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
                   </div>
 
                   {/* Footer Info */}
-                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                    <div className="flex items-center gap-3 text-[10px] font-medium text-zinc-400">
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-white/5">
+                    <div className="flex items-center gap-3 text-[10px] font-medium text-gray-600 dark:text-zinc-400">
                       <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 text-zinc-500" />
+                        <Clock className="h-3 w-3 text-gray-500 dark:text-zinc-500" />
                         <span>{lesson.duration}p</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Zap className="h-3 w-3 text-orange-500 fill-orange-500/20" />
-                        <span className="text-zinc-300 group-hover:text-white transition-colors">
+                        <span className="text-gray-700 dark:text-zinc-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                           +{Math.round(lesson.progress * 100)} XP
                         </span>
                       </div>
                     </div>
 
                     {/* Play Button - Glowing on Hover */}
-                    <div className="rounded-full bg-white/5 p-1.5 text-zinc-300 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,122,0,0.5)]">
+                    <div className="rounded-full bg-gray-100 dark:bg-white/5 p-1.5 text-gray-600 dark:text-zinc-300 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,122,0,0.5)]">
                       <PlayCircle className="h-4 w-4 fill-current" />
                     </div>
                   </div>

@@ -44,17 +44,17 @@ export function AchievementCards() {
       {/* Header Section */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 flex items-center gap-2">
             Danh hiệu{" "}
             <span className="text-orange-500 bg-orange-500/10 px-1.5 rounded">
               (1 / 20)
             </span>
           </h3>
-          <div className="h-1.5 w-32 bg-[#18181b] rounded-full mt-2 overflow-hidden border border-white/5">
+          <div className="h-1.5 w-32 bg-gray-200 dark:bg-[#18181b] rounded-full mt-2 overflow-hidden border border-gray-300 dark:border-white/5">
             <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 w-[5%] shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
           </div>
         </div>
-        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors group bg-white/5 px-3 py-1.5 rounded-full border border-transparent hover:border-white/10">
+        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors group bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-full border border-transparent hover:border-gray-300 dark:hover:border-white/10">
           Tất cả{" "}
           <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
         </button>
@@ -68,8 +68,8 @@ export function AchievementCards() {
             className={cn(
               "relative p-5 border rounded-[1.5rem] transition-all duration-300 group overflow-hidden flex flex-col items-center text-center",
               item.isUnlocked
-                ? `bg-gradient-to-br from-[#18181b] to-black border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.1)] hover:-translate-y-1 hover:shadow-pink-500/20`
-                : "bg-[#0a0a0a] border-white/5 opacity-60 grayscale hover:opacity-100 transition-opacity",
+                ? `bg-gradient-to-br from-white to-gray-50 dark:from-[#18181b] dark:to-black border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.1)] hover:-translate-y-1 hover:shadow-pink-500/20`
+                : "bg-gray-100 dark:bg-[#0a0a0a] border-gray-200 dark:border-white/5 opacity-60 grayscale hover:opacity-100 transition-opacity",
             )}
           >
             {/* Status Icons */}
@@ -78,7 +78,7 @@ export function AchievementCards() {
                 <CheckCircle2 className="w-3 h-3" />
               </div>
             ) : (
-              <Lock className="absolute top-3 right-3 h-3 w-3 text-zinc-700" />
+              <Lock className="absolute top-3 right-3 h-3 w-3 text-gray-400 dark:text-zinc-700" />
             )}
 
             {/* Icon Badge */}
@@ -96,18 +96,18 @@ export function AchievementCards() {
             <h4
               className={cn(
                 "font-black text-[10px] uppercase tracking-wider mb-1 leading-none",
-                item.isUnlocked ? "text-white" : "text-zinc-500",
+                item.isUnlocked ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-zinc-500",
               )}
             >
               {item.title}
             </h4>
-            <p className="text-[9px] font-bold text-zinc-600 leading-tight">
+            <p className="text-[9px] font-bold text-gray-500 dark:text-zinc-600 leading-tight">
               {item.subtitle}
             </p>
 
             {/* Shine effect for unlocked items */}
             {item.isUnlocked && (
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-gray-200/50 dark:via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             )}
           </Card>
         ))}

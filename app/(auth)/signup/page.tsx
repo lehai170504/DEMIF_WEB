@@ -79,22 +79,22 @@ export default function SignupPage() {
         value={formData[id]}
         onChange={handleChange}
         placeholder=" " // Quan trọng cho hiệu ứng floating
-        className={`peer w-full bg-black/40 border text-white h-12 px-4 rounded-xl outline-none transition-all placeholder-transparent
+        className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-12 px-4 rounded-xl outline-none transition-all placeholder-transparent
           ${
             errors[id]
               ? "border-red-500 focus:border-red-500"
-              : "border-white/10 focus:border-[#FF7A00]/60"
+              : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
           }`}
       />
       <label
         htmlFor={id}
         className={`absolute left-4 top-3 text-sm transition-all pointer-events-none 
-          peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-[#0D0D0D] peer-focus:px-1
-          peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[#0D0D0D] peer-[:not(:placeholder-shown)]:px-1
+          peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-white dark:peer-focus:bg-[#0D0D0D] peer-focus:px-1
+          peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white dark:peer-[:not(:placeholder-shown)]:bg-[#0D0D0D] peer-[:not(:placeholder-shown)]:px-1
           ${
             errors[id]
               ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-              : "text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-zinc-400"
+              : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
           }`}
       >
         {label}
@@ -122,20 +122,20 @@ export default function SignupPage() {
       >
         <Link
           href="/"
-          className="absolute -top-12 left-0 flex items-center gap-2 text-zinc-500 hover:text-white transition-all text-sm font-medium group font-sans"
+          className="absolute -top-12 left-0 flex items-center gap-2 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-all text-sm font-medium group font-sans"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Quay lại trang chủ
         </Link>
 
-        <div className="bg-[#0D0D0D]/60 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+        <div className="bg-white dark:bg-[#0D0D0D]/60 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF7A00] to-purple-600 rounded-[32px] opacity-10 blur-sm group-hover:opacity-20 transition duration-500" />
 
           <div className="text-center mb-6 relative z-10">
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
               Tạo <span className="text-[#FF7A00]">tài khoản</span> mới
             </h1>
-            <p className="text-zinc-400 text-sm font-medium italic">
+            <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium italic">
               Bắt đầu hành trình chinh phục ngôn ngữ cùng AI
             </p>
           </div>
@@ -164,22 +164,22 @@ export default function SignupPage() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder=" "
-                className={`peer w-full bg-black/40 border text-white h-12 px-4 rounded-xl outline-none transition-all placeholder-transparent pr-12
+                className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-12 px-4 rounded-xl outline-none transition-all placeholder-transparent pr-12
                   ${
                     errors.password
                       ? "border-red-500 focus:border-red-500"
-                      : "border-white/10 focus:border-[#FF7A00]/60"
+                      : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
                   }`}
               />
               <label
                 htmlFor="password"
                 className={`absolute left-4 top-3 text-sm transition-all pointer-events-none 
-                  peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-[#0D0D0D] peer-focus:px-1
-                  peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[#0D0D0D] peer-[:not(:placeholder-shown)]:px-1
+                  peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-white dark:peer-focus:bg-[#0D0D0D] peer-focus:px-1
+                  peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white dark:peer-[:not(:placeholder-shown)]:bg-[#0D0D0D] peer-[:not(:placeholder-shown)]:px-1
                   ${
                     errors.password
                       ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-                      : "text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-zinc-400"
+                      : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
                   }`}
               >
                 Mật khẩu
@@ -187,7 +187,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3.5 text-zinc-500 hover:text-white transition-colors"
+                className="absolute right-4 top-3.5 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -210,22 +210,22 @@ export default function SignupPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder=" "
-                className={`peer w-full bg-black/40 border text-white h-12 px-4 rounded-xl outline-none transition-all placeholder-transparent pr-12
+                className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-12 px-4 rounded-xl outline-none transition-all placeholder-transparent pr-12
                   ${
                     errors.confirmPassword
                       ? "border-red-500 focus:border-red-500"
-                      : "border-white/10 focus:border-[#FF7A00]/60"
+                      : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
                   }`}
               />
               <label
                 htmlFor="confirmPassword"
                 className={`absolute left-4 top-3 text-sm transition-all pointer-events-none 
-                  peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-[#0D0D0D] peer-focus:px-1
-                  peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-[#0D0D0D] peer-[:not(:placeholder-shown)]:px-1
+                  peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:bg-white dark:peer-focus:bg-[#0D0D0D] peer-focus:px-1
+                  peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white dark:peer-[:not(:placeholder-shown)]:bg-[#0D0D0D] peer-[:not(:placeholder-shown)]:px-1
                   ${
                     errors.confirmPassword
                       ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-                      : "text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-zinc-400"
+                      : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
                   }`}
               >
                 Xác nhận mật khẩu
@@ -233,7 +233,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-3.5 text-zinc-500 hover:text-white transition-colors"
+                className="absolute right-4 top-3.5 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -280,8 +280,8 @@ export default function SignupPage() {
           </form>
 
           {/* FOOTER */}
-          <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
-            <p className="text-zinc-500 text-sm">
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/5 text-center relative z-10">
+            <p className="text-gray-500 dark:text-zinc-500 text-sm">
               Đã có tài khoản?{" "}
               <Link
                 href="/login"

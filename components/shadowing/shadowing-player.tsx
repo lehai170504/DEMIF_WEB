@@ -34,21 +34,21 @@ export function ShadowingPlayer({
   return (
     <div className="space-y-8">
       {/* Audio Wave Visualizer */}
-      <div className="relative bg-[#18181b] border border-white/10 rounded-[2.5rem] p-8 overflow-hidden">
+      <div className="relative bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 overflow-hidden shadow-lg">
         <div className="flex items-center justify-center h-32 gap-1.5 mb-8">
           {Array.from({ length: 24 }).map((_, i) => (
             <motion.div
               key={i}
               className={cn(
-                "w-1.5 rounded-full",
-                isPlaying ? "bg-orange-500" : "bg-white/10",
+                "w-2 rounded-full",
+                isPlaying ? "bg-orange-500" : "bg-black dark:bg-white/10",
               )}
               animate={
                 isPlaying
                   ? {
-                      height: [10, Math.random() * 60 + 20, 10],
+                      height: [30, Math.random() * 60 + 40, 30],
                     }
-                  : { height: 10 }
+                  : { height: 30 }
               }
               transition={
                 isPlaying
@@ -68,7 +68,7 @@ export function ShadowingPlayer({
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full w-12 h-12 text-zinc-500 hover:text-white hover:bg-white/5"
+            className="rounded-full w-12 h-12 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"
             onClick={onPrev}
             disabled={!canPrev}
           >
@@ -92,7 +92,7 @@ export function ShadowingPlayer({
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full w-12 h-12 text-zinc-500 hover:text-white hover:bg-white/5"
+            className="rounded-full w-12 h-12 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"
             onClick={onNext}
             disabled={!canNext}
           >
@@ -102,27 +102,27 @@ export function ShadowingPlayer({
       </div>
 
       {/* Sentence Display */}
-      <div className="bg-[#18181b] border border-white/10 rounded-[2rem] p-8 text-center space-y-4 shadow-lg">
+      <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 text-center space-y-4 shadow-lg">
         <AnimatePresence mode="wait">
           <motion.p
             key={sentence.original}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="text-2xl md:text-3xl font-bold text-white leading-relaxed"
+            className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-relaxed"
           >
             {sentence.original}
           </motion.p>
         </AnimatePresence>
 
-        <div className="h-px w-12 bg-white/10 mx-auto" />
+        <div className="h-px w-12 bg-gray-200 dark:bg-white/10 mx-auto" />
 
         <div className="min-h-[24px]">
           {showTranslation ? (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-zinc-400 italic"
+              className="text-gray-600 dark:text-zinc-400 italic"
             >
               {sentence.translation}
             </motion.p>
@@ -130,7 +130,7 @@ export function ShadowingPlayer({
             <Button
               variant="link"
               onClick={onToggleTranslation}
-              className="text-zinc-500 text-xs uppercase tracking-widest hover:text-orange-500 h-auto p-0"
+              className="text-gray-500 dark:text-zinc-500 text-xs uppercase tracking-widest hover:text-orange-500 h-auto p-0"
             >
               Hiện dịch nghĩa
             </Button>

@@ -28,7 +28,7 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+        <h3 className="text-sm font-black uppercase tracking-widest text-gray-600 dark:text-zinc-400 flex items-center gap-2">
           <BookOpen className="h-4 w-4 text-orange-500" />
           Bài viết hay
         </h3>
@@ -50,9 +50,9 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
             transition={{ delay: index * 0.1 }}
           >
             <Link href={article.link} className="group block">
-              <div className="flex gap-4 items-start p-3 rounded-2xl transition-all duration-300 hover:bg-white/5 border border-transparent hover:border-white/5">
+              <div className="flex gap-4 items-start p-3 rounded-2xl transition-all duration-300 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/5">
                 {/* Image Thumbnail */}
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/10 group-hover:border-orange-500/30 transition-colors">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 group-hover:border-orange-500/30 transition-colors">
                   <Image
                     src={article.image || "/placeholder.svg"}
                     alt={article.title}
@@ -63,11 +63,11 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
 
                 <div className="flex-1 min-w-0 space-y-1">
                   {article.date && (
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">
+                    <span className="text-[9px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest block mb-1">
                       {article.date}
                     </span>
                   )}
-                  <h4 className="line-clamp-2 text-sm font-bold leading-snug text-zinc-300 group-hover:text-white transition-colors">
+                  <h4 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 dark:text-zinc-300 group-hover:text-orange-600 dark:group-hover:text-white transition-colors">
                     {article.title}
                   </h4>
 
@@ -83,8 +83,8 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
         ))}
 
         {articles.length === 0 && (
-          <div className="text-center py-8 rounded-2xl border border-dashed border-white/10 bg-white/5">
-            <p className="text-xs text-zinc-500 font-medium">
+          <div className="text-center py-8 rounded-2xl border border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+            <p className="text-xs text-gray-500 dark:text-zinc-500 font-medium">
               Đang cập nhật bài viết mới...
             </p>
           </div>
@@ -92,7 +92,7 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
       </div>
 
       {/* Newsletter Card - Glass Style */}
-      <div className="mt-8 p-6 rounded-[2rem] bg-gradient-to-br from-[#18181b] to-[#09090b] border border-white/10 relative overflow-hidden group shadow-2xl">
+      <div className="mt-8 p-6 rounded-[2rem] bg-gradient-to-br from-gray-100 to-white dark:from-[#18181b] dark:to-[#09090b] border border-gray-200 dark:border-white/10 relative overflow-hidden group shadow-2xl">
         {/* Glow Effect */}
         <div className="absolute -right-10 -bottom-10 h-32 w-32 bg-orange-500/10 blur-[60px] rounded-full group-hover:bg-orange-500/20 transition-colors duration-500" />
 
@@ -104,12 +104,12 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
             </span>
           </div>
 
-          <h5 className="text-lg font-bold text-white leading-tight">
+          <h5 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
             Nhận bí quyết học <br />{" "}
-            <span className="text-zinc-400">tiếng Anh hàng tuần</span>
+            <span className="text-gray-600 dark:text-zinc-400">tiếng Anh hàng tuần</span>
           </h5>
 
-          <Button className="w-full h-10 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-orange-500/40">
+          <Button className="w-full h-10 bg-gray-900 dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-[0_0_20px_rgba(255,122,0,0.1)] hover:shadow-orange-500/40">
             Đăng ký ngay
           </Button>
         </div>

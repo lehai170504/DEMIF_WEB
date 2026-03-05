@@ -31,7 +31,7 @@ export function BlogPagination({
           size="icon"
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="h-12 w-12 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 transition-all"
+          className="h-12 w-12 rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 disabled:opacity-30 transition-all"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
@@ -46,7 +46,7 @@ export function BlogPagination({
                 "h-12 w-12 rounded-xl font-bold text-base transition-all duration-300",
                 currentPage === page
                   ? "bg-orange-500 text-white hover:bg-orange-600 border-none shadow-lg shadow-orange-500/25"
-                  : "bg-transparent border-white/10 text-zinc-400 hover:text-white hover:border-white/20 hover:bg-white/5",
+                  : "bg-transparent border-gray-200 dark:border-white/10 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-100 dark:hover:bg-white/5",
               )}
             >
               {page}
@@ -59,18 +59,18 @@ export function BlogPagination({
           size="icon"
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="h-12 w-12 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 transition-all"
+          className="h-12 w-12 rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 disabled:opacity-30 transition-all"
         >
           <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
-      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+      <p className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
         Hiển thị{" "}
-        <span className="text-white">
+        <span className="text-gray-900 dark:text-white">
           {startIndex + 1}-{Math.min(endIndex, totalPosts)}
         </span>{" "}
-        trong <span className="text-white">{totalPosts}</span> bài viết
+        trong <span className="text-gray-900 dark:text-white">{totalPosts}</span> bài viết
       </p>
     </div>
   );

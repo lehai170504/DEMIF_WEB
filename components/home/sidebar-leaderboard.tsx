@@ -67,21 +67,21 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
       className="relative"
     >
       {/* Glass Card */}
-      <div className="overflow-hidden bg-[#18181b] border border-white/10 p-5 rounded-[2rem] shadow-xl">
+      <div className="overflow-hidden bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 rounded-[2rem] shadow-xl">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h3 className="text-lg font-black tracking-tight text-white flex items-center gap-2">
+              <h3 className="text-lg font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
                 Bảng vàng tuần
               </h3>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
                 Cập nhật 5 phút trước
               </p>
             </div>
             <Link
               href="/leaderboard"
-              className="h-8 w-8 flex items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-orange-500 hover:text-white transition-all border border-white/5"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-400 hover:bg-orange-500 hover:text-white transition-all border border-gray-200 dark:border-white/5"
             >
               <ChevronRight className="h-4 w-4" />
             </Link>
@@ -113,7 +113,7 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
                   {/* Avatar */}
                   <div
                     className={cn(
-                      "h-8 w-8 rounded-full border-2 bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden",
+                      "h-8 w-8 rounded-full border-2 bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-gray-900 dark:text-white overflow-hidden",
                       styles.avatarBorder,
                     )}
                   >
@@ -139,7 +139,7 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
                     {/* Streak Info (Optional) */}
                     <div className="flex items-center gap-1">
                       <Flame className="h-3 w-3 text-orange-500 fill-orange-500/20" />
-                      <span className="text-[10px] text-zinc-500 font-mono">
+                      <span className="text-[10px] text-gray-500 dark:text-zinc-500 font-mono">
                         {entry.streak} 🔥
                       </span>
                     </div>
@@ -147,7 +147,7 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
 
                   {/* XP */}
                   <div className="text-right">
-                    <p className="text-[12px] font-black text-white tracking-tight">
+                    <p className="text-[12px] font-black text-gray-900 dark:text-white tracking-tight">
                       {entry.xp.toLocaleString()}
                     </p>
                     <p className="text-[8px] font-bold uppercase text-zinc-500">
@@ -160,7 +160,7 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
           </div>
 
           {/* CTA Button */}
-          <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-orange-500 hover:text-white hover:border-orange-500 shadow-lg hover:shadow-orange-500/25">
+          <button className="w-full py-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-zinc-300 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-orange-500 hover:text-white hover:border-orange-500 shadow-lg hover:shadow-orange-500/25">
             Thách đấu ngay
           </button>
         </div>

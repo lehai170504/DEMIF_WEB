@@ -26,14 +26,14 @@ export function BlogHero({ searchQuery, onSearchChange }: BlogHeroProps) {
             </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black mb-6 text-white tracking-tight leading-[1.1]">
+          <h1 className="text-5xl md:text-7xl font-black mb-6 text-gray-900 dark:text-white tracking-tight leading-[1.1]">
             Blog{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
               DEMIF
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+          <p className="text-lg md:text-xl text-gray-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
             Khám phá các mẹo học tập, kiến thức ngữ pháp và xu hướng học tiếng
             Anh mới nhất từ các chuyên gia.
           </p>
@@ -42,19 +42,19 @@ export function BlogHero({ searchQuery, onSearchChange }: BlogHeroProps) {
           <div className="max-w-2xl mx-auto relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity duration-500" />
 
-            <div className="relative bg-[#18181b] rounded-2xl border border-white/10 shadow-2xl">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500 group-focus-within:text-orange-500 transition-colors" />
+            <div className="relative bg-white dark:bg-[#18181b] rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-zinc-500 group-focus-within:text-orange-500 transition-colors" />
               <Input
                 type="text"
                 placeholder="Tìm kiếm bài viết..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-14 pr-12 h-16 bg-transparent border-none text-white placeholder:text-zinc-600 text-lg focus-visible:ring-0 rounded-2xl"
+                className="w-full pl-14 pr-12 h-16 bg-transparent border-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 text-lg focus-visible:ring-0 rounded-2xl"
               />
               {searchQuery && (
                 <button
                   onClick={() => onSearchChange("")}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>

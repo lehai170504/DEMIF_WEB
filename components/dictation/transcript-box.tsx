@@ -55,7 +55,7 @@ export function TranscriptBox({
     : 0;
 
   return (
-    <Card className="border border-white/10 bg-[#18181b] rounded-[2.5rem] overflow-hidden shadow-2xl">
+    <Card className="border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] rounded-[2.5rem] overflow-hidden shadow-2xl">
       <CardContent className="p-8 md:p-10">
         <AnimatePresence mode="wait">
           {!submitted ? (
@@ -70,7 +70,7 @@ export function TranscriptBox({
                 <div className="p-2 bg-orange-500/10 rounded-xl text-orange-500 border border-orange-500/20">
                   <Send className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-bold tracking-tight text-white">
+                <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
                   Nội dung nghe được
                 </h3>
               </div>
@@ -79,7 +79,7 @@ export function TranscriptBox({
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder="Nhập chính xác những gì bạn vừa nghe..."
-                className="min-h-[180px] text-lg bg-black/20 border-white/5 focus-visible:ring-2 focus-visible:ring-orange-500/50 rounded-3xl p-6 transition-all text-white placeholder:text-zinc-600 resize-none"
+                className="min-h-[180px] text-lg bg-gray-50 dark:bg-black/20 border-gray-200 dark:border-white/5 focus-visible:ring-2 focus-visible:ring-orange-500/50 rounded-3xl p-6 transition-all text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-600 resize-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && userInput.trim()) {
                     e.preventDefault();
@@ -91,7 +91,7 @@ export function TranscriptBox({
               <Button
                 onClick={handleSubmit}
                 disabled={!userInput.trim()}
-                className="w-full h-16 bg-white text-black hover:bg-zinc-200 rounded-2xl font-black text-lg uppercase tracking-widest shadow-lg transition-all active:scale-[0.98]"
+                className="w-full h-16 bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200 rounded-2xl font-black text-lg uppercase tracking-widest shadow-lg transition-all active:scale-[0.98]"
               >
                 Kiểm tra đáp án
               </Button>
@@ -134,12 +134,12 @@ export function TranscriptBox({
                       strokeLinecap="round"
                     />
                   </svg>
-                  <span className="absolute text-3xl font-black text-white">
+                  <span className="absolute text-3xl font-black text-gray-900 dark:text-white">
                     {accuracyScore}%
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold italic flex items-center gap-2 justify-center text-white">
+                  <h3 className="text-xl font-bold italic flex items-center gap-2 justify-center text-gray-900 dark:text-white">
                     {accuracyScore >= 80 ? (
                       <>
                         <Sparkles className="text-yellow-500 fill-current" />{" "}
@@ -149,7 +149,7 @@ export function TranscriptBox({
                       "Cố gắng lên!"
                     )}
                   </h3>
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-gray-600 dark:text-zinc-500">
                     Độ chính xác của bài làm
                   </p>
                 </div>
@@ -157,10 +157,10 @@ export function TranscriptBox({
 
               {/* Feedback */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 px-2">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500 px-2">
                   <AlertCircle className="h-3 w-3" /> Chi tiết từng từ
                 </div>
-                <div className="flex flex-wrap gap-3 p-6 bg-black/20 rounded-[2rem] border border-white/5">
+                <div className="flex flex-wrap gap-3 p-6 bg-gray-50 dark:bg-black/20 rounded-[2rem] border border-gray-200 dark:border-white/5">
                   {feedback.map((item, i) => (
                     <motion.div
                       key={i}
@@ -180,7 +180,7 @@ export function TranscriptBox({
                         {item.word}
                       </span>
                       {!item.isCorrect && (
-                        <span className="text-[10px] mt-1 font-medium text-zinc-500 line-through decoration-zinc-500/50">
+                        <span className="text-[10px] mt-1 font-medium text-gray-500 dark:text-zinc-500 line-through decoration-gray-400 dark:decoration-zinc-500/50">
                           {item.userWord}
                         </span>
                       )}
@@ -194,7 +194,7 @@ export function TranscriptBox({
                 <Button
                   variant="outline"
                   onClick={reset}
-                  className="flex-1 h-14 rounded-2xl font-bold border-white/10 bg-transparent text-white hover:bg-white/5 transition-all"
+                  className="flex-1 h-14 rounded-2xl font-bold border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
                 >
                   <RotateCcw className="mr-2 h-4 w-4" /> LÀM LẠI
                 </Button>

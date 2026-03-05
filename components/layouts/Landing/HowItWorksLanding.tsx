@@ -40,13 +40,13 @@ export function HowItWorksLanding() {
         transition={{ duration: 0.6 }}
         className="text-center mb-20"
       >
-        <Badge className="mb-6 bg-white/5 hover:bg-white/10 text-[#FF7A00] border border-[#FF7A00]/30 backdrop-blur-md px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(255,122,0,0.1)]">
+        <Badge className="mb-6 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-orange-600 dark:text-[#FF7A00] border border-orange-500/50 dark:border-[#FF7A00]/30 backdrop-blur-md px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(255,122,0,0.1)]">
           Quy trình hoạt động
         </Badge>
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">
           Học dễ dàng chỉ với <span className="text-[#FF7A00]">3 bước</span>
         </h2>
-        <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+        <p className="text-gray-600 dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
           Trải nghiệm hành trình học ngôn ngữ được dẫn dắt bởi AI — đơn giản,
           trực quan và hiệu quả vượt trội.
         </p>
@@ -54,7 +54,7 @@ export function HowItWorksLanding() {
 
       {/* STEPS CONTAINER */}
       <div className="relative max-w-6xl mx-auto">
-        <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-transparent via-zinc-800 to-transparent z-0" />
+        <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-transparent via-gray-200 dark:via-zinc-800 to-transparent z-0" />
 
         <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-transparent via-[#FF7A00]/50 to-transparent z-0 blur-[2px]" />
 
@@ -69,7 +69,7 @@ export function HowItWorksLanding() {
               whileHover={{ y: -10 }}
               className="group relative flex flex-col items-center text-center"
             >
-              <div className="absolute inset-0 -z-10 bg-white/5 rounded-3xl border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm group-hover:shadow-[0_0_30px_rgba(255,122,0,0.1)]" />
+              <div className="absolute inset-0 -z-10 bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-sm group-hover:shadow-lg dark:group-hover:shadow-[0_0_30px_rgba(255,122,0,0.1)]" />
 
               {/* NUMBER CIRCLE */}
               <div className="relative w-28 h-28 mb-8 flex items-center justify-center">
@@ -77,7 +77,7 @@ export function HowItWorksLanding() {
                 <div className="absolute inset-0 bg-[#FF7A00] blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity duration-500 rounded-full" />
 
                 {/* Hình khối chứa số */}
-                <div className="relative w-20 h-20 rounded-2xl bg-[#0a0a0a] border border-white/10 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 group-hover:border-[#FF7A00]/50">
+                <div className="relative w-20 h-20 rounded-2xl bg-gray-900 dark:bg-[#0a0a0a] border border-gray-700 dark:border-white/10 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 group-hover:border-[#FF7A00]/50">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
                   <span className="text-3xl font-bold bg-gradient-to-br from-[#FF7A00] to-[#FFD056] bg-clip-text text-transparent">
                     {step.id}
@@ -85,7 +85,7 @@ export function HowItWorksLanding() {
                 </div>
 
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute -right-[50%] top-1/2 -translate-y-1/2 text-zinc-700">
+                  <div className="hidden md:block absolute -right-[50%] top-1/2 -translate-y-1/2 text-gray-300 dark:text-zinc-700">
                     <ArrowRight className="w-6 h-6 opacity-20" />
                   </div>
                 )}
@@ -93,10 +93,10 @@ export function HowItWorksLanding() {
 
               {/* TEXT CONTENT */}
               <div className="px-4 pb-8">
-                <h3 className="text-xl font-bold mb-3 text-white group-hover:text-[#FF7A00] transition-colors duration-300">
+                <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-[#FF7A00] transition-colors duration-300">
                   {step.title}
                 </h3>
-                <p className="text-zinc-400 text-sm md:text-base leading-relaxed group-hover:text-zinc-300 transition-colors">
+                <p className="text-gray-600 dark:text-zinc-400 text-sm md:text-base leading-relaxed group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors">
                   {step.description}
                 </p>
               </div>

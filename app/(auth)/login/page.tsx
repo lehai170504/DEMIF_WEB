@@ -95,22 +95,22 @@ export default function LoginPage() {
       >
         <Link
           href="/"
-          className="absolute -top-12 left-0 flex items-center gap-2 text-zinc-500 hover:text-white transition-all text-sm font-medium group"
+          className="absolute -top-12 left-0 flex items-center gap-2 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-all text-sm font-medium group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Quay lại trang chủ
         </Link>
 
-        <div className="bg-[#0D0D0D]/60 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 md:p-10 shadow-2xl relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0D0D0D]/60 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 md:p-10 shadow-2xl relative overflow-hidden">
           {/* Hiệu ứng nền */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF7A00] to-purple-600 rounded-[32px] opacity-10 blur-sm pointer-events-none" />
 
           <div className="relative z-10">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 Chào mừng <span className="text-[#FF7A00]">trở lại</span>
               </h1>
-              <p className="text-zinc-400 text-sm italic">
+              <p className="text-gray-600 dark:text-zinc-400 text-sm italic">
                 Tiếp tục hành trình luyện nói tiếng Anh cùng AI
               </p>
             </div>
@@ -125,11 +125,11 @@ export default function LoginPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder=" "
-                    className={`peer w-full bg-black/40 border text-white h-14 px-4 rounded-xl outline-none transition-all pt-3
+                    className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-14 px-4 rounded-xl outline-none transition-all pt-3
                       ${
                         errors.email
                           ? "border-red-500 focus:border-red-500"
-                          : "border-white/10 focus:border-[#FF7A00]/60"
+                          : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
                       }`}
                   />
                   <label
@@ -140,14 +140,14 @@ export default function LoginPage() {
                     ${
                       errors.email
                         ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-                        : "text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-zinc-400"
+                        : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
                     }`}
                   >
                     Địa chỉ Email
                   </label>
                   <Mail
                     className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none transition-all
-                    ${errors.email ? "text-red-500 opacity-100" : "text-zinc-500 opacity-50 peer-focus:opacity-100 peer-focus:text-[#FF7A00]"}`}
+                    ${errors.email ? "text-red-500 opacity-100" : "text-gray-400 dark:text-zinc-500 opacity-50 peer-focus:opacity-100 peer-focus:text-[#FF7A00]"}`}
                   />
                 </div>
                 {errors.email && (
@@ -170,11 +170,11 @@ export default function LoginPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder=" "
-                    className={`peer w-full bg-black/40 border text-white h-14 px-4 rounded-xl outline-none transition-all pt-3 pr-16
+                    className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-14 px-4 rounded-xl outline-none transition-all pt-3 pr-16
                       ${
                         errors.password
                           ? "border-red-500 focus:border-red-500"
-                          : "border-white/10 focus:border-[#FF7A00]/60"
+                          : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
                       }`}
                   />
                   <label
@@ -185,7 +185,7 @@ export default function LoginPage() {
                     ${
                       errors.password
                         ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-                        : "text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-zinc-400"
+                        : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
                     }`}
                   >
                     Mật khẩu
@@ -194,7 +194,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -255,10 +255,10 @@ export default function LoginPage() {
 
             {/* Phần Footer */}
             <div className="relative my-8 text-center">
-              <span className="bg-[#0D0D0D] px-3 text-[10px] text-zinc-500 uppercase tracking-widest relative z-10">
+              <span className="bg-white dark:bg-[#0D0D0D] px-3 text-[10px] text-gray-500 dark:text-zinc-500 uppercase tracking-widest relative z-10">
                 Hoặc đăng nhập bằng
               </span>
-              <div className="absolute top-1/2 left-0 w-full border-t border-white/5"></div>
+              <div className="absolute top-1/2 left-0 w-full border-t border-gray-200 dark:border-white/5"></div>
             </div>
 
             <Button
@@ -268,7 +268,7 @@ export default function LoginPage() {
               disabled={
                 firebaseLoginMutation.isPending || loginMutation.isPending
               }
-              className="w-full bg-white/5 border-white/10 hover:bg-white/10 rounded-xl h-12 gap-3 text-zinc-200 transition-all active:scale-95 shadow-xl font-bold"
+              className="w-full bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl h-12 gap-3 text-gray-900 dark:text-zinc-200 transition-all active:scale-95 shadow-xl font-bold"
             >
               {firebaseLoginMutation.isPending ? (
                 <Loader2 className="w-5 h-5 animate-spin text-[#FF7A00]" />
@@ -278,7 +278,7 @@ export default function LoginPage() {
               Tiếp tục với Google
             </Button>
 
-            <p className="mt-8 text-center text-zinc-500 text-sm">
+            <p className="mt-8 text-center text-gray-500 dark:text-zinc-500 text-sm">
               Mới biết đến Demif?{" "}
               <Link
                 href="/signup"

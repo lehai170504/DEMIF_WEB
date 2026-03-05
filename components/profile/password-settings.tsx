@@ -89,7 +89,7 @@ export function PasswordSettings() {
       <div className="space-y-6">
         {/* Current Password */}
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500">
             Mật khẩu hiện tại
           </Label>
           <div className="relative group">
@@ -97,14 +97,14 @@ export function PasswordSettings() {
               type="password"
               value={formData.currentPassword}
               onChange={(e) => handleChange("currentPassword", e.target.value)}
-              className={`h-12 pl-11 rounded-2xl bg-black/20 border-white/10 text-white transition-all ${
+              className={`h-12 pl-11 rounded-2xl bg-gray-50 dark:bg-black/20 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white transition-all ${
                 errors.currentPassword
                   ? "border-red-500 focus-visible:ring-red-500"
                   : "focus-visible:ring-orange-500/50"
               }`}
             />
             <Lock
-              className={`absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${errors.currentPassword ? "text-red-500" : "text-zinc-600 group-focus-within:text-orange-500"}`}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${errors.currentPassword ? "text-red-500" : "text-gray-400 dark:text-zinc-600 group-focus-within:text-orange-500"}`}
             />
           </div>
           {errors.currentPassword && (
@@ -116,14 +116,14 @@ export function PasswordSettings() {
 
         {/* New Password */}
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500">
             Mật khẩu mới
           </Label>
           <Input
             type="password"
             value={formData.newPassword}
             onChange={(e) => handleChange("newPassword", e.target.value)}
-            className={`h-12 rounded-2xl bg-black/20 border-white/10 text-white transition-all ${
+            className={`h-12 rounded-2xl bg-gray-50 dark:bg-black/20 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white transition-all ${
               errors.newPassword
                 ? "border-red-500 focus-visible:ring-red-500"
                 : "focus-visible:ring-orange-500/50"
@@ -138,14 +138,14 @@ export function PasswordSettings() {
 
         {/* Confirm Password */}
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500">
             Xác nhận mật khẩu
           </Label>
           <Input
             type="password"
             value={formData.confirmNewPassword}
             onChange={(e) => handleChange("confirmNewPassword", e.target.value)}
-            className={`h-12 rounded-2xl bg-black/20 border-white/10 text-white transition-all ${
+            className={`h-12 rounded-2xl bg-gray-50 dark:bg-black/20 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white transition-all ${
               errors.confirmNewPassword
                 ? "border-red-500 focus-visible:ring-red-500"
                 : "focus-visible:ring-orange-500/50"
@@ -163,7 +163,7 @@ export function PasswordSettings() {
         <Button
           onClick={handleSubmit}
           disabled={changePasswordMutation.isPending}
-          className="w-full h-12 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full h-12 rounded-2xl bg-orange-500 dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-xs hover:bg-orange-600 dark:hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,122,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {changePasswordMutation.isPending ? (
             <>

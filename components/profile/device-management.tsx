@@ -27,7 +27,7 @@ export function DeviceManagement() {
         />
       </div>
 
-      <div className="pt-4 border-t border-white/5">
+      <div className="pt-4 border-t border-gray-200 dark:border-white/5">
         <Button
           variant="ghost"
           className="w-full text-rose-500 font-bold hover:bg-rose-500/10 hover:text-rose-400 rounded-2xl h-12 uppercase text-xs tracking-widest"
@@ -41,38 +41,38 @@ export function DeviceManagement() {
 
 function DeviceItem({ name, info, isCurrent, time, icon }: any) {
   return (
-    <div className="flex items-center justify-between p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all group">
+    <div className="flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-all group">
       <div className="flex items-center gap-5">
         <div
           className={`p-3.5 rounded-xl ${
             isCurrent
               ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
-              : "bg-black/40 text-zinc-500 border border-white/5"
+              : "bg-gray-200 dark:bg-black/40 text-gray-600 dark:text-zinc-500 border border-gray-300 dark:border-white/5"
           }`}
         >
           {icon}
         </div>
         <div>
-          <h4 className="font-bold text-white text-sm flex items-center gap-3">
+          <h4 className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-3">
             {name}
             {isCurrent && (
-              <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md uppercase tracking-wide">
+              <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md uppercase tracking-wide">
                 Hiện tại
               </span>
             )}
           </h4>
-          <p className="text-xs text-zinc-500 mt-1 font-medium">{info}</p>
+          <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1 font-medium">{info}</p>
         </div>
       </div>
       {!isCurrent && (
         <div className="text-right flex flex-col items-end gap-2">
-          <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-wider">
+          <p className="text-[10px] text-gray-500 dark:text-zinc-600 font-bold uppercase tracking-wider">
             {time}
           </p>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-all"
+            className="h-8 text-gray-500 dark:text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-all"
           >
             Xóa
           </Button>

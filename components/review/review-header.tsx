@@ -40,13 +40,13 @@ export function ReviewHeader({
               Spaced Repetition System
             </span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
             Trung tâm{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
               Ôn tập
             </span>
           </h1>
-          <p className="text-lg text-zinc-400 font-medium max-w-2xl">
+          <p className="text-lg text-gray-600 dark:text-zinc-400 font-medium max-w-2xl">
             Sử dụng phương pháp lặp lại ngắt quãng (SRS) để tối ưu hóa trí nhớ
             dài hạn của bạn.
           </p>
@@ -132,25 +132,25 @@ function StatCard({ icon, value, label, highlight = false, delay = 0 }: any) {
     >
       <Card
         className={cn(
-          "p-6 rounded-[2rem] border border-white/5 shadow-xl flex items-center gap-5 transition-all duration-300",
+          "p-6 rounded-[2rem] border border-gray-200 dark:border-white/5 shadow-xl flex items-center gap-5 transition-all duration-300",
           highlight
-            ? "bg-[#18181b] shadow-orange-500/10 border-orange-500/20"
-            : "bg-[#18181b]",
+            ? "bg-white dark:bg-[#18181b] shadow-orange-500/10 border-orange-500/20"
+            : "bg-white dark:bg-[#18181b]",
         )}
       >
         <div
           className={cn(
             "h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner",
-            highlight ? "bg-orange-500/10" : "bg-white/5",
+            highlight ? "bg-orange-50 dark:bg-orange-500/10" : "bg-gray-100 dark:bg-white/5",
           )}
         >
           {icon}
         </div>
         <div>
-          <div className="text-3xl font-black text-white tracking-tight">
+          <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
             {value}
           </div>
-          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+          <div className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-1">
             {label}
           </div>
         </div>

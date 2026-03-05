@@ -70,7 +70,7 @@ export default function EditProfilePage() {
   const { title, desc, icon: Icon } = getTabMetadata();
 
   return (
-    <div className="min-h-screen bg-[#050505] font-mono text-zinc-100 selection:bg-orange-500/30 pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 pb-20 relative overflow-hidden">
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-orange-500/5 blur-[120px] rounded-full" />
@@ -94,10 +94,10 @@ export default function EditProfilePage() {
                 Settings
               </span>
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white mb-2">
+            <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white mb-2">
               {title}
             </h1>
-            <p className="text-zinc-400 font-medium max-w-2xl text-lg">
+            <p className="text-gray-600 dark:text-zinc-400 font-medium max-w-2xl text-lg">
               {desc}
             </p>
           </motion.div>
@@ -106,7 +106,7 @@ export default function EditProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10 items-start">
           {/* Sidebar Area */}
           <aside className="hidden lg:block sticky top-28 z-20">
-            <div className="p-2 border border-white/10 rounded-[2rem] bg-[#18181b]/80 backdrop-blur-md shadow-xl">
+            <div className="p-2 border border-gray-200 dark:border-white/10 rounded-[2rem] bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-md shadow-xl">
               <ProfileSidebar
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
@@ -116,7 +116,7 @@ export default function EditProfilePage() {
 
           {/* Main Content Area */}
           <main className="relative min-h-[600px]">
-            <div className="p-8 md:p-12 border border-white/10 rounded-[3rem] bg-[#18181b] shadow-2xl overflow-hidden relative">
+            <div className="p-8 md:p-12 border border-gray-200 dark:border-white/10 rounded-[3rem] bg-white dark:bg-[#18181b] shadow-2xl overflow-hidden relative">
               {/* Glow Effect inside card */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] pointer-events-none" />
 

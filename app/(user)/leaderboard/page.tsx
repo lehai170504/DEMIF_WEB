@@ -44,7 +44,7 @@ export default function LeaderboardPage() {
   const currentUser = rankedData.find((u) => u.userId === "user-1");
 
   return (
-    <div className="min-h-screen bg-[#050505] font-mono text-zinc-100 selection:bg-orange-500/30 pb-20">
+    <div className="min-h-screen font-mono selection:bg-orange-500/30 pb-20">
       <main className="container mx-auto px-4 pt-8 md:pt-12 max-w-6xl">
         {/* Header */}
         <LeaderboardHeader />
@@ -59,7 +59,7 @@ export default function LeaderboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Left: Leaderboard List */}
           <div className="lg:col-span-2 space-y-6">
-            <h3 className="text-lg font-black uppercase tracking-widest text-zinc-500 border-b border-white/10 pb-4 mb-4">
+            <h3 className="text-lg font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500 border-b border-gray-200 dark:border-white/10 pb-4 mb-4">
               Top Chiến Binh
             </h3>
 
