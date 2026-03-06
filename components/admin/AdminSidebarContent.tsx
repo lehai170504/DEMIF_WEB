@@ -43,7 +43,6 @@ const MENU_GROUPS = [
         icon: CreditCard,
         label: "Gói dịch vụ",
       },
-      // ------------------------
       { href: "/admin/orders", icon: ShoppingCart, label: "Đơn hàng" },
       { href: "/admin/feedback", icon: Bot, label: "AI Feedback" },
       { href: "/admin/progress", icon: BarChart3, label: "Tiến độ" },
@@ -59,8 +58,8 @@ const NavItem = ({ href, icon: Icon, label, isActive, showText }: any) => {
           "group relative flex items-center h-11 rounded-xl transition-all duration-300 mb-1.5 px-3 mx-2",
           "hover:translate-x-1 active:scale-95",
           isActive
-            ? "bg-[#FF7A00] text-white shadow-[0_0_20px_rgba(255,122,0,0.3)]"
-            : "text-zinc-500 hover:bg-white/5 hover:text-zinc-200",
+            ? "bg-[#FF7A00] text-white shadow-[0_4px_15px_rgba(255,122,0,0.25)]"
+            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900",
           !showText && "justify-center px-0 mx-1",
         )}
       >
@@ -76,7 +75,7 @@ const NavItem = ({ href, icon: Icon, label, isActive, showText }: any) => {
           </span>
         )}
         {isActive && (
-          <div className="absolute -left-2 w-1 h-6 bg-white rounded-full blur-[2px]" />
+          <div className="absolute -left-2 w-1 h-6 bg-[#FF7A00] rounded-full blur-[1px] lg:bg-white" />
         )}
       </div>
     </Link>
@@ -110,7 +109,7 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
           className={cn(
             "flex items-center gap-3 w-full p-2 rounded-2xl transition-all duration-500",
             showText &&
-              "bg-white/5 border border-white/10 shadow-inner backdrop-blur-md",
+              "bg-gray-50 border border-gray-200 shadow-sm backdrop-blur-md",
           )}
         >
           {isLoading ? (
@@ -125,13 +124,13 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
                 <img
                   src={avatarSrc}
                   alt={displayName}
-                  className="relative h-10 w-10 rounded-xl border border-white/10 object-cover"
+                  className="relative h-10 w-10 rounded-xl border border-gray-200 object-cover"
                 />
               </div>
               {showText && (
                 <div className="flex flex-col truncate">
                   <span
-                    className="font-black text-[13px] text-white tracking-tighter truncate"
+                    className="font-black text-[13px] text-gray-900 tracking-tighter truncate"
                     title={displayName}
                   >
                     {displayName}
@@ -150,7 +149,7 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
         {MENU_GROUPS.map((group) => (
           <div key={group.group} className="mb-6">
             {showText && (
-              <h3 className="px-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 mb-3">
+              <h3 className="px-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">
                 {group.group}
               </h3>
             )}
@@ -168,7 +167,7 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
         ))}
       </ScrollArea>
 
-      <div className="p-4 border-t border-white/5 bg-black/20">
+      <div className="p-4 border-t border-gray-200 bg-gray-50">
         <NavItem
           href="/admin/settings"
           icon={Settings}

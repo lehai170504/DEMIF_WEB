@@ -71,15 +71,6 @@ export const registerSchema = z
     confirmPassword: z
       .string()
       .min(1, { message: "Vui lòng xác nhận mật khẩu." }),
-
-    // Các trường bổ sung (đặt mặc định nếu muốn ẩn, hoặc bắt buộc nhập)
-    country: z.string().min(1, { message: "Vui lòng nhập quốc gia." }),
-    nativeLanguage: z
-      .string()
-      .min(1, { message: "Vui lòng nhập ngôn ngữ mẹ đẻ." }),
-    targetLanguage: z
-      .string()
-      .min(1, { message: "Vui lòng nhập ngôn ngữ muốn học." }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu xác nhận không khớp.",

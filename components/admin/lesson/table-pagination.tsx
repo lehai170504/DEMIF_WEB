@@ -23,26 +23,26 @@ export default function TablePagination<TData>({
   table,
 }: TablePaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-2">
-      <div className="flex-1 text-xs text-zinc-500">
+    <div className="flex items-center justify-between px-2 pt-2 pb-4">
+      <div className="flex-1 text-xs text-gray-500">
         Đã chọn {table.getFilteredSelectedRowModel().rows.length} /{" "}
         {table.getFilteredRowModel().rows.length} hàng.
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
-          <p className="text-xs font-medium text-zinc-400">Số hàng mỗi trang</p>
+          <p className="text-xs font-medium text-gray-600">Số hàng mỗi trang</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger className="h-8 w-[70px] bg-white/5 border-white/10 text-white">
+            <SelectTrigger className="h-8 w-[70px] bg-white border-gray-200 text-gray-700 shadow-sm">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent
               side="top"
-              className="bg-[#18181b] border-white/10 text-white"
+              className="bg-white border-gray-200 text-gray-700 shadow-xl"
             >
               {[10, 20, 30, 40, 50].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
@@ -52,14 +52,14 @@ export default function TablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-xs font-medium text-white">
+        <div className="flex w-[100px] items-center justify-center text-xs font-medium text-gray-700">
           Trang {table.getState().pagination.pageIndex + 1} /{" "}
           {table.getPageCount()}
         </div>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            className="hidden h-8 w-8 p-0 bg-white/5 border-white/10 text-white hover:bg-white/10 lg:flex"
+            className="hidden h-8 w-8 p-0 bg-white border-gray-200 text-gray-600 hover:bg-gray-50 lg:flex"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
@@ -68,7 +68,7 @@ export default function TablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="h-8 w-8 p-0 bg-white/5 border-white/10 text-white hover:bg-white/10"
+            className="h-8 w-8 p-0 bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -77,7 +77,7 @@ export default function TablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="h-8 w-8 p-0 bg-white/5 border-white/10 text-white hover:bg-white/10"
+            className="h-8 w-8 p-0 bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -86,7 +86,7 @@ export default function TablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="hidden h-8 w-8 p-0 bg-white/5 border-white/10 text-white hover:bg-white/10 lg:flex"
+            className="hidden h-8 w-8 p-0 bg-white border-gray-200 text-gray-600 hover:bg-gray-50 lg:flex"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >

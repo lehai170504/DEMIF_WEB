@@ -1,9 +1,12 @@
+// src/types/lesson.type.ts
+
 export interface LessonDto {
   id: string;
   title: string;
   description: string;
-  lessonType: "Dictation" | "Shadowing" | "Test" | string;
-  level: "Beginner" | "Intermediate" | "Advanced" | string;
+  // Đổi thành string để đồng bộ với cách Select/Input hoạt động hiện tại
+  lessonType: string;
+  level: string;
 
   category: string | null;
   audioUrl: string | null;
@@ -19,7 +22,7 @@ export interface LessonDto {
   isPremiumOnly: boolean;
   displayOrder: number;
   tags: string | null;
-  status: "published" | "draft" | "review" | "archived" | string;
+  status: string; // Đồng bộ string
 
   completionsCount: number;
   avgScore: number;
@@ -43,22 +46,24 @@ export interface GetLessonsResponse {
   totalPages: number;
 }
 
-// Request gửi lên khi Create / Update
+// Request dùng chung cho cả Create và Update để tránh lặp lại code
 export interface CreateLessonRequest {
   title: string;
   description: string;
   lessonType: string;
   level: string;
   category: string;
-  audioUrl?: string;
-  mediaUrl?: string;
-  mediaType?: string;
+  audioUrl?: string | null;
+  mediaUrl?: string | null;
+  mediaType?: string | null;
   durationSeconds: number;
-  thumbnailUrl?: string;
+  thumbnailUrl?: string | null;
   fullTranscript: string;
-  timedTranscript?: string;
+  timedTranscript?: string | null;
   isPremiumOnly: boolean;
   displayOrder: number;
-  tags?: string;
+  tags?: string | null;
   status: string;
 }
+
+export interface UpdateLessonRequest extends Partial<CreateLessonRequest> {}

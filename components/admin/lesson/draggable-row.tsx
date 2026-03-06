@@ -1,5 +1,3 @@
-// src/components/dashboardAdmin/draggable-row.tsx
-
 import * as React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -30,8 +28,8 @@ export default function DraggableRow({ row }: DraggableRowProps) {
       data-state={row.getIsSelected() && "selected"}
       style={style}
       className={`
-        group transition-colors border-b border-white/5 hover:bg-white/5
-        ${isDragging ? "opacity-50 bg-white/10 shadow-2xl border-orange-500/50" : ""}
+        group transition-colors border-b border-gray-100 hover:bg-gray-50/80 bg-white
+        ${isDragging ? "opacity-90 bg-orange-50 shadow-xl border-orange-200 z-50 relative" : ""}
       `}
     >
       {row.getVisibleCells().map((cell) => (

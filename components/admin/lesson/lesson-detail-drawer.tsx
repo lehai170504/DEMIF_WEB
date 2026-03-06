@@ -11,35 +11,18 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, Trash2, X } from "lucide-react";
 import { useLessonActions } from "@/hooks/use-lesson";
 import { LessonSchema, LessonFormValues } from "@/schemas/lesson.schema";
-import { LessonDto } from "@/types/lesson.type";
+import { LessonDto, UpdateLessonRequest } from "@/types/lesson.type";
 import {
   normalizeStatus,
   normalizeType,
   normalizeLevel,
 } from "./table-columns";
+import { LessonFormFields } from "./lesson-form-fields";
 
 interface LessonDetailDrawerProps {
   lesson: LessonDto | null;
@@ -47,14 +30,13 @@ interface LessonDetailDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const parseTags = (tagsRaw?: string | null) => {
+const parseTagsForInput = (tagsRaw?: string | null) => {
   if (!tagsRaw) return "";
   try {
     const parsed = JSON.parse(tagsRaw);
-    if (Array.isArray(parsed)) return parsed.join(", ");
-    return tagsRaw;
-  } catch (e) {
-    return tagsRaw;
+    return Array.isArray(parsed) ? parsed.join(", ") : tagsRaw;
+  } catch {
+    return tagsRaw || "";
   }
 };
 
@@ -71,8 +53,8 @@ export default function LessonDetailDrawer({
     defaultValues: {
       title: "",
       description: "",
-      lessonType: "Dictation", // Mặc định là chuỗi
-      level: "Beginner", // Mặc định là chuỗi
+      lessonType: "Dictation",
+      level: "Beginner",
       category: "",
       status: "draft",
       isPremiumOnly: false,
@@ -88,27 +70,27 @@ export default function LessonDetailDrawer({
     },
   });
 
-  // Reset form khi mở drawer và có dữ liệu lesson
+  const formErrors = form.formState.errors;
+
   React.useEffect(() => {
     if (open && lesson) {
       form.reset({
         title: lesson.title || "",
         description: lesson.description || "",
-        // Lấy dữ liệu dưới dạng chuỗi
-        lessonType: normalizeType(lesson.lessonType),
-        level: normalizeLevel(lesson.level),
+        lessonType: String(normalizeType(lesson.lessonType)),
+        level: String(normalizeLevel(lesson.level)),
         category: lesson.category || "",
-        status: normalizeStatus(lesson.status).toLowerCase(),
-        isPremiumOnly: lesson.isPremiumOnly || false,
-        durationSeconds: lesson.durationSeconds || 0,
-        displayOrder: lesson.displayOrder || 0,
+        status: String(normalizeStatus(lesson.status)).toLowerCase(),
+        isPremiumOnly: !!lesson.isPremiumOnly,
+        durationSeconds: Number(lesson.durationSeconds) || 0,
+        displayOrder: Number(lesson.displayOrder) || 0,
         audioUrl: lesson.audioUrl || "",
         mediaUrl: lesson.mediaUrl || "",
         mediaType: lesson.mediaType || "audio",
         thumbnailUrl: lesson.thumbnailUrl || "",
         fullTranscript: lesson.fullTranscript || "",
         timedTranscript: lesson.timedTranscript || "",
-        tags: parseTags(lesson.tags),
+        tags: parseTagsForInput(lesson.tags),
       });
     }
   }, [open, lesson, form]);
@@ -116,482 +98,123 @@ export default function LessonDetailDrawer({
   const onSubmit = (values: LessonFormValues) => {
     if (!lesson) return;
 
-    // Chuyển đổi tags từ chuỗi thành JSON string array trước khi gửi
-    const payload = {
-      ...values,
-      tags: values.tags
-        ? JSON.stringify(values.tags.split(",").map((t) => t.trim()))
-        : null,
+    const payload: UpdateLessonRequest = {
+      title: values.title,
+      description: values.description,
+      lessonType: values.lessonType,
+      level: values.level,
+      category: values.category,
+      audioUrl: values.audioUrl || null,
+      mediaUrl: values.mediaUrl || null,
+      mediaType: values.mediaType || "audio",
+      durationSeconds: Number(values.durationSeconds),
+      thumbnailUrl: values.thumbnailUrl || null,
+      fullTranscript: values.fullTranscript,
+      timedTranscript: values.timedTranscript || null,
+      isPremiumOnly: values.isPremiumOnly,
+      displayOrder: Number(values.displayOrder),
+      tags: values.tags || null,
+      status: values.status,
     };
 
     updateLesson(
-      { id: lesson.id, data: payload as any },
-      { onSuccess: () => onOpenChange(false) },
+      { id: lesson.id, data: payload },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          form.reset();
+        },
+      },
     );
-  };
-
-  const handleDelete = () => {
-    if (!lesson) return;
-    if (confirm("Bạn có chắc chắn muốn xóa bài học này?")) {
-      deleteLesson(lesson.id, { onSuccess: () => onOpenChange(false) });
-    }
   };
 
   if (!lesson) return null;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="bg-[#18181b] border-l border-white/10 text-white font-mono h-full max-w-[700px] ml-auto rounded-l-[2rem] flex flex-col shadow-2xl focus:outline-none">
-        <DrawerHeader className="border-b border-white/5 pb-4 px-6">
+      <DrawerContent className="bg-white border-l border-gray-200 text-gray-900 font-mono h-full max-w-[900px] ml-auto rounded-l-[2rem] flex flex-col shadow-2xl focus:outline-none">
+        <DrawerHeader className="border-b border-gray-100 py-6 px-8">
           <div className="flex items-center justify-between">
-            <DrawerTitle className="text-xl font-black uppercase tracking-tighter">
+            <DrawerTitle className="text-2xl font-black uppercase tracking-tighter text-gray-900">
               Chi tiết bài học
             </DrawerTitle>
             <DrawerClose asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-white/10 text-zinc-400"
+                className="hover:bg-gray-100 text-gray-500 rounded-full"
               >
                 <X className="h-5 w-5" />
               </Button>
             </DrawerClose>
           </div>
-          <p className="text-[10px] text-zinc-500 font-bold mt-1 uppercase tracking-widest">
+          <p className="text-[10px] text-gray-500 font-bold mt-2 uppercase tracking-[0.2em] bg-gray-100 w-fit px-2 py-1 rounded-md">
             UID: {lesson.id}
           </p>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-8 no-scrollbar">
           <Form {...form}>
             <form
               id="update-lesson-form"
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-8"
             >
-              {/* --- SECTION 1: BASIC INFO --- */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-orange-500 uppercase tracking-[0.2em] border-b border-white/5 pb-2">
-                  Thông tin cơ bản
-                </h4>
+              <LessonFormFields form={form} />
 
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                        Tiêu đề
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="bg-black/20 border-white/10 font-bold focus:border-orange-500/50 transition-all text-zinc-100"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                        Mô tả ngắn
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          className="bg-black/20 border-white/10 min-h-[80px] resize-none text-zinc-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="lessonType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Loại bài
-                        </FormLabel>
-                        {/* Sử dụng onChange truyền thẳng chuỗi */}
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-black/20 border-white/10 text-zinc-200">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                            <SelectItem value="Dictation">Dictation</SelectItem>
-                            <SelectItem value="Shadowing">Shadowing</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="level"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Cấp độ
-                        </FormLabel>
-                        {/* Sử dụng onChange truyền thẳng chuỗi */}
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-black/20 border-white/10 text-zinc-200">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                            <SelectItem value="Beginner">Beginner</SelectItem>
-                            <SelectItem value="Intermediate">
-                              Intermediate
-                            </SelectItem>
-                            <SelectItem value="Advanced">Advanced</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {Object.keys(formErrors).length > 0 && (
+                <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-2xl">
+                  <p className="text-red-600 text-xs font-black uppercase mb-2 tracking-widest">
+                    Cần sửa các lỗi sau:
+                  </p>
+                  <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-red-500 font-bold">
+                    {Object.entries(formErrors).map(([key, err]) => (
+                      <li key={key}>
+                        • {key}: {err?.message as string}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Danh mục
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="bg-black/20 border-white/10 text-zinc-200"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Tags
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="bg-black/20 border-white/10 text-zinc-200"
-                            placeholder="coffee, daily..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* --- SECTION 2: MEDIA --- */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-blue-500 uppercase tracking-[0.2em] border-b border-white/5 pb-2">
-                  Media & Tài nguyên
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="audioUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Audio URL
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="bg-black/20 border-white/10 text-xs text-blue-300"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="mediaUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Video URL
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="bg-black/20 border-white/10 text-xs text-blue-300"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="thumbnailUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Thumbnail URL
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="bg-black/20 border-white/10 text-xs text-zinc-300"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="mediaType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Loại Media
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-black/20 border-white/10 text-zinc-200">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                            <SelectItem value="audio">Audio</SelectItem>
-                            <SelectItem value="video">Video</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* --- SECTION 3: TRANSCRIPTS --- */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-purple-500 uppercase tracking-[0.2em] border-b border-white/5 pb-2">
-                  Nội dung luyện tập
-                </h4>
-                <FormField
-                  control={form.control}
-                  name="fullTranscript"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                        Full Transcript
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          className="bg-black/20 border-white/10 h-32 font-mono text-[11px] leading-relaxed text-zinc-300"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="timedTranscript"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                        Timed JSON / Subtitles
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          className="bg-black/20 border-white/10 h-32 font-mono text-[11px] text-blue-400"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* --- SECTION 4: SETTINGS --- */}
-              <div className="space-y-4 pb-10">
-                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em] border-b border-white/5 pb-2">
-                  Cấu hình & Trạng thái
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Trạng thái
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-black/20 border-white/10 text-zinc-200">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                            <SelectItem value="draft">Nháp (Draft)</SelectItem>
-                            <SelectItem value="published">
-                              Công khai (Published)
-                            </SelectItem>
-                            <SelectItem value="review">
-                              Đang chờ (Review)
-                            </SelectItem>
-                            <SelectItem value="archived">
-                              Lưu trữ (Archived)
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="displayOrder"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Thứ tự hiển thị
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="bg-black/20 border-white/10 text-zinc-200"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="durationSeconds"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-bold text-zinc-500 uppercase">
-                          Thời lượng (s)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="bg-black/20 border-white/10 text-zinc-200"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="isPremiumOnly"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4 transition-all hover:bg-white/[0.08]">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-sm font-bold text-zinc-200">
-                          Gói Premium
-                        </FormLabel>
-                        <FormDescription className="text-[10px] text-zinc-500">
-                          Chỉ người dùng trả phí mới có thể truy cập.
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+              )}
             </form>
           </Form>
         </div>
 
-        <DrawerFooter className="border-t border-white/5 bg-[#1c1c1f] p-6">
-          <div className="grid grid-cols-2 gap-4 w-full">
+        <DrawerFooter className="border-t border-gray-100 bg-gray-50 p-8">
+          <div className="grid grid-cols-2 gap-6 w-full">
             <Button
-              type="button"
               variant="outline"
-              className="border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10"
-              onClick={handleDelete}
+              className="bg-white border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 h-14 rounded-2xl transition-all"
+              onClick={() =>
+                confirm("Xác nhận xóa bài học?") &&
+                deleteLesson(lesson.id, {
+                  onSuccess: () => onOpenChange(false),
+                })
+              }
               disabled={isDeleting}
             >
               {isDeleting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="animate-spin" />
               ) : (
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-5 w-5 mr-2" />
               )}
-              Xóa bài học
+              <span className="font-bold uppercase tracking-wider text-xs">
+                Xóa bài học
+              </span>
             </Button>
             <Button
               type="submit"
               form="update-lesson-form"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20"
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold h-14 rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98]"
               disabled={isUpdating}
             >
               {isUpdating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="animate-spin" />
               ) : (
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5 mr-2" />
               )}
-              Lưu thay đổi
+              <span className="font-bold uppercase tracking-wider text-xs">
+                Lưu thay đổi
+              </span>
             </Button>
           </div>
         </DrawerFooter>

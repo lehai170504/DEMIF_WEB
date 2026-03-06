@@ -64,33 +64,33 @@ export function SidebarNav() {
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all duration-300 relative group",
               isActive
-                ? "bg-primary text-primary-foreground shadow-[0_0_20px_-5px_var(--primary)] scale-[1.02]"
-                : "text-zinc-400 hover:text-white hover:bg-white/5",
+                ? "bg-gray-900 text-white shadow-[0_4px_20px_-5px_rgba(0,0,0,0.2)] scale-[1.02]"
+                : "text-gray-500 hover:text-gray-900 hover:bg-gray-100",
             )}
           >
             <item.icon
               className={cn(
                 "w-4 h-4 transition-transform duration-300 group-hover:scale-110",
                 isActive
-                  ? "text-primary-foreground"
-                  : "text-primary/70 group-hover:text-primary",
+                  ? "text-white"
+                  : "text-gray-400 group-hover:text-gray-900",
               )}
             />
             {item.title}
 
             {/* Dấu chấm chỉ báo active */}
             {isActive && (
-              <div className="absolute right-3 w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_5px_white]" />
+              <div className="absolute right-3 w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse shadow-[0_0_5px_#FF7A00]" />
             )}
           </Link>
         );
       })}
 
-      <div className="pt-4 border-t border-white/10 mt-4">
+      <div className="pt-4 border-t border-gray-200 mt-4">
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="flex items-center gap-3 px-4 py-3 text-rose-500 font-black uppercase text-[11px] w-full hover:bg-rose-500/10 hover:text-rose-400 rounded-2xl transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-3 px-4 py-3 text-rose-600 font-black uppercase text-[11px] w-full hover:bg-rose-50 hover:text-rose-700 rounded-2xl transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoggingOut ? (
             <Loader2 className="w-4 h-4 animate-spin" />

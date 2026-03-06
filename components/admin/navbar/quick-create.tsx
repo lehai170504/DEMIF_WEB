@@ -22,27 +22,28 @@ export function QuickCreate() {
       <DropdownMenuTrigger asChild>
         <Button
           size="sm"
-          className="hidden xl:flex bg-white text-black hover:bg-zinc-200 gap-2 rounded-xl font-bold shadow-lg shadow-white/5 transition-all hover:scale-105 active:scale-95"
+          variant="outline"
+          className="hidden xl:flex bg-white border-gray-200 text-gray-700 hover:text-gray-900 hover:bg-gray-50 gap-2 rounded-full font-bold shadow-sm transition-all hover:border-gray-300 px-4 h-9"
         >
-          <Plus className="h-4 w-4" /> Tạo mới
+          <Plus className="h-4 w-4 text-gray-400" /> Tạo mới
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 font-mono p-2 bg-[#121212]/95 backdrop-blur-xl border-white/10 text-zinc-300"
+        className="w-56 font-mono p-2 bg-white border-gray-200 text-gray-700 shadow-xl rounded-2xl"
       >
-        <DropdownMenuLabel className="text-[10px] uppercase text-zinc-500 tracking-[0.2em] p-2">
+        <DropdownMenuLabel className="text-[10px] uppercase text-gray-400 tracking-[0.2em] p-2">
           Lối tắt nhanh
         </DropdownMenuLabel>
 
         <CreateLessonDialog>
           <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
-            className="cursor-pointer focus:bg-orange-500/10 focus:text-orange-500 rounded-lg"
+            className="cursor-pointer hover:bg-gray-50 focus:bg-orange-50 focus:text-orange-600 rounded-lg py-2.5"
           >
             <BookOpen className="mr-2 h-4 w-4 text-orange-500" />
             <span className="font-bold">Bài tập mới</span>
-            <DropdownMenuShortcut className="text-zinc-600">
+            <DropdownMenuShortcut className="text-gray-400">
               ⌘N
             </DropdownMenuShortcut>
           </DropdownMenuItem>
@@ -51,7 +52,7 @@ export function QuickCreate() {
         <AddAdminDialog>
           <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
-            className="cursor-pointer focus:bg-blue-500/10 focus:text-blue-500 rounded-lg"
+            className="cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:text-blue-600 rounded-lg py-2.5"
           >
             <Users className="mr-2 h-4 w-4 text-blue-500" />
             <span className="font-bold">Thêm Admin</span>
@@ -60,7 +61,7 @@ export function QuickCreate() {
 
         <DropdownMenuItem
           onClick={() => router.push("/admin/orders")}
-          className="focus:bg-emerald-500/10 focus:text-emerald-500 rounded-lg"
+          className="cursor-pointer hover:bg-gray-50 focus:bg-emerald-50 focus:text-emerald-600 rounded-lg py-2.5"
         >
           <ShoppingCart className="mr-2 h-4 w-4 text-emerald-500" />
           <span className="font-bold">Xem đơn hàng</span>

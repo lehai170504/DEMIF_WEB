@@ -34,8 +34,6 @@ import LessonDetailDialog from "@/components/admin/lesson/lesson-detail-drawer";
 import { useLessonActions } from "@/hooks/use-lesson";
 import { toast } from "sonner";
 
-// --- HELPERS (Chuẩn hóa dữ liệu từ API) ---
-
 export const normalizeStatus = (status?: string | null) => {
   if (!status) return "Draft";
   const s = status.toLowerCase();
@@ -45,21 +43,19 @@ export const normalizeStatus = (status?: string | null) => {
   return "Draft";
 };
 
-// Chuyển đổi Số (từ BE) thành Chữ (để FE hiển thị)
 export const normalizeType = (type?: string | number | null) => {
-  const t = String(type).toLowerCase(); // Ép về chuỗi để dễ so sánh
+  const t = String(type).toLowerCase();
   if (t === "0" || t === "dictation") return "Dictation";
   if (t === "1" || t === "shadowing") return "Shadowing";
-  return "Dictation"; // Mặc định nếu bị lỗi
+  return "Dictation";
 };
 
-// Chuyển đổi Số (từ BE) thành Chữ (để FE hiển thị)
 export const normalizeLevel = (level?: string | number | null) => {
-  const l = String(level).toLowerCase(); // Ép về chuỗi để dễ so sánh
+  const l = String(level).toLowerCase();
   if (l === "0" || l === "beginner") return "Beginner";
   if (l === "1" || l === "intermediate") return "Intermediate";
   if (l === "2" || l === "advanced") return "Advanced";
-  return "Beginner"; // Mặc định nếu bị lỗi
+  return "Beginner";
 };
 
 const formatDuration = (seconds: number) => {
@@ -76,7 +72,6 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString));
 };
 
-// --- DRAG HANDLE ---
 function DragHandle({ id }: { id: string }) {
   const { attributes, listeners } = useSortable({ id });
   return (
@@ -85,14 +80,13 @@ function DragHandle({ id }: { id: string }) {
       {...listeners}
       variant="ghost"
       size="icon"
-      className="text-zinc-500 hover:text-white size-7 hover:bg-white/10 cursor-grab active:cursor-grabbing transition-colors"
+      className="text-gray-400 hover:text-gray-900 size-7 hover:bg-gray-100 cursor-grab active:cursor-grabbing transition-colors"
     >
       <IconGripVertical className="size-4" />
     </Button>
   );
 }
 
-// === COLUMN DEFINITIONS ===
 export const columns: ColumnDef<LessonDto>[] = [
   {
     id: "drag",
@@ -111,7 +105,7 @@ export const columns: ColumnDef<LessonDto>[] = [
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          className="border-white/20 data-[state=checked]:bg-orange-500"
+          className="border-gray-300 data-[state=checked]:bg-orange-500"
         />
       </div>
     ),
@@ -120,14 +114,13 @@ export const columns: ColumnDef<LessonDto>[] = [
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          className="border-white/20 data-[state=checked]:bg-orange-500"
+          className="border-gray-300 data-[state=checked]:bg-orange-500"
         />
       </div>
     ),
     enableSorting: false,
     enableHiding: false,
   },
-  // --- TITLE & CATEGORY ---
   {
     accessorKey: "title",
     header: "Bài học",
@@ -140,25 +133,23 @@ export const columns: ColumnDef<LessonDto>[] = [
           <span
             className={cn(
               "font-bold truncate max-w-[300px]",
-              !row.original.title ? "text-zinc-500 italic" : "text-white",
+              !row.original.title ? "text-gray-400 italic" : "text-gray-900",
             )}
             title={title}
           >
             {title}
           </span>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+          <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
             {category}
           </span>
         </div>
       );
     },
   },
-  // --- TYPE ---
   {
     accessorKey: "lessonType",
     header: "Loại bài",
     cell: ({ row }) => {
-      // Đã tự động dịch từ số sang chữ qua hàm normalizeType
       const type = normalizeType(row.original.lessonType);
       const isVideo =
         row.original.mediaType === "video" || row.original.mediaUrl;
@@ -166,17 +157,17 @@ export const columns: ColumnDef<LessonDto>[] = [
       return (
         <div className="flex items-center gap-2">
           {isVideo ? (
-            <IconVideo className="size-4 text-blue-400" />
+            <IconVideo className="size-4 text-blue-500" />
           ) : (
-            <IconHeadphones className="size-4 text-purple-400" />
+            <IconHeadphones className="size-4 text-purple-500" />
           )}
           <Badge
             variant="outline"
             className={cn(
-              "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap",
+              "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap bg-white",
               type === "Dictation"
-                ? "border-blue-500/30 text-blue-400 bg-blue-500/5"
-                : "border-purple-500/30 text-purple-400 bg-purple-500/5",
+                ? "border-blue-200 text-blue-600"
+                : "border-purple-200 text-purple-600",
             )}
           >
             {type}
@@ -185,21 +176,19 @@ export const columns: ColumnDef<LessonDto>[] = [
       );
     },
   },
-  // --- LEVEL & PREMIUM ---
   {
     accessorKey: "level",
     header: "Cấp độ",
     cell: ({ row }) => {
-      // Đã tự động dịch từ số sang chữ qua hàm normalizeLevel
       const level = normalizeLevel(row.original.level);
-      let colorClass = "text-zinc-400 border-zinc-500/20 bg-white/5";
+      let colorClass = "text-gray-600 border-gray-200 bg-gray-50";
 
       if (level === "Advanced")
-        colorClass = "text-orange-400 border-orange-500/20 bg-orange-500/5";
+        colorClass = "text-orange-600 border-orange-200 bg-orange-50";
       else if (level === "Intermediate")
-        colorClass = "text-yellow-400 border-yellow-500/20 bg-yellow-500/5";
+        colorClass = "text-yellow-600 border-yellow-200 bg-yellow-50";
       else if (level === "Beginner")
-        colorClass = "text-emerald-400 border-emerald-500/20 bg-emerald-500/5";
+        colorClass = "text-emerald-600 border-emerald-200 bg-emerald-50";
 
       return (
         <div className="flex items-center gap-2">
@@ -214,7 +203,7 @@ export const columns: ColumnDef<LessonDto>[] = [
           </Badge>
           {row.original.isPremiumOnly && (
             <IconCrown
-              className="size-4 text-yellow-500 animate-pulse shrink-0"
+              className="size-4 text-yellow-500 shrink-0"
               title="Premium Only"
             />
           )}
@@ -222,18 +211,17 @@ export const columns: ColumnDef<LessonDto>[] = [
       );
     },
   },
-  // --- THÔNG TIN BỔ SUNG (DURATION & DATE) ---
   {
     id: "details",
     header: "Thông tin",
     cell: ({ row }) => (
-      <div className="flex flex-col gap-1.5 text-[11px] text-zinc-400 font-medium whitespace-nowrap">
+      <div className="flex flex-col gap-1.5 text-[11px] text-gray-500 font-medium whitespace-nowrap">
         <div className="flex items-center gap-1.5">
-          <IconClock className="size-3.5 text-zinc-500" />
+          <IconClock className="size-3.5 text-gray-400" />
           {formatDuration(row.original.durationSeconds || 0)}
         </div>
         <div className="flex items-center gap-1.5">
-          <IconCalendar className="size-3.5 text-zinc-500" />
+          <IconCalendar className="size-3.5 text-gray-400" />
           {row.original.createdAt
             ? formatDate(row.original.createdAt)
             : "--/--/----"}
@@ -241,7 +229,6 @@ export const columns: ColumnDef<LessonDto>[] = [
       </div>
     ),
   },
-  // --- STATUS ---
   {
     accessorKey: "status",
     header: "Trạng thái",
@@ -253,10 +240,10 @@ export const columns: ColumnDef<LessonDto>[] = [
             <IconCircleCheckFilled className="size-4 text-emerald-500" />
           )}
           {status === "Draft" && (
-            <div className="size-2 rounded-full bg-zinc-600 ml-1 mr-1" />
+            <div className="size-2 rounded-full bg-gray-400 ml-1 mr-1" />
           )}
           {status === "Archived" && (
-            <IconArchive className="size-4 text-zinc-500" />
+            <IconArchive className="size-4 text-gray-400" />
           )}
           {status === "Review" && (
             <IconAlertCircle className="size-4 text-yellow-500" />
@@ -264,11 +251,11 @@ export const columns: ColumnDef<LessonDto>[] = [
 
           <span
             className={cn(
-              "text-xs font-medium uppercase tracking-wider",
-              status === "Published" && "text-emerald-400",
-              status === "Draft" && "text-zinc-500",
-              status === "Archived" && "text-zinc-600 italic line-through",
-              status === "Review" && "text-yellow-400",
+              "text-xs font-bold uppercase tracking-wider",
+              status === "Published" && "text-emerald-600",
+              status === "Draft" && "text-gray-500",
+              status === "Archived" && "text-gray-400 italic line-through",
+              status === "Review" && "text-yellow-600",
             )}
           >
             {status}
@@ -277,7 +264,6 @@ export const columns: ColumnDef<LessonDto>[] = [
       );
     },
   },
-  // --- ACTIONS ---
   {
     id: "actions",
     cell: ({ row }) => {
@@ -295,16 +281,10 @@ export const columns: ColumnDef<LessonDto>[] = [
         });
       };
 
-      // ĐÃ FIX: Gửi toàn bộ payload cũ kèm theo status mới để BE không xóa mất dữ liệu
       const handleToggleStatus = () => {
         const newStatus = currentStatus === "Published" ? "draft" : "published";
+        const payload: any = { ...lesson, status: newStatus };
 
-        const payload: any = {
-          ...lesson,
-          status: newStatus,
-        };
-
-        // Ép kiểu lại lessonType và level về Number để khớp với DB
         if (typeof payload.lessonType === "string") {
           payload.lessonType =
             payload.lessonType === "Shadowing" || payload.lessonType === "1"
@@ -323,14 +303,9 @@ export const columns: ColumnDef<LessonDto>[] = [
         updateLesson({ id: lesson.id, data: payload });
       };
 
-      // ĐÃ FIX: Tương tự như trên cho chức năng Archive
       const handleArchive = () => {
-        const payload: any = {
-          ...lesson,
-          status: "archived",
-        };
+        const payload: any = { ...lesson, status: "archived" };
 
-        // Ép kiểu
         if (typeof payload.lessonType === "string") {
           payload.lessonType =
             payload.lessonType === "Shadowing" || payload.lessonType === "1"
@@ -357,25 +332,25 @@ export const columns: ColumnDef<LessonDto>[] = [
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-zinc-500 hover:text-white"
+                className="h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
               >
                 <IconDotsVertical className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-48 bg-[#18181b] border-white/10 text-zinc-300"
+              className="w-48 bg-white border-gray-200 text-gray-700 shadow-xl"
             >
               <DropdownMenuItem
                 onClick={() => setOpenDetail(true)}
-                className="cursor-pointer hover:bg-white/10"
+                className="cursor-pointer hover:bg-gray-50"
               >
                 <IconEdit className="mr-2 h-4 w-4" /> Chỉnh sửa
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={handleToggleStatus}
-                className="cursor-pointer hover:bg-white/10"
+                className="cursor-pointer hover:bg-gray-50"
               >
                 <IconStar className="mr-2 h-4 w-4" />
                 {currentStatus === "Published"
@@ -386,17 +361,17 @@ export const columns: ColumnDef<LessonDto>[] = [
               {currentStatus !== "Archived" && (
                 <DropdownMenuItem
                   onClick={handleArchive}
-                  className="cursor-pointer hover:bg-white/10 text-zinc-400"
+                  className="cursor-pointer hover:bg-gray-50 text-gray-500"
                 >
                   <IconArchive className="mr-2 h-4 w-4" /> Lưu trữ
                 </DropdownMenuItem>
               )}
 
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator className="bg-gray-100" />
               <DropdownMenuItem
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-red-500 focus:bg-red-500/10 focus:text-red-400 cursor-pointer"
+                className="text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer"
               >
                 <IconTrash className="mr-2 h-4 w-4" /> Xóa bài học
               </DropdownMenuItem>

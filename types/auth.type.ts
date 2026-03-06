@@ -56,15 +56,23 @@ export interface ChangePasswordPayload {
 export interface RegisterPayload {
   email: string;
   password: string;
-  confirmPassword: string; // Trường mới
+  confirmPassword: string;
   username: string;
-  country: string; // Trường mới
-  nativeLanguage: string; // Trường mới
-  targetLanguage: string; // Trường mới
 }
 
 //==================================
+// 2. KẾT QUẢ TRẢ VỀ SAU KHI ĐĂNG KÝ
 export interface RegisterResponse {
+  userId: string;
+  email: string;
+  username: string;
+  message: string;
+  requiresEmailVerification: boolean;
+}
+
+//==================================
+// 3. KẾT QUẢ TRẢ VỀ SAU KHI XÁC THỰC EMAIL (CÓ TRẢ VỀ TOKEN)
+export interface VerifyEmailResponse {
   userId: string;
   email: string;
   username: string;
@@ -72,18 +80,10 @@ export interface RegisterResponse {
   refreshToken: string;
   expiresAt: string;
   roles: string[];
+  message: string;
 }
 
 //==================================
-export interface FirebaseLoginPayload {
+export interface GoogleLoginPayload {
   idToken: string;
-}
-
-export interface FirebaseLoginResponse {
-  userId: string;
-  email: string;
-  username: string;
-  accessToken: string;
-  roles: string[];
-  isNewUser: boolean;
 }

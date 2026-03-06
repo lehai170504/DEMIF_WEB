@@ -53,20 +53,20 @@ export function NotificationButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative hover:bg-white/5 group transition-all rounded-xl border border-white/5"
+          className="relative hover:bg-gray-100 group transition-all rounded-xl border border-gray-200 bg-white shadow-sm"
         >
           <Bell
             className={cn(
               "h-5 w-5 transition-all group-hover:rotate-12",
               unreadCount > 0
                 ? "text-[#FF7A00] fill-[#FF7A00]/20"
-                : "text-zinc-500",
+                : "text-gray-500",
             )}
           />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-[#FF7A00] text-[9px] font-black text-white items-center justify-center border-2 border-[#050505]">
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-[#FF7A00] text-[9px] font-black text-white items-center justify-center border-2 border-white">
                 {unreadCount}
               </span>
             </span>
@@ -76,11 +76,11 @@ export function NotificationButton() {
 
       <PopoverContent
         align="end"
-        className="w-85 p-0 font-mono rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/10 bg-[#09090b]/95 backdrop-blur-2xl mt-4 overflow-hidden"
+        className="w-85 p-0 font-mono rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-gray-200 bg-white/95 backdrop-blur-2xl mt-4 overflow-hidden"
       >
-        <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50">
           <div className="flex items-center gap-2">
-            <span className="font-black text-xs uppercase tracking-widest text-white italic">
+            <span className="font-black text-xs uppercase tracking-widest text-gray-900 italic">
               Trung tâm thông báo
             </span>
             {unreadCount > 0 && (
@@ -93,7 +93,7 @@ export function NotificationButton() {
             variant="ghost"
             size="sm"
             onClick={markAllAsRead}
-            className="h-7 text-[9px] font-black uppercase text-zinc-500 hover:text-[#FF7A00] hover:bg-transparent"
+            className="h-7 text-[9px] font-black uppercase text-gray-500 hover:text-[#FF7A00] hover:bg-transparent"
           >
             Đánh dấu đã đọc
           </Button>
@@ -106,8 +106,8 @@ export function NotificationButton() {
                 <div
                   key={n.id}
                   className={cn(
-                    "flex gap-4 p-5 border-b border-white/5 hover:bg-white/5 transition-all cursor-pointer relative group",
-                    n.unread && "bg-[#FF7A00]/5",
+                    "flex gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 transition-all cursor-pointer relative group",
+                    n.unread && "bg-orange-50/50",
                   )}
                 >
                   {n.unread && (
@@ -117,11 +117,11 @@ export function NotificationButton() {
                     className={cn(
                       "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110",
                       n.type === "success" &&
-                        "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+                        "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
                       n.type === "warning" &&
                         "bg-[#FF7A00]/10 text-[#FF7A00] border-[#FF7A00]/20",
                       n.type === "info" &&
-                        "bg-blue-500/10 text-blue-500 border-blue-500/20",
+                        "bg-blue-500/10 text-blue-600 border-blue-500/20",
                     )}
                   >
                     {n.type === "success" && <Check className="h-5 w-5" />}
@@ -135,16 +135,16 @@ export function NotificationButton() {
                       className={cn(
                         "text-[13px] leading-none tracking-tight",
                         n.unread
-                          ? "font-black text-white"
-                          : "font-bold text-zinc-400",
+                          ? "font-black text-gray-900"
+                          : "font-bold text-gray-600",
                       )}
                     >
                       {n.title}
                     </p>
-                    <p className="text-[11px] text-zinc-500 leading-relaxed italic">
+                    <p className="text-[11px] text-gray-500 leading-relaxed italic">
                       "{n.description}"
                     </p>
-                    <p className="text-[9px] text-zinc-600 font-black uppercase tracking-widest mt-2">
+                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mt-2">
                       {n.time}
                     </p>
                   </div>
@@ -152,8 +152,8 @@ export function NotificationButton() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-zinc-700">
-              <Zap className="h-12 w-12 mb-4 opacity-10 animate-pulse" />
+            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+              <Zap className="h-12 w-12 mb-4 opacity-20 animate-pulse text-gray-300" />
               <p className="text-[10px] font-black uppercase tracking-[.3em]">
                 Hộp thư trống
               </p>
@@ -161,11 +161,11 @@ export function NotificationButton() {
           )}
         </ScrollArea>
 
-        <div className="p-3 border-t border-white/5 bg-black/40">
+        <div className="p-3 border-t border-gray-100 bg-gray-50">
           <Button
             variant="ghost"
             onClick={clearAll}
-            className="w-full text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-rose-500 hover:bg-rose-500/5 transition-all"
+            className="w-full text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
           >
             <Trash2 className="mr-2 h-4 w-4" /> Xóa tất cả nhật ký
           </Button>

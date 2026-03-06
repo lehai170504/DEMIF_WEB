@@ -29,13 +29,13 @@ export function Breadcrumbs({ pathname }: { pathname: string }) {
     .filter((s) => Boolean(s) && s !== "admin");
 
   return (
-    <nav className="hidden md:flex items-center text-sm font-medium text-zinc-400 font-mono">
-      <div className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 mr-2">
-        <LayoutGrid className="h-4 w-4 text-orange-500" />
+    <nav className="hidden md:flex items-center text-sm font-medium text-gray-500 font-mono">
+      <div className="p-1.5 rounded-lg bg-orange-100 border border-orange-200 mr-2 shadow-sm">
+        <LayoutGrid className="h-4 w-4 text-orange-600" />
       </div>
 
       <span
-        className="hover:text-white cursor-pointer transition-colors"
+        className="hover:text-gray-900 cursor-pointer transition-colors"
         onClick={() => router.push("/admin")}
       >
         Hệ thống
@@ -48,14 +48,14 @@ export function Breadcrumbs({ pathname }: { pathname: string }) {
 
         return (
           <div key={segment} className="flex items-center">
-            <ChevronRight className="h-3 w-3 mx-1.5 text-zinc-600" />
+            <ChevronRight className="h-3 w-3 mx-1.5 text-gray-300" />
             <span
               onClick={() => !isLast && router.push(url)}
               className={cn(
                 "capitalize transition-all",
                 isLast
-                  ? "text-white font-black italic tracking-tight"
-                  : "hover:text-orange-500 cursor-pointer",
+                  ? "text-gray-900 font-black italic tracking-tight"
+                  : "hover:text-orange-600 cursor-pointer",
               )}
             >
               {translatedName}

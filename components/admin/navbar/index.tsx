@@ -9,10 +9,10 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 import MobileSidebar from "../MobileSidebar";
 import { NotificationButton } from "../NotificationButton";
-import { Breadcrumbs } from "./breadcrumbs";
-import { QuickCreate } from "./quick-create";
-import { ServerStatus } from "./server-status";
-import { UserAccountNav } from "./user-account-nav";
+import { Breadcrumbs } from "../navbar/breadcrumbs";
+import { QuickCreate } from "../navbar/quick-create";
+import { ServerStatus } from "../navbar/server-status";
+import { UserAccountNav } from "../navbar/user-account-nav";
 
 export default function AdminNavbar() {
   const pathname = usePathname();
@@ -34,7 +34,7 @@ export default function AdminNavbar() {
   ]);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-white/5 bg-[#050505]/60 backdrop-blur-2xl px-4 md:px-6 font-mono">
+    <header className="sticky top-0 z-40 flex h-[72px] items-center gap-4 border-b border-gray-200 bg-white/80 backdrop-blur-xl px-4 md:px-6 font-mono shadow-sm">
       {/* Cụm trái: Mobile Toggle & Breadcrumbs */}
       <div className="flex items-center gap-2 md:gap-4 flex-1 md:flex-none">
         <MobileSidebar />
@@ -44,14 +44,14 @@ export default function AdminNavbar() {
       {/* Cụm giữa: Thanh tìm kiếm 3D Glass */}
       <div className="hidden lg:flex flex-1 justify-center max-w-md mx-auto">
         <div className="relative w-full group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-orange-500 transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
           <Input
             ref={searchInputRef}
             placeholder="Tìm kiếm nhanh..."
-            className="w-full bg-white/5 border-white/5 rounded-2xl pl-9 pr-12 focus-visible:ring-1 focus-visible:ring-orange-500/50 focus-visible:bg-white/10 transition-all text-sm placeholder:text-zinc-600"
+            className="w-full bg-gray-100 border-transparent hover:bg-gray-200/50 rounded-full pl-11 pr-12 focus-visible:ring-4 focus-visible:ring-orange-500/10 focus-visible:bg-white focus-visible:border-orange-500 transition-all text-sm text-gray-900 placeholder:text-gray-500 h-10"
           />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden h-5 select-none items-center gap-1 rounded-md border border-white/10 bg-black/50 px-1.5 font-sans text-[9px] font-bold text-zinc-500 sm:flex uppercase tracking-tighter">
-            ⌘ K
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden h-5 select-none items-center gap-1 rounded bg-white border border-gray-200 px-1.5 font-sans text-[10px] font-bold text-gray-400 sm:flex shadow-sm">
+            ⌘K
           </kbd>
         </div>
       </div>
@@ -60,10 +60,10 @@ export default function AdminNavbar() {
       <div className="flex items-center gap-3 ml-auto">
         <QuickCreate />
 
-        <div className="h-6 w-px bg-white/10 mx-1 hidden sm:block" />
+        <div className="h-6 w-px bg-gray-200 mx-1 hidden sm:block" />
 
         <TooltipProvider>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <ServerStatus />
             <NotificationButton />
           </div>

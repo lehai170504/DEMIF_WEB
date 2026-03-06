@@ -57,7 +57,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Import components và type
 import DraggableRow from "@/components/admin/lesson/draggable-row";
 import TablePagination from "@/components/admin/lesson/table-pagination";
 import { columns } from "@/components/admin/lesson/table-columns";
@@ -78,7 +77,6 @@ export function LessonTableWrapper({
   pageSize,
   onPaginationChange,
 }: LessonTableWrapperProps) {
-  // Sync data khi props thay đổi (quan trọng khi fetch API)
   const [data, setData] = React.useState<LessonDto[]>(initialData);
 
   React.useEffect(() => {
@@ -93,7 +91,6 @@ export function LessonTableWrapper({
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  // Pagination state cục bộ để đồng bộ với React Table
   const pagination = React.useMemo(
     () => ({
       pageIndex,
@@ -117,7 +114,7 @@ export function LessonTableWrapper({
   const table = useReactTable({
     data,
     columns,
-    pageCount: pageCount, // Tổng số trang từ BE
+    pageCount: pageCount,
     state: {
       sorting,
       columnVisibility,
@@ -125,9 +122,8 @@ export function LessonTableWrapper({
       columnFilters,
       pagination,
     },
-    manualPagination: true, // Kích hoạt Server-side pagination
+    manualPagination: true,
     onPaginationChange: (updater) => {
-      // Xử lý cập nhật pagination state
       if (typeof updater === "function") {
         const newState = updater(pagination);
         onPaginationChange(newState.pageIndex, newState.pageSize);
@@ -135,7 +131,7 @@ export function LessonTableWrapper({
         onPaginationChange(updater.pageIndex, updater.pageSize);
       }
     },
-    getRowId: (row) => row.id, // ID là string UUID
+    getRowId: (row) => row.id,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -156,7 +152,6 @@ export function LessonTableWrapper({
         const newIndex = items.findIndex((item) => item.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
-      // TODO: Gọi API cập nhật thứ tự (displayOrder) tại đây nếu cần
     }
   }
 
@@ -165,52 +160,48 @@ export function LessonTableWrapper({
       defaultValue="outline"
       className="w-full flex-col justify-start gap-6 font-mono"
     >
-      {/* TOOLBAR */}
       <div className="flex items-center justify-between px-1">
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>
 
-        {/* Mobile View Selector */}
         <Select defaultValue="outline">
           <SelectTrigger
-            className="flex w-fit bg-white/5 border-white/10 text-white h-9 rounded-xl lg:hidden"
+            className="flex w-fit bg-white border-gray-200 text-gray-900 h-9 rounded-xl lg:hidden shadow-sm"
             size="sm"
             id="view-selector"
           >
             <SelectValue placeholder="Chọn chế độ xem" />
           </SelectTrigger>
-          <SelectContent className="bg-[#18181b] border-white/10 text-white">
+          <SelectContent className="bg-white border-gray-200 text-gray-900">
             <SelectItem value="outline">Danh sách Bài Tập</SelectItem>
             <SelectItem value="analytics">Phân tích (Sắp có)</SelectItem>
           </SelectContent>
         </Select>
 
-        {/* Desktop Tabs List */}
         <TabsList className="hidden h-10 items-center justify-start gap-2 bg-transparent p-0 lg:flex">
           <TabsTrigger
             value="outline"
-            className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 hover:text-zinc-300 rounded-xl px-4 py-2 font-bold transition-all border border-transparent data-[state=active]:border-white/5"
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm text-gray-500 hover:text-gray-700 rounded-xl px-4 py-2 font-bold transition-all border border-transparent data-[state=active]:border-gray-200"
           >
             Danh sách
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
             disabled
-            className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-zinc-500 hover:text-zinc-300 rounded-xl px-4 py-2 font-bold transition-all border border-transparent data-[state=active]:border-white/5 opacity-50 cursor-not-allowed"
+            className="text-gray-400 rounded-xl px-4 py-2 font-bold transition-all border border-transparent opacity-50 cursor-not-allowed"
           >
             Phân tích (Sắp có)
           </TabsTrigger>
         </TabsList>
 
-        {/* Column Visibility */}
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 rounded-xl h-9"
+                className="bg-white border-gray-200 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl h-9 shadow-sm"
               >
                 <IconLayoutColumns className="mr-2 h-4 w-4" />
                 <span className="hidden lg:inline font-bold uppercase text-xs tracking-wider">
@@ -221,7 +212,7 @@ export function LessonTableWrapper({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-56 bg-[#18181b] border-white/10 text-zinc-300"
+              className="w-56 bg-white border-gray-200 text-gray-700 shadow-xl"
             >
               {table
                 .getAllColumns()
@@ -234,7 +225,7 @@ export function LessonTableWrapper({
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      className="capitalize focus:bg-white/10 focus:text-white cursor-pointer"
+                      className="capitalize focus:bg-gray-100 cursor-pointer"
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
@@ -249,12 +240,11 @@ export function LessonTableWrapper({
         </div>
       </div>
 
-      {/* TABLE CONTENT */}
       <TabsContent
         value="outline"
         className="relative flex flex-col gap-4 overflow-auto"
       >
-        <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#18181b]/50 shadow-xl">
+        <div className="overflow-hidden rounded-[1.5rem] border border-gray-200 bg-white shadow-sm">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -263,18 +253,18 @@ export function LessonTableWrapper({
             id={sortableId}
           >
             <Table>
-              <TableHeader className="bg-white/5 sticky top-0 z-10 backdrop-blur-md">
+              <TableHeader className="bg-gray-50/80 sticky top-0 z-10 backdrop-blur-md">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
                     key={headerGroup.id}
-                    className="hover:bg-transparent border-white/5"
+                    className="hover:bg-transparent border-gray-200"
                   >
                     {headerGroup.headers.map((header) => {
                       return (
                         <TableHead
                           key={header.id}
                           colSpan={header.colSpan}
-                          className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 h-12"
+                          className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 h-12"
                         >
                           {header.isPlaceholder
                             ? null
@@ -302,7 +292,7 @@ export function LessonTableWrapper({
                   <TableRow className="hover:bg-transparent">
                     <TableCell
                       colSpan={columns.length}
-                      className="h-24 text-center text-zinc-500"
+                      className="h-24 text-center text-gray-500"
                     >
                       Không có bài học nào.
                     </TableCell>
@@ -313,12 +303,11 @@ export function LessonTableWrapper({
           </DndContext>
         </div>
 
-        {/* Pagination Control */}
         <TablePagination table={table} />
       </TabsContent>
 
       <TabsContent value="analytics" className="flex flex-col">
-        <div className="aspect-video w-full flex-1 rounded-[1.5rem] border border-white/10 border-dashed bg-white/5 flex items-center justify-center text-zinc-500 font-bold uppercase tracking-widest text-xs">
+        <div className="aspect-video w-full flex-1 rounded-[1.5rem] border border-gray-200 border-dashed bg-gray-50 flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-xs">
           Tính năng đang phát triển...
         </div>
       </TabsContent>

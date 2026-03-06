@@ -1,3 +1,4 @@
+// src/app/admin/lessons/page.tsx
 "use client";
 
 import * as React from "react";
@@ -24,17 +25,13 @@ export default function AdminLessonsPage() {
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
 
-  // 1. CHỈ GỌI API ĐỂ LẤY DỮ LIỆU (KHÔNG TRUYỀN FILTER XUỐNG BE NỮA)
-  // Nếu muốn FE tự lọc hết, bạn nên set pageSize lớn (vd: 1000) ở Backend hoặc API để lấy full list.
   const { data, isLoading, isError, refetch } = useLessons({
     page,
     pageSize,
-    // Bỏ trống status, type, search ở đây để BE trả về tất cả
   });
 
   const allLessons = data?.items || [];
 
-  // 2. FE TỰ ĐỘNG ĐẾM SỐ LƯỢNG TỪNG TRẠNG THÁI TỪ DATA GỐC
   const lessonCounts = React.useMemo(() => {
     const counts: Record<LessonStatus, number> = {
       all: allLessons.length,
@@ -45,7 +42,6 @@ export default function AdminLessonsPage() {
     };
 
     allLessons.forEach((lesson) => {
-      // Dùng hàm normalizeStatus để đưa về đúng chuẩn chữ (Published, Draft...)
       const status = normalizeStatus(lesson.status) as LessonStatus;
       if (counts[status] !== undefined) {
         counts[status] += 1;
@@ -55,37 +51,31 @@ export default function AdminLessonsPage() {
     return counts;
   }, [allLessons]);
 
-  // 3. FE TỰ THỰC HIỆN LỌC DỮ LIỆU (FILTERING)
   const filteredLessons = React.useMemo(() => {
     return allLessons.filter((lesson) => {
-      // -- Lọc theo Status --
       const currentStatus = normalizeStatus(lesson.status);
       const matchStatus =
         activeStatus === "all" || currentStatus === activeStatus;
 
-      // -- Lọc theo Type --
       const currentType = normalizeType(lesson.lessonType);
       const matchType = activeType === "all" || currentType === activeType;
 
-      // -- Lọc theo Search (Tìm theo Title) --
       const matchSearch =
         searchTerm === "" ||
         (lesson.title &&
           lesson.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      // Phải thỏa mãn cả 3 điều kiện mới được hiển thị
       return matchStatus && matchType && matchSearch;
     });
   }, [allLessons, activeStatus, activeType, searchTerm]);
 
-  // Khi đổi filter, reset về trang 1
   React.useEffect(() => {
     setPage(1);
   }, [activeStatus, activeType, searchTerm]);
 
   if (isLoading) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-zinc-500 font-mono animate-pulse">
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-gray-500 font-mono animate-pulse">
         <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
         <p className="text-xs uppercase tracking-widest">
           Đang tải dữ liệu bài học...
@@ -96,7 +86,7 @@ export default function AdminLessonsPage() {
 
   if (isError) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-zinc-500 font-mono">
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-gray-500 font-mono">
         <AlertCircle className="h-10 w-10 text-red-500" />
         <p>Không thể tải dữ liệu.</p>
         <Button variant="outline" onClick={() => refetch()}>
@@ -107,13 +97,8 @@ export default function AdminLessonsPage() {
   }
 
   return (
-    <div className="w-full space-y-8 pb-10 font-mono text-zinc-100 relative">
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[15%] right-[20%] w-[600px] h-[600px] bg-purple-500/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[10%] left-[10%] w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full" />
-      </div>
-
-      <div className="relative z-10 space-y-8">
+    <div className="w-full space-y-8 pb-10 font-mono text-gray-900 bg-gray-50 min-h-screen">
+      <div className="relative z-10 space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <LessonHeader />
 
         <LessonFilterBar

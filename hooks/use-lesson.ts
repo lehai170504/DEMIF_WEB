@@ -1,7 +1,11 @@
 // src/hooks/use-lesson.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { lessonService } from "@/services/lesson.service";
-import { CreateLessonRequest, GetLessonsParams } from "@/types/lesson.type";
+import {
+  CreateLessonRequest,
+  GetLessonsParams,
+  UpdateLessonRequest,
+} from "@/types/lesson.type";
 import { toast } from "sonner";
 
 // Hook Fetch Danh sách
@@ -17,6 +21,16 @@ export const useLessons = (params: GetLessonsParams) => {
 export const useLessonActions = () => {
   const queryClient = useQueryClient();
 
+  // Hàm helper để trích xuất message lỗi từ BE
+  const getErrorMessage = (error: any, defaultMsg: string) => {
+    return (
+      error?.response?.data?.error ||
+      error?.response?.data?.message ||
+      error?.response?.data?.detail ||
+      defaultMsg
+    );
+  };
+
   const createMutation = useMutation({
     mutationFn: (data: CreateLessonRequest) => lessonService.createLesson(data),
     onSuccess: () => {
@@ -24,7 +38,9 @@ export const useLessonActions = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
     onError: (error: any) =>
-      toast.error(error?.response?.data?.message || "Lỗi tạo bài học"),
+      toast.error("Lỗi tạo bài học", {
+        description: getErrorMessage(error, "Vui lòng kiểm tra lại dữ liệu."),
+      }),
   });
 
   const updateMutation = useMutation({
@@ -33,13 +49,16 @@ export const useLessonActions = () => {
       data,
     }: {
       id: string;
-      data: Partial<CreateLessonRequest>;
+      data: UpdateLessonRequest; // 👈 Sử dụng Type chuẩn
     }) => lessonService.updateLesson(id, data),
     onSuccess: () => {
       toast.success("Cập nhật thành công!");
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
-    onError: (error: any) => toast.error("Lỗi cập nhật bài học"),
+    onError: (error: any) =>
+      toast.error("Lỗi cập nhật", {
+        description: getErrorMessage(error, "Không thể lưu thay đổi."),
+      }),
   });
 
   const deleteMutation = useMutation({
@@ -48,7 +67,13 @@ export const useLessonActions = () => {
       toast.success("Đã xóa bài học.");
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
-    onError: (error: any) => toast.error("Lỗi xóa bài học"),
+    onError: (error: any) =>
+      toast.error("Lỗi xóa bài học", {
+        description: getErrorMessage(
+          error,
+          "Bài học có thể đang được sử dụng.",
+        ),
+      }),
   });
 
   return {

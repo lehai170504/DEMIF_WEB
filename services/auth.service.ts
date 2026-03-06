@@ -2,13 +2,13 @@
 import axiosClient from "@/lib/axios-client";
 import {
   ChangePasswordPayload,
-  FirebaseLoginPayload,
-  FirebaseLoginResponse,
+  GoogleLoginPayload,
   LoginResponse,
   RegisterPayload,
   RegisterResponse,
   UpdateProfilePayload,
   UserProfile,
+  VerifyEmailResponse,
 } from "@/types/auth.type";
 
 export const authService = {
@@ -38,9 +38,12 @@ export const authService = {
     return await axiosClient.post("/Auth/register", payload);
   },
 
-  firebaseLogin: async (
-    payload: FirebaseLoginPayload,
-  ): Promise<FirebaseLoginResponse> => {
-    return await axiosClient.post("/Auth/firebase-login", payload);
+  // THÊM MỚI HÀM VERIFY EMAIL
+  verifyEmail: async (token: string): Promise<VerifyEmailResponse> => {
+    return await axiosClient.get("/Auth/verify-email", { params: { token } });
+  },
+
+  googleLogin: async (payload: GoogleLoginPayload): Promise<LoginResponse> => {
+    return await axiosClient.post("/Auth/google-login", payload);
   },
 };

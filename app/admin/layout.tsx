@@ -13,7 +13,7 @@ export default function RootAdminLayout({
 }) {
   return (
     <AdminGuard>
-      <div className="flex h-screen bg-[#050505] overflow-hidden">
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
         <AdminSidebar />
 
         <div className="flex flex-col flex-1 md:pl-[78px] transition-all duration-300 h-full">
@@ -25,7 +25,7 @@ export default function RootAdminLayout({
             </div>
           </main>
 
-          <footer className="shrink-0 p-4 border-t border-white/5 bg-[#050505]/80 backdrop-blur-md text-center text-xs text-zinc-500 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20">
+          <footer className="shrink-0 p-4 border-t border-gray-200 bg-white/80 backdrop-blur-md text-center text-xs text-gray-500 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-20">
             <AdminFooter />
           </footer>
         </div>
