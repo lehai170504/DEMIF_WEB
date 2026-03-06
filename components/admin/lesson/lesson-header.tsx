@@ -5,20 +5,23 @@ import { LayoutGrid } from "lucide-react";
 export function LessonHeader() {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4 px-2">
-      <div className="space-y-1">
+      <div className="space-y-2">
         <div className="flex items-center gap-2 text-orange-600 mb-2">
           <div className="p-1.5 rounded-lg bg-orange-100 border border-orange-200">
             <LayoutGrid className="h-4 w-4" />
           </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em]">
-            Course Management
-          </span>
+          <span className="text-sm font-semibold">Quản lý khóa học</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-none text-gray-900">
-          Lesson <span className="text-gray-400">Repository</span>
+
+        {/* Tiêu đề chính */}
+        <h1 className="text-3xl md:text-4xl font-bold leading-tight text-slate-900">
+          Kho bài học{" "}
+          <span className="text-slate-400 font-medium">hệ thống</span>
         </h1>
-        <p className="text-gray-500 text-xs font-medium italic max-w-lg mt-2">
-          Quản lý và biên tập nội dung luyện nghe, shadowing hệ thống.
+
+        {/* Mô tả */}
+        <p className="text-slate-500 text-sm font-medium max-w-lg mt-2">
+          Quản lý và biên tập nội dung luyện nghe, shadowing của hệ thống.
         </p>
       </div>
     </div>

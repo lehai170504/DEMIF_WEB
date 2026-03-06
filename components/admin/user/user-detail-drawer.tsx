@@ -27,7 +27,6 @@ import {
   Loader2,
   Copy,
   XCircle,
-  Zap,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -58,22 +57,37 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
     useUserActions();
 
   // --- Helpers ---
+  const translateStatus = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "Hoạt động";
+      case "inactive":
+      case "suspended":
+        return "Đình chỉ";
+      case "banned":
+        return "Bị cấm";
+      default:
+        return "Không rõ";
+    }
+  };
+
   const getStatusClass = (status: string) => {
     switch (status?.toLowerCase()) {
       case "active":
-        return "bg-emerald-50 text-emerald-600 border-emerald-200";
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "inactive":
       case "suspended":
-        return "bg-orange-50 text-orange-600 border-orange-200";
+        return "bg-orange-50 text-orange-700 border-orange-200";
       case "banned":
-        return "bg-red-50 text-red-600 border-red-200";
+        return "bg-red-50 text-red-700 border-red-200";
       default:
-        return "bg-gray-50 text-gray-500 border-gray-200";
+        return "bg-slate-50 text-slate-600 border-slate-200";
     }
   };
 
   const handleCopyId = (id: string) => {
     navigator.clipboard.writeText(id);
-    toast.success("Đã sao chép ID");
+    toast.success("Đã sao chép ID người dùng");
   };
 
   const handleToggleBan = () => {
@@ -85,7 +99,9 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
   const handleDeleteUser = () => {
     if (!user) return;
     if (
-      confirm("Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa?")
+      confirm(
+        "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa hồ sơ này?",
+      )
     ) {
       deleteUser(user.id, {
         onSuccess: () => setIsOpen(false),
@@ -108,50 +124,50 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
     <Drawer direction="right" onOpenChange={setIsOpen} open={isOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
 
-      <DrawerContent className="bg-white border-l border-gray-200 text-gray-900 h-full max-w-[500px] w-full ml-auto rounded-none sm:rounded-l-[2rem] outline-none font-mono flex flex-col shadow-2xl">
-        {/* Background Glow - Chuyển sang màu nhạt hơn cho nền trắng */}
+      <DrawerContent className="bg-white border-l border-slate-200 text-slate-900 h-full max-w-[500px] w-full ml-auto rounded-none sm:rounded-l-[2rem] outline-none font-mono flex flex-col shadow-2xl">
+        {/* Background Glow tinh tế */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/5 blur-[100px] rounded-full pointer-events-none" />
 
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-4">
             <DrawerTitle className="sr-only">Đang tải...</DrawerTitle>
             <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-            <p className="text-gray-400 text-sm animate-pulse">
-              Đang tải hồ sơ...
+            <p className="text-slate-500 font-medium text-sm animate-pulse">
+              Đang tải thông tin hồ sơ...
             </p>
           </div>
         ) : isError || !user ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-4">
             <DrawerTitle className="sr-only">Lỗi</DrawerTitle>
-            <XCircle className="h-10 w-10 text-red-500" />
-            <p className="text-gray-500 font-bold italic text-sm uppercase tracking-widest">
+            <XCircle className="h-10 w-10 text-red-500 opacity-80" />
+            <p className="text-slate-600 font-semibold text-sm">
               Không tìm thấy thông tin định danh
             </p>
             <Button
               variant="outline"
               onClick={() => refetch()}
-              className="border-gray-200"
+              className="border-slate-200 text-slate-600"
             >
               Thử lại
             </Button>
           </div>
         ) : (
           <>
-            <DrawerHeader className="p-8 border-b border-gray-100 relative z-10 pb-6">
+            <DrawerHeader className="p-8 border-b border-slate-100 relative z-10 pb-6">
               <div className="flex items-start gap-5">
-                <Avatar className="h-24 w-24 border-4 border-white shadow-xl rounded-3xl ring-1 ring-gray-100">
+                <Avatar className="h-24 w-24 border-4 border-white shadow-lg rounded-3xl ring-1 ring-slate-100">
                   <AvatarImage
                     src={user.avatarUrl || ""}
                     className="object-cover"
                   />
-                  <AvatarFallback className="text-3xl font-black bg-gray-100 text-gray-400 rounded-3xl italic">
-                    {user.username?.[0]?.toUpperCase()}
+                  <AvatarFallback className="text-3xl font-bold bg-slate-50 text-slate-400 rounded-3xl uppercase">
+                    {user.username?.[0]}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="space-y-2 flex-1 pt-1">
+                <div className="space-y-3 flex-1 pt-1">
                   <div>
-                    <DrawerTitle className="text-2xl font-black text-gray-900 tracking-tight leading-none mb-2 italic uppercase">
+                    <DrawerTitle className="text-2xl font-bold text-slate-900 tracking-tight leading-none mb-2.5">
                       {user.username}
                     </DrawerTitle>
 
@@ -159,18 +175,19 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
                       <Badge
                         variant="outline"
                         className={cn(
-                          "px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider",
+                          "px-2.5 py-0.5 rounded-md text-xs font-semibold",
                           getStatusClass(user.status),
                         )}
                       >
-                        {user.status}
+                        {translateStatus(user.status)}
                       </Badge>
+
                       {user.authProvider === "google" && (
                         <Badge
                           variant="secondary"
-                          className="bg-blue-50 text-blue-600 border border-blue-100 text-[10px] px-2 py-0.5 rounded-lg font-bold"
+                          className="bg-blue-50 text-blue-700 border border-blue-100 text-xs px-2.5 py-0.5 rounded-md font-semibold"
                         >
-                          GOOGLE AUTH
+                          Google Auth
                         </Badge>
                       )}
                     </div>
@@ -178,32 +195,32 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
 
                   <div
                     onClick={() => handleCopyId(user.id)}
-                    className="group flex items-center gap-2 text-[10px] text-gray-400 cursor-pointer hover:text-orange-500 transition-colors bg-gray-50 hover:bg-gray-100 w-fit px-3 py-1.5 rounded-lg border border-gray-100"
+                    className="group flex items-center gap-2 text-xs text-slate-500 cursor-pointer hover:text-orange-600 transition-colors bg-slate-50 hover:bg-orange-50 w-fit px-3 py-1.5 rounded-lg border border-slate-100 hover:border-orange-100"
                   >
-                    <Fingerprint className="h-3 w-3 group-hover:text-orange-500 transition-colors" />
-                    <span className="truncate max-w-[180px] font-mono font-bold uppercase tracking-tighter">
+                    <Fingerprint className="h-3.5 w-3.5 group-hover:text-orange-500 transition-colors" />
+                    <span className="truncate max-w-[180px] font-mono font-medium">
                       {user.id}
                     </span>
-                    <Copy className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Copy className="h-3.5 w-3.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               </div>
             </DrawerHeader>
 
-            <div className="flex-1 overflow-y-auto p-8 space-y-8 relative z-10 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-200">
+            <div className="flex-1 overflow-y-auto p-8 space-y-8 relative z-10 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200">
               {/* 1. THÔNG TIN ĐỊNH DANH */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <SectionTitle
-                  title="01. Thông tin Định danh"
+                  title="Thông tin Định danh"
                   color="text-orange-600"
                   borderColor="border-orange-500"
                 />
-                <div className="grid gap-px bg-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
+                <div className="grid gap-px bg-slate-100 border border-slate-100 rounded-[1.5rem] overflow-hidden">
                   <RowItem
                     icon={Mail}
                     label="Địa chỉ Email"
                     value={user.email}
-                    valueClass="text-gray-900 font-bold"
+                    valueClass="text-slate-900 font-semibold"
                   />
                   <RowItem
                     icon={Calendar}
@@ -228,26 +245,27 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
                           )
                         : "Chưa đăng nhập"
                     }
-                    valueClass="text-gray-400 italic"
+                    valueClass="text-slate-500"
                   />
 
                   {/* Roles Display */}
-                  <div className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors">
-                    <span className="text-gray-400 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest">
-                      <ShieldCheck className="h-4 w-4 text-gray-300" /> Vai trò
+                  <div className="flex items-center justify-between p-4 bg-white hover:bg-slate-50 transition-colors">
+                    <span className="text-slate-500 flex items-center gap-2 text-xs font-medium">
+                      <ShieldCheck className="h-4 w-4 text-slate-400" /> Vai trò
+                      hệ thống
                     </span>
                     <div className="flex gap-1.5">
                       {user.roles && user.roles.length > 0 ? (
                         user.roles.map((r) => (
                           <Badge
                             key={r.roleId}
-                            className="bg-gray-900 text-white hover:bg-gray-800 border-none px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider"
+                            className="bg-slate-800 text-white hover:bg-slate-700 border-none px-2.5 py-0.5 text-xs font-semibold"
                           >
                             {r.roleName}
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-gray-400 text-[10px] font-bold italic uppercase">
+                        <span className="text-slate-500 text-xs font-medium bg-slate-100 px-2.5 py-0.5 rounded-md">
                           Học viên
                         </span>
                       )}
@@ -257,9 +275,9 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
               </div>
 
               {/* 2. HỒ SƠ HỌC TẬP */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <SectionTitle
-                  title="02. Hồ sơ Học tập"
+                  title="Hồ sơ Học tập"
                   color="text-blue-600"
                   borderColor="border-blue-500"
                 />
@@ -268,7 +286,7 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
                     icon={Globe}
                     label="Tiếng mẹ đẻ"
                     value={user.nativeLanguage || "---"}
-                    colorClass="text-gray-900"
+                    colorClass="text-slate-900"
                   />
                   <StatCard
                     icon={BookOpen}
@@ -282,16 +300,16 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
                     value={user.currentLevel || "Beginner"}
                     colorClass="text-emerald-600"
                   />
-                  <div className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm flex flex-col justify-center gap-1 hover:border-orange-200 transition-colors">
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                      <Clock className="h-3 w-3 text-gray-300" /> Mục tiêu ngày
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-center gap-1.5 hover:border-orange-200 transition-colors">
+                    <span className="text-xs font-medium text-slate-500 flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-slate-400" /> Mục tiêu ngày
                     </span>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-orange-600 italic">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xl font-bold text-orange-600">
                         {user.dailyGoalMinutes}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-black uppercase">
-                        PHÚT
+                      <span className="text-xs text-slate-500 font-semibold">
+                        phút
                       </span>
                     </div>
                   </div>
@@ -300,19 +318,19 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
             </div>
 
             {/* --- FOOTER ACTIONS --- */}
-            <DrawerFooter className="flex-shrink-0 p-6 border-t border-gray-100 bg-gray-50/50 z-20">
+            <DrawerFooter className="flex-shrink-0 p-6 border-t border-slate-100 bg-slate-50/50 z-20">
               <div className="grid gap-3 w-full">
                 {/* Assign/Remove Admin Role */}
                 <Button
                   variant="outline"
-                  className="w-full h-12 rounded-xl text-blue-600 hover:bg-blue-50 border-blue-100 font-black uppercase text-[10px] tracking-widest disabled:opacity-50 transition-all"
+                  className="w-full h-11 rounded-xl text-blue-600 hover:bg-blue-50 hover:text-blue-700 border-blue-200 font-semibold text-sm disabled:opacity-50 transition-all shadow-sm"
                   onClick={handleToggleAdminRole}
                   disabled={isPending}
                 >
                   <ShieldCheck className="h-4 w-4 mr-2" />
                   {user.roles.some((r) => r.roleName === "Admin")
-                    ? "Gỡ quyền quản trị"
-                    : "Cấp quyền quản trị"}
+                    ? "Gỡ quyền quản trị viên"
+                    : "Cấp quyền quản trị viên"}
                 </Button>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -320,10 +338,10 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
                   <Button
                     variant={user.status === "Banned" ? "default" : "outline"}
                     className={cn(
-                      "h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border disabled:opacity-50",
+                      "h-11 rounded-xl font-semibold text-sm transition-all border disabled:opacity-50 shadow-sm",
                       user.status === "Banned"
                         ? "bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white"
-                        : "bg-red-50 text-red-600 hover:bg-red-100 border-red-100",
+                        : "bg-red-50 text-red-600 hover:bg-red-100 border-red-200",
                     )}
                     onClick={handleToggleBan}
                     disabled={isPending}
@@ -333,26 +351,28 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
                     ) : (
                       <Ban className="h-4 w-4 mr-2" />
                     )}
-                    {user.status === "Banned" ? "Mở khóa" : "Chặn hồ sơ"}
+                    {user.status === "Banned"
+                      ? "Mở khóa tài khoản"
+                      : "Đình chỉ tài khoản"}
                   </Button>
 
                   {/* Close Button */}
                   <DrawerClose asChild>
-                    <Button className="h-12 rounded-xl bg-gray-900 text-white hover:bg-gray-800 font-black uppercase text-[10px] tracking-widest transition-all w-full shadow-lg shadow-gray-200">
-                      <Check className="h-4 w-4 mr-2" /> Đóng
+                    <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-semibold text-sm transition-all w-full shadow-md shadow-slate-900/10">
+                      Đóng
                     </Button>
                   </DrawerClose>
                 </div>
 
                 {/* Delete User Button */}
                 <Button
-                  variant="link"
-                  className="text-gray-300 hover:text-red-500 text-[9px] font-black uppercase tracking-widest mt-2 disabled:opacity-50"
+                  variant="ghost"
+                  className="text-slate-400 hover:bg-red-50 hover:text-red-600 text-xs font-semibold mt-1 disabled:opacity-50 mx-auto w-fit px-4"
                   onClick={handleDeleteUser}
                   disabled={isPending}
                 >
-                  <Trash2 className="h-3 w-3 mr-1" /> Xóa vĩnh viễn dữ liệu
-                  người dùng
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Xóa vĩnh viễn dữ
+                  liệu
                 </Button>
               </div>
             </DrawerFooter>
@@ -366,11 +386,7 @@ export function UserDetailDrawer({ userId, children }: UserDetailDrawerProps) {
 // --- SUB COMPONENTS (White Background) ---
 const SectionTitle = ({ title, color, borderColor }: any) => (
   <h3
-    className={cn(
-      "text-[10px] font-black uppercase tracking-[0.2em] pl-3 border-l-4 italic",
-      color,
-      borderColor,
-    )}
+    className={cn("text-sm font-semibold pl-3 border-l-4", color, borderColor)}
   >
     {title}
   </h3>
@@ -380,17 +396,14 @@ const RowItem = ({
   icon: Icon,
   label,
   value,
-  valueClass = "text-gray-700",
+  valueClass = "text-slate-700",
 }: any) => (
-  <div className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
-    <span className="text-gray-400 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest">
-      <Icon className="h-4 w-4 text-gray-300" /> {label}
+  <div className="flex items-center justify-between p-4 bg-white hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+    <span className="text-slate-500 flex items-center gap-2 text-xs font-medium">
+      <Icon className="h-4 w-4 text-slate-400" /> {label}
     </span>
     <span
-      className={cn(
-        "text-sm truncate max-w-[200px] font-bold uppercase tracking-tight",
-        valueClass,
-      )}
+      className={cn("text-sm truncate max-w-[200px] font-semibold", valueClass)}
     >
       {value}
     </span>
@@ -398,16 +411,11 @@ const RowItem = ({
 );
 
 const StatCard = ({ icon: Icon, label, value, colorClass }: any) => (
-  <div className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm flex flex-col justify-center gap-1 hover:border-gray-200 transition-colors">
-    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-      <Icon className="h-3 w-3 text-gray-300" /> {label}
+  <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-center gap-1.5 hover:border-slate-300 transition-colors">
+    <span className="text-xs font-medium text-slate-500 flex items-center gap-2">
+      <Icon className="h-4 w-4 text-slate-400" /> {label}
     </span>
-    <span
-      className={cn(
-        "text-lg font-black truncate uppercase italic tracking-tighter",
-        colorClass,
-      )}
-    >
+    <span className={cn("text-lg font-bold truncate", colorClass)}>
       {value}
     </span>
   </div>

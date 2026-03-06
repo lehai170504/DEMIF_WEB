@@ -132,16 +132,17 @@ export function EditPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px] bg-white border-none text-gray-900 font-mono max-h-[95vh] overflow-y-auto no-scrollbar rounded-[2.5rem] shadow-2xl p-0 overflow-hidden">
-        <DialogHeader className="p-10 bg-gray-50/50 border-b border-gray-100">
-          <DialogTitle className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter">
-            <Save className="h-7 w-7 text-blue-500" />
-            Cập Nhật Gói Dịch Vụ
+      <DialogContent className="sm:max-w-[650px] bg-white border-none text-slate-900 font-sans max-h-[95vh] overflow-y-auto no-scrollbar rounded-[2rem] shadow-2xl p-0">
+        {/* Header */}
+        <DialogHeader className="p-8 bg-slate-50/50 border-b border-slate-100">
+          <DialogTitle className="flex items-center gap-3 text-2xl font-mono tracking-tight">
+            <Save className="h-6 w-6 text-blue-500" />
+            Cập nhật gói dịch vụ
           </DialogTitle>
-          <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-white border border-gray-200 rounded-xl w-fit">
-            <Fingerprint className="h-3 w-3 text-gray-400" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-              ID Gói: {plan.id}
+          <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg w-fit ml-9">
+            <Fingerprint className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-xs font-medium text-slate-500">
+              ID Gói: <span className="font-mono">{plan.id}</span>
             </span>
           </div>
         </DialogHeader>
@@ -149,24 +150,25 @@ export function EditPlanDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="p-10 space-y-8"
+            className="p-8 space-y-8"
           >
+            {/* Nhóm 1: Cấu hình cơ bản */}
             <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase text-blue-500 tracking-[0.3em] flex items-center gap-2">
-                <Sparkles className="w-3 h-3" /> 01. Cấu hình cơ bản
+              <h4 className="text-sm font-mono text-blue-600 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Sparkles className="w-4 h-4" /> Cấu hình cơ bản
               </h4>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Tên Hiển Thị
+                      <FormLabel className="text-xs font-mono text-slate-600 ml-1">
+                        Tên hiển thị
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl"
+                          className="h-11 bg-white border-slate-200 font-medium rounded-xl shadow-sm"
                           {...field}
                         />
                       </FormControl>
@@ -179,19 +181,19 @@ export function EditPlanDialog({
                   name="tier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Cấp Độ (Tier)
+                      <FormLabel className="text-xs font-mono text-slate-600 ml-1">
+                        Cấp độ (Tier)
                       </FormLabel>
                       <Select
                         onValueChange={(val) => field.onChange(Number(val))}
                         value={String(field.value)}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl">
+                          <SelectTrigger className="h-11 bg-white border-slate-200 font-medium rounded-xl shadow-sm">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="font-mono font-bold">
+                        <SelectContent className="font-mono font-medium">
                           <SelectItem value="0">Basic</SelectItem>
                           <SelectItem value="1">Premium</SelectItem>
                           <SelectItem value="2">Enterprise</SelectItem>
@@ -203,23 +205,24 @@ export function EditPlanDialog({
               </div>
             </div>
 
+            {/* Nhóm 2: Thông số kinh doanh */}
             <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase text-orange-500 tracking-[0.3em] flex items-center gap-2">
-                <Sparkles className="w-3 h-3" /> 02. Thông số kinh doanh
+              <h4 className="text-sm font-mono text-orange-600 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <Sparkles className="w-4 h-4" /> Thông số kinh doanh
               </h4>
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-3 gap-5">
                 <FormField
                   control={form.control}
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Giá Bán (VND)
+                      <FormLabel className="text-xs font-mono text-slate-600 ml-1">
+                        Giá bán (VND)
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl"
+                          className="h-11 bg-white border-slate-200 font-medium rounded-xl shadow-sm"
                           {...field}
                         />
                       </FormControl>
@@ -231,22 +234,22 @@ export function EditPlanDialog({
                   name="billingCycle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Chu Kỳ
+                      <FormLabel className="text-xs font-mono text-slate-600 ml-1">
+                        Chu kỳ
                       </FormLabel>
                       <Select
                         onValueChange={(val) => field.onChange(Number(val))}
                         value={String(field.value)}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl">
+                          <SelectTrigger className="h-11 bg-white border-slate-200 font-medium rounded-xl shadow-sm">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="font-mono font-bold">
-                          <SelectItem value="0">Hàng Tháng</SelectItem>
-                          <SelectItem value="1">Hàng Năm</SelectItem>
-                          <SelectItem value="2">Vĩnh Viễn</SelectItem>
+                        <SelectContent className="font-mono font-medium">
+                          <SelectItem value="0">Hàng tháng</SelectItem>
+                          <SelectItem value="1">Hàng năm</SelectItem>
+                          <SelectItem value="2">Vĩnh viễn</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -257,13 +260,13 @@ export function EditPlanDialog({
                   name="durationDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Số Ngày
+                      <FormLabel className="text-xs font-mono text-slate-600 ml-1">
+                        Số ngày
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl disabled:opacity-50"
+                          className="h-11 bg-white border-slate-200 font-medium rounded-xl disabled:opacity-50 shadow-sm"
                           {...field}
                           value={field.value ?? 0}
                           disabled={Number(form.watch("billingCycle")) === 2}
@@ -275,17 +278,18 @@ export function EditPlanDialog({
               </div>
             </div>
 
+            {/* Nhóm 3: Đặc quyền (Textarea chung) */}
             <FormField
               control={form.control}
               name="featuresString"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1 italic">
-                    Đặc Quyền (Mỗi dòng một mục)
+                  <FormLabel className="text-xs font-mono text-slate-600 ml-1">
+                    Danh sách đặc quyền (Mỗi dòng một mục)
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="bg-gray-50 border-gray-200 font-mono text-sm min-h-[120px] rounded-2xl p-4 shadow-inner"
+                      className="bg-slate-50 border-slate-200 font-mono text-sm min-h-[120px] rounded-xl p-4 shadow-inner"
                       {...field}
                     />
                   </FormControl>
@@ -293,16 +297,17 @@ export function EditPlanDialog({
               )}
             />
 
+            {/* Trạng thái Switch */}
             <FormField
               control={form.control}
               name="isActive"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/50 p-6">
-                  <div className="space-y-1">
-                    <FormLabel className="text-sm font-black uppercase text-gray-900">
-                      Trạng Thái Kích Hoạt
+                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-5 transition-all hover:bg-white hover:shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-sm font-mono text-slate-900">
+                      Trạng thái hoạt động
                     </FormLabel>
-                    <FormDescription className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                    <FormDescription className="text-xs font-medium text-slate-500">
                       Quyết định việc gói có xuất hiện trên ứng dụng hay không.
                     </FormDescription>
                   </div>
@@ -316,26 +321,26 @@ export function EditPlanDialog({
               )}
             />
 
-            <DialogFooter className="gap-3">
+            <DialogFooter className="pt-2 gap-3 sm:gap-2">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="h-14 px-8 rounded-xl font-bold uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50"
+                className="h-11 px-6 rounded-xl font-semibold text-sm text-slate-600 border-slate-200 hover:bg-slate-50"
               >
-                Hủy Bỏ
+                Hủy bỏ
               </Button>
               <Button
                 type="submit"
                 disabled={isUpdating}
-                className="h-14 flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-600/20"
+                className="h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all active:scale-[0.98]"
               >
                 {isUpdating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                Lưu Thay Đổi Hệ Thống
+                Lưu thay đổi
               </Button>
             </DialogFooter>
           </form>

@@ -14,41 +14,42 @@ export default function AdminSubscriptionPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-gray-400 font-mono animate-pulse">
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-400 font-mono animate-pulse">
         <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-        <p className="text-xs uppercase tracking-widest font-bold">
-          Đang tải dữ liệu gói dịch vụ...
-        </p>
+        <p className="text-sm font-medium">Đang tải dữ liệu gói dịch vụ...</p>
       </div>
     );
   }
 
   if (isError || !data) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-gray-500 font-mono">
-        <AlertCircle className="h-10 w-10 text-red-500" />
-        <p className="font-bold">Không thể kết nối dữ liệu từ máy chủ.</p>
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-500 font-mono bg-slate-50/50">
+        <AlertCircle className="h-10 w-10 text-red-500 opacity-80" />
+        <p className="font-semibold text-sm">
+          Không thể kết nối dữ liệu từ máy chủ.
+        </p>
         <Button
           variant="outline"
           onClick={() => refetch()}
-          className="rounded-xl border-gray-200"
+          className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 mt-2"
         >
-          Thử lại
+          Thử tải lại
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-10 pb-10 font-mono text-gray-900 animate-in fade-in duration-500 relative">
+    <div className="w-full max-w-[1600px] mx-auto space-y-10 pb-10 px-4 sm:px-8 lg:px-12 font-mono text-slate-900 animate-in fade-in duration-500 relative">
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[10%] right-[5%] w-[400px] h-[400px] bg-orange-500/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[10%] left-[5%] w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full" />
       </div>
 
       <div className="relative z-10 space-y-10">
-        <div className="flex flex-col gap-8 px-2 pt-4">
-          <div className="flex justify-between items-start">
+        <div className="flex flex-col gap-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <SubscriptionHeader />
             <CreatePlanDialog />
           </div>
@@ -63,9 +64,9 @@ export default function AdminSubscriptionPage() {
 
         <PlanList plans={data?.plans || []} />
 
-        <footer className="pt-8 text-center border-t border-gray-100 mt-10">
-          <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.5em]">
-            Demif Subscription Engine v1.0
+        <footer className="pt-8 text-center border-t border-slate-200 mt-10">
+          <p className="text-sm font-medium text-slate-400">
+            Hệ thống quản lý dịch vụ v1.0 • Demif Studio
           </p>
         </footer>
       </div>

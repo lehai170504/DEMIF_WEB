@@ -24,20 +24,18 @@ interface PlanCardProps {
   plan: SubscriptionPlanDto;
 }
 
-// FIX: Helper nhận diện Tier dựa trên string từ SubscriptionPlanDto
 const getTierLabel = (tier: string) => {
   return tier || "N/A";
 };
 
-// FIX: Helper nhận diện BillingCycle dựa trên string từ SubscriptionPlanDto
 const getCycleLabel = (cycle: string) => {
   switch (cycle) {
     case "Monthly":
-      return "Hàng Tháng";
+      return "Hàng tháng";
     case "Yearly":
-      return "Hàng Năm";
+      return "Hàng năm";
     case "Lifetime":
-      return "Vĩnh Viễn";
+      return "Vĩnh viễn";
     default:
       return cycle;
   }
@@ -63,34 +61,34 @@ export function PlanCard({ plan }: PlanCardProps) {
     <>
       <div
         className={cn(
-          "group relative flex flex-col bg-white border border-gray-200 rounded-[2.5rem] p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 overflow-hidden font-mono",
-          plan.isActive === false && "opacity-60 grayscale",
+          "group relative flex flex-col bg-white border border-slate-200 rounded-[2rem] p-8 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 overflow-hidden font-mono",
+          plan.isActive === false && "opacity-75 grayscale-[50%]",
         )}
       >
         {/* Hiệu ứng trang trí nền */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[40px] rounded-full pointer-events-none transition-colors group-hover:bg-orange-500/10" />
 
-        {/* Cấu trúc Header: Trạng thái & Tier */}
+        {/* Header: Trạng thái & Tier */}
         <div className="flex items-center justify-between mb-8 relative z-10">
           <div className="flex gap-2">
             <div
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-tighter transition-all",
+                "flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-semibold transition-all",
                 plan.isActive
-                  ? "bg-emerald-50 border-emerald-100 text-emerald-600 shadow-sm"
-                  : "bg-gray-100 border-gray-200 text-gray-400",
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm"
+                  : "bg-slate-100 border-slate-200 text-slate-500",
               )}
             >
-              <Power className="h-3 w-3" />
-              {plan.isActive ? "Đang Hoạt Động" : "Đã Tạm Dừng"}
+              <Power className="h-3.5 w-3.5" />
+              {plan.isActive ? "Hoạt động" : "Tạm dừng"}
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-100 bg-gray-50 text-gray-500 text-[9px] font-black uppercase tracking-tighter">
-              <Layers className="h-3 w-3 text-gray-400" />
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-semibold capitalize">
+              <Layers className="h-3.5 w-3.5 text-slate-400" />
               {getTierLabel(plan.tier)}
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 italic">
-            <Calendar className="w-3 h-3 opacity-50" />
+          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+            <Calendar className="w-3.5 h-3.5" />
             {plan.createdAt
               ? format(new Date(plan.createdAt), "dd/MM/yyyy", { locale: vi })
               : "N/A"}
@@ -100,13 +98,13 @@ export function PlanCard({ plan }: PlanCardProps) {
         {/* Thông tin Gói & Giá bán */}
         <div className="relative z-10 space-y-4 mb-8">
           <div>
-            <h4 className="text-2xl font-black text-gray-900 group-hover:text-orange-600 transition-colors uppercase italic tracking-tighter leading-none mb-3">
+            <h4 className="text-2xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors tracking-tight leading-none mb-3 capitalize">
               {plan.name}
             </h4>
             <div className="flex flex-wrap gap-2">
               <Badge
                 variant="outline"
-                className="bg-gray-50 border-gray-200 text-gray-500 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg"
+                className="bg-slate-50 border-slate-200 text-slate-600 text-xs font-semibold px-2.5 py-0.5 rounded-md"
               >
                 {getCycleLabel(plan.billingCycle)}
                 {plan.durationDays && ` (${plan.durationDays} Ngày)`}
@@ -116,23 +114,23 @@ export function PlanCard({ plan }: PlanCardProps) {
                   style={{
                     backgroundColor: plan.badgeColor
                       ? `${plan.badgeColor}15`
-                      : "#f3f4f6",
-                    color: plan.badgeColor || "#6b7280",
+                      : "#f8fafc",
+                    color: plan.badgeColor || "#475569",
                     borderColor: plan.badgeColor
                       ? `${plan.badgeColor}30`
-                      : "#e5e7eb",
+                      : "#e2e8f0",
                   }}
-                  className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border shadow-sm"
+                  className="text-xs font-semibold px-2.5 py-0.5 rounded-md border shadow-sm"
                 >
                   {plan.badgeText}
                 </Badge>
               )}
             </div>
           </div>
-          <div className="pt-2 border-t border-gray-50">
-            <p className="text-3xl font-black text-gray-900 tracking-tighter">
+          <div className="pt-3 border-t border-slate-100">
+            <p className="text-3xl font-bold text-slate-900 tracking-tight">
               {formattedPrice}
-              <span className="text-xs font-bold text-gray-400 uppercase ml-2 italic tracking-widest">
+              <span className="text-sm font-semibold text-slate-400 ml-1.5 uppercase">
                 {plan.currency}
               </span>
             </p>
@@ -140,57 +138,55 @@ export function PlanCard({ plan }: PlanCardProps) {
         </div>
 
         {/* Danh sách Tính năng đặc quyền */}
-        <div className="flex-1 space-y-4 mb-10">
+        <div className="flex-1 space-y-3 mb-10">
           {plan.features.map((feature, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-3 text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors"
+              className="flex items-start gap-3 text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors"
             >
-              <div className="mt-0.5 p-1 rounded-full bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100/50">
-                <Check className="h-3 w-3 stroke-[3.5px]" />
+              <div className="mt-0.5 p-0.5 flex-shrink-0 rounded-full bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100">
+                <Check className="h-3.5 w-3.5 stroke-[3px]" />
               </div>
-              <span className="leading-tight uppercase text-[11px] font-bold tracking-tight">
-                {feature}
-              </span>
+              <span className="leading-snug">{feature}</span>
             </div>
           ))}
         </div>
 
         {/* Footer: Metadata & Hành động */}
-        <div className="relative z-10 pt-6 border-t border-gray-100 flex items-center justify-between mt-auto">
+        <div className="relative z-10 pt-5 border-t border-slate-100 flex items-center justify-between mt-auto">
           <div className="space-y-1">
-            <span className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] flex items-center gap-2">
-              <AlertCircle className="h-3 w-3" /> Giới hạn
+            <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5" /> Giới hạn
             </span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[11px] font-bold text-gray-600 leading-none">
+              <span className="text-sm font-semibold text-slate-700 leading-none">
                 {plan.limits || "Không giới hạn"}
               </span>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               disabled={isDeleting}
               onClick={handleDelete}
-              className="h-10 w-10 rounded-2xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
+              className="h-10 w-10 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all hover:border-red-200 border border-transparent"
             >
               {isDeleting ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className="h-4 w-4" />
               )}
             </Button>
 
             <Button
               variant="outline"
               onClick={() => setIsEditOpen(true)}
-              className="h-10 px-5 gap-2 rounded-2xl border-gray-200 bg-white hover:bg-gray-900 hover:text-white text-gray-900 font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm active:scale-95"
+              className="h-10 px-5 gap-2 rounded-xl border-slate-200 bg-white hover:bg-slate-900 hover:text-white text-slate-900 font-semibold text-sm transition-all shadow-sm active:scale-95"
             >
-              <Edit2 className="h-3 w-3 stroke-[3px]" />
-              Sửa
+              <Edit2 className="h-4 w-4" />
+              Sửa gói
             </Button>
           </div>
         </div>

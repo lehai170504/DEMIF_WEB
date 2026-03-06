@@ -18,42 +18,39 @@ export function StatCard({
   color,
   isCurrency,
 }: StatCardProps) {
+  // Thay đổi màu background glow cho phù hợp với phong cách nhẹ nhàng
   const bgGlow = color.replace("text-", "bg-");
   const bgIcon = color.replace("text-", "bg-") + "/10";
 
   return (
-    <div className="p-6 rounded-[2.5rem] bg-white border border-gray-100 flex items-center gap-6 relative overflow-hidden group shadow-xl shadow-gray-200/40 hover:shadow-2xl transition-all duration-500 font-mono">
+    <div className="p-6 rounded-[2rem] bg-white border border-slate-200 flex items-center gap-5 relative overflow-hidden group shadow-sm hover:shadow-md transition-all duration-300 font-mono">
       <div
         className={cn(
-          "p-4 rounded-[1.5rem] border border-white shadow-inner transition-transform group-hover:scale-110 duration-500",
+          "p-4 rounded-2xl border border-white shadow-sm transition-transform group-hover:scale-105 duration-300",
           bgIcon,
           color,
         )}
       >
-        <Icon className="h-8 w-8 stroke-[2.5px]" />
+        <Icon className="h-7 w-7 stroke-[2px]" />
       </div>
 
-      <div className="space-y-1.5 relative z-10">
-        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
-          {label}
-        </p>
+      <div className="space-y-1 relative z-10">
+        <p className="text-xs font-medium text-slate-500">{label}</p>
         <p
           className={cn(
-            "text-3xl font-black text-gray-900 tracking-tighter uppercase italic leading-none",
+            "text-2xl font-bold text-slate-900 tracking-tight leading-none",
             isCurrency && "text-emerald-600",
           )}
         >
           {value}
         </p>
-        <p className="text-[10px] text-gray-500 font-bold italic tracking-tight border-l-2 border-gray-100 pl-2">
-          {subtext}
-        </p>
+        <p className="text-xs font-medium text-slate-400 pt-1">{subtext}</p>
       </div>
 
-      {/* Trang trí background nhẹ */}
+      {/* Trang trí background nhẹ nhàng hơn */}
       <div
         className={cn(
-          "absolute -right-6 -bottom-6 w-24 h-24 opacity-0 group-hover:opacity-10 transition-opacity blur-3xl rounded-full",
+          "absolute -right-6 -bottom-6 w-32 h-32 opacity-0 group-hover:opacity-[0.03] transition-opacity blur-2xl rounded-full",
           bgGlow,
         )}
       />

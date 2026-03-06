@@ -19,6 +19,7 @@ export const useLessons = (params: GetLessonsParams) => {
     queryKey: ["admin-lessons", params],
     queryFn: () => lessonService.getLessons(params),
     placeholderData: (previousData) => previousData,
+    staleTime: 5000,
   });
 };
 
@@ -49,11 +50,14 @@ export const useLessonActions = () => {
   const createMutation = useMutation({
     mutationFn: (data: CreateLessonRequest) => lessonService.createLesson(data),
     onSuccess: () => {
-      toast.success("Tạo bài học mới thành công!");
+      toast.success("Tạo bài học mới thành công!", {
+        id: "create-lesson-success",
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
     onError: (error: any) =>
       toast.error("Lỗi tạo bài học", {
+        id: "create-lesson-error",
         description: extractErrorMessage(
           error,
           "Vui lòng kiểm tra lại dữ liệu.",
@@ -65,7 +69,9 @@ export const useLessonActions = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateLessonRequest }) =>
       lessonService.updateLesson(id, data),
     onSuccess: (_, variables) => {
-      toast.success("Cập nhật thành công!");
+      toast.success("Cập nhật bài học thành công!", {
+        id: "update-lesson-success",
+      }); // Thêm ID
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.id] });
       queryClient.invalidateQueries({
@@ -74,6 +80,7 @@ export const useLessonActions = () => {
     },
     onError: (error: any) =>
       toast.error("Lỗi cập nhật", {
+        id: "update-lesson-error",
         description: extractErrorMessage(error, "Không thể lưu thay đổi."),
       }),
   });
@@ -81,11 +88,14 @@ export const useLessonActions = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => lessonService.deleteLesson(id),
     onSuccess: () => {
-      toast.success("Đã xóa bài học.");
+      toast.success("Đã xóa bài học khỏi hệ thống.", {
+        id: "delete-lesson-success",
+      }); // Thêm ID
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
     onError: (error: any) =>
       toast.error("Lỗi xóa bài học", {
+        id: "delete-lesson-error",
         description: extractErrorMessage(
           error,
           "Bài học có thể đang được sử dụng.",
@@ -97,12 +107,15 @@ export const useLessonActions = () => {
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       lessonService.updateStatus(id, status),
     onSuccess: (data) => {
-      toast.success(data.message || "Cập nhật trạng thái thành công");
+      toast.success(data.message || "Cập nhật trạng thái thành công", {
+        id: "status-update-success",
+      }); // Thêm ID
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
       queryClient.invalidateQueries({ queryKey: ["lesson", data.lessonId] });
     },
     onError: (error: any) =>
       toast.error("Lỗi thay đổi trạng thái", {
+        id: "status-update-error",
         description: extractErrorMessage(error, "Thao tác không hợp lệ."),
       }),
   });
@@ -126,13 +139,15 @@ export const useRegenerateTemplates = () => {
   return useMutation({
     mutationFn: (id: string) => lessonService.regenerateTemplates(id),
     onSuccess: (data, lessonId) => {
-      toast.success("Thành công!", {
+      toast.success("Đồng bộ thành công!", {
+        id: "regen-template-success",
         description: data?.message || "Đã tạo lại Templates cho bài học.",
       });
       queryClient.invalidateQueries({ queryKey: ["lesson-preview", lessonId] });
     },
     onError: (error: any) =>
       toast.error("Lỗi hệ thống", {
+        id: "regen-template-error",
         description: extractErrorMessage(
           error,
           "Không thể tạo lại Templates lúc này.",
@@ -150,6 +165,7 @@ export const useUpdateTranscript = () => {
       lessonService.updateTranscript(id, data),
     onSuccess: (data, variables) => {
       toast.success("Đã cập nhật Transcript", {
+        id: "update-transcript-success",
         description: `Hệ thống đã xử lý ${data.segmentCount} câu thoại và tái tạo templates.`,
       });
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.id] });
@@ -159,6 +175,7 @@ export const useUpdateTranscript = () => {
     },
     onError: (error: any) => {
       toast.error("Lỗi cập nhật Transcript", {
+        id: "update-transcript-error",
         description: extractErrorMessage(
           error,
           "Không thể xử lý nội dung transcript này.",
@@ -177,7 +194,8 @@ export const useCreateFromYoutube = () => {
     mutationFn: (data: CreateLessonFromYoutubeRequest) =>
       lessonService.createFromYoutube(data),
     onSuccess: (data) => {
-      toast.success("Thành công!", {
+      toast.success("Xử lý thành công!", {
+        id: "youtube-create-success",
         description: `Đã tạo bài học "${data.title}" từ YouTube.`,
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
@@ -189,6 +207,7 @@ export const useCreateFromYoutube = () => {
     },
     onError: (error: any) => {
       toast.error("Lỗi tạo từ YouTube", {
+        id: "youtube-create-error",
         description: extractErrorMessage(
           error,
           "Không thể lấy dữ liệu từ URL này.",
@@ -198,7 +217,7 @@ export const useCreateFromYoutube = () => {
   });
 };
 
-// --- 7. Hook Preview YouTube trước khi tạo bài học ---
+// --- 8. Hook Preview YouTube trước khi tạo bài học ---
 export const useYoutubePreview = (url: string) => {
   return useQuery({
     queryKey: ["youtube-preview", url],

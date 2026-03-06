@@ -1,4 +1,3 @@
-// src/app/admin/lessons/[id]/page.tsx
 "use client";
 
 import * as React from "react";
@@ -10,7 +9,6 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Save, Trash2, ArrowLeft, LayoutTemplate } from "lucide-react";
-import { toast } from "sonner";
 
 import { useLesson, useLessonActions } from "@/hooks/use-lesson";
 import { LessonSchema, LessonFormValues } from "@/schemas/lesson.schema";
@@ -18,12 +16,16 @@ import { UpdateLessonRequest } from "@/types/lesson.type";
 
 import { LessonFormFields } from "@/components/admin/lesson/lesson-form-fields";
 import { DictationPreviewTab } from "@/components/admin/lesson/dictation-preview-tab";
-import {
-  normalizeStatus,
-  normalizeType,
-  normalizeLevel,
-} from "@/components/admin/lesson/table-columns";
+import { DeleteLessonDialog } from "@/components/admin/lesson/delete-lesson-dialog";
 
+// IMPORT HẰNG SỐ ĐỂ CHUẨN HÓA DỮ LIỆU
+import {
+  LESSON_TYPES,
+  LESSON_LEVELS,
+  LESSON_STATUSES,
+} from "@/components/admin/lesson/lesson.constants";
+
+// Hàm xử lý Tags từ chuỗi JSON của BE về dạng text phẩy
 const parseTagsForInput = (tagsRaw?: string | null) => {
   if (!tagsRaw) return "";
   try {
@@ -34,16 +36,33 @@ const parseTagsForInput = (tagsRaw?: string | null) => {
   }
 };
 
+// HÀM CHUẨN HÓA THẺ SELECT: Khắc phục lỗi BE trả về sai case (chữ hoa/thường)
+const normalizeSelectValue = (
+  value: string | number | null | undefined,
+  options: { value: string; label: string }[],
+  defaultValue: string,
+) => {
+  if (!value) return defaultValue;
+  const strValue = String(value).toLowerCase();
+  const match = options.find(
+    (opt) => String(opt.value).toLowerCase() === strValue,
+  );
+  return match ? match.value : defaultValue;
+};
+
 export default function LessonDetailPage() {
   const router = useRouter();
   const params = useParams();
   const lessonId = params.id as string;
 
-  // Lấy dữ liệu bài học
-  const { data: lesson, isLoading: isFetching } = useLesson(lessonId);
-  const { updateLesson, deleteLesson, isUpdating, isDeleting } =
-    useLessonActions();
+  // State quản lý mở Modal xác nhận xóa
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
+  // Lấy chi tiết bài học từ BE
+  const { data: lesson, isLoading: isFetching } = useLesson(lessonId);
+  const { updateLesson, isUpdating } = useLessonActions();
+
+  // Khởi tạo Form
   const form = useForm<LessonFormValues>({
     resolver: zodResolver(LessonSchema),
     defaultValues: {
@@ -68,16 +87,23 @@ export default function LessonDetailPage() {
 
   const formErrors = form.formState.errors;
 
-  // Cập nhật form khi fetch xong data
+  // NẠP DỮ LIỆU VÀO FORM KHI LOAD XONG (Detail)
   React.useEffect(() => {
     if (lesson) {
       form.reset({
         title: lesson.title || "",
         description: lesson.description || "",
-        lessonType: String(normalizeType(lesson.lessonType)),
-        level: String(normalizeLevel(lesson.level)),
+
+        // Khắc phục triệt để lỗi không hiển thị Select bằng hàm normalize
+        lessonType: normalizeSelectValue(
+          lesson.lessonType,
+          LESSON_TYPES,
+          "Dictation",
+        ),
+        level: normalizeSelectValue(lesson.level, LESSON_LEVELS, "Beginner"),
+        status: normalizeSelectValue(lesson.status, LESSON_STATUSES, "draft"),
+
         category: lesson.category || "",
-        status: String(normalizeStatus(lesson.status)).toLowerCase(),
         isPremiumOnly: !!lesson.isPremiumOnly,
         durationSeconds: Number(lesson.durationSeconds) || 0,
         displayOrder: Number(lesson.displayOrder) || 0,
@@ -92,9 +118,11 @@ export default function LessonDetailPage() {
     }
   }, [lesson, form]);
 
+  // XỬ LÝ SUBMIT UPDATE
   const onSubmit = (values: LessonFormValues) => {
     if (!lesson) return;
 
+    // Map dữ liệu form về cấu trúc Request của Backend
     const payload: UpdateLessonRequest = {
       title: values.title,
       description: values.description,
@@ -114,43 +142,22 @@ export default function LessonDetailPage() {
       status: values.status,
     };
 
-    updateLesson(
-      { id: lesson.id, data: payload },
-      {
-        onSuccess: () => {
-          toast.success("Đã cập nhật thông tin bài học thành công!");
-          // Không redirect, ở lại trang để người dùng có thể test Preview
-        },
-      },
-    );
-  };
-
-  const handleDelete = () => {
-    if (confirm("Bạn có chắc chắn muốn xóa bài học này vĩnh viễn không?")) {
-      deleteLesson(lessonId, {
-        onSuccess: () => {
-          toast.success("Đã xóa bài học!");
-          router.push("/admin/lessons"); // Xóa xong thì quay về danh sách
-        },
-      });
-    }
+    updateLesson({ id: lesson.id, data: payload });
   };
 
   if (isFetching) {
     return (
-      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-gray-500 font-mono">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500 mb-4" />
-        <p className="text-xs uppercase tracking-widest">
-          Đang tải dữ liệu bài học...
-        </p>
+      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-slate-500 font-sans">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-sm font-medium">Đang tải dữ liệu bài học...</p>
       </div>
     );
   }
 
   if (!lesson) {
     return (
-      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-gray-500 font-mono">
-        <p>Không tìm thấy bài học.</p>
+      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-slate-500 font-sans">
+        <p className="text-sm font-medium mb-2">Không tìm thấy bài học.</p>
         <Button variant="link" onClick={() => router.push("/admin/lessons")}>
           Quay lại danh sách
         </Button>
@@ -159,79 +166,71 @@ export default function LessonDetailPage() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 pb-12 font-mono">
+    <div className="w-full max-w-[1200px] mx-auto space-y-6 pb-12 font-mono px-4 lg:px-8">
       {/* Nút Quay Lại */}
       <button
         onClick={() => router.push("/admin/lessons")}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-2"
+        className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors mb-2 mt-6"
       >
         <ArrowLeft className="h-4 w-4" /> Quay lại danh sách
       </button>
 
       {/* Header Trang */}
-      <div className="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-orange-50 rounded-xl border border-orange-100">
-              <LayoutTemplate className="h-5 w-5 text-orange-500" />
+              <LayoutTemplate className="h-5 w-5 text-orange-600" />
             </div>
-            <h1 className="text-2xl font-black uppercase tracking-tighter text-gray-900">
+            <h1 className="text-2xl font-bold text-slate-900">
               Chi tiết bài học
             </h1>
           </div>
-          <p className="text-[11px] text-gray-500 font-bold uppercase tracking-[0.2em] bg-gray-100 w-fit px-2 py-1 rounded-md ml-12">
-            UID: {lessonId}
+          <p className="text-xs text-slate-500 font-medium bg-slate-100 w-fit px-3 py-1.5 rounded-lg ml-[3.25rem]">
+            <span className="font-mono">ID: {lessonId}</span>
           </p>
         </div>
 
-        {/* Action Buttons (Top) */}
+        {/* Action Buttons */}
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
-            className="bg-white border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl"
-            onClick={handleDelete}
-            disabled={isDeleting}
+            className="h-11 bg-white border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl"
+            onClick={() => setIsDeleteDialogOpen(true)}
           >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4 mr-2" />
-            )}
-            <span className="font-bold text-xs uppercase tracking-wider">
-              Xóa
-            </span>
+            <Trash2 className="h-4 w-4 mr-2" />
+            <span className="font-semibold text-sm">Xóa bài</span>
           </Button>
+
           <Button
             type="submit"
             form="update-lesson-form"
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20"
+            className="h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md shadow-blue-500/20 px-6"
             disabled={isUpdating}
           >
             {isUpdating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            <span className="font-bold text-xs uppercase tracking-wider">
-              Lưu thay đổi
-            </span>
+            Lưu thay đổi
           </Button>
         </div>
       </div>
 
       {/* Vùng Tabs Content */}
-      <div className="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm min-h-[500px]">
+      <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm min-h-[500px]">
         <Tabs defaultValue="edit" className="w-full">
-          <TabsList className="w-full bg-gray-100 p-1.5 rounded-2xl mb-8 grid grid-cols-2 h-14">
+          <TabsList className="w-full bg-slate-100/50 p-1.5 rounded-2xl mb-8 grid grid-cols-2 h-14">
             <TabsTrigger
               value="edit"
-              className="rounded-xl font-black text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm transition-all"
+              className="rounded-xl font-semibold text-sm text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all"
             >
               Chỉnh sửa nội dung
             </TabsTrigger>
             <TabsTrigger
               value="preview"
-              className="rounded-xl font-black text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm transition-all"
+              className="rounded-xl font-semibold text-sm text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all"
             >
               Xem trước & Kiểm định
             </TabsTrigger>
@@ -244,21 +243,24 @@ export default function LessonDetailPage() {
                 id="update-lesson-form"
                 onSubmit={form.handleSubmit(onSubmit)}
               >
+                {/* HIỂN THỊ CÁC TRƯỜNG DỮ LIỆU */}
                 <LessonFormFields form={form} />
 
                 {Object.keys(formErrors).length > 0 && (
-                  <div className="mt-8 p-5 bg-red-50 border border-red-200 rounded-2xl">
-                    <p className="text-red-600 text-xs font-black uppercase mb-3 tracking-widest">
+                  <div className="mt-8 p-5 bg-red-50 border border-red-100 rounded-2xl">
+                    <p className="text-red-600 text-sm font-bold mb-3">
                       Vui lòng sửa các lỗi sau để lưu:
                     </p>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs text-red-500 font-bold">
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-red-500 font-medium">
                       {Object.entries(formErrors).map(([key, err]) => (
                         <li key={key} className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                          <span className="uppercase text-[10px] bg-white px-1 rounded text-red-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                          <span className="text-xs bg-white px-2 py-0.5 rounded-md text-red-400 border border-red-100">
                             {key}
                           </span>
-                          {err?.message as string}
+                          <span className="truncate">
+                            {err?.message as string}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -270,11 +272,19 @@ export default function LessonDetailPage() {
 
           {/* TAB XEM TRƯỚC */}
           <TabsContent value="preview" className="mt-0 outline-none">
-            {/* Đảm bảo component DictationPreviewTab này đã được bạn lưu đúng đường dẫn */}
             <DictationPreviewTab lessonId={lessonId} />
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Component Modal Xác nhận Xóa */}
+      <DeleteLessonDialog
+        lessonId={lessonId}
+        lessonTitle={lesson?.title || ""}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onSuccess={() => router.push("/admin/lessons")}
+      />
     </div>
   );
 }
