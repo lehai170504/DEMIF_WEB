@@ -16,15 +16,11 @@ import {
 import { Loader2 } from "lucide-react";
 
 export default function AdminUsersPage() {
-  // --- 1. STATE ---
   const [activeFilter, setActiveFilter] = React.useState<UserStatus>("all");
   const [searchTerm, setSearchTerm] = React.useState("");
-
-  // Pagination State
   const [page, setPage] = React.useState(1);
   const pageSize = 10;
 
-  // --- 2. DEBOUNCE & FETCH ---
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   const { data, isLoading, isError } = useUsers({
@@ -38,21 +34,15 @@ export default function AdminUsersPage() {
     setPage(1);
   }, [activeFilter, debouncedSearch]);
 
-  const counts = {
-    all: data?.totalCount || 0,
-    active: 0,
-    suspended: 0,
-    banned: 0,
-  };
+  // ĐÃ LOẠI BỎ LOGIC counts TẠI ĐÂY
 
   const totalPages = data?.totalPages || 1;
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 pb-10 px-2 font-mono text-foreground relative">
-      {/* Background Glow Effect - Sử dụng màu primary mờ */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[20%] left-[10%] w-[600px] h-[600px] bg-blue-500/5 blur-[120px] rounded-full" />
+    <div className="max-w-[1600px] mx-auto space-y-8 pb-10 px-2 font-mono text-gray-900 relative">
+      <div className="fixed inset-0 pointer-events-none z-0 bg-gray-50/50">
+        <div className="absolute top-[10%] right-[5%] w-[400px] h-[400px] bg-orange-500/5 blur-[100px] rounded-full" />
+        <div className="absolute bottom-[10%] left-[5%] w-[500px] h-[500px] bg-blue-500/5 blur-[100px] rounded-full" />
       </div>
 
       <div className="relative z-10 space-y-8">
@@ -63,29 +53,28 @@ export default function AdminUsersPage() {
           onSearchChange={setSearchTerm}
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
-          counts={counts}
+          // KHÔNG TRUYỀN counts NỮA
         />
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-muted-foreground animate-pulse">
-              Đang tải dữ liệu người dùng...
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-orange-500" />
+            <p className="text-gray-500 font-bold uppercase tracking-widest text-xs animate-pulse">
+              Đang truy xuất dữ liệu cộng đồng...
             </p>
           </div>
         ) : isError ? (
-          <div className="text-center py-20 text-destructive bg-destructive/5 rounded-xl border border-destructive/10">
-            Có lỗi xảy ra khi tải danh sách. Vui lòng thử lại.
+          <div className="text-center py-20 text-red-600 bg-red-50 rounded-[2.5rem] border border-red-100 font-bold uppercase text-xs">
+            Hệ thống gặp sự cố khi tải danh sách. Vui lòng thử lại sau.
           </div>
         ) : (
           <>
             <UserTable users={data?.users || []} />
 
             {totalPages > 1 && (
-              <div className="py-4 border-t border-border bg-card/50 backdrop-blur-sm rounded-b-[2.5rem] -mt-8">
+              <div className="py-6 border-t border-gray-100 bg-white/80 backdrop-blur-md rounded-b-[2.5rem] shadow-sm -mt-8 flex justify-center">
                 <Pagination>
-                  <PaginationContent>
-                    {/* Nút Previous */}
+                  <PaginationContent className="gap-4">
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"
@@ -95,21 +84,19 @@ export default function AdminUsersPage() {
                         }}
                         className={
                           page <= 1
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-muted hover:text-foreground text-muted-foreground transition-colors"
+                            ? "pointer-events-none opacity-30"
+                            : "cursor-pointer hover:bg-gray-100 rounded-xl font-bold"
                         }
                       />
                     </PaginationItem>
 
-                    {/* Hiển thị số trang */}
                     <PaginationItem>
-                      <span className="px-4 text-sm font-bold text-muted-foreground">
-                        Trang <span className="text-foreground">{page}</span> /{" "}
+                      <div className="px-6 py-2 bg-gray-50 rounded-xl border border-gray-100 text-xs font-black uppercase tracking-tighter">
+                        Trang <span className="text-orange-600">{page}</span> /{" "}
                         {totalPages}
-                      </span>
+                      </div>
                     </PaginationItem>
 
-                    {/* Nút Next */}
                     <PaginationItem>
                       <PaginationNext
                         href="#"
@@ -119,8 +106,8 @@ export default function AdminUsersPage() {
                         }}
                         className={
                           page >= totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-muted hover:text-foreground text-muted-foreground transition-colors"
+                            ? "pointer-events-none opacity-30"
+                            : "cursor-pointer hover:bg-gray-100 rounded-xl font-bold"
                         }
                       />
                     </PaginationItem>

@@ -14,6 +14,7 @@ import {
   Activity,
   Loader2,
   CreditCard,
+  Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -31,6 +32,7 @@ const MENU_GROUPS = [
     group: "Nội dung",
     items: [
       { href: "/admin/lessons", icon: BookOpen, label: "Bài tập" },
+      { href: "/admin/blogs", icon: Newspaper, label: "Blog" },
       { href: "/admin/audio", icon: FileAudio, label: "Audio" },
     ],
   },

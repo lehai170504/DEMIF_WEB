@@ -6,7 +6,7 @@ interface StatCardProps {
   label: string;
   value: string | number;
   subtext: string;
-  color: string; // vd: "text-blue-500"
+  color: string;
   isCurrency?: boolean;
 }
 
@@ -18,36 +18,44 @@ export function StatCard({
   color,
   isCurrency,
 }: StatCardProps) {
-  // Tách màu nền từ màu text (vd: text-blue-500 -> bg-blue-500)
   const bgGlow = color.replace("text-", "bg-");
+  const bgIcon = color.replace("text-", "bg-") + "/10";
 
   return (
-    <div className="p-5 rounded-[1.5rem] bg-[#18181b] border border-white/10 flex items-center gap-4 relative overflow-hidden group">
+    <div className="p-6 rounded-[2.5rem] bg-white border border-gray-100 flex items-center gap-6 relative overflow-hidden group shadow-xl shadow-gray-200/40 hover:shadow-2xl transition-all duration-500 font-mono">
       <div
-        className={`p-3 rounded-2xl bg-white/5 border border-white/5 ${color}`}
+        className={cn(
+          "p-4 rounded-[1.5rem] border border-white shadow-inner transition-transform group-hover:scale-110 duration-500",
+          bgIcon,
+          color,
+        )}
       >
-        <Icon className="h-6 w-6" />
+        <Icon className="h-8 w-8 stroke-[2.5px]" />
       </div>
-      <div>
-        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-0.5">
+
+      <div className="space-y-1.5 relative z-10">
+        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
           {label}
         </p>
         <p
           className={cn(
-            "text-2xl font-black text-white tracking-tight",
-            isCurrency && "text-emerald-400",
+            "text-3xl font-black text-gray-900 tracking-tighter uppercase italic leading-none",
+            isCurrency && "text-emerald-600",
           )}
         >
           {value}
         </p>
-        <p className="text-[10px] text-zinc-600 font-medium italic mt-0.5">
+        <p className="text-[10px] text-gray-500 font-bold italic tracking-tight border-l-2 border-gray-100 pl-2">
           {subtext}
         </p>
       </div>
 
-      {/* Decorative Glow */}
+      {/* Trang trí background nhẹ */}
       <div
-        className={`absolute -right-4 -bottom-4 w-20 h-20 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl rounded-full ${bgGlow}`}
+        className={cn(
+          "absolute -right-6 -bottom-6 w-24 h-24 opacity-0 group-hover:opacity-10 transition-opacity blur-3xl rounded-full",
+          bgGlow,
+        )}
       />
     </div>
   );

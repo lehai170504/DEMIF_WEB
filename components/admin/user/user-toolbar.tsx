@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type UserStatus = "all" | "active" | "suspended" | "banned";
+export type UserStatus = "all" | "active" | "inactive" | "banned";
 
 interface UserToolbarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   activeFilter: UserStatus;
   onFilterChange: (value: UserStatus) => void;
-  counts: Record<UserStatus, number>;
+  // ĐÃ XÓA counts KHỎI INTERFACE
 }
 
 export function UserToolbar({
@@ -20,33 +20,35 @@ export function UserToolbar({
   onSearchChange,
   activeFilter,
   onFilterChange,
-  counts,
 }: UserToolbarProps) {
   return (
-    <Card className="rounded-[2.5rem] border border-white/10 bg-[#18181b] p-8 space-y-6 shadow-2xl relative overflow-hidden">
-      {/* Glow */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+    <Card className="rounded-[2.5rem] border border-gray-200 bg-white p-8 space-y-6 shadow-xl shadow-gray-200/50 relative overflow-hidden font-mono transition-all duration-300">
+      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600" />
 
-      <div className="flex flex-col lg:flex-row gap-6 items-center relative z-10">
-        {/* Search Bar */}
+      <div className="flex flex-col lg:flex-row gap-8 items-center relative z-10">
         <div className="relative w-full lg:max-w-md group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-orange-500 transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 group-focus-within:text-orange-500 group-focus-within:scale-110 transition-all duration-300" />
           <Input
-            placeholder="Tìm theo username hoặc email..."
-            className="h-12 pl-12 bg-black/20 border-white/10 text-white rounded-2xl font-bold focus-visible:ring-orange-500/50 focus-visible:border-orange-500 placeholder:text-zinc-600 transition-all"
+            placeholder="Tìm theo Username hoặc Email định danh..."
+            className="h-14 pl-12 bg-gray-50 border-gray-200 text-gray-900 rounded-2xl font-bold focus-visible:ring-orange-500/10 focus-visible:border-orange-500 placeholder:text-gray-400 shadow-inner transition-all placeholder:font-medium"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
 
-        <div className="h-8 w-px bg-white/10 hidden lg:block" />
+        <div className="h-10 w-px bg-gray-100 hidden lg:block" />
 
-        {/* Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mr-2 flex items-center gap-2 italic">
-            <Filter className="h-3 w-3" /> Lọc theo:
-          </span>
-          {(["all", "active", "suspended", "banned"] as UserStatus[]).map(
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 mr-2">
+            <div className="p-1.5 bg-gray-100 rounded-lg">
+              <Filter className="h-3 w-3 text-gray-400" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">
+              Lọc Danh Sách:
+            </span>
+          </div>
+
+          {(["all", "active", "inactive", "banned"] as UserStatus[]).map(
             (status) => {
               const isActive = activeFilter === status;
               return (
@@ -54,23 +56,13 @@ export function UserToolbar({
                   key={status}
                   onClick={() => onFilterChange(status)}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-[11px] font-bold uppercase transition-all duration-300 flex items-center gap-2 border",
+                    "px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase transition-all border shadow-sm active:scale-95",
                     isActive
-                      ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20"
-                      : "bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10 hover:text-white hover:border-white/10",
+                      ? "bg-gray-900 text-white border-gray-900 shadow-orange-900/10"
+                      : "bg-white border-gray-100 text-gray-400 hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50/20",
                   )}
                 >
-                  {status}
-                  <span
-                    className={cn(
-                      "px-1.5 py-0.5 rounded-md text-[9px] font-black",
-                      isActive
-                        ? "bg-black/20 text-white"
-                        : "bg-white/10 text-zinc-500",
-                    )}
-                  >
-                    {counts[status]}
-                  </span>
+                  <span className="tracking-widest">{status}</span>
                 </button>
               );
             },

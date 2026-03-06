@@ -25,12 +25,21 @@ import {
   LESSON_LEVELS,
   LESSON_STATUSES,
 } from "./lesson.constants";
+import { Button } from "@/components/ui/button";
+import { RefreshCw, Loader2, Sparkles } from "lucide-react";
+import { useRegenerateTemplates } from "@/hooks/use-lesson";
+import { useParams } from "next/navigation";
+import { TranscriptImportDialog } from "./transcript-import-dialog";
 
 interface LessonFormFieldsProps {
   form: UseFormReturn<LessonFormValues>;
 }
 
 export function LessonFormFields({ form }: LessonFormFieldsProps) {
+  const params = useParams();
+  const lessonId = params.id as string;
+  const regenerateMutation = useRegenerateTemplates();
+
   return (
     <div className="space-y-12">
       {/* SECTION 1: CƠ BẢN */}
@@ -143,7 +152,6 @@ export function LessonFormFields({ form }: LessonFormFieldsProps) {
           )}
         />
 
-        {/* Category & Tags */}
         <div className="grid grid-cols-2 gap-8">
           <FormField
             control={form.control}
@@ -295,14 +303,40 @@ export function LessonFormFields({ form }: LessonFormFieldsProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="timedTranscript"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[10px] font-bold text-gray-500 uppercase">
-                  Dữ liệu thời gian (JSON)
-                </FormLabel>
+                <div className="flex items-center justify-between mb-1">
+                  <FormLabel className="text-[10px] font-bold text-gray-500 uppercase">
+                    Cấu trúc thời gian (JSON)
+                  </FormLabel>
+
+                  {/* CỤM NÚT ACTION NHANH CHO TRANSCRIPT */}
+                  <div className="flex items-center gap-2">
+                    {lessonId && <TranscriptImportDialog lessonId={lessonId} />}
+
+                    {lessonId && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => regenerateMutation.mutate(lessonId)}
+                        disabled={regenerateMutation.isPending || !field.value}
+                        className="h-7 text-[9px] font-black uppercase text-purple-600 hover:text-purple-700 hover:bg-purple-50 gap-1.5 border border-purple-100"
+                      >
+                        {regenerateMutation.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                        Đồng bộ Templates
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <FormControl>
                   <Textarea
                     className="bg-gray-50 border-gray-200 shadow-inner min-h-[150px] rounded-2xl font-mono text-[11px] text-emerald-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
@@ -310,6 +344,7 @@ export function LessonFormFields({ form }: LessonFormFieldsProps) {
                     value={field.value ?? ""}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

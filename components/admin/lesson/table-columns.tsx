@@ -27,12 +27,13 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useSortable } from "@dnd-kit/sortable";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { LessonDto } from "@/types/lesson.type";
-import LessonDetailDialog from "@/components/admin/lesson/lesson-detail-drawer";
 import { useLessonActions } from "@/hooks/use-lesson";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
+// --- HELPERS (Chuẩn hóa dữ liệu hiển thị) ---
 
 export const normalizeStatus = (status?: string | null) => {
   if (!status) return "Draft";
@@ -72,6 +73,7 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString));
 };
 
+// --- DRAG HANDLE COMPONENT ---
 function DragHandle({ id }: { id: string }) {
   const { attributes, listeners } = useSortable({ id });
   return (
@@ -87,6 +89,7 @@ function DragHandle({ id }: { id: string }) {
   );
 }
 
+// === COLUMN DEFINITIONS ===
 export const columns: ColumnDef<LessonDto>[] = [
   {
     id: "drag",
@@ -268,61 +271,32 @@ export const columns: ColumnDef<LessonDto>[] = [
     id: "actions",
     cell: ({ row }) => {
       const lesson = row.original;
-      const [openDetail, setOpenDetail] = useState(false);
-      const { deleteLesson, updateLesson, isDeleting } = useLessonActions();
+      const router = useRouter();
+      const { updateStatus, deleteLesson, isDeleting } = useLessonActions();
       const currentStatus = normalizeStatus(lesson.status);
+
+      // --- HANDLERS ---
+
+      const handleToggleStatus = () => {
+        // Luân chuyển giữa Draft và Published
+        const newStatus = currentStatus === "Published" ? "draft" : "published";
+        updateStatus({ id: lesson.id, status: newStatus });
+      };
+
+      const handleArchive = () => {
+        updateStatus({ id: lesson.id, status: "archived" });
+      };
 
       const handleDelete = () => {
         toast("Xác nhận xóa bài học?", {
           description: `Bài học "${lesson.title || "Không tên"}" sẽ bị xóa vĩnh viễn.`,
-          action: { label: "Xóa ngay", onClick: () => deleteLesson(lesson.id) },
+          action: {
+            label: "Xóa ngay",
+            onClick: () => deleteLesson(lesson.id),
+          },
           cancel: { label: "Hủy", onClick: () => {} },
           actionButtonStyle: { backgroundColor: "#ef4444", color: "white" },
         });
-      };
-
-      const handleToggleStatus = () => {
-        const newStatus = currentStatus === "Published" ? "draft" : "published";
-        const payload: any = { ...lesson, status: newStatus };
-
-        if (typeof payload.lessonType === "string") {
-          payload.lessonType =
-            payload.lessonType === "Shadowing" || payload.lessonType === "1"
-              ? 1
-              : 0;
-        }
-        if (typeof payload.level === "string") {
-          payload.level =
-            payload.level === "Advanced" || payload.level === "2"
-              ? 2
-              : payload.level === "Intermediate" || payload.level === "1"
-                ? 1
-                : 0;
-        }
-
-        updateLesson({ id: lesson.id, data: payload });
-      };
-
-      const handleArchive = () => {
-        const payload: any = { ...lesson, status: "archived" };
-
-        if (typeof payload.lessonType === "string") {
-          payload.lessonType =
-            payload.lessonType === "Shadowing" || payload.lessonType === "1"
-              ? 1
-              : 0;
-        }
-        if (typeof payload.level === "string") {
-          payload.level =
-            payload.level === "Advanced" || payload.level === "2"
-              ? 2
-              : payload.level === "Intermediate" || payload.level === "1"
-                ? 1
-                : 0;
-        }
-
-        updateLesson({ id: lesson.id, data: payload });
-        toast.success(`Đã lưu trữ bài học`);
       };
 
       return (
@@ -332,57 +306,64 @@ export const columns: ColumnDef<LessonDto>[] = [
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                className="h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full"
               >
                 <IconDotsVertical className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-48 bg-white border-gray-200 text-gray-700 shadow-xl"
+              className="w-48 bg-white border border-gray-200 text-gray-700 shadow-xl rounded-2xl p-1.5"
             >
+              {/* CHUYỂN HƯỚNG SANG PAGE CHI TIẾT [ID] */}
               <DropdownMenuItem
-                onClick={() => setOpenDetail(true)}
-                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => router.push(`/admin/lessons/${lesson.id}`)}
+                className="cursor-pointer hover:bg-gray-50 rounded-lg py-2"
               >
-                <IconEdit className="mr-2 h-4 w-4" /> Chỉnh sửa
+                <IconEdit className="mr-2 h-4 w-4 text-gray-400" /> Chỉnh sửa
+                chi tiết
               </DropdownMenuItem>
 
+              {/* PATCH STATUS: PUBLISH/DRAFT */}
               <DropdownMenuItem
                 onClick={handleToggleStatus}
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer hover:bg-gray-50 rounded-lg py-2"
               >
-                <IconStar className="mr-2 h-4 w-4" />
+                <IconStar
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    currentStatus !== "Published"
+                      ? "text-orange-500 fill-orange-500/20"
+                      : "text-gray-400",
+                  )}
+                />
                 {currentStatus === "Published"
                   ? "Gỡ bài (Draft)"
                   : "Đăng bài (Publish)"}
               </DropdownMenuItem>
 
+              {/* PATCH STATUS: ARCHIVE */}
               {currentStatus !== "Archived" && (
                 <DropdownMenuItem
                   onClick={handleArchive}
-                  className="cursor-pointer hover:bg-gray-50 text-gray-500"
+                  className="cursor-pointer hover:bg-gray-50 text-gray-500 rounded-lg py-2"
                 >
-                  <IconArchive className="mr-2 h-4 w-4" /> Lưu trữ
+                  <IconArchive className="mr-2 h-4 w-4" /> Lưu trữ bài học
                 </DropdownMenuItem>
               )}
 
-              <DropdownMenuSeparator className="bg-gray-100" />
+              <DropdownMenuSeparator className="my-1 bg-gray-100" />
+
+              {/* DELETE */}
               <DropdownMenuItem
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer"
+                className="text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer rounded-lg py-2"
               >
                 <IconTrash className="mr-2 h-4 w-4" /> Xóa bài học
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <LessonDetailDialog
-            open={openDetail}
-            onOpenChange={setOpenDetail}
-            lesson={lesson}
-          />
         </div>
       );
     },

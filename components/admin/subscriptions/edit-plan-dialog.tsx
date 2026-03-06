@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Fingerprint, Sparkles } from "lucide-react";
 import { useManagePlan } from "@/hooks/use-manage-plan";
 import {
   CreatePlanSchema,
@@ -48,19 +48,18 @@ interface EditPlanDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// --- HELPER MAPPING (Số từ BE -> Chữ cho Select UI) ---
 const mapTierToString = (tier: string | number) => {
   const t = String(tier);
   if (t === "1" || t === "Premium") return "1";
   if (t === "2" || t === "Enterprise") return "2";
-  return "0"; // Basic
+  return "0";
 };
 
 const mapCycleToString = (cycle: string | number) => {
   const c = String(cycle);
   if (c === "1" || c === "Yearly") return "1";
   if (c === "2" || c === "Lifetime") return "2";
-  return "0"; // Monthly
+  return "0";
 };
 
 export function EditPlanDialog({
@@ -86,15 +85,14 @@ export function EditPlanDialog({
     },
   });
 
-  // Reset form khi mở modal
   React.useEffect(() => {
     if (open && plan) {
       form.reset({
         name: plan.name,
-        tier: Number(mapTierToString(plan.tier)), // Chuyển về số cho Schema
+        tier: Number(mapTierToString(plan.tier)),
         price: plan.price,
         currency: plan.currency,
-        billingCycle: Number(mapCycleToString(plan.billingCycle)), // Chuyển về số cho Schema
+        billingCycle: Number(mapCycleToString(plan.billingCycle)),
         durationDays: plan.durationDays ?? 30,
         featuresString: plan.features ? plan.features.join("\n") : "",
         badgeText: plan.badgeText || "",
@@ -105,17 +103,14 @@ export function EditPlanDialog({
   }, [open, plan, form]);
 
   const onSubmit = (values: CreatePlanFormValues) => {
-    // 1. Xử lý Features
     const featuresArray = values.featuresString
       .split("\n")
       .map((f) => f.trim())
       .filter((f) => f.length > 0);
 
-    // 2. Fix lỗi logic: Khi là Lifetime (2) thì truyền số 0 để BE C# không bị lỗi NULL
     const finalDuration =
       values.billingCycle === 2 ? 0 : (values.durationDays ?? 30);
 
-    // 3. Tạo Payload chuẩn khớp với CreatePlanRequest
     const payload: CreatePlanRequest = {
       name: values.name,
       tier: values.tier,
@@ -129,231 +124,186 @@ export function EditPlanDialog({
       isActive: values.isActive,
     };
 
-    // 4. Gọi API
     updatePlan(
       { id: plan.id, data: payload },
-      {
-        onSuccess: () => onOpenChange(false),
-      },
+      { onSuccess: () => onOpenChange(false) },
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] bg-[#18181b] border-white/10 text-white font-mono max-h-[90vh] overflow-y-auto no-scrollbar">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase">
-            <Save className="h-5 w-5 text-blue-500" />
-            Cập nhật gói dịch vụ
+      <DialogContent className="sm:max-w-[650px] bg-white border-none text-gray-900 font-mono max-h-[95vh] overflow-y-auto no-scrollbar rounded-[2.5rem] shadow-2xl p-0 overflow-hidden">
+        <DialogHeader className="p-10 bg-gray-50/50 border-b border-gray-100">
+          <DialogTitle className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter">
+            <Save className="h-7 w-7 text-blue-500" />
+            Cập Nhật Gói Dịch Vụ
           </DialogTitle>
-          <DialogDescription className="text-zinc-400 text-xs">
-            Chỉnh sửa thông tin chi tiết của gói dịch vụ ID: {plan.id}
-          </DialogDescription>
+          <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-white border border-gray-200 rounded-xl w-fit">
+            <Fingerprint className="h-3 w-3 text-gray-400" />
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              ID Gói: {plan.id}
+            </span>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5 py-4"
+            className="p-10 space-y-8"
           >
-            {/* Tên & Cấp độ */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Tên gói
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-black/20 border-white/10"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Cấp độ
-                    </FormLabel>
-                    <Select
-                      onValueChange={(val) => field.onChange(Number(val))}
-                      value={String(field.value)}
-                    >
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase text-blue-500 tracking-[0.3em] flex items-center gap-2">
+                <Sparkles className="w-3 h-3" /> 01. Cấu hình cơ bản
+              </h4>
+              <div className="grid grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                        Tên Hiển Thị
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger className="bg-black/20 border-white/10">
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Input
+                          className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl"
+                          {...field}
+                        />
                       </FormControl>
-                      <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                        <SelectItem value="0">Basic</SelectItem>
-                        <SelectItem value="1">Premium</SelectItem>
-                        <SelectItem value="2">Enterprise</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tier"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                        Cấp Độ (Tier)
+                      </FormLabel>
+                      <Select
+                        onValueChange={(val) => field.onChange(Number(val))}
+                        value={String(field.value)}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="font-mono font-bold">
+                          <SelectItem value="0">Basic</SelectItem>
+                          <SelectItem value="1">Premium</SelectItem>
+                          <SelectItem value="2">Enterprise</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            {/* Giá, Chu kỳ, Ngày */}
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Giá bán (VND)
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        className="bg-black/20 border-white/10"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="billingCycle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Chu kỳ
-                    </FormLabel>
-                    <Select
-                      onValueChange={(val) => field.onChange(Number(val))}
-                      value={String(field.value)}
-                    >
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase text-orange-500 tracking-[0.3em] flex items-center gap-2">
+                <Sparkles className="w-3 h-3" /> 02. Thông số kinh doanh
+              </h4>
+              <div className="grid grid-cols-3 gap-6">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                        Giá Bán (VND)
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger className="bg-black/20 border-white/10">
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Input
+                          type="number"
+                          className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl"
+                          {...field}
+                        />
                       </FormControl>
-                      <SelectContent className="bg-[#1c1c1f] border-white/10 text-white">
-                        <SelectItem value="0">Theo Tháng</SelectItem>
-                        <SelectItem value="1">Theo Năm</SelectItem>
-                        <SelectItem value="2">Vĩnh viễn</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="durationDays"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Số ngày
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        className="bg-black/20 border-white/10 disabled:opacity-50"
-                        {...field}
-                        value={field.value ?? ""}
-                        disabled={Number(form.watch("billingCycle")) === 2}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="billingCycle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                        Chu Kỳ
+                      </FormLabel>
+                      <Select
+                        onValueChange={(val) => field.onChange(Number(val))}
+                        value={String(field.value)}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="font-mono font-bold">
+                          <SelectItem value="0">Hàng Tháng</SelectItem>
+                          <SelectItem value="1">Hàng Năm</SelectItem>
+                          <SelectItem value="2">Vĩnh Viễn</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="durationDays"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                        Số Ngày
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="h-12 bg-gray-50 border-gray-200 font-bold rounded-xl disabled:opacity-50"
+                          {...field}
+                          value={field.value ?? 0}
+                          disabled={Number(form.watch("billingCycle")) === 2}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            {/* Features */}
             <FormField
               control={form.control}
               name="featuresString"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                    Tính năng (Xuống dòng)
+                  <FormLabel className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1 italic">
+                    Đặc Quyền (Mỗi dòng một mục)
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="bg-black/20 border-white/10 h-24 font-mono text-xs"
+                      className="bg-gray-50 border-gray-200 font-mono text-sm min-h-[120px] rounded-2xl p-4 shadow-inner"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Badge Info */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="badgeText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Badge Text
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-black/20 border-white/10"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="badgeColor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase text-zinc-500">
-                      Mã màu (Hex)
-                    </FormLabel>
-                    <FormControl>
-                      <div className="flex gap-2">
-                        <div
-                          className="w-10 h-10 rounded border border-white/10 shrink-0"
-                          style={{ backgroundColor: field.value }}
-                        />
-                        <Input
-                          className="bg-black/20 border-white/10 flex-1"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Active Switch */}
             <FormField
               control={form.control}
               name="isActive"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-sm font-bold text-white">
-                      Trạng thái Kích hoạt
+                <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/50 p-6">
+                  <div className="space-y-1">
+                    <FormLabel className="text-sm font-black uppercase text-gray-900">
+                      Trạng Thái Kích Hoạt
                     </FormLabel>
-                    <FormDescription className="text-xs text-zinc-500">
-                      Ẩn/Hiện gói dịch vụ trên giao diện người dùng.
+                    <FormDescription className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                      Quyết định việc gói có xuất hiện trên ứng dụng hay không.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -366,26 +316,26 @@ export function EditPlanDialog({
               )}
             />
 
-            <DialogFooter>
+            <DialogFooter className="gap-3">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
-                className="hover:bg-white/10 hover:text-white text-zinc-400"
+                className="h-14 px-8 rounded-xl font-bold uppercase text-[10px] tracking-widest text-gray-400 hover:bg-gray-50"
               >
-                Hủy bỏ
+                Hủy Bỏ
               </Button>
               <Button
                 type="submit"
                 disabled={isUpdating}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold min-w-[120px]"
+                className="h-14 flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-600/20"
               >
                 {isUpdating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+                Lưu Thay Đổi Hệ Thống
               </Button>
             </DialogFooter>
           </form>

@@ -48,10 +48,10 @@ export default function AddAdminDialog({
       username: "",
       email: "",
       password: "",
-      country: "Vietnam", // Default Value
+      country: "Vietnam",
       nativeLanguage: "Vietnamese",
       targetLanguage: "English",
-      roles: ["Admin"], // Default Role
+      roles: ["Admin"],
     },
   });
 
@@ -86,18 +86,18 @@ export default function AddAdminDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] rounded-[1.5rem] font-mono bg-[#18181b] border-white/10 text-zinc-100 shadow-2xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[500px] rounded-[1.5rem] font-mono bg-white border-gray-200 text-gray-900 shadow-2xl p-0 overflow-hidden">
         {/* Header */}
-        <div className="relative p-6 border-b border-white/5 bg-gradient-to-br from-orange-500/10 to-transparent">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/20 blur-[50px] rounded-full pointer-events-none" />
+        <div className="relative p-6 border-b border-gray-100 bg-gray-50/50">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[50px] rounded-full pointer-events-none" />
           <DialogHeader className="relative z-10">
-            <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase tracking-tight text-white">
+            <DialogTitle className="flex items-center gap-2 text-xl font-black uppercase tracking-tight text-gray-900">
               <ShieldCheck className="h-5 w-5 text-orange-500" /> Thêm Quản Trị
               Viên
             </DialogTitle>
-            <DialogDescription className="text-zinc-400 text-xs font-medium mt-1.5 leading-relaxed">
+            <DialogDescription className="text-gray-500 text-xs font-medium mt-1.5 leading-relaxed">
               Tạo tài khoản mới và cấp quyền{" "}
-              <span className="text-white font-bold">Super Admin</span>.
+              <span className="text-gray-900 font-bold">Super Admin</span>.
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -113,17 +113,17 @@ export default function AddAdminDialog({
                   name="username"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                         <User className="h-3 w-3" /> Tên đăng nhập
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="vd: admin_01"
-                          className="form-input"
+                          className="bg-gray-50 border-gray-200 text-gray-900 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 rounded-xl"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage className="text-[10px] text-red-400" />
+                      <FormMessage className="text-[10px] text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -133,17 +133,17 @@ export default function AddAdminDialog({
                   name="email"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                         <Mail className="h-3 w-3" /> Email
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="admin@demif.com"
-                          className="form-input"
+                          className="bg-gray-50 border-gray-200 text-gray-900 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 rounded-xl"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage className="text-[10px] text-red-400" />
+                      <FormMessage className="text-[10px] text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -155,39 +155,39 @@ export default function AddAdminDialog({
                 name="password"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                       <Lock className="h-3 w-3" /> Mật khẩu
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         placeholder="••••••••"
-                        className="form-input"
+                        className="bg-gray-50 border-gray-200 text-gray-900 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 rounded-xl"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-[10px] text-red-400" />
+                    <FormMessage className="text-[10px] text-red-500" />
                   </FormItem>
                 )}
               />
 
-              {/* Row 3: Country (New) */}
+              {/* Row 3: Country */}
               <FormField
                 control={form.control}
                 name="country"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                       <MapPin className="h-3 w-3" /> Quốc gia
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Vietnam"
-                        className="form-input"
+                        className="bg-gray-50 border-gray-200 text-gray-900 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 rounded-xl"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-[10px] text-red-400" />
+                    <FormMessage className="text-[10px] text-red-500" />
                   </FormItem>
                 )}
               />
@@ -199,13 +199,16 @@ export default function AddAdminDialog({
                   name="nativeLanguage"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                         <Globe className="h-3 w-3" /> Tiếng mẹ đẻ
                       </FormLabel>
                       <FormControl>
-                        <Input className="form-input text-xs" {...field} />
+                        <Input
+                          className="bg-gray-50 border-gray-200 text-gray-900 text-xs rounded-xl"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage className="text-[10px] text-red-400" />
+                      <FormMessage className="text-[10px] text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -215,29 +218,32 @@ export default function AddAdminDialog({
                   name="targetLanguage"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                         <Globe className="h-3 w-3 text-blue-500" /> Ngôn ngữ học
                       </FormLabel>
                       <FormControl>
-                        <Input className="form-input text-xs" {...field} />
+                        <Input
+                          className="bg-gray-50 border-gray-200 text-gray-900 text-xs rounded-xl"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage className="text-[10px] text-red-400" />
+                      <FormMessage className="text-[10px] text-red-500" />
                     </FormItem>
                   )}
                 />
               </div>
 
               {/* Footer */}
-              <DialogFooter className="mt-6 pt-4 border-t border-white/5">
+              <DialogFooter className="mt-6 pt-4 border-t border-gray-100">
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="w-full h-11 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold uppercase tracking-widest text-xs transition-all shadow-lg hover:shadow-white/10"
+                  className="w-full h-12 rounded-xl bg-gray-900 text-white hover:bg-black font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <ShieldCheck className="mr-2 h-4 w-4 text-orange-600" />
+                    <ShieldCheck className="mr-2 h-4 w-4 text-orange-500" />
                   )}
                   {isPending ? "Đang xử lý..." : "Xác nhận tạo Admin"}
                 </Button>

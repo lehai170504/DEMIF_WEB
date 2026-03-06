@@ -53,6 +53,7 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate bằng Zod
     const result = loginSchema.safeParse(formData);
 
     if (!result.success) {

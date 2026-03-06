@@ -1,4 +1,6 @@
-import { DollarSign, Package, Users } from "lucide-react";
+"use client";
+
+import { DollarSign, Package, Users, TrendingUp } from "lucide-react";
 import { StatCard } from "./stat-card";
 
 interface SubscriptionStatsProps {
@@ -14,35 +16,37 @@ export function SubscriptionStats({
   activeSubscribers,
   totalRevenue,
 }: SubscriptionStatsProps) {
+  // Chuẩn hóa định dạng tiền tệ Việt Nam
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
       <StatCard
         icon={Package}
-        label="Tổng số gói"
+        label="Tổng Số Gói Dịch Vụ"
         value={totalPlans}
-        subtext="Gói đang hoạt động"
-        color="text-blue-500"
+        subtext="Số gói khả dụng trên hệ thống"
+        color="text-blue-600"
       />
       <StatCard
         icon={Users}
-        label="Người đăng ký"
+        label="Người Dùng Đăng Ký"
         value={totalSubscribers}
-        subtext={`${activeSubscribers} đang kích hoạt`}
-        color="text-orange-500"
+        subtext={`${activeSubscribers} học viên đang hoạt động`}
+        color="text-orange-600"
       />
       <StatCard
         icon={DollarSign}
-        label="Tổng doanh thu"
+        label="Tổng Doanh Thu Hệ Thống"
         value={formatCurrency(totalRevenue)}
-        subtext="Doanh thu trọn đời"
-        color="text-emerald-500"
+        subtext="Tổng giá trị giao dịch thành công"
+        color="text-emerald-600"
         isCurrency
       />
     </div>
