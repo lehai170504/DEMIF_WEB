@@ -12,7 +12,6 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import CreateLessonDialog from "@/components/admin/lesson/create-lesson-dialog";
-import AddAdminDialog from "@/components/admin/user/add-admin-dialog";
 
 export function QuickCreate() {
   const router = useRouter();
@@ -48,16 +47,6 @@ export function QuickCreate() {
             </DropdownMenuShortcut>
           </DropdownMenuItem>
         </CreateLessonDialog>
-
-        <AddAdminDialog>
-          <DropdownMenuItem
-            onSelect={(e) => e.preventDefault()}
-            className="cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:text-blue-600 rounded-lg py-2.5"
-          >
-            <Users className="mr-2 h-4 w-4 text-blue-500" />
-            <span className="font-bold">Thêm Admin</span>
-          </DropdownMenuItem>
-        </AddAdminDialog>
 
         <DropdownMenuItem
           onClick={() => router.push("/admin/orders")}

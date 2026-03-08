@@ -134,7 +134,7 @@ export default function CreateLessonDialog({
         category: preview.suggestedCategory || "YouTube Import",
         isPremiumOnly: false,
         displayOrder: 0,
-        status: "draft",
+        status: "draft", // Luôn mặc định là bản nháp sau khi nhập
       },
       {
         onSuccess: () => {
@@ -151,7 +151,7 @@ export default function CreateLessonDialog({
         {children ? (
           children
         ) : (
-          <Button className="h-10 gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all">
+          <Button className="h-10 gap-2 bg-orange-500 hover:bg-orange-600 text-white font-mono font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all">
             <Plus className="h-4 w-4" /> Thêm Bài Học Mới
           </Button>
         )}
@@ -211,11 +211,11 @@ export default function CreateLessonDialog({
               </Form>
             </TabsContent>
 
-            {/* Nội Dung: Nhập Từ YouTube (Có Xem Trước) */}
+            {/* Nội Dung: Nhập Từ YouTube */}
             <TabsContent value="youtube" className="mt-0 outline-none">
               <div className="space-y-8 py-4 max-w-2xl mx-auto">
-                {/* Biểu Ngữ Trí Tuệ Nhân Tạo */}
-                <div className="p-6 bg-red-50 rounded-3xl border border-red-100 flex items-start gap-5">
+                {/* Biểu Ngữ AI */}
+                <div className="p-6 bg-red-50 rounded-3xl border border-red-100 flex items-start gap-5 shadow-sm">
                   <div className="p-3 bg-white rounded-2xl shadow-sm">
                     <Sparkles className="w-7 h-7 text-red-500" />
                   </div>
@@ -247,7 +247,6 @@ export default function CreateLessonDialog({
                     </div>
                   </div>
 
-                  {/* Trạng Thái Đang Phân Tích */}
                   {isPreviewLoading && (
                     <div className="h-48 flex flex-col items-center justify-center bg-gray-50 rounded-2xl border border-dashed border-gray-200 gap-3">
                       <Loader2 className="animate-spin text-red-400 w-8 h-8" />
@@ -257,7 +256,6 @@ export default function CreateLessonDialog({
                     </div>
                   )}
 
-                  {/* Hiển Thị Thông Tin Xem Trước */}
                   <AnimatePresence mode="wait">
                     {preview && (
                       <motion.div
@@ -270,7 +268,6 @@ export default function CreateLessonDialog({
                     )}
                   </AnimatePresence>
 
-                  {/* Thông Báo Lỗi Khi Không Tìm Thấy Video */}
                   {isPreviewError && ytUrl && (
                     <p className="text-[10px] text-red-500 font-black uppercase italic text-center py-3 bg-red-50 rounded-xl border border-red-100">
                       Không tìm thấy video hoặc đường dẫn không hợp lệ.
@@ -278,7 +275,7 @@ export default function CreateLessonDialog({
                   )}
                 </div>
 
-                {/* BƯỚC B: Cảnh Báo Phụ Đề & Chặn Hành Động */}
+                {/* Cảnh Báo Phụ Đề */}
                 {preview && !preview.hasCaptions && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -312,10 +309,10 @@ export default function CreateLessonDialog({
                       Cấp Độ
                     </label>
                     <Select value={ytLevel} onValueChange={setYtLevel}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold">
+                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold shadow-sm">
                         <SelectValue placeholder="Chọn cấp độ" />
                       </SelectTrigger>
-                      <SelectContent className="font-mono">
+                      <SelectContent>
                         {LESSON_LEVELS.map((l) => (
                           <SelectItem key={l.value} value={l.value}>
                             {l.label}
@@ -329,10 +326,10 @@ export default function CreateLessonDialog({
                       Loại Bài Tập
                     </label>
                     <Select value={ytType} onValueChange={setYtType}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold">
+                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold shadow-sm">
                         <SelectValue placeholder="Chọn loại bài" />
                       </SelectTrigger>
-                      <SelectContent className="font-mono">
+                      <SelectContent>
                         <SelectItem value="Dictation">Dictation</SelectItem>
                         <SelectItem value="Shadowing">Shadowing</SelectItem>
                       </SelectContent>
@@ -343,10 +340,10 @@ export default function CreateLessonDialog({
                       Ngôn Ngữ Phụ Đề
                     </label>
                     <Select value={ytLang} onValueChange={setYtLang}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold">
+                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold shadow-sm">
                         <SelectValue placeholder="Chọn ngôn ngữ" />
                       </SelectTrigger>
-                      <SelectContent className="font-mono">
+                      <SelectContent>
                         {preview?.availableCaptionLanguages?.length ? (
                           preview.availableCaptionLanguages.map((lang) => (
                             <SelectItem key={lang} value={lang}>
@@ -354,14 +351,14 @@ export default function CreateLessonDialog({
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="en">English (Mặc định)</SelectItem>
+                          <SelectItem value="en">ENGLISH</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                {/* Nút Thực Thi Tự Động */}
+                {/* Nút Thực Thi */}
                 <Button
                   className="w-full h-16 bg-red-600 hover:bg-red-700 text-white font-black text-xl rounded-2xl shadow-xl shadow-red-500/20 transition-all active:scale-[0.98] mt-6 disabled:opacity-50 disabled:grayscale"
                   disabled={
@@ -381,18 +378,6 @@ export default function CreateLessonDialog({
                     ? "Đang Xử Lý Dữ Liệu..."
                     : "Tự Động Tạo Bài Tập Từ Video"}
                 </Button>
-
-                {/* Gợi Ý Cho Admin Khi Bị Chặn */}
-                {preview && !preview.hasCaptions && (
-                  <p className="text-[10px] text-gray-400 text-center font-bold uppercase tracking-widest px-4 leading-normal">
-                    Mẹo: Bạn vẫn có thể tạo bài học thủ công và sử dụng tính
-                    năng{" "}
-                    <span className="text-orange-500">
-                      "Nhập Transcript Nhanh"
-                    </span>{" "}
-                    để dán phụ đề tự do.
-                  </p>
-                )}
               </div>
             </TabsContent>
           </Tabs>

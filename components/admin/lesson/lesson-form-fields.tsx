@@ -376,7 +376,7 @@ export function LessonFormFields({ form }: LessonFormFieldsProps) {
                   value={field.value ?? "draft"}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900">
+                    <SelectTrigger className="bg-white border-slate-200 shadow-sm h-11 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>

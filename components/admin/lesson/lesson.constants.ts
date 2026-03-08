@@ -10,8 +10,7 @@ export const LESSON_LEVELS = [
 ];
 
 export const LESSON_STATUSES = [
-  { label: "Nháp (Draft)", value: "draft" },
+  { label: "Bản nháp (Draft)", value: "draft" },
   { label: "Công khai (Published)", value: "published" },
-  { label: "Đang chờ (Review)", value: "review" },
   { label: "Lưu trữ (Archived)", value: "archived" },
 ];

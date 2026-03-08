@@ -7,19 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const getRedirectPath = (roles?: string[] | string | null): string => {
-  // 1. Kiểm tra nhanh nếu không có dữ liệu
+  // 1. Nếu không có dữ liệu roles -> Mặc định về trang học viên
   if (!roles) return "/home";
 
-  // 2. Chuẩn hóa về mảng, lọc bỏ các giá trị null/undefined và ép về string
-  const rolesArray = (Array.isArray(roles) ? roles : [roles])
-    .filter(Boolean)
-    .map((r) => String(r).trim().toLowerCase());
+  // 2. Ép kiểu an toàn về mảng (dù backend trả về chuỗi hay mảng)
+  const rolesArray = Array.isArray(roles) ? roles : [roles];
 
-  // 3. Nếu mảng rỗng sau khi lọc
-  if (rolesArray.length === 0) return "/home";
+  // 3. Kiểm tra xem có chứa role "admin" (không phân biệt hoa/thường, loại bỏ khoảng trắng dư)
+  const isAdmin = rolesArray.some(
+    (role) => typeof role === "string" && role.trim().toLowerCase() === "admin",
+  );
 
-  // 4. Kiểm tra quyền Admin
-  const isAdmin = rolesArray.includes("admin");
-
+  // 4. Phân luồng trả về đường dẫn
   return isAdmin ? "/admin" : "/home";
 };

@@ -24,7 +24,6 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 
-// Quan trọng: Sử dụng Named Import với dấu { } để khớp với file định nghĩa modal
 import { AdminProfileModal } from "@/components/admin/settings/admin-profile-modal";
 
 export function UserAccountNav() {
@@ -46,11 +45,12 @@ export function UserAccountNav() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
+          {/* Bỏ overflow-hidden để chấm xanh không bị cắt lẹm */}
           <Button
             variant="ghost"
-            className="relative h-10 w-10 rounded-full border border-slate-200 p-0 overflow-hidden hover:scale-105 transition-all focus-visible:ring-orange-500 shadow-sm ml-1"
+            className="relative h-10 w-10 rounded-full p-0 hover:scale-105 transition-transform duration-300 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 ml-1"
           >
-            <Avatar className="h-full w-full rounded-full">
+            <Avatar className="h-full w-full rounded-full border border-slate-200 shadow-sm">
               <AvatarImage
                 src={
                   user?.avatarUrl ||
@@ -58,42 +58,49 @@ export function UserAccountNav() {
                 }
                 className="object-cover"
               />
-              <AvatarFallback className="bg-slate-100 text-slate-500 font-semibold text-xs">
+              <AvatarFallback className="bg-slate-100 text-slate-500 font-mono font-bold text-xs">
                 {displayName[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            {/* Chấm trạng thái hoạt động */}
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+
+            {/* Chấm trạng thái hoạt động CÓ HIỆU ỨNG NHÁY (Ping) */}
+            <span className="absolute bottom-0 right-0 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
+            </span>
           </Button>
         </DropdownMenuTrigger>
 
+        {/* Căn chỉnh lại Dropdown, sử dụng hoàn toàn font-mono */}
         <DropdownMenuContent
           align="end"
-          className="w-64 font-sans p-2 bg-white border-slate-200 text-slate-700 shadow-xl rounded-2xl"
-          sideOffset={8}
+          className="w-64 font-mono p-2 bg-white border border-slate-200 text-slate-700 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-2xl"
+          sideOffset={10}
         >
-          <DropdownMenuLabel className="font-sans p-3">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center justify-between">
+          {/* Header Card của Dropdown */}
+          <DropdownMenuLabel className="p-3 mb-1">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 shrink-0">
+                <ShieldCheck className="h-5 w-5 text-orange-500" />
+              </div>
+              <div className="flex flex-col overflow-hidden">
                 <p
-                  className="font-bold text-slate-900 text-base leading-none truncate max-w-[150px]"
+                  className="font-bold text-slate-900 text-sm truncate"
                   title={displayName}
                 >
                   {displayName}
                 </p>
-                <div className="p-1 rounded-md bg-orange-50 border border-orange-100">
-                  <ShieldCheck className="h-3.5 w-3.5 text-orange-500" />
-                </div>
+                <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider mt-0.5 truncate">
+                  {roleDisplay}
+                </p>
               </div>
-              <p className="text-xs text-slate-500 font-medium bg-slate-50 px-2.5 py-1 rounded-md w-fit border border-slate-100">
-                {roleDisplay}
-              </p>
             </div>
           </DropdownMenuLabel>
 
-          <DropdownMenuSeparator className="bg-slate-100" />
+          <DropdownMenuSeparator className="bg-slate-100 mx-1 mb-1" />
 
-          <DropdownMenuGroup className="p-1">
+          {/* Nhóm menu chức năng */}
+          <DropdownMenuGroup className="p-1 space-y-1">
             <UserMenuItem
               icon={UserIcon}
               label="Hồ sơ cá nhân"
@@ -113,31 +120,33 @@ export function UserAccountNav() {
             />
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="bg-slate-100" />
+          <DropdownMenuSeparator className="bg-slate-100 mx-1 my-1" />
 
-          <DropdownMenuItem
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="text-red-600 focus:bg-red-50 focus:text-red-700 font-semibold text-sm rounded-lg m-1 cursor-pointer disabled:opacity-50 py-2.5 transition-colors font-sans"
-          >
-            {isLoggingOut ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <LogOut className="mr-2 h-4 w-4" />
-            )}
-            {isLoggingOut ? "Đang xử lý..." : "Đăng xuất hệ thống"}
-          </DropdownMenuItem>
+          {/* Nút Đăng xuất nổi bật */}
+          <div className="p-1">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex items-center justify-center w-full rounded-lg py-2.5 px-3 cursor-pointer disabled:opacity-50 text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors font-bold text-sm"
+            >
+              {isLoggingOut ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-red-500" />
+              ) : (
+                <LogOut className="mr-2 h-4 w-4" />
+              )}
+              {isLoggingOut ? "Đang xử lý..." : "Đăng xuất hệ thống"}
+            </DropdownMenuItem>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Gọi Modal hồ sơ Admin - Đảm bảo component đã được export đúng cách */}
       <AdminProfileModal open={isProfileOpen} onOpenChange={setIsProfileOpen} />
     </>
   );
 }
 
 /**
- * Component hỗ trợ render Menu Item nhanh chóng
+ * Component hỗ trợ render Menu Item
  */
 function UserMenuItem({
   icon: Icon,
@@ -153,14 +162,14 @@ function UserMenuItem({
   return (
     <DropdownMenuItem
       onClick={onClick}
-      className="rounded-lg p-2.5 cursor-pointer focus:bg-slate-50 group transition-colors font-sans"
+      className="flex items-center rounded-xl py-2.5 px-3 cursor-pointer hover:bg-slate-50 focus:bg-slate-50 group transition-all duration-200 outline-none"
     >
-      <Icon className="mr-2.5 h-4 w-4 text-slate-400 group-focus:text-orange-500 transition-colors" />
-      <span className="font-medium text-sm text-slate-700 group-focus:text-slate-900">
+      <Icon className="mr-3 h-4 w-4 text-slate-400 group-hover:text-orange-500 group-focus:text-orange-500 transition-colors" />
+      <span className="font-semibold text-[13px] text-slate-600 group-hover:text-slate-900 group-focus:text-slate-900">
         {label}
       </span>
       {shortcut && (
-        <DropdownMenuShortcut className="text-slate-400 text-[10px] group-focus:text-slate-500 ml-auto font-sans">
+        <DropdownMenuShortcut className="text-slate-300 text-[10px] group-hover:text-slate-400 ml-auto tracking-widest font-bold">
           {shortcut}
         </DropdownMenuShortcut>
       )}

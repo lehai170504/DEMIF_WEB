@@ -2,8 +2,8 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { RoleTransition } from "@/components/auth/RoleTransition";
 
 export default function MemberGuard({
   children,
@@ -13,30 +13,50 @@ export default function MemberGuard({
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [transitionMessage, setTransitionMessage] = useState(
+    "Đang tải dữ liệu học tập...",
+  );
+
+  const actualUser = (user as any)?.data || user;
+
+  const isAdmin = actualUser?.roles?.some(
+    (role: string) =>
+      typeof role === "string" && role.toLowerCase() === "admin",
+  );
+
   useEffect(() => {
-    if (isLoading) return;
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        setTransitionMessage("Yêu cầu đăng nhập...");
+        setIsRedirecting(true);
+        setTimeout(() => {
+          router.replace("/login");
+        }, 1500);
+      } else if (isAdmin) {
+        setTransitionMessage("Đang chuyển về Không gian Quản trị...");
+        setIsRedirecting(true);
 
-    // 1. Chưa đăng nhập -> Về Login
-    if (!isAuthenticated) {
-      router.replace("/login");
-      return;
+        setTimeout(() => {
+          router.replace("/admin");
+        }, 3000);
+      }
     }
+  }, [isLoading, isAuthenticated, isAdmin, router]);
 
-    // 2. Nếu là Admin -> Đẩy sang trang Admin
-    // (Vì Admin thường không vào trang học viên để học)
-    if (user?.roles?.includes("Admin")) {
-      router.replace("/admin");
-    }
-  }, [user, isLoading, isAuthenticated, router]);
-
-  // Loading khi đang check quyền
-  if (isLoading || user?.roles?.includes("Admin")) {
+  // NẾU ĐANG CALL API HOẶC ĐANG BỊ ĐIỀU HƯỚNG -> BẬT MÀN HÌNH 3D
+  if (isLoading || isRedirecting || (isAdmin && isAuthenticated)) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-white">
-        <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-      </div>
+      <RoleTransition
+        message={transitionMessage}
+        role={isAdmin ? "admin" : "member"}
+      />
     );
   }
 
+  // Nếu là Admin thì giấu giao diện học viên đi
+  if (isAdmin) return null;
+
+  // Render giao diện học viên bình thường
   return <>{children}</>;
 }

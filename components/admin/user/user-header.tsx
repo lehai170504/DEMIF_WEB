@@ -2,7 +2,6 @@
 
 import { Plus, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AddAdminDialog from "./add-admin-dialog";
 
 export function UserHeader() {
   return (
@@ -27,12 +26,6 @@ export function UserHeader() {
           cộng đồng học viên hệ thống.
         </p>
       </div>
-
-      <AddAdminDialog>
-        <Button className="h-12 px-6 bg-orange-500 text-white hover:bg-orange-600 font-semibold rounded-xl shadow-md shadow-orange-500/20 transition-all border-none gap-2">
-          <Plus className="h-4 w-4" /> Khởi tạo Quản trị viên
-        </Button>
-      </AddAdminDialog>
     </div>
   );
 }

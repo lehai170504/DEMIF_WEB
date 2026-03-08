@@ -1,3 +1,4 @@
+// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -13,14 +14,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 2. Nếu ĐÃ login mà truy cập vào /login hoặc /signup
+  // 2. ĐÃ FIX: Chỉ chặn /login và /signup. Ép về "/" để page.tsx tự phân luồng.
   if (token && (pathname === "/login" || pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/home", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/home/:path*", "/admin/:path*", "/login", "/signup"],
+  matcher: ["/", "/home/:path*", "/admin/:path*", "/login", "/signup"],
 };
