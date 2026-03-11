@@ -200,3 +200,45 @@
 @theme {
   --animate-shimmer: shimmer 2s linear infinite;
 }
+
+
+/* Ẩn thanh cuộn cho toàn bộ trang web nhưng vẫn cho phép cuộn bằng chuột/cảm ứng */
+html, body {
+  scroll-behavior: smooth;
+  -ms-overflow-style: none; /* Dành cho IE và Edge */
+  scrollbar-width: none;    /* Dành cho Firefox */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Dành cho Chrome, Safari, Opera */
+}
+
+@layer utilities {
+  /* Animation cho CPU hoặc các Icon AI xoay chậm */
+  @keyframes spin-slow-neon {
+    from {
+      transform: rotate(0deg);
+      filter: drop-shadow(0 0 2px #FF7A00);
+    }
+    50% {
+      filter: drop-shadow(0 0 10px #FF7A00);
+    }
+    to {
+      transform: rotate(360deg);
+      filter: drop-shadow(0 0 2px #FF7A00);
+    }
+  }
+
+  .animate-spin-slow-neon {
+    animation: spin-slow-neon 12s linear infinite;
+  }
+
+  /* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

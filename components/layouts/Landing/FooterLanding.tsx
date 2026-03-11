@@ -1,149 +1,141 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Github, Globe } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Github,
+  Globe,
+  ArrowUpRight,
+  Command,
+} from "lucide-react";
+
+const footerLinks = {
+  products: ["Tính năng", "Bảng giá", "Lộ trình", "Dự án"],
+  company: ["Về chúng tôi", "Blog", "Tuyển dụng", "Liên hệ"],
+  legal: ["Bảo mật", "Điều khoản", "Cookie"],
+};
 
 export function FooterLanding() {
   return (
-    <footer className="relative border-t border-gray-200 dark:border-white/5 pt-20 pb-10 font-mono overflow-hidden bg-gray-50/80 dark:bg-[#050505]/80 backdrop-blur-xl">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          {/* 1. Brand Section */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="flex items-center gap-3 group w-fit">
-              <div className="relative flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] rounded-xl shadow-lg shadow-orange-500/20 transition-transform group-hover:-rotate-6">
-                <img
-                  src="/DemifLogo.png"
-                  alt="D"
-                  className="w-6 h-6 brightness-0 invert" // Logo trắng
-                />
+    <footer className="relative bg-white dark:bg-[#050505] pt-24 pb-12 font-mono overflow-hidden">
+      {/* Background Decor - Những vệt sáng mờ ảo */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="max-w-[1400px] mx-auto px-6">
+        {/* TOP SECTION: BENTO GRID STYLE */}
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-4 mb-20">
+          {/* Box 1: Brand & Bio (Large) */}
+          <div className="lg:col-span-5 p-8 rounded-[2.5rem] bg-gray-50 dark:bg-zinc-900/40 border border-gray-100 dark:border-white/5 flex flex-col justify-between group">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-[#FF7A00] rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+                  <img
+                    src="/DemifLogo.png"
+                    alt="D"
+                    className="w-7 h-7 brightness-0 invert"
+                  />
+                </div>
+                <span className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">
+                  DEMIF<span className="text-[#FF7A00] not-italic">.</span>
+                </span>
               </div>
-              <span className="text-2xl font-black tracking-tighter italic uppercase text-gray-900 dark:text-white">
-                DEMIF<span className="text-[#FF7A00] not-italic">.</span>
-              </span>
+              <p className="text-gray-500 dark:text-zinc-400 text-lg leading-relaxed max-w-sm font-medium">
+                Khai phá tiềm năng ngôn ngữ của bạn bằng trí tuệ nhân tạo thế hệ
+                mới.
+              </p>
             </div>
 
-            <p className="text-gray-600 dark:text-zinc-500 text-sm leading-relaxed max-w-sm font-medium">
-              Nâng tầm kỹ năng ngôn ngữ với AI thông qua phương pháp
-              <span className="text-gray-900 dark:text-zinc-200 font-bold italic">
-                {" "}
-                Dictation
-              </span>{" "}
-              và
-              <span className="text-gray-900 dark:text-zinc-200 font-bold italic">
-                {" "}
-                Shadowing
-              </span>{" "}
-              chuyên sâu.
-            </p>
-
-            {/* Social Icons */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex gap-4 mt-8">
               {[Facebook, Instagram, Twitter, Github].map((Icon, i) => (
                 <Link
                   key={i}
                   href="#"
-                  className="p-2.5 rounded-xl bg-gray-200 dark:bg-white/5 text-gray-600 dark:text-zinc-400 hover:bg-[#FF7A00] hover:text-white transition-all border border-gray-300 dark:border-white/5 hover:border-[#FF7A00]"
+                  className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-[#FF7A00] hover:border-[#FF7A00] transition-all"
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon size={18} />
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* 2. Links Sections */}
-          <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
-              Sản phẩm
-            </h4>
-            <ul className="space-y-3">
-              {["Tính năng", "Bảng giá", "Lộ trình", "Dự án"].map((item) => (
-                <li key={item}>
+          {/* Box 2: Quick Links (Medium) */}
+          <div className="lg:col-span-4 p-8 rounded-[2.5rem] bg-gray-50 dark:bg-zinc-900/40 border border-gray-100 dark:border-white/5">
+            <div className="flex justify-between items-start mb-8">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FF7A00]">
+                Điều hướng
+              </h4>
+              <Command size={14} className="text-zinc-600" />
+            </div>
+            <div className="grid grid-cols-2 gap-y-4">
+              {Object.values(footerLinks)
+                .flat()
+                .slice(0, 8)
+                .map((link) => (
                   <Link
+                    key={link}
                     href="#"
-                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-[#FF7A00] transition-colors flex items-center gap-1 group"
                   >
-                    {item}
+                    {link}{" "}
+                    <ArrowUpRight
+                      size={12}
+                      className="opacity-0 group-hover:opacity-100 transition-all -translate-y-1"
+                    />
                   </Link>
-                </li>
-              ))}
-            </ul>
+                ))}
+            </div>
           </div>
 
-          <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
-              Công ty
-            </h4>
-            <ul className="space-y-3">
-              {["Về chúng tôi", "Blog", "Tuyển dụng", "Liên hệ"].map((item) => (
-                <li key={item}>
-                  <Link
-                    href="#"
-                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
-              Pháp lý
-            </h4>
-            <ul className="space-y-3">
-              {["Bảo mật", "Điều khoản", "Cookie"].map((item) => (
-                <li key={item}>
-                  <Link
-                    href="#"
-                    className="text-sm font-bold text-gray-600 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* 3. Language */}
-          <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#FF7A00]">
-              Ngôn ngữ
-            </h4>
-            <div className="flex flex-col gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 dark:border-white/10 bg-gray-100 dark:bg-white/5 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
-                <Globe className="w-3.5 h-3.5" /> Tiếng Việt
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/5 text-xs font-bold text-gray-500 dark:text-zinc-600 hover:text-gray-700 dark:hover:text-zinc-400 hover:border-gray-300 dark:hover:border-white/10 transition-all">
-                English
+          {/* Box 3: Status & Lang (Small) */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Status Box */}
+            <div className="p-6 rounded-[2rem] bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase text-emerald-500 tracking-widest">
+                Hệ thống
+              </span>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />{" "}
+                Trực tuyến
+              </div>
+            </div>
+            {/* Language Box */}
+            <div className="p-6 rounded-[2rem] bg-gray-50 dark:bg-zinc-900/40 border border-gray-100 dark:border-white/5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4">
+                Khu vực
+              </h4>
+              <button className="flex items-center gap-2 w-full px-4 py-3 rounded-xl bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 text-xs font-bold text-gray-900 dark:text-white shadow-sm">
+                <Globe size={14} className="text-[#FF7A00]" /> Tiếng Việt (VN)
               </button>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6">
-            <p className="text-xs font-bold text-gray-500 dark:text-zinc-600">
-              © 2026 DEMIF SYSTEM. All rights reserved.
+        {/* BOTTOM SECTION: GIANT LOGO SIGN-OFF */}
+        <div className="relative pt-10 border-t border-gray-100 dark:border-white/5">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-8 relative z-10">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">
+              © 2026 DEMIF System — Crafting the future of Learning
             </p>
-            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-700">
-              <span>Hà Nội</span>
-              <span className="w-1 h-1 bg-gray-400 dark:bg-zinc-800 rounded-full" />
-              <span>Sài Gòn</span>
-              <span className="w-1 h-1 bg-gray-400 dark:bg-zinc-800 rounded-full" />
-              <span>Đà Nẵng</span>
+
+            <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+              <Link href="#" className="hover:text-[#FF7A00]">
+                Bảo mật
+              </Link>
+              <Link href="#" className="hover:text-[#FF7A00]">
+                Điều khoản
+              </Link>
+              <span className="text-zinc-700">HANOI • SAIGON • DANANG</span>
             </div>
           </div>
 
-          {/* System Status - Dark Mode Style */}
-          <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-full">
-            <div className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </div>
-            Hệ thống ổn định
+          {/* Chữ DEMIF siêu to làm nền ở dưới cùng */}
+          <div className="mt-12 select-none pointer-events-none overflow-hidden h-20 md:h-40 flex items-end">
+            <h2 className="text-[15vw] leading-[0.8] font-black text-gray-100 dark:text-zinc-900/30 uppercase tracking-tighter">
+              DEMIF
+            </h2>
           </div>
         </div>
       </div>
