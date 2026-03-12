@@ -25,7 +25,7 @@ export function HeaderLanding() {
   const headerTop = useTransform(smoothY, [0, 150], [0, 20]);
 
   // 3. Độ mờ nền: Đậm dần khi cuộn
-  const bgOpacity = useTransform(smoothY, [0, 150], [0.4, 0.8]);
+  const bgOpacity = useTransform(smoothY, [0, 150], [0.4, 0.85]);
 
   return (
     // Z-index cực cao (z-[100]) để luôn nằm trên các Stacked Cards và CinematicJourney
@@ -44,12 +44,14 @@ export function HeaderLanding() {
           type: "spring",
           bounce: 0.3,
         }}
-        className="pointer-events-auto rounded-full border border-gray-200/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)] overflow-hidden"
+        // FIX SÁNG/TỐI: Tinh chỉnh viền và bóng đổ rõ rệt cho 2 mode
+        className="pointer-events-auto rounded-full border border-gray-200/50 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.6)] overflow-hidden transition-colors duration-500"
       >
         {/* Lớp nền Glassmorphism đồng nhất với các thẻ bên dưới */}
         <motion.div
           style={{ opacity: bgOpacity }}
-          className="absolute inset-0 bg-white/60 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl -z-10"
+          // FIX SÁNG/TỐI: Nền trắng đục (Light) và đen nhám (Dark)
+          className="absolute inset-0 bg-white/70 dark:bg-[#111111]/80 backdrop-blur-2xl -z-10 transition-colors duration-500"
         />
 
         <div className="px-6 py-2.5 flex items-center justify-between font-mono">
@@ -69,7 +71,7 @@ export function HeaderLanding() {
                 {/* Hiệu ứng hào quang Cam quanh Logo */}
                 <div className="absolute inset-0 bg-[#FF7A00] blur-xl scale-50 group-hover:scale-125 transition-all opacity-0 group-hover:opacity-40 duration-500" />
               </div>
-              <span className="hidden sm:block font-black tracking-tighter text-gray-900 dark:text-white text-lg">
+              <span className="hidden sm:block font-black tracking-tighter text-gray-900 dark:text-white text-lg transition-colors">
                 DEMIF<span className="text-[#FF7A00]">.</span>
               </span>
             </motion.div>
@@ -99,12 +101,14 @@ export function HeaderLanding() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
 
-            <div className="h-4 w-px bg-gray-300 dark:bg-zinc-800 mx-1 hidden sm:block" />
+            {/* Dấu gạch chia phân cách */}
+            <div className="h-4 w-px bg-gray-300 dark:bg-zinc-800 mx-1 hidden sm:block transition-colors" />
 
             <Button
               variant="ghost"
               size="sm"
-              className="hidden sm:flex text-gray-700 dark:text-zinc-300 font-bold hover:text-[#FF7A00] dark:hover:text-white rounded-full px-4"
+              // FIX SÁNG/TỐI: Nút Đăng nhập nổi bật hơn khi hover
+              className="hidden sm:flex text-gray-700 dark:text-zinc-300 font-bold hover:text-[#FF7A00] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full px-4 transition-all"
               asChild
             >
               <Link href="/login">Đăng nhập</Link>
