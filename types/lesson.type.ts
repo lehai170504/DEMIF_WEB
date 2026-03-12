@@ -151,3 +151,126 @@ export interface YoutubePreviewResponse {
   availableCaptionLanguages: string[];
   suggestedCategory: string;
 }
+
+// ============ USER API TYPES ============
+
+// GET /api/lessons (Public)
+export interface GetUserLessonsParams {
+  page?: number;
+  pageSize?: number;
+  level?: string; // "Beginner" | "Intermediate" | "Advanced" | "Expert"
+  type?: string; // "Dictation" | "Shadowing"
+  category?: string;
+  status?: string; // "published" | "draft" | "archived"
+}
+
+export interface GetUserLessonsResponse {
+  items: LessonDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+// Dictation Types
+export interface DictationWord {
+  text: string;
+  isBlank: boolean;
+  position: number;
+  answer?: string;
+  hint?: string;
+  length?: number;
+  punctuation?: string;
+}
+
+export interface DictationSegment {
+  startTime: number;
+  endTime: number;
+  originalText: string;
+  words: DictationWord[];
+}
+
+export interface DictationTemplate {
+  level: string;
+  blankPercentage: number;
+  segments: DictationSegment[];
+  totalBlanks: number;
+  totalWords: number;
+}
+
+export interface GetDictationExerciseResponse {
+  lessonId: string;
+  level: string;
+  template: DictationTemplate;
+}
+
+// Dictation Submit
+export interface DictationAnswer {
+  segmentIndex: number;
+  position: number;
+  userInput: string;
+}
+
+export interface SubmitDictationRequest {
+  level: string;
+  answers: DictationAnswer[];
+  timeSpentSeconds: number;
+}
+
+export interface DictationResult {
+  segmentIndex: number;
+  position: number;
+  isCorrect: boolean;
+  userInput: string;
+  correctAnswer?: string;
+}
+
+export interface SubmitDictationResponse {
+  score: number;
+  totalBlanks: number;
+  correctCount: number;
+  results: DictationResult[];
+  feedback?: string;
+}
+
+// Shadowing Types
+export interface TimedSegment {
+  startTime: number;
+  endTime: number;
+  text: string;
+}
+
+export interface LevelConfig {
+  showTranscriptBefore: boolean;
+  showTranscriptAfter: boolean;
+  maxReplays: number; // -1 = unlimited
+}
+
+export interface GetSegmentsResponse {
+  lessonId: string;
+  level: string;
+  segments: TimedSegment[];
+  levelConfig: LevelConfig;
+}
+
+// Segment Check
+export interface CheckSegmentRequest {
+  level: string;
+  userText: string;
+  timeSpentSeconds: number;
+}
+
+export interface WordComparison {
+  word: string;
+  isCorrect: boolean;
+  expected?: string;
+}
+
+export interface CheckSegmentResponse {
+  segmentIndex: number;
+  transcript: string;
+  userText: string;
+  words: WordComparison[];
+  accuracy: number;
+  feedback?: string;
+}
