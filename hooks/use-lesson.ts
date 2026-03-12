@@ -8,12 +8,17 @@ import {
   GetLessonsParams,
   UpdateLessonRequest,
   UpdateTranscriptRequest,
+  GetUserLessonsParams,
+  SubmitDictationRequest,
+  CheckSegmentRequest,
 } from "@/types/lesson.type";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/error";
 import { useRouter } from "next/navigation";
 
-// --- 1. Hook Fetch Danh sách bài học ---
+// ============ ADMIN HOOKS ============
+
+// Hook Fetch Danh sách (Admin)
 export const useLessons = (params: GetLessonsParams) => {
   return useQuery({
     queryKey: ["admin-lessons", params],
@@ -225,5 +230,95 @@ export const useYoutubePreview = (url: string) => {
     enabled: !!url && (url.includes("youtube.com") || url.includes("youtu.be")),
     staleTime: 1000 * 60 * 5,
     retry: 1,
+  });
+};
+
+// ============ USER HOOKS ============
+
+// Hook lấy danh sách lessons cho user
+export const useUserLessons = (params: GetUserLessonsParams) => {
+  return useQuery({
+    queryKey: ["user-lessons", params],
+    queryFn: () => lessonService.getUserLessons(params),
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+// Hook lấy chi tiết lesson cho user
+export const useUserLessonDetail = (id: string) => {
+  return useQuery({
+    queryKey: ["user-lesson", id],
+    queryFn: () => lessonService.getUserLessonById(id),
+    enabled: !!id,
+  });
+};
+
+// Hook lấy dictation exercise
+export const useDictationExercise = (id: string, level: string) => {
+  return useQuery({
+    queryKey: ["dictation", id, level],
+    queryFn: () => lessonService.getDictationExercise(id, level),
+    enabled: !!id && !!level,
+  });
+};
+
+// Hook submit dictation
+export const useSubmitDictation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: SubmitDictationRequest }) =>
+      lessonService.submitDictation(id, data),
+    onSuccess: (result) => {
+      const correctPercentage = (result.correctCount / result.totalBlanks) * 100;
+      if (correctPercentage >= 80) {
+        toast.success(`Xuất sắc! Điểm: ${result.score.toFixed(0)}`);
+      } else if (correctPercentage >= 50) {
+        toast.info(`Tốt lắm! Điểm: ${result.score.toFixed(0)}`);
+      } else {
+        toast.warning(`Cần cố gắng thêm. Điểm: ${result.score.toFixed(0)}`);
+      }
+      queryClient.invalidateQueries({ queryKey: ["user-lesson"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Lỗi khi nộp bài");
+    },
+  });
+};
+
+// Hook lấy segments cho shadowing
+export const useSegments = (id: string, level: string) => {
+  return useQuery({
+    queryKey: ["segments", id, level],
+    queryFn: () => lessonService.getSegments(id, level),
+    enabled: !!id && !!level,
+  });
+};
+
+// Hook check segment
+export const useCheckSegment = () => {
+  return useMutation({
+    mutationFn: ({
+      id,
+      segmentIndex,
+      data,
+    }: {
+      id: string;
+      segmentIndex: number;
+      data: CheckSegmentRequest;
+    }) => lessonService.checkSegment(id, segmentIndex, data),
+    onSuccess: (result) => {
+      const accuracy = result.accuracy;
+      if (accuracy >= 90) {
+        toast.success(`Hoàn hảo! Độ chính xác: ${accuracy.toFixed(0)}%`);
+      } else if (accuracy >= 70) {
+        toast.info(`Tốt! Độ chính xác: ${accuracy.toFixed(0)}%`);
+      } else {
+        toast.warning(`Thử lại nhé! Độ chính xác: ${accuracy.toFixed(0)}%`);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Lỗi khi kiểm tra");
+    },
   });
 };

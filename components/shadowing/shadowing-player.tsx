@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { TimedSegment } from "@/types/lesson.type";
 
 interface ShadowingPlayerProps {
   isPlaying: boolean;
@@ -12,12 +13,12 @@ interface ShadowingPlayerProps {
   onPrev: () => void;
   canNext: boolean;
   canPrev: boolean;
-  sentence: {
-    original: string;
-    translation: string;
-  };
-  showTranslation: boolean;
-  onToggleTranslation: () => void;
+  segment: TimedSegment | null;
+  /** Whether to show the transcript text to the user before recording */
+  showTranscript: boolean;
+  onToggleTranscript: () => void;
+  replayCount: number;
+  maxReplays: number; // -1 = unlimited
 }
 
 export function ShadowingPlayer({
@@ -27,41 +28,57 @@ export function ShadowingPlayer({
   onPrev,
   canNext,
   canPrev,
-  sentence,
-  showTranslation,
-  onToggleTranslation,
+  segment,
+  showTranscript,
+  onToggleTranscript,
+  replayCount,
+  maxReplays,
 }: ShadowingPlayerProps) {
+  const replayLimitReached = maxReplays !== -1 && replayCount >= maxReplays;
+  const replaysLeft = maxReplays === -1 ? null : maxReplays - replayCount;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Audio Wave Visualizer */}
       <div className="relative bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 overflow-hidden shadow-lg">
-        <div className="flex items-center justify-center h-32 gap-1.5 mb-8">
+        <div className="flex items-center justify-center h-28 gap-1.5 mb-6">
           {Array.from({ length: 24 }).map((_, i) => (
             <motion.div
               key={i}
               className={cn(
                 "w-2 rounded-full",
-                isPlaying ? "bg-orange-500" : "bg-black dark:bg-white/10",
+                isPlaying ? "bg-orange-500" : "bg-gray-200 dark:bg-white/10",
               )}
               animate={
                 isPlaying
-                  ? {
-                      height: [30, Math.random() * 60 + 40, 30],
-                    }
+                  ? { height: [30, Math.random() * 60 + 40, 30] }
                   : { height: 30 }
               }
               transition={
                 isPlaying
-                  ? {
-                      repeat: Infinity,
-                      duration: 0.5,
-                      delay: i * 0.05,
-                    }
+                  ? { repeat: Infinity, duration: 0.5, delay: i * 0.05 }
                   : { duration: 0.3 }
               }
             />
           ))}
         </div>
+
+        {/* Timestamp info */}
+        {segment && (
+          <div className="flex items-center justify-center gap-2 mb-6 text-xs font-bold text-gray-500 dark:text-zinc-500">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{segment.startTime.toFixed(1)}s – {segment.endTime.toFixed(1)}s</span>
+            {replaysLeft !== null && (
+              <span className={cn("ml-2 px-2 py-0.5 rounded-full border text-[10px]",
+                replayLimitReached
+                  ? "border-red-500/30 text-red-400 bg-red-500/10"
+                  : "border-orange-500/30 text-orange-400 bg-orange-500/10"
+              )}>
+                {replayLimitReached ? "Hết lượt nghe" : `Còn ${replaysLeft} lượt`}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Controls */}
         <div className="flex items-center justify-center gap-6 relative z-10">
@@ -79,7 +96,8 @@ export function ShadowingPlayer({
             <div className="absolute inset-0 bg-orange-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <Button
               onClick={onPlayPause}
-              className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-600 hover:scale-105 transition-all shadow-xl flex items-center justify-center text-white border border-white/20"
+              disabled={replayLimitReached && !isPlaying}
+              className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-600 hover:scale-105 transition-all shadow-xl flex items-center justify-center text-white border border-white/20 disabled:opacity-60"
             >
               {isPlaying ? (
                 <Pause className="h-8 w-8 fill-current" />
@@ -101,42 +119,50 @@ export function ShadowingPlayer({
         </div>
       </div>
 
-      {/* Sentence Display */}
+      {/* Segment Text */}
       <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 text-center space-y-4 shadow-lg">
         <AnimatePresence mode="wait">
-          <motion.p
-            key={sentence.original}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-relaxed"
-          >
-            {sentence.original}
-          </motion.p>
-        </AnimatePresence>
-
-        <div className="h-px w-12 bg-gray-200 dark:bg-white/10 mx-auto" />
-
-        <div className="min-h-[24px]">
-          {showTranslation ? (
+          {showTranscript && segment ? (
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-gray-600 dark:text-zinc-400 italic"
+              key={segment.text}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-relaxed"
             >
-              {sentence.translation}
+              {segment.text}
             </motion.p>
           ) : (
-            <Button
-              variant="link"
-              onClick={onToggleTranslation}
-              className="text-gray-500 dark:text-zinc-500 text-xs uppercase tracking-widest hover:text-orange-500 h-auto p-0"
+            <motion.div
+              key="hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center gap-3"
             >
-              Hiện dịch nghĩa
-            </Button>
+              <p className="text-gray-400 dark:text-zinc-600 text-sm">Văn bản đang bị ẩn</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onToggleTranscript}
+                className="rounded-xl text-xs border-orange-500/20 text-orange-500 hover:bg-orange-500/10"
+              >
+                Xem lời thoại
+              </Button>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
+
+        {showTranscript && (
+          <Button
+            variant="link"
+            onClick={onToggleTranscript}
+            className="text-gray-400 dark:text-zinc-600 text-[10px] uppercase tracking-widest hover:text-orange-500 h-auto p-0"
+          >
+            Ẩn lời thoại
+          </Button>
+        )}
       </div>
     </div>
   );
 }
+

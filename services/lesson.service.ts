@@ -12,9 +12,18 @@ import {
   UpdateTranscriptRequest,
   UpdateTranscriptResponse,
   YoutubePreviewResponse,
+  GetUserLessonsParams,
+  GetUserLessonsResponse,
+  GetDictationExerciseResponse,
+  SubmitDictationRequest,
+  SubmitDictationResponse,
+  GetSegmentsResponse,
+  CheckSegmentRequest,
+  CheckSegmentResponse,
 } from "@/types/lesson.type";
 
 export const lessonService = {
+  // ============ ADMIN ENDPOINTS ============
   // GET List
   getLessons: async (params: GetLessonsParams): Promise<GetLessonsResponse> => {
     const response = await axiosClient.get("/admin/lessons", { params });
@@ -102,6 +111,69 @@ export const lessonService = {
     const response = await axiosClient.get("/admin/lessons/youtube/preview", {
       params: { url },
     });
+    return (response as any).data ?? response;
+  },
+
+  // ============ USER ENDPOINTS ============
+
+  // GET /api/lessons - Lấy danh sách lessons (public + premium)
+  getUserLessons: async (
+    params: GetUserLessonsParams,
+  ): Promise<GetUserLessonsResponse> => {
+    const response = await axiosClient.get("/lessons", { params });
+    return (response as any).data ?? response;
+  },
+
+  // GET /api/lessons/{id} - Lấy chi tiết lesson
+  getUserLessonById: async (id: string): Promise<LessonDto> => {
+    const response = await axiosClient.get(`/lessons/${id}`);
+    return (response as any).data ?? response;
+  },
+
+  // GET /api/lessons/{id}/dictation - Lấy dictation exercise (blanks KHÔNG có đáp án)
+  getDictationExercise: async (
+    id: string,
+    level: string = "Beginner",
+  ): Promise<GetDictationExerciseResponse> => {
+    const response = await axiosClient.get(`/lessons/${id}/dictation`, {
+      params: { levelStr: level },
+    });
+    return (response as any).data ?? response;
+  },
+
+  // POST /lessons/{id}/dictation/submit - Submit dictation answers
+  submitDictation: async (
+    id: string,
+    data: SubmitDictationRequest,
+  ): Promise<SubmitDictationResponse> => {
+    const response = await axiosClient.post(
+      `/lessons/${id}/dictation/submit`,
+      data,
+    );
+    return (response as any).data ?? response;
+  },
+
+  // GET /lessons/{id}/segments - Lấy segments cho shadowing
+  getSegments: async (
+    id: string,
+    level: string = "Intermediate",
+  ): Promise<GetSegmentsResponse> => {
+    const response = await axiosClient.get(`/lessons/${id}/segments`, {
+      params: { level },
+    });
+    return (response as any).data ?? response;
+  },
+
+  // POST /lessons/{id}/segments/{segmentIndex}/check - Check segment
+  checkSegment: async (
+    id: string,
+    segmentIndex: number,
+    data: CheckSegmentRequest,
+  ): Promise<CheckSegmentResponse> => {
+    const response = await axiosClient.post(
+      `/lessons/${id}/segments/${segmentIndex}/check`,
+      data,
+    );
     return (response as any).data ?? response;
   },
 };

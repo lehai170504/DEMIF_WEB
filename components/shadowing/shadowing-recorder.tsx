@@ -4,24 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, RotateCcw, ChevronRight, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { CheckSegmentResponse } from "@/types/lesson.type";
 
 interface ShadowingRecorderProps {
   isRecording: boolean;
   onRecord: () => void;
-  scores: { pronunciation: number; timing: number; tone: number };
+  checkResult?: CheckSegmentResponse | null;
+  isChecking: boolean;
   onNext: () => void;
   onRetry: () => void;
+  speechSupported: boolean;
 }
 
 export function ShadowingRecorder({
   isRecording,
   onRecord,
-  scores,
+  checkResult,
+  isChecking,
   onNext,
   onRetry,
+  speechSupported,
 }: ShadowingRecorderProps) {
-  const hasScore =
-    scores.pronunciation > 0 || scores.timing > 0 || scores.tone > 0;
+  const accuracy = checkResult?.accuracy ?? 0;
+
+  const getAccuracyColor = (val: number) => {
+    if (val >= 80) return "text-emerald-400";
+    if (val >= 60) return "text-orange-400";
+    return "text-rose-400";
+  };
 
   return (
     <div className="flex flex-col gap-6 h-full">
@@ -33,21 +43,23 @@ export function ShadowingRecorder({
               "text-[10px] font-black uppercase tracking-[0.2em] py-1 px-3 rounded-full border transition-colors",
               isRecording
                 ? "border-red-500/50 text-red-500 bg-red-500/10 animate-pulse"
+                : isChecking
+                ? "border-orange-500/50 text-orange-400 bg-orange-500/10 animate-pulse"
                 : "border-gray-200 dark:border-white/10 text-gray-500 dark:text-zinc-500 bg-gray-100 dark:bg-white/5",
             )}
           >
-            {isRecording ? "Đang ghi âm..." : "Sẵn sàng"}
+            {isRecording ? "Đang ghi âm..." : isChecking ? "Đang chấm điểm..." : "Sẵn sàng"}
           </span>
         </div>
 
         {/* Mic Button */}
         <div className="relative z-10 mb-8 mt-4">
           {isRecording && (
-            <span className="absolute inset-0 rounded-full border-2 border-red-500 opacity-50 animate-ping" />
+            <span className="absolute inset-0 rounded-full border-2 border-red-500 opacity-50 animate-ping"></span>
           )}
           <Button
             onClick={onRecord}
-            disabled={isRecording}
+            disabled={isRecording || isChecking || !speechSupported}
             className={cn(
               "w-32 h-32 rounded-full transition-all duration-300 flex items-center justify-center border-4",
               isRecording
@@ -63,16 +75,18 @@ export function ShadowingRecorder({
           </Button>
         </div>
 
-        <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium mb-2">
-          {isRecording
+        <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium mb-2 text-center">
+          {!speechSupported
+            ? "Trình duyệt không hỗ trợ nhận dạng giọng nói"
+            : isRecording
             ? "Đang lắng nghe giọng của bạn..."
             : "Nhấn vào micro để bắt đầu nói"}
         </p>
         <p className="text-xs text-gray-500 dark:text-zinc-600">
-          Hệ thống sẽ tự động chấm điểm sau khi ghi âm
+          Hệ thống sẽ tự động chấm điểm sau khi bạn nói xong
         </p>
 
-        {/* Recording Visualizer (Fake) */}
+        {/* Recording Visualizer */}
         {isRecording && (
           <div className="absolute bottom-0 left-0 w-full h-16 flex items-end justify-center gap-1 pb-4 opacity-30">
             {Array.from({ length: 30 }).map((_, i) => (
@@ -89,7 +103,7 @@ export function ShadowingRecorder({
 
       {/* Score Feedback */}
       <AnimatePresence>
-        {(hasScore || isRecording) && !isRecording && (
+        {checkResult && !isRecording && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -98,41 +112,47 @@ export function ShadowingRecorder({
           >
             <div className="flex items-center gap-2 mb-4 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
               <Sparkles className="h-4 w-4 text-orange-500" />
-              AI Feedback
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                {
-                  label: "Phát âm",
-                  score: scores.pronunciation,
-                  color: "text-emerald-400",
-                },
-                {
-                  label: "Nhịp điệu",
-                  score: scores.timing,
-                  color: "text-blue-400",
-                },
-                {
-                  label: "Ngữ điệu",
-                  score: scores.tone,
-                  color: "text-purple-400",
-                },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-gray-50 dark:bg-white/5 rounded-2xl p-3 text-center border border-gray-200 dark:border-white/5"
-                >
-                  <div className={cn("text-xl font-black mb-1", stat.color)}>
-                    {stat.score}
-                  </div>
-                  <div className="text-[9px] font-bold text-gray-500 dark:text-zinc-500 uppercase">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
+              Kết quả
             </div>
 
-            <div className="flex gap-3 mt-6">
+            {/* Accuracy score */}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className={cn("text-5xl font-black", getAccuracyColor(accuracy))}>
+                {accuracy.toFixed(0)}
+              </span>
+              <span className="text-xl font-bold text-gray-500 dark:text-zinc-500">%</span>
+            </div>
+
+            {/* Word-by-word comparison */}
+            {checkResult.words.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-5">
+                {checkResult.words.map((w, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "px-2 py-0.5 rounded-lg text-sm font-bold border",
+                      w.isCorrect
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    )}
+                    title={!w.isCorrect && w.expected ? `Cần: "${w.expected}"` : undefined}
+                  >
+                    {w.word}
+                    {!w.isCorrect && w.expected && (
+                      <span className="ml-1 text-[10px] opacity-70">→ {w.expected}</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {checkResult.feedback && (
+              <p className="text-xs text-gray-500 dark:text-zinc-500 italic mb-4">
+                {checkResult.feedback}
+              </p>
+            )}
+
+            <div className="flex gap-3">
               <Button
                 onClick={onRetry}
                 variant="outline"
@@ -153,3 +173,4 @@ export function ShadowingRecorder({
     </div>
   );
 }
+
