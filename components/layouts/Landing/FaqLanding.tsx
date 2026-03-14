@@ -24,15 +24,24 @@ export function FaqLanding() {
     },
   ];
 
+  // Logic xác định hướng trượt dựa trên vị trí (Cột trái trượt từ trái, Cột phải trượt từ phải)
+  const getCardAnimation = (idx: number) => {
+    const isLeftColumn = idx % 2 === 0; // Index chẵn (0, 2) nằm bên trái
+    return {
+      initial: { opacity: 0, x: isLeftColumn ? -60 : 60, y: 20 },
+      whileInView: { opacity: 1, x: 0, y: 0 },
+    };
+  };
+
   return (
-    // Thay py-32 bằng py-12 để khớp với khung nhìn h-screen của StackedSection
-    <section className="container mx-auto px-6 py-12 md:py-20 font-mono h-full flex flex-col justify-center">
-      {/* Tiêu đề chính - Thu nhỏ margin để tiết kiệm diện tích */}
-      <div className="max-w-4xl mx-auto text-center mb-10 md:mb-16">
+    <section className="container mx-auto px-6 py-12 md:py-20 font-mono h-full flex flex-col justify-center overflow-hidden">
+      {/* Tiêu đề chính - Slide từ trên xuống */}
+      <div className="max-w-4xl mx-auto text-center mb-10 md:mb-16 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <Badge className="mb-4 bg-orange-500/10 text-orange-600 dark:text-[#FF7A00] border-none px-4 py-1.5 rounded-full uppercase tracking-widest text-[10px] font-bold">
             Hỗ trợ & Giải đáp
@@ -49,51 +58,60 @@ export function FaqLanding() {
         </motion.div>
       </div>
 
-      {/* FAQ Grid Layout - Giảm Gap để không bị tràn khung hình */}
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full">
-        {faqs.map((faq, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.05 }}
-            className="group p-5 md:p-8 bg-gray-50/50 dark:bg-zinc-900/40 border border-gray-100 dark:border-white/5 rounded-[2rem] hover:bg-white dark:hover:bg-zinc-900 transition-all duration-500 hover:shadow-xl"
-          >
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-black flex items-center justify-center shadow-sm border border-gray-100 dark:border-white/10 group-hover:border-[#FF7A00]/30 transition-colors">
-                  <HelpCircle className="w-5 h-5 text-[#FF7A00]" />
+      {/* FAQ Grid Layout - Slide lắp ráp từ 2 bên */}
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 w-full relative z-10">
+        {faqs.map((faq, idx) => {
+          const anim = getCardAnimation(idx);
+
+          return (
+            <motion.div
+              key={idx}
+              initial={anim.initial}
+              whileInView={anim.whileInView}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{
+                type: "spring",
+                stiffness: 100,
+                damping: 20,
+                delay: idx * 0.1, // Stagger mượt mà
+              }}
+              className="group p-6 md:p-8 bg-gray-50/80 dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-[2rem] hover:bg-white dark:hover:bg-zinc-900/80 backdrop-blur-sm transition-colors duration-500 hover:shadow-xl hover:border-[#FF7A00]/30"
+            >
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black flex items-center justify-center shadow-sm border border-gray-100 dark:border-white/10 group-hover:scale-110 group-hover:border-[#FF7A00]/30 transition-all duration-500">
+                    <HelpCircle className="w-6 h-6 text-[#FF7A00]" />
+                  </div>
+                  <Plus className="w-5 h-5 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
-                <Plus className="w-4 h-4 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight group-hover:text-[#FF7A00] transition-colors duration-300">
+                  {faq.q}
+                </h3>
+
+                <p className="text-gray-600 dark:text-zinc-400 leading-relaxed text-sm font-medium">
+                  {faq.a}
+                </p>
               </div>
-
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-tight group-hover:text-[#FF7A00] transition-colors">
-                {faq.q}
-              </h3>
-
-              <p className="text-gray-600 dark:text-zinc-400 leading-relaxed text-xs md:text-sm font-medium">
-                {faq.a}
-              </p>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
-      {/* Nút hỗ trợ thêm - Đưa sát lên trên */}
+      {/* Nút hỗ trợ thêm - Slide từ dưới lên mượt mà */}
       <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        className="mt-10 md:mt-12 text-center"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
+        className="mt-10 md:mt-14 text-center relative z-10"
       >
         <Link
           href="/contact"
-          className="group inline-flex items-center gap-2 text-[#FF7A00] text-xs md:text-sm font-black transition-all"
+          className="group inline-flex items-center gap-2 text-[#FF7A00] text-sm font-black transition-all bg-[#FF7A00]/10 hover:bg-[#FF7A00]/20 px-6 py-3 rounded-full"
         >
-          <span className="hover:underline underline-offset-8">
-            Liên hệ với đội ngũ hỗ trợ 24/7
-          </span>
-          <Plus className="w-4 h-4 rotate-45 group-hover:rotate-90 transition-transform" />
+          <span>Liên hệ với đội ngũ hỗ trợ 24/7</span>
+          <Plus className="w-4 h-4 rotate-45 group-hover:rotate-90 transition-transform duration-300" />
         </Link>
       </motion.div>
     </section>

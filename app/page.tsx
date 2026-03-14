@@ -50,12 +50,16 @@ export default function LandingPage() {
       <HeaderLanding />
 
       <main className="w-full relative z-0 no-scrollbar">
-        {/* PHẦN 1: CINEMATIC JOURNEY (500vh) */}
+        {/* ============================================== */}
+        {/* BLOCK 1: CINEMATIC JOURNEY (500vh)             */}
+        {/* ============================================== */}
         <div className="relative z-20 w-full bg-white dark:bg-[#050505]">
           <CinematicJourney />
         </div>
 
-        {/* PHẦN 2: ADVANCED 3D STACKED SECTIONS */}
+        {/* ============================================== */}
+        {/* BLOCK 2: 3D STACKED SECTIONS (PHẦN ĐẦU)        */}
+        {/* ============================================== */}
         <div className="relative w-full z-10 perspective-[1500px]">
           <StackedSection isFirst bgClass="bg-white dark:bg-[#050505]">
             <AppleStyleSection id="stats" className="w-full">
@@ -68,14 +72,22 @@ export default function LandingPage() {
               <TestimonialsLanding />
             </AppleStyleSection>
           </StackedSection>
+        </div>
 
-          <StackedSection bgClass="bg-white dark:bg-[#050505]">
-            <AppleStyleSection id="pricing" className="w-full">
-              <Pricing />
-            </AppleStyleSection>
-          </StackedSection>
+        {/* ============================================== */}
+        {/* BLOCK 3: BREAKOUT SECTION (THOÁT KHỎI STACK 3D)*/}
+        {/* Đoạn này cuộn tự do bình thường để trải nghiệm  */}
+        {/* kéo ngang của Pricing được tối ưu nhất         */}
+        {/* ============================================== */}
+        <div className="relative w-full z-30 bg-white dark:bg-[#050505] rounded-t-[3rem] md:rounded-t-[5rem] shadow-[0_-30px_100px_rgba(0,0,0,0.5)] border-t border-white/10">
+          <Pricing />
+        </div>
 
-          <StackedSection bgClass="bg-gray-50 dark:bg-[#0a0a0a]">
+        {/* ============================================== */}
+        {/* BLOCK 4: TÁI THIẾT LẬP 3D STACKED SECTIONS     */}
+        {/* ============================================== */}
+        <div className="relative w-full z-40 perspective-[1500px]">
+          <StackedSection isFirst bgClass="bg-gray-50 dark:bg-[#0a0a0a]">
             <AppleStyleSection id="about" className="w-full">
               <AboutLanding />
             </AppleStyleSection>
@@ -95,6 +107,7 @@ export default function LandingPage() {
         </div>
       </main>
 
+      {/* FOOTER */}
       <div className="relative z-[60] bg-white dark:bg-[#050505] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_-40px_80px_rgba(0,0,0,0.9)] border-t border-gray-200 dark:border-white/5 rounded-t-[3rem]">
         <FooterLanding />
       </div>
@@ -143,7 +156,7 @@ function StackedSection({
     ["blur(0px) contrast(100%)", "blur(4px) contrast(80%)"],
   );
 
-  // 4. Hiệu ứng Parallax cho nội dung bên trong (Nội dung trôi ngược lên khi thẻ nhỏ lại)
+  // 4. Hiệu ứng Parallax cho nội dung bên trong
   const contentY = useTransform(smoothProgress, [0, 1], [0, -150]);
 
   // 5. Lớp màn phản chiếu Glass lướt qua
@@ -161,7 +174,7 @@ function StackedSection({
           rotateX,
           filter,
           transformOrigin: "center top",
-          z: useTransform(smoothProgress, [0, 1], [0, -500]), // Lùi hẳn vào không gian 3D
+          z: useTransform(smoothProgress, [0, 1], [0, -500]), // Lùi hẳn vào không không gian 3D
         }}
         className={`sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden no-scrollbar will-change-transform ${
           isFirst
