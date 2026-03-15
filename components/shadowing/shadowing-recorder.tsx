@@ -124,7 +124,7 @@ export function ShadowingRecorder({
             </div>
 
             {/* Word-by-word comparison */}
-            {checkResult.words.length > 0 && (
+            {(checkResult.words?.length ?? 0) > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-5">
                 {checkResult.words.map((w, i) => (
                   <span

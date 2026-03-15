@@ -191,14 +191,14 @@ export const lessonService = {
     return (response as any).data ?? response;
   },
 
-  // POST /lessons/{id}/segments/{segmentIndex}/check - Check segment
+  // POST /lessons/{id}/segments/{segmentIndex}/shadowing - Check segment (text-fallback via Web Speech API)
   checkSegment: async (
     id: string,
     segmentIndex: number,
     data: CheckSegmentRequest,
   ): Promise<CheckSegmentResponse> => {
     const response = await axiosClient.post(
-      `/lessons/${id}/segments/${segmentIndex}/check`,
+      `/lessons/${id}/segments/${segmentIndex}/shadowing`,
       data,
     );
     return (response as any).data ?? response;

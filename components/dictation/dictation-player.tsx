@@ -151,84 +151,12 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
 
       <main className="container mx-auto max-w-[1600px] px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT SIDEBAR */}
-          <aside className="hidden lg:block lg:col-span-3 space-y-6 sticky top-24">
-            {/* Level Selector */}
-            <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl">
-              <div className="space-y-4">
-                <h3 className="font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em]">
-                  Chọn cấp độ
-                </h3>
-                <div className="flex flex-col gap-2">
-                  {["Beginner", "Intermediate", "Advanced", "Expert"].map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => {
-                        setLevel(l);
-                        setAnswers({});
-                      }}
-                      className={cn(
-                        "px-4 py-3 rounded-xl text-xs font-bold transition-all border",
-                        level === l
-                          ? "bg-orange-500 text-white border-orange-500 shadow-lg"
-                          : "bg-transparent text-gray-600 dark:text-zinc-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
-                      )}
-                    >
-                      {getLevelLabel(l)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            {/* Progress Card */}
-            <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em]">
-                  <Info className="h-4 w-4 text-orange-500" />
-                  Tiến độ
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5">
-                    <span className="text-xs font-bold text-gray-600 dark:text-zinc-400">
-                      Đã điền
-                    </span>
-                    <div className="flex items-baseline gap-1 text-orange-500">
-                      <span className="text-xl font-black">{filledBlanks}</span>
-                      <span className="text-xs font-bold text-gray-400">
-                        / {totalBlanks}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase">
-                      <span>Hoàn thành</span>
-                      <span className="text-gray-900 dark:text-white">
-                        {progress.toFixed(0)}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={progress}
-                      className="h-2 bg-gray-200 dark:bg-white/5"
-                    />
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-600 dark:text-blue-400">
-                    ⏱️ Thời gian: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* MAIN CONTENT */}
-          <div className="col-span-1 lg:col-span-9 space-y-8">
+          {/* ===== LEFT: Media + Level + Progress (sticky) ===== */}
+          <aside className="lg:col-span-5 space-y-5 sticky top-24">
             {/* Media Player */}
-            <div className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
+            <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
               {lesson.mediaType === "youtube" ? (
-                /* --- YouTube Embed --- */
                 <div className="w-full aspect-video">
                   <iframe
                     src={getYoutubeEmbedUrl(lesson.mediaUrl) ?? undefined}
@@ -239,16 +167,14 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                   />
                 </div>
               ) : lesson.mediaType === "video" ? (
-                /* --- HTML5 Video --- */
                 <video
                   ref={audioRef as React.RefObject<HTMLVideoElement>}
                   controls
-                  className="w-full max-h-[480px] bg-black"
+                  className="w-full max-h-[360px] bg-black"
                   src={lesson.mediaUrl ?? undefined}
                   poster={lesson.thumbnailUrl ?? undefined}
                 />
               ) : (
-                /* --- Audio (default) --- */
                 <div className="p-8 flex flex-col items-center gap-6">
                   <div className="inline-flex p-6 rounded-[2.5rem] bg-gradient-to-br from-orange-500/20 to-transparent border border-orange-500/20 text-orange-500">
                     <Volume2 className="h-12 w-12" />
@@ -274,17 +200,17 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                 </div>
               )}
 
-              {/* Hints toggle below the media */}
-              <div className="px-8 py-4 border-t border-gray-100 dark:border-white/5 flex items-center gap-3 bg-gray-50 dark:bg-white/[0.02]">
-                <Volume2 className="h-4 w-4 text-orange-500" />
-                <span className="text-xs font-bold text-gray-600 dark:text-zinc-400 flex-1">
+              {/* Bottom bar */}
+              <div className="px-6 py-3 border-t border-gray-100 dark:border-white/5 flex items-center gap-3 bg-gray-50 dark:bg-white/[0.02]">
+                <Volume2 className="h-4 w-4 text-orange-500 shrink-0" />
+                <span className="text-xs font-bold text-gray-600 dark:text-zinc-400 flex-1 line-clamp-1">
                   {lesson.title}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowHints(!showHints)}
-                  className="rounded-xl text-xs"
+                  className="rounded-xl text-xs shrink-0"
                 >
                   {showHints ? <Eye className="h-4 w-4 mr-1.5" /> : <EyeOff className="h-4 w-4 mr-1.5" />}
                   {showHints ? "Ẩn gợi ý" : "Hiện gợi ý"}
@@ -292,38 +218,94 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
               </div>
             </div>
 
+            {/* Level Selector */}
+            <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl">
+              <h3 className="font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-3">
+                Chọn cấp độ
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {["Beginner", "Intermediate", "Advanced", "Expert"].map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => {
+                      setLevel(l);
+                      setAnswers({});
+                    }}
+                    className={cn(
+                      "px-4 py-2.5 rounded-xl text-xs font-bold transition-all border",
+                      level === l
+                        ? "bg-orange-500 text-white border-orange-500 shadow-lg"
+                        : "bg-transparent text-gray-600 dark:text-zinc-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
+                    )}
+                  >
+                    {getLevelLabel(l)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Progress Card */}
+            <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl">
+              <div className="flex items-center gap-2 font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-4">
+                <Info className="h-4 w-4 text-orange-500" />
+                Tiến độ
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-white/5">
+                  <span className="text-xs font-bold text-gray-600 dark:text-zinc-400">Đã điền</span>
+                  <div className="flex items-baseline gap-1 text-orange-500">
+                    <span className="text-xl font-black">{filledBlanks}</span>
+                    <span className="text-xs font-bold text-gray-400">/ {totalBlanks}</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase">
+                    <span>Hoàn thành</span>
+                    <span className="text-gray-900 dark:text-white">{progress.toFixed(0)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2 bg-gray-200 dark:bg-white/5" />
+                </div>
+                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-600 dark:text-blue-400">
+                  ⏱️ Thời gian: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* ===== RIGHT: Exercise (scrollable) ===== */}
+          <div className="lg:col-span-7 space-y-6">
             {/* Exercise Content */}
             {isLoading && (
-              <div className="flex items-center justify-center py-20">
+              <div className="flex items-center justify-center py-32">
                 <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
               </div>
             )}
 
             {!isLoading && exercise && (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {exercise.template.segments.map((segment, segIndex) => (
                   <motion.div
                     key={segIndex}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: segIndex * 0.1 }}
+                    transition={{ delay: segIndex * 0.07 }}
                     className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl"
                   >
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase">
-                        <span className="h-6 w-6 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs">
+                        <span className="h-6 w-6 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-xs shrink-0">
                           {segIndex + 1}
                         </span>
-                        <span>{segment.startTime.toFixed(1)}s - {segment.endTime.toFixed(1)}s</span>
+                        <span>{segment.startTime.toFixed(1)}s – {segment.endTime.toFixed(1)}s</span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 leading-loose text-base">
+                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-3 leading-loose text-base">
                         {segment.words.map((word, wordIndex) => (
                           <span key={wordIndex}>
                             {word.isBlank ? (
                               <input
                                 type="text"
-                                placeholder={showHints ? word.hint : "___"}
+                                placeholder={showHints ? (word.hint ?? "___") : "___"}
                                 value={answers[`${segIndex}-${word.position}`] || ""}
                                 onChange={(e) =>
                                   handleInputChange(segIndex, word.position, e.target.value)
@@ -345,11 +327,11 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                 ))}
 
                 {/* Submit Button */}
-                <div className="flex justify-center py-6">
+                <div className="flex justify-center py-4">
                   <Button
                     onClick={handleSubmit}
                     disabled={submitMutation.isPending || filledBlanks === 0}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl h-12 px-8 text-base"
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl h-12 px-10 text-base"
                   >
                     {submitMutation.isPending ? (
                       <>
@@ -381,7 +363,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                       </p>
 
                       {/* Detailed Results */}
-                      <div className="mt-6 grid gap-3">
+                      <div className="mt-6 grid gap-3 text-left">
                         {submitMutation.data.results.map((result, idx) => (
                           <div
                             key={idx}
@@ -394,9 +376,9 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                           >
                             <div className="flex items-center gap-3">
                               {result.isCorrect ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
                               ) : (
-                                <XCircle className="h-5 w-5 text-red-500" />
+                                <XCircle className="h-5 w-5 text-red-500 shrink-0" />
                               )}
                               <span className="font-medium text-gray-900 dark:text-white">
                                 {result.userInput}
