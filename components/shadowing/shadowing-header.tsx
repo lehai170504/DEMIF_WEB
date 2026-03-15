@@ -26,32 +26,34 @@ export function ShadowingHeader({
             variant="ghost"
             size="icon"
             asChild
-            className="rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+            className="rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 text-gray-500 dark:text-zinc-400 hover:text-blue-600"
           >
             <Link href="/shadowing">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
           <div>
-            <h1 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[200px] sm:max-w-none">
+            <h1 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[200px] sm:max-w-none">
               {title}
             </h1>
-            <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
-              Luyện tập Shadowing
+            <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em]">
+              Shadowing Practice Mode
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-gray-500 dark:text-zinc-500">
-            {current} <span className="text-gray-400 dark:text-zinc-700">/</span> {total}
+          <span className="text-[10px] font-black text-gray-500 dark:text-zinc-500 tabular-nums">
+            PHẦN {current}{" "}
+            <span className="text-gray-300 dark:text-zinc-700 mx-1">/</span>{" "}
+            {total}
           </span>
-          <div className="w-24 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+          <div className="w-24 h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden border border-gray-200/50 dark:border-white/5">
             <motion.div
-              className="h-full bg-orange-500"
+              className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </div>
         </div>

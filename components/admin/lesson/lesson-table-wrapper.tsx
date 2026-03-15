@@ -91,7 +91,11 @@ export function LessonTableWrapper({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  // FIX: Mặc định sắp xếp theo displayOrder tăng dần (nhỏ hiện trước)
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "displayOrder", desc: false },
+  ]);
 
   const pagination = React.useMemo(
     () => ({
@@ -126,7 +130,7 @@ export function LessonTableWrapper({
       columnFilters,
       pagination,
     },
-    manualPagination: true, // Vì chúng ta phân trang từ phía Server (API)
+    manualPagination: true,
     onPaginationChange: (updater) => {
       if (typeof updater === "function") {
         const newState = updater(pagination);
@@ -155,9 +159,13 @@ export function LessonTableWrapper({
       setData((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+        const newData = arrayMove(items, oldIndex, newIndex);
+
+        // GỢI Ý: Bạn nên gọi một hàm API cập nhật displayOrder ở đây
+        // VD: updateOrderMutation.mutate(newData.map((item, index) => ({ id: item.id, order: index + 1 })));
+
+        return newData;
       });
-      // Gợi ý: Gọi API Patch 'displayOrder' tại đây nếu cần lưu thứ tự vào Database
     }
   }
 
@@ -205,7 +213,6 @@ export function LessonTableWrapper({
         </TabsList>
 
         <div className="flex items-center gap-2">
-          {/* Menu ẩn hiện cột */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -239,7 +246,11 @@ export function LessonTableWrapper({
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id === "lessonType" ? "Loại bài" : column.id}
+                    {column.id === "lessonType"
+                      ? "Loại bài"
+                      : column.id === "displayOrder"
+                        ? "Ưu tiên"
+                        : column.id}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
@@ -307,7 +318,6 @@ export function LessonTableWrapper({
           </DndContext>
         </div>
 
-        {/* Phân trang */}
         <div className="mt-2">
           <TablePagination table={table} />
         </div>

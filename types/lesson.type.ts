@@ -323,3 +323,20 @@ export interface CheckSegmentResponse {
   accuracy: number;
   feedback?: string;
 }
+
+export interface CheckVoiceRequest {
+  level: string;
+  spokenText: string;
+  speechConfidence: number;
+  timeSpentSeconds: number;
+}
+
+export interface CheckVoiceResponse {
+  isCorrect: boolean;
+  accuracyScore: number; // Điểm độ chính xác từ BE (0-100)
+  originalText: string; // Văn bản gốc để đối chiếu
+  detectedWords: {
+    word: string;
+    isCorrect: boolean;
+  }[];
+}

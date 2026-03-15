@@ -13,6 +13,7 @@ import {
   CheckSegmentRequest,
   UpdateDictationTemplatesRequest,
   GetYoutubeTranscriptParams,
+  CheckVoiceRequest,
 } from "@/types/lesson.type";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/error";
@@ -376,5 +377,12 @@ export const useCheckSegment = () => {
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || "Lỗi khi kiểm tra");
     },
+  });
+};
+
+export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
+  return useMutation({
+    mutationFn: (data: CheckVoiceRequest) =>
+      lessonService.checkVoice(lessonId, segmentIndex, data),
   });
 };

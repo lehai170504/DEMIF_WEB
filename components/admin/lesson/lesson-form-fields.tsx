@@ -21,8 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
 import {
   LESSON_TYPES,
-  LESSON_LEVELS,
-  LESSON_STATUSES,
+  LESSON_LEVELS, // Đảm bảo hằng số này đã được cập nhật 4 mức độ
 } from "./lesson.constants";
 import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles, FileText, Settings2 } from "lucide-react";
@@ -31,9 +30,8 @@ import { useParams } from "next/navigation";
 import { TranscriptImportDialog } from "./transcript-import-dialog";
 
 interface LessonFormFieldsProps {
-  // Dùng 'any' ở đây để nhận cả CreateLessonFormValues và UpdateLessonFormValues
   form: UseFormReturn<any>;
-  isEditMode?: boolean; // MỚI: Biến kiểm tra đang ở form Tạo hay Sửa
+  isEditMode?: boolean;
 }
 
 export function LessonFormFields({
@@ -46,9 +44,7 @@ export function LessonFormFields({
 
   return (
     <div className="space-y-12">
-      {/* ======================================================= */}
-      {/* SECTION 1: CƠ BẢN (DÙNG CHUNG CHO CẢ CREATE & UPDATE) */}
-      {/* ======================================================= */}
+      {/* SECTION 1: CƠ BẢN */}
       <div className="space-y-6">
         <h4 className="text-sm font-bold text-orange-600 border-b border-orange-100 pb-2 flex items-center gap-2">
           <Settings2 className="w-4 h-4" /> 1. Thông tin hiển thị
@@ -108,6 +104,8 @@ export function LessonFormFields({
               </FormItem>
             )}
           />
+
+          {/* TRƯỜNG TRÌNH ĐỘ - ĐÃ CẬP NHẬT 4 MỨC ĐỘ */}
           <FormField
             control={form.control}
             name="level"
@@ -207,15 +205,13 @@ export function LessonFormFields({
         </div>
       </div>
 
-      {/* ======================================================= */}
-      {/* SECTION 2: TÀI NGUYÊN (MEDIA)                           */}
-      {/* ======================================================= */}
+      {/* CÁC PHẦN CÒN LẠI GIỮ NGUYÊN ... */}
+      {/* SECTION 2: TÀI NGUYÊN (MEDIA) */}
       <div className="space-y-6">
         <h4 className="text-sm font-bold text-blue-600 border-b border-blue-100 pb-2">
           2. Tài nguyên đa phương tiện
         </h4>
 
-        {/* NẾU LÀ FORM UPDATE: Hiển thị trường Audio URL */}
         {isEditMode && (
           <FormField
             control={form.control}
@@ -288,7 +284,6 @@ export function LessonFormFields({
           />
         </div>
 
-        {/* NẾU LÀ FORM CREATE: Cần nhập thời lượng để AI cắt file */}
         {!isEditMode && (
           <FormField
             control={form.control}
@@ -341,15 +336,12 @@ export function LessonFormFields({
         />
       </div>
 
-      {/* ======================================================= */}
-      {/* SECTION 3: TRANSCRIPT (TÁCH BIỆT LOGIC CREATE/UPDATE)   */}
-      {/* ======================================================= */}
+      {/* SECTION 3: TRANSCRIPT */}
       <div className="space-y-6">
         <h4 className="text-sm font-bold text-purple-600 border-b border-purple-100 pb-2 flex items-center gap-2">
           <FileText className="w-4 h-4" /> 3. Nội dung Phụ đề (Transcript)
         </h4>
 
-        {/* --- FORM CREATE: DÁN NỘI DUNG THÔ --- */}
         {!isEditMode && (
           <div className="space-y-6">
             <FormField
@@ -408,7 +400,6 @@ export function LessonFormFields({
           </div>
         )}
 
-        {/* --- FORM UPDATE: SỬA FULL TRANSCRIPT CỦA BE --- */}
         {isEditMode && (
           <FormField
             control={form.control}
@@ -419,8 +410,6 @@ export function LessonFormFields({
                   <FormLabel className="text-xs font-semibold text-slate-600">
                     Văn bản gốc (Full Transcript) *
                   </FormLabel>
-
-                  {/* NÚT ĐỒNG BỘ TEMPLATES (Chỉ hiện khi Update và có ID) */}
                   <div className="flex items-center gap-2">
                     {lessonId && <TranscriptImportDialog lessonId={lessonId} />}
                     {lessonId && (
@@ -461,9 +450,7 @@ export function LessonFormFields({
         )}
       </div>
 
-      {/* ======================================================= */}
-      {/* SECTION 4: HỆ THỐNG                                     */}
-      {/* ======================================================= */}
+      {/* SECTION 4: HỆ THỐNG */}
       <div className="space-y-6">
         <h4 className="text-sm font-bold text-slate-500 border-b border-slate-200 pb-2">
           4. Cài đặt hệ thống

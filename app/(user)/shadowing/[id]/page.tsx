@@ -1,23 +1,30 @@
 "use client";
 
 import { use, useState, useRef, useEffect, useCallback } from "react";
-import { useUserLessonDetail, useSegments, useCheckSegment } from "@/hooks/use-lesson";
+import {
+  useUserLessonDetail,
+  useSegments,
+  useCheckVoice,
+} from "@/hooks/use-lesson";
 import { Loader2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ShadowingHeader } from "@/components/shadowing/shadowing-header";
 import { ShadowingPlayer } from "@/components/shadowing/shadowing-player";
 import { ShadowingRecorder } from "@/components/shadowing/shadowing-recorder";
 import { ShadowingResult } from "@/components/shadowing/shadowing-result";
-import { CheckSegmentResponse } from "@/types/lesson.type";
+import { CheckVoiceResponse } from "@/types/lesson.type";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
-// Build YouTube embed URL from various URL formats
+// Build YouTube embed URL
 function getYoutubeEmbedUrl(url: string | null): string | null {
   if (!url) return null;
   if (url.includes("/embed/")) return url;
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0`;
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
+  );
+  if (match)
+    return `https://www.youtube.com/embed/${match[1]}?rel=0&enablejsapi=1`;
   return url;
 }
 
@@ -34,7 +41,7 @@ const LEVEL_LABELS: Record<Level, string> = {
 const LEVEL_COLORS: Record<Level, string> = {
   Beginner: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   Intermediate: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  Advanced: "text-rose-400 bg-rose-500/10 border-rose-500/20",
+  Advanced: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   Expert: "text-purple-400 bg-purple-500/10 border-purple-500/20",
 };
 
@@ -53,26 +60,37 @@ export default function ShadowingPracticePage({
   const [showTranscript, setShowTranscript] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [replayCount, setReplayCount] = useState(0);
-  const [checkResults, setCheckResults] = useState<Record<number, CheckSegmentResponse>>({});
+  const [checkResults, setCheckResults] = useState<
+    Record<number, CheckVoiceResponse>
+  >({});
   const [speechSupported, setSpeechSupported] = useState(true);
 
   // --- Refs ---
   const mediaRef = useRef<HTMLAudioElement | HTMLVideoElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
   const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // --- Data fetching ---
-  const { data: lesson, isLoading: lessonLoading, error } = useUserLessonDetail(id);
-  const { data: segmentsData, isLoading: segmentsLoading } = useSegments(id, level);
-  const checkMutation = useCheckSegment();
+  const {
+    data: lesson,
+    isLoading: lessonLoading,
+    error,
+  } = useUserLessonDetail(id);
+  const { data: segmentsData, isLoading: segmentsLoading } = useSegments(
+    id,
+    level,
+  );
+
+  // SỬ DỤNG HOOK CHECK VOICE MỚI
+  const checkVoiceMutation = useCheckVoice(id, currentIdx);
 
   const segments = segmentsData?.segments ?? [];
   const levelConfig = segmentsData?.levelConfig;
   const currentSegment = segments[currentIdx] ?? null;
-  const progress = segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
+  const progress =
+    segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
 
-  // --- Speech recognition support check ---
+  // --- Check Speech API Support ---
   useEffect(() => {
     const hasSR =
       typeof window !== "undefined" &&
@@ -80,7 +98,7 @@ export default function ShadowingPracticePage({
     setSpeechSupported(hasSR);
   }, []);
 
-  // --- Reset when level changes ---
+  // --- Reset logic ---
   useEffect(() => {
     setCurrentIdx(0);
     setCheckResults({});
@@ -89,20 +107,16 @@ export default function ShadowingPracticePage({
     setIsPlaying(false);
   }, [level]);
 
-  // --- Reset state on segment change ---
   useEffect(() => {
     setReplayCount(0);
-    setShowTranscript(
-      levelConfig?.showTranscriptBefore ?? false
-    );
+    setShowTranscript(levelConfig?.showTranscriptBefore ?? false);
     setIsPlaying(false);
     if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
   }, [currentIdx, levelConfig]);
 
-  // --- Play current segment on HTML5 media ---
+  // --- Media Control ---
   const handlePlaySegment = useCallback(() => {
     if (!currentSegment) return;
-
     const maxReplays = levelConfig?.maxReplays ?? -1;
     if (maxReplays !== -1 && replayCount >= maxReplays) return;
 
@@ -113,14 +127,14 @@ export default function ShadowingPracticePage({
       setIsPlaying(true);
       setReplayCount((c) => c + 1);
 
-      const duration = (currentSegment.endTime - currentSegment.startTime) * 1000 + 300;
+      const duration =
+        (currentSegment.endTime - currentSegment.startTime) * 1000 + 300;
       if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
       stopTimerRef.current = setTimeout(() => {
         media.pause();
         setIsPlaying(false);
       }, duration);
     } else {
-      // YouTube — just track count; user controls playback manually
       setReplayCount((c) => c + 1);
     }
   }, [currentSegment, levelConfig, lesson, replayCount]);
@@ -131,28 +145,37 @@ export default function ShadowingPracticePage({
     if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
   }, []);
 
-  // --- Speech recognition recording ---
+  // --- LUỒNG CHECK VOICE CHÍNH ---
   const handleRecord = useCallback(() => {
     if (!speechSupported || !lesson) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SR = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+    const SR =
+      (window as any).SpeechRecognition ??
+      (window as any).webkitSpeechRecognition;
     const recognition = new SR();
     recognition.lang = "en-US";
     recognition.continuous = false;
     recognition.interimResults = false;
 
-    recognition.onresult = (e: Event & { results: SpeechRecognitionResultList }) => {
+    recognition.onresult = (e: any) => {
       const text = e.results[0][0].transcript;
+      const confidence = e.results[0][0].confidence;
       setIsRecording(false);
-      checkMutation.mutate(
-        { id: lesson.id, segmentIndex: currentIdx, data: { level, userText: text, timeSpentSeconds: 0 } },
+
+      // CALL API: Đưa dữ liệu STT lên Backend
+      checkVoiceMutation.mutate(
+        {
+          level,
+          spokenText: text,
+          speechConfidence: confidence,
+          timeSpentSeconds: 5,
+        },
         {
           onSuccess: (result) => {
             setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
             if (levelConfig?.showTranscriptAfter) setShowTranscript(true);
           },
-        }
+        },
       );
     };
 
@@ -162,7 +185,14 @@ export default function ShadowingPracticePage({
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
-  }, [speechSupported, lesson, currentIdx, level, levelConfig, checkMutation]);
+  }, [
+    speechSupported,
+    lesson,
+    currentIdx,
+    level,
+    levelConfig,
+    checkVoiceMutation,
+  ]);
 
   const handleStopRecording = useCallback(() => {
     recognitionRef.current?.stop();
@@ -186,18 +216,16 @@ export default function ShadowingPracticePage({
     setIsPlaying(false);
   };
 
-  // ----------------------------------------------------------------
-  // Derived data for result screen
-  // ----------------------------------------------------------------
+  // --- Dữ liệu tổng kết ---
   const completedResults = Object.values(checkResults);
   const avgAccuracy =
     completedResults.length > 0
-      ? Math.round(completedResults.reduce((s, r) => s + r.accuracy, 0) / completedResults.length)
+      ? Math.round(
+          completedResults.reduce((s, r) => s + (r.accuracyScore || 0), 0) /
+            completedResults.length,
+        )
       : 0;
 
-  // ----------------------------------------------------------------
-  // Early returns
-  // ----------------------------------------------------------------
   if (lessonLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#050505]">
@@ -220,12 +248,12 @@ export default function ShadowingPracticePage({
             color: "text-orange-400",
           },
           {
-            label: "Câu đã làm",
+            label: "Câu đã nói",
             value: completedResults.length,
             color: "text-emerald-400",
           },
           {
-            label: "Câu bỏ qua",
+            label: "Câu còn lại",
             value: segments.length - completedResults.length,
             color: "text-blue-400",
           },
@@ -245,11 +273,8 @@ export default function ShadowingPracticePage({
 
       <main className="container mx-auto px-4 py-8 max-w-[1400px]">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-
-          {/* ---- LEFT: Media Player (hidden on mobile, show above on small) ---- */}
+          {/* LEFT: Dashboard học viên */}
           <div className="xl:col-span-5 space-y-6">
-
-            {/* Media player card */}
             <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 overflow-hidden shadow-xl">
               {lesson.mediaType === "youtube" ? (
                 <div className="w-full aspect-video">
@@ -258,12 +283,11 @@ export default function ShadowingPracticePage({
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
-                    title={lesson.title}
                   />
                 </div>
               ) : lesson.mediaType === "video" ? (
                 <video
-                  ref={mediaRef as React.RefObject<HTMLVideoElement>}
+                  ref={mediaRef as any}
                   className="w-full max-h-64 bg-black"
                   src={lesson.mediaUrl ?? undefined}
                   poster={lesson.thumbnailUrl ?? undefined}
@@ -271,26 +295,28 @@ export default function ShadowingPracticePage({
               ) : (
                 <div className="p-6">
                   <audio
-                    ref={mediaRef as React.RefObject<HTMLAudioElement>}
+                    ref={mediaRef as any}
                     className="w-full"
-                    src={lesson.audioUrl ?? undefined}
+                    src={lesson.mediaUrl ?? lesson.audioUrl ?? undefined}
                   />
                 </div>
               )}
               <div className="px-5 py-3 border-t border-gray-100 dark:border-white/5 flex items-center gap-3">
-                <Badge className={cn("text-[10px]", LEVEL_COLORS[level])}>
+                <Badge
+                  className={cn("text-[10px] font-black", LEVEL_COLORS[level])}
+                >
                   {LEVEL_LABELS[level]}
                 </Badge>
-                <span className="text-xs text-gray-500 dark:text-zinc-500 flex-1 line-clamp-1">
+                <span className="text-xs text-gray-500 dark:text-zinc-500 flex-1 line-clamp-1 font-bold">
                   {lesson.title}
                 </span>
               </div>
             </div>
 
-            {/* Level Selector */}
+            {/* Selector Level */}
             <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl">
               <h3 className="font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-3">
-                Cấp độ
+                Cấp độ thử thách
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {LEVELS.map((l) => (
@@ -300,8 +326,8 @@ export default function ShadowingPracticePage({
                     className={cn(
                       "px-3 py-2.5 rounded-xl text-xs font-bold transition-all border",
                       level === l
-                        ? "bg-orange-500 text-white border-orange-500 shadow-md"
-                        : "bg-transparent text-gray-600 dark:text-zinc-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5"
+                        ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20"
+                        : "bg-transparent text-gray-600 dark:text-zinc-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5",
                     )}
                   >
                     {LEVEL_LABELS[l]}
@@ -310,11 +336,11 @@ export default function ShadowingPracticePage({
               </div>
             </div>
 
-            {/* Transcript panel (all segments) */}
+            {/* Playlist Segments & Results */}
             {segments.length > 0 && (
-              <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl max-h-72 overflow-y-auto">
-                <h3 className="font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-3 sticky top-0 bg-white dark:bg-[#18181b] py-1">
-                  Bản chép
+              <div className="rounded-[2rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl max-h-72 overflow-y-auto custom-scrollbar">
+                <h3 className="font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-3 sticky top-0 bg-white dark:bg-[#18181b] py-1 z-10">
+                  Bản chép câu nói
                 </h3>
                 <ol className="space-y-2">
                   {segments.map((seg, i) => (
@@ -322,22 +348,28 @@ export default function ShadowingPracticePage({
                       key={i}
                       onClick={() => setCurrentIdx(i)}
                       className={cn(
-                        "flex gap-3 p-3 rounded-xl cursor-pointer text-sm transition-colors",
+                        "flex gap-3 p-3 rounded-xl cursor-pointer text-sm transition-all border",
                         i === currentIdx
-                          ? "bg-orange-500/10 border border-orange-500/20 text-gray-900 dark:text-white"
-                          : "hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400",
-                        checkResults[i] ? "opacity-100" : "opacity-70"
+                          ? "bg-orange-500/10 border-orange-500/30 text-gray-900 dark:text-white"
+                          : "border-transparent hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400",
                       )}
                     >
                       <span className="shrink-0 w-5 h-5 rounded-full bg-orange-500/10 text-orange-500 text-[10px] flex items-center justify-center font-black">
                         {i + 1}
                       </span>
-                      <span className="leading-relaxed">{seg.text}</span>
+                      <span className="leading-relaxed line-clamp-2">
+                        {seg.text}
+                      </span>
                       {checkResults[i] && (
-                        <span className={cn("ml-auto shrink-0 text-xs font-bold",
-                          checkResults[i].accuracy >= 80 ? "text-emerald-400" : checkResults[i].accuracy >= 60 ? "text-orange-400" : "text-rose-400"
-                        )}>
-                          {checkResults[i].accuracy.toFixed(0)}%
+                        <span
+                          className={cn(
+                            "ml-auto shrink-0 text-[10px] font-black px-2 py-1 rounded-md",
+                            checkResults[i].accuracyScore >= 80
+                              ? "bg-emerald-500/10 text-emerald-500"
+                              : "bg-orange-500/10 text-orange-500",
+                          )}
+                        >
+                          {checkResults[i].accuracyScore.toFixed(0)}%
                         </span>
                       )}
                     </li>
@@ -347,21 +379,23 @@ export default function ShadowingPracticePage({
             )}
           </div>
 
-          {/* ---- RIGHT: Practice Area ---- */}
+          {/* RIGHT: Practice Area */}
           <div className="xl:col-span-7 space-y-6">
             {segmentsLoading ? (
               <div className="flex items-center justify-center py-32">
                 <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
               </div>
             ) : segments.length === 0 ? (
-              <div className="flex items-center justify-center py-32 text-gray-500 dark:text-zinc-500 text-sm">
-                Bài học này chưa có dữ liệu cho cấp độ đã chọn.
+              <div className="flex items-center justify-center py-32 text-gray-500 text-sm">
+                Bài học chưa có dữ liệu cho cấp độ này.
               </div>
             ) : (
               <>
                 <ShadowingPlayer
                   isPlaying={isPlaying}
-                  onPlayPause={isPlaying ? handleStopPlayback : handlePlaySegment}
+                  onPlayPause={
+                    isPlaying ? handleStopPlayback : handlePlaySegment
+                  }
                   onNext={handleNext}
                   onPrev={() => setCurrentIdx((i) => Math.max(0, i - 1))}
                   canNext={currentIdx < segments.length - 1}
@@ -377,7 +411,7 @@ export default function ShadowingPracticePage({
                   isRecording={isRecording}
                   onRecord={isRecording ? handleStopRecording : handleRecord}
                   checkResult={checkResults[currentIdx] ?? null}
-                  isChecking={checkMutation.isPending}
+                  isChecking={checkVoiceMutation.isPending}
                   onNext={handleNext}
                   onRetry={() => {
                     setCheckResults((prev) => {
@@ -396,4 +430,3 @@ export default function ShadowingPracticePage({
     </div>
   );
 }
-
