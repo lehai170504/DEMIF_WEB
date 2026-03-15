@@ -7,6 +7,7 @@ export const LESSON_LEVELS = [
   { label: "Beginner", value: "Beginner" },
   { label: "Intermediate", value: "Intermediate" },
   { label: "Advanced", value: "Advanced" },
+  { label: "Expert", value: "Expert" },
 ];
 
 export const LESSON_STATUSES = [

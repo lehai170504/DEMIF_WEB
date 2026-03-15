@@ -1,423 +1,431 @@
-"use client"
+"use client";
 
-import { useState, useRef } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, Play, Pause, Mic, Square, Volume2, Check, RotateCcw } from "lucide-react"
-import type { Lesson } from "@/lib/data/lessons"
-// Remove the broken import. Implement local audio utility functions below.
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import {
+  ArrowLeft,
+  Play,
+  Pause,
+  Mic,
+  Square,
+  Volume2,
+  Check,
+  RotateCcw,
+  Headphones,
+  ChevronRight,
+  Trophy,
+  Sparkles,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-function resetAudio() {
-  const audio = document.querySelector("audio");
-  if (audio) {
-    audio.currentTime = 0;
-    audio.pause();
-  }
-}
+type ExerciseStep = "listen" | "record" | "review" | "score";
 
-function togglePlay() {
-  const audio = document.querySelector("audio");
-  if (audio) {
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
-  }
-}
+export function ShadowingExercise({ lesson }: { lesson: any }) {
+  const [step, setStep] = useState<ExerciseStep>("listen");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasRecording, setHasRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
 
-// Dummy implementations for recording (replace with real logic as needed)
-function startRecording() {
-  // Start recording logic here
-  // You may want to use MediaRecorder API
-  alert("Bắt đầu ghi âm (chưa triển khai)");
-}
-
-function stopRecording() {
-  // Stop recording logic here
-  alert("Dừng ghi âm (chưa triển khai)");
-}
-
-interface ShadowingExerciseProps {
-  lesson: Lesson
-}
-
-type ExerciseStep = "listen" | "record" | "review" | "score"
-
-export function ShadowingExercise({ lesson }: ShadowingExerciseProps) {
-  const [step, setStep] = useState<ExerciseStep>("listen")
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [hasRecording, setHasRecording] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [recordingTime, setRecordingTime] = useState(0)
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [scores] = useState({
     pronunciation: 85,
     fluency: 78,
     intonation: 82,
-    rhythm: 80,
     overall: 81,
-  })
+  });
 
-  const handleContinue = () => {
-    if (step === "listen") {
-      setStep("record")
-    } else if (step === "record") {
-      setStep("review")
-    } else if (step === "review") {
-      setStep("score")
+  // Logic đếm thời gian ghi âm
+  useEffect(() => {
+    if (isRecording) {
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
     }
-  }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isRecording]);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) audioRef.current.pause();
+      else audioRef.current.play();
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleStartRecording = () => {
+    setIsRecording(true);
+    setHasRecording(false);
+    setRecordingTime(0);
+  };
+
+  const handleStopRecording = () => {
+    setIsRecording(false);
+    setHasRecording(true);
+  };
+
+  const handleNextStep = () => {
+    if (step === "listen") setStep("record");
+    else if (step === "record") setStep("review");
+    else if (step === "review") setStep("score");
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-orange-50/30 to-orange-100/50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-orange-200/50 shadow-sm">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/shadowing">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Quay lại
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-lg font-bold text-slate-800">{lesson.title}</h1>
-              <p className="text-xs text-slate-600">{lesson.description}</p>
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-blue-500/30">
+      {/* Header & Steps */}
+      <div className="sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5">
+        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10"
+          >
+            <Link href="/shadowing" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="font-black text-[10px] uppercase tracking-widest">
+                Thoát
+              </span>
+            </Link>
+          </Button>
+          <div className="flex flex-col items-center gap-2 w-full max-w-xs md:max-w-md mx-8">
+            <div className="flex justify-between w-full">
+              <span className="text-[10px] font-black uppercase text-blue-500 tracking-tighter">
+                Tiến trình bài tập
+              </span>
+              <span className="text-[10px] font-black uppercase text-zinc-400">
+                Bước{" "}
+                {step === "listen"
+                  ? 1
+                  : step === "record"
+                    ? 2
+                    : step === "review"
+                      ? 3
+                      : 4}
+                /4
+              </span>
             </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Progress Bar */}
-      <div className="border-b border-orange-200/50 bg-white/80">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center gap-4 mb-2">
-            <span className="text-sm font-medium text-slate-700">
-              Bước {step === "listen" ? 1 : step === "record" ? 2 : step === "review" ? 3 : 4} / 4
-            </span>
             <Progress
-              value={step === "listen" ? 25 : step === "record" ? 50 : step === "review" ? 75 : 100}
-              className="flex-1"
+              value={
+                step === "listen"
+                  ? 25
+                  : step === "record"
+                    ? 50
+                    : step === "review"
+                      ? 75
+                      : 100
+              }
+              className="h-1.5 w-full bg-blue-50 dark:bg-white/5"
             />
           </div>
+          <div className="w-20 hidden md:block" /> {/* Spacer */}
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Listen Step */}
-          {step === "listen" && (
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-3">
-              <Card className="p-5 border border-orange-200/70 bg-white shadow-sm rounded-xl">
-                <div className="text-center mb-5">
-                  <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-2">
-                    <Volume2 className="h-7 w-7 text-[#FF7A00]" />
+      <main className="container mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto">
+          <AnimatePresence mode="wait">
+            {/* STEP 1: LISTEN */}
+            {step === "listen" && (
+              <motion.div
+                key="listen"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <Card className="p-12 rounded-[3rem] border-gray-100 dark:border-white/5 shadow-2xl bg-white dark:bg-[#111113] text-center space-y-8">
+                  <div className="w-24 h-24 rounded-[2rem] bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mx-auto shadow-inner">
+                    <Headphones className="h-10 w-10 text-blue-500" />
                   </div>
-                  <h2 className="text-lg font-bold text-slate-800 mb-1">Nghe người bản xứ</h2>
-                  <p className="text-xs text-slate-600">Chú ý đến cách phát âm và ngữ điệu</p>
-                </div>
+                  <div>
+                    <h2 className="text-3xl font-black mb-2 tracking-tight">
+                      Nghe bản gốc
+                    </h2>
+                    <p className="text-gray-500 dark:text-zinc-500 font-bold text-sm uppercase tracking-widest">
+                      Lắng nghe kỹ ngữ điệu và cách nối âm của người bản xứ
+                    </p>
+                  </div>
 
-                <div className="space-y-3">
-                  <Card className="p-3 bg-orange-50/50 border border-orange-200/70 rounded-xl">
-                    <div className="flex items-center justify-between mb-2 text-xs">
-                      <span className="text-slate-600">Âm thanh gốc</span>
-                      <span className="text-slate-600">
-                        {Math.floor(currentTime)}s / {lesson.duration}s
-                      </span>
-                    </div>
-                    <Progress value={(currentTime / lesson.duration) * 100} className="mb-2" />
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={resetAudio}
-                        className="border-orange-200 bg-transparent h-8 w-8"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" onClick={togglePlay} className="w-28">
-                        {isPlaying ? (
-                          <>
-                            <Pause className="h-3 w-3 mr-1" />
-                            Tạm dừng
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-3 w-3 mr-1" />
-                            Phát
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </Card>
+                  <div className="bg-gray-50 dark:bg-white/[0.02] p-10 rounded-[2.5rem] border border-gray-100 dark:border-white/5 relative group">
+                    <p className="text-2xl md:text-3xl font-bold leading-relaxed text-gray-800 dark:text-white">
+                      "{lesson.transcript}"
+                    </p>
+                  </div>
 
-                  <Card className="p-3 bg-white border border-orange-200/70 rounded-xl">
-                    <h3 className="font-semibold text-xs mb-2 text-slate-800">Bản ghi âm:</h3>
-                    <p className="text-xs leading-relaxed text-slate-700">{lesson.transcript}</p>
-                  </Card>
-
-                  <Button onClick={handleContinue} className="w-full" size="sm">
-                    Sẵn sàng ghi âm
-                  </Button>
-                </div>
-
-                <audio ref={audioRef} src={lesson.audioUrl} />
-              </Card>
-
-              <div className="space-y-3">
-                <Card className="p-3 border border-orange-200/70 bg-white shadow-sm rounded-xl">
-                  <h3 className="font-bold text-slate-800 mb-2 text-xs">Thông tin bài học</h3>
-                  <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-600">Thời lượng:</span>
-                      <span className="font-semibold">{lesson.duration}s</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600">Cấp độ:</span>
-                      <span className="font-semibold text-[#FF7A00]">{lesson.level}</span>
-                    </div>
+                  <div className="flex flex-col items-center gap-6">
+                    <Button
+                      onClick={togglePlay}
+                      className="h-20 w-20 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-500/30"
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-8 w-8 fill-current" />
+                      ) : (
+                        <Play className="h-8 w-8 fill-current ml-1" />
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleNextStep}
+                      className="h-14 px-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black font-black uppercase tracking-widest transition-all"
+                    >
+                      Tôi đã sẵn sàng nói
+                    </Button>
                   </div>
                 </Card>
+              </motion.div>
+            )}
 
-                <Card className="p-3 border border-orange-200/70 bg-white shadow-sm rounded-xl">
-                  <h3 className="font-bold text-slate-800 mb-2 text-xs">Mẹo</h3>
-                  <ul className="space-y-1.5 text-xs text-slate-600">
-                    <li className="flex items-start gap-2">
-                      <span className="text-[#FF7A00]">•</span>
-                      <span>Nghe nhiều lần</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-[#FF7A00]">•</span>
-                      <span>Tập trung vào ngữ điệu</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-[#FF7A00]">•</span>
-                      <span>Bắt chước nhịp điệu</span>
-                    </li>
-                  </ul>
-                </Card>
-              </div>
-            </div>
-          )}
+            {/* STEP 2: RECORD */}
+            {step === "record" && (
+              <motion.div
+                key="record"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+              >
+                <Card className="p-12 rounded-[3rem] border-gray-100 dark:border-white/5 shadow-2xl bg-white dark:bg-[#111113] text-center space-y-8">
+                  <div
+                    className={cn(
+                      "w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto transition-all duration-500",
+                      isRecording
+                        ? "bg-red-500 animate-pulse shadow-[0_0_40px_rgba(239,68,68,0.4)]"
+                        : "bg-blue-50 dark:bg-blue-500/10",
+                    )}
+                  >
+                    <Mic
+                      className={cn(
+                        "h-10 w-10",
+                        isRecording ? "text-white" : "text-blue-500",
+                      )}
+                    />
+                  </div>
 
-          {/* Record Step */}
-          {step === "record" && (
-            <Card className="p-6 border border-orange-200/70 bg-white shadow-sm rounded-xl max-w-3xl mx-auto">
-              <div className="text-center mb-6">
-                <div
-                  className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                    isRecording ? "bg-red-500/20 animate-pulse" : "bg-orange-100"
-                  }`}
-                >
-                  <Mic className={`h-8 w-8 ${isRecording ? "text-red-500" : "text-[#FF7A00]"}`} />
-                </div>
-                <h2 className="text-xl font-bold mb-2">Ghi âm giọng nói của bạn</h2>
-                <p className="text-sm text-slate-600">Nói rõ ràng và cố gắng bắt chước phong cách của người bản xứ</p>
-              </div>
+                  <h2 className="text-3xl font-black tracking-tight">
+                    Ghi âm giọng của bạn
+                  </h2>
 
-              <div className="space-y-4">
-                <div className="bg-orange-50/50 border border-orange-200/70 rounded-xl p-5">
-                  <h3 className="font-semibold mb-2 text-sm">Bản ghi âm:</h3>
-                  <p className="text-sm leading-relaxed mb-5">{lesson.transcript}</p>
+                  <div className="bg-gray-50 dark:bg-white/[0.02] p-10 rounded-[2.5rem] border border-gray-100 dark:border-white/5">
+                    <p className="text-xl md:text-2xl font-bold text-zinc-400 dark:text-zinc-600 line-through decoration-blue-500/30">
+                      {lesson.transcript}
+                    </p>
+                  </div>
 
-                  <div className="text-center">
+                  <div className="flex flex-col items-center gap-6">
                     {isRecording ? (
-                      <div className="space-y-3">
-                        <div className="text-3xl font-bold text-red-500">{recordingTime}s</div>
-                        <Button size="sm" variant="destructive" onClick={stopRecording} className="w-40">
-                          <Square className="h-4 w-4 mr-2" />
-                          Dừng ghi âm
+                      <div className="space-y-4">
+                        <span className="text-4xl font-black text-red-500 tabular-nums">
+                          {recordingTime}s
+                        </span>
+                        <Button
+                          onClick={handleStopRecording}
+                          variant="destructive"
+                          className="h-16 px-10 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-500/20"
+                        >
+                          <Square className="mr-2 h-5 w-5 fill-current" /> Dừng
+                          lại
                         </Button>
                       </div>
-                    ) : hasRecording ? (
-                      <div className="space-y-3">
-                        <div className="text-sm text-slate-600">Đã lưu ghi âm ({recordingTime}s)</div>
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setHasRecording(false)
-                              setRecordingTime(0)
-                            }}
-                          >
-                            <RotateCcw className="h-3 w-3 mr-1" />
-                            Ghi lại
-                          </Button>
-                          <Button size="sm" onClick={handleContinue} className="w-40">
-                            Tiếp tục
-                          </Button>
-                        </div>
-                      </div>
                     ) : (
-                      <Button size="sm" onClick={startRecording} className="w-40">
-                        <Mic className="h-4 w-4 mr-2" />
-                        Bắt đầu ghi âm
-                      </Button>
+                      <div className="flex flex-col gap-4">
+                        <Button
+                          onClick={handleStartRecording}
+                          className="h-16 px-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest shadow-xl shadow-blue-500/20"
+                        >
+                          <Mic className="mr-2 h-5 w-5" />{" "}
+                          {hasRecording ? "Ghi âm lại" : "Bắt đầu thu"}
+                        </Button>
+                        {hasRecording && (
+                          <Button
+                            onClick={handleNextStep}
+                            variant="ghost"
+                            className="font-bold text-blue-500 uppercase text-xs tracking-widest"
+                          >
+                            Tiếp tục <ChevronRight className="ml-1 h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                  <p className="text-xs text-blue-700">
-                    <strong>Mẹo:</strong> Nghe lại âm thanh gốc nếu cần trước khi ghi âm
-                  </p>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Review Step */}
-          {step === "review" && (
-            <Card className="p-6 border border-orange-200/70 bg-white shadow-sm rounded-xl max-w-3xl mx-auto">
-              <div className="text-center mb-6">
-                <h2 className="text-xl font-bold mb-2">Xem lại bản ghi âm của bạn</h2>
-                <p className="text-sm text-slate-600">So sánh bản ghi âm của bạn với bản gốc</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-orange-50/50 border border-orange-200/70 rounded-xl p-5">
-                  <h3 className="font-semibold mb-2 text-sm">Âm thanh gốc:</h3>
-                  <div className="flex items-center gap-3 mb-5">
-                    <Button variant="outline" size="icon" onClick={togglePlay} className="h-8 w-8 bg-transparent">
-                      {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                    </Button>
-                    <Progress value={(currentTime / lesson.duration) * 100} className="flex-1" />
-                    <span className="text-xs text-slate-600">
-                      {Math.floor(currentTime)}s / {lesson.duration}s
-                    </span>
-                  </div>
-
-                  <h3 className="font-semibold mb-2 text-sm">Bản ghi âm của bạn:</h3>
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" size="icon" className="h-8 w-8 bg-transparent">
-                      <Play className="h-3 w-3" />
-                    </Button>
-                    <Progress value={0} className="flex-1" />
-                    <span className="text-xs text-slate-600">0s / {recordingTime}s</span>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-orange-200/70 rounded-xl p-5">
-                  <h3 className="font-semibold mb-2 text-sm">Bản ghi âm:</h3>
-                  <p className="text-sm leading-relaxed">{lesson.transcript}</p>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setStep("record")}
-                    className="flex-1 bg-transparent"
-                    size="sm"
-                  >
-                    Ghi lại
-                  </Button>
-                  <Button onClick={handleContinue} className="flex-1" size="sm">
-                    Nhận điểm AI
-                  </Button>
-                </div>
-              </div>
-
-              <audio ref={audioRef} src={lesson.audioUrl} />
-            </Card>
-          )}
-
-          {/* Score Step */}
-          {step === "score" && (
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-3">
-              <Card className="p-5 border border-orange-200/70 bg-white shadow-sm rounded-xl">
-                <div className="text-center mb-5">
-                  <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
-                    <Check className="h-7 w-7 text-green-500" />
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-800 mb-1">Phân tích AI hoàn tất!</h2>
-                  <p className="text-xs text-slate-600">Đánh giá chi tiết về cách phát âm của bạn</p>
-                </div>
-
-                <div className="space-y-3">
-                  <Card className="p-5 bg-gradient-to-br from-orange-50 to-white border border-orange-200/70 text-center rounded-xl">
-                    <div className="text-4xl font-bold text-[#FF7A00] mb-1">{scores.overall}%</div>
-                    <div className="text-xs text-slate-600">Điểm tổng thể</div>
-                  </Card>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <Card className="p-3 bg-orange-50/50 border border-orange-200/70 rounded-xl">
-                      <div className="text-xl font-bold text-[#FF7A00] mb-0.5">{scores.pronunciation}%</div>
-                      <div className="text-xs text-slate-600">Phát âm</div>
-                      <Progress value={scores.pronunciation} className="mt-1.5 h-1.5" />
-                    </Card>
-                    <Card className="p-3 bg-orange-50/50 border border-orange-200/70 rounded-xl">
-                      <div className="text-xl font-bold text-[#FF7A00] mb-0.5">{scores.fluency}%</div>
-                      <div className="text-xs text-slate-600">Trôi chảy</div>
-                      <Progress value={scores.fluency} className="mt-1.5 h-1.5" />
-                    </Card>
-                    <Card className="p-3 bg-orange-50/50 border border-orange-200/70 rounded-xl">
-                      <div className="text-xl font-bold text-[#FF7A00] mb-0.5">{scores.intonation}%</div>
-                      <div className="text-xs text-slate-600">Ngữ điệu</div>
-                      <Progress value={scores.intonation} className="mt-1.5 h-1.5" />
-                    </Card>
-                    <Card className="p-3 bg-orange-50/50 border border-orange-200/70 rounded-xl">
-                      <div className="text-xl font-bold text-[#FF7A00] mb-0.5">{scores.rhythm}%</div>
-                      <div className="text-xs text-slate-600">Nhịp điệu</div>
-                      <Progress value={scores.rhythm} className="mt-1.5 h-1.5" />
-                    </Card>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button variant="outline" asChild className="flex-1 border-orange-200 bg-transparent" size="sm">
-                      <Link href="/shadowing">Quay lại bài học</Link>
-                    </Button>
-                    <Button asChild className="flex-1" size="sm">
-                      <Link href="/dashboard">Xem bảng điều khiển</Link>
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-
-              <div className="space-y-3">
-                <Card className="p-3 bg-white border border-orange-200/70 shadow-sm rounded-xl">
-                  <h3 className="font-semibold text-xs mb-2 text-slate-800">Phản hồi AI:</h3>
-                  <ul className="space-y-1.5 text-xs text-slate-600">
-                    <li className="flex items-start gap-2">
-                      <Check className="h-3 w-3 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Phát âm xuất sắc</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-3 w-3 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Nhịp điệu tốt</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-yellow-500 flex-shrink-0 mt-0.5">⚠</span>
-                      <span>Cải thiện ngữ điệu</span>
-                    </li>
-                  </ul>
                 </Card>
+              </motion.div>
+            )}
 
-                <Card className="p-3 bg-white border border-orange-200/70 shadow-sm rounded-xl">
-                  <h3 className="font-semibold text-xs mb-2 text-slate-800">Từ vựng:</h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {lesson.vocabulary.slice(0, 5).map((word) => (
-                      <span
-                        key={word}
-                        className="px-2 py-0.5 rounded text-xs bg-orange-100 text-[#FF7A00] border border-orange-200"
+            {/* STEP 3: REVIEW */}
+            {step === "review" && (
+              <motion.div
+                key="review"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <Card className="p-12 rounded-[3rem] border-gray-100 dark:border-white/5 shadow-2xl bg-white dark:bg-[#111113] space-y-10">
+                  <div className="text-center">
+                    <h2 className="text-3xl font-black tracking-tight mb-2">
+                      So khớp kết quả
+                    </h2>
+                    <p className="text-gray-500 font-bold text-sm uppercase tracking-widest">
+                      Nghe lại cả hai để tự đánh giá
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between p-6 bg-blue-50/50 dark:bg-blue-500/5 rounded-3xl border border-blue-100 dark:border-blue-500/20">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-500 rounded-2xl text-white">
+                          <Volume2 size={20} />
+                        </div>
+                        <span className="font-bold text-sm">Âm thanh gốc</span>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="rounded-full text-blue-500"
                       >
-                        {word}
-                      </span>
-                    ))}
+                        <Play size={20} />
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-6 bg-emerald-50/50 dark:bg-emerald-500/5 rounded-3xl border border-emerald-100 dark:border-emerald-500/20">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-emerald-500 rounded-2xl text-white">
+                          <Mic size={20} />
+                        </div>
+                        <span className="font-bold text-sm">
+                          Bản thu của bạn
+                        </span>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="rounded-full text-emerald-500"
+                      >
+                        <Play size={20} />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button
+                      onClick={() => setStep("record")}
+                      variant="outline"
+                      className="flex-1 h-14 rounded-2xl border-zinc-200 dark:border-white/10 font-bold uppercase text-xs"
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" /> Thu lại
+                    </Button>
+                    <Button
+                      onClick={handleNextStep}
+                      className="flex-1 h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-500/20"
+                    >
+                      AI Chấm điểm
+                    </Button>
                   </div>
                 </Card>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+
+            {/* STEP 4: SCORE */}
+            {step === "score" && (
+              <motion.div
+                key="score"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <Card className="p-12 rounded-[3rem] border-gray-100 dark:border-white/5 shadow-2xl bg-zinc-900 text-white text-center relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-blue-500" />
+                  <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-500/20 blur-[100px] rounded-full" />
+
+                  <div className="relative z-10 space-y-8">
+                    <div className="inline-flex p-6 bg-blue-500 rounded-full shadow-2xl shadow-blue-500/40">
+                      <Trophy className="h-12 w-12 text-white" />
+                    </div>
+
+                    <div>
+                      <h2 className="text-4xl font-black mb-2">Hoàn thành!</h2>
+                      <div className="flex items-center justify-center gap-2 text-blue-400 font-black uppercase text-[10px] tracking-[0.3em]">
+                        <Sparkles size={14} /> AI Analysis Complete
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center items-baseline gap-1">
+                      <span className="text-8xl font-black tracking-tighter">
+                        {scores.overall}
+                      </span>
+                      <span className="text-2xl font-bold text-zinc-500">
+                        %
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        {
+                          label: "Phát âm",
+                          val: scores.pronunciation,
+                          color: "text-emerald-400",
+                        },
+                        {
+                          label: "Trôi chảy",
+                          val: scores.fluency,
+                          color: "text-blue-400",
+                        },
+                        {
+                          label: "Ngữ điệu",
+                          val: scores.intonation,
+                          color: "text-purple-400",
+                        },
+                      ].map((s) => (
+                        <div
+                          key={s.label}
+                          className="bg-white/5 border border-white/5 rounded-2xl p-4"
+                        >
+                          <div
+                            className={cn("text-xl font-black mb-1", s.color)}
+                          >
+                            {s.val}%
+                          </div>
+                          <div className="text-[8px] font-bold uppercase text-zinc-500 tracking-wider">
+                            {s.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <Button
+                        onClick={() => setStep("listen")}
+                        variant="outline"
+                        className="flex-1 h-14 rounded-2xl border-white/10 bg-transparent hover:bg-white/5 text-white font-bold uppercase text-xs"
+                      >
+                        <RotateCcw className="mr-2 h-4 w-4" /> Thử lại bài này
+                      </Button>
+                      <Button
+                        asChild
+                        className="flex-1 h-14 rounded-2xl bg-white text-black hover:bg-zinc-200 font-black uppercase text-xs tracking-widest"
+                      >
+                        <Link href="/shadowing">Bài học khác</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
+
+      <audio
+        ref={audioRef}
+        src={lesson.audioUrl}
+        onEnded={() => setIsPlaying(false)}
+        className="hidden"
+      />
     </div>
-  )
+  );
 }

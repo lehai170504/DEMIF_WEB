@@ -24,6 +24,8 @@ import {
   UpdateDictationTemplatesRequest,
   GetYoutubeTranscriptParams,
   YoutubeTranscriptResponse,
+  CheckVoiceRequest,
+  CheckVoiceResponse,
 } from "@/types/lesson.type";
 
 export const lessonService = {
@@ -202,5 +204,17 @@ export const lessonService = {
       data,
     );
     return (response as any).data ?? response;
+  },
+
+  checkVoice: async (
+    id: string,
+    segmentIndex: number,
+    data: CheckVoiceRequest,
+  ): Promise<CheckVoiceResponse> => {
+    const response = await axiosClient.post(
+      `/lessons/${id}/segments/${segmentIndex}/check-voice`,
+      data,
+    );
+    return response.data;
   },
 };

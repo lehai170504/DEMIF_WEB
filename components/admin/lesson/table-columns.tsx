@@ -14,7 +14,7 @@ import {
   IconCrown,
   IconArchive,
   IconClock,
-  IconCalendar,
+  IconHash, // Thêm icon hash
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,19 +33,16 @@ import { useLessonActions } from "@/hooks/use-lesson";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-// --- HELPERS (Fix khớp 100% với Enum của BE) ---
-
+// --- HELPERS ---
 export const normalizeStatus = (status?: string | null) => {
   if (!status) return "draft";
   const s = status.toLowerCase();
-  // Trả về đúng string BE quy định để logic so sánh ở dưới chính xác
   if (s === "published") return "published";
   if (s === "archived") return "archived";
   if (s === "review") return "review";
   return "draft";
 };
 
-// ... (normalizeType và normalizeLevel giữ nguyên)
 export const normalizeType = (type?: string | number | null) => {
   const t = String(type).toLowerCase();
   if (t === "0" || t === "dictation") return "Dictation";
@@ -58,6 +55,7 @@ export const normalizeLevel = (level?: string | number | null) => {
   if (l === "0" || l === "beginner") return "Beginner";
   if (l === "1" || l === "intermediate") return "Intermediate";
   if (l === "2" || l === "advanced") return "Advanced";
+  if (l === "3" || l === "expert") return "Expert";
   return "Beginner";
 };
 
@@ -65,14 +63,6 @@ const formatDuration = (seconds: number) => {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
-};
-
-const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(dateString));
 };
 
 function DragHandle({ id }: { id: string }) {
@@ -90,6 +80,7 @@ function DragHandle({ id }: { id: string }) {
   );
 }
 
+// --- COLUMNS DEFINITION ---
 export const columns: ColumnDef<LessonDto>[] = [
   {
     id: "drag",
@@ -123,6 +114,23 @@ export const columns: ColumnDef<LessonDto>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  // MỚI: Cột hiển thị Thứ tự ưu tiên
+  {
+    accessorKey: "displayOrder",
+    header: ({ column }) => (
+      <div className="flex items-center gap-1">
+        <IconHash className="size-3" />
+        <span>Ưu tiên</span>
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div className="font-mono text-xs font-bold text-gray-400 bg-gray-50 border border-gray-100 w-7 h-7 flex items-center justify-center rounded-lg">
+        {row.getValue("displayOrder")}
+      </div>
+    ),
+    // Cho phép sắp xếp theo cột này
+    enableSorting: true,
   },
   {
     accessorKey: "title",
@@ -187,22 +195,36 @@ export const columns: ColumnDef<LessonDto>[] = [
     cell: ({ row }) => {
       const level = normalizeLevel(row.original.level);
       const colors: Record<string, string> = {
-        Advanced: "text-orange-600 border-orange-200 bg-orange-50",
-        Intermediate: "text-yellow-600 border-yellow-200 bg-yellow-50",
+        Expert: "text-purple-600 border-purple-200 bg-purple-50",
+        Advanced: "text-rose-600 border-rose-200 bg-rose-50",
+        Intermediate: "text-amber-600 border-amber-200 bg-amber-50",
         Beginner: "text-emerald-600 border-emerald-200 bg-emerald-50",
       };
+
       return (
         <Badge
           variant="secondary"
           className={cn(
-            "border transition-colors whitespace-nowrap",
-            colors[level] || "text-gray-600",
+            "border transition-all duration-300 font-bold px-2.5 py-0.5 rounded-full uppercase text-[10px] tracking-wider whitespace-nowrap",
+            colors[level] || "text-gray-600 bg-gray-50",
           )}
         >
           {level}
         </Badge>
       );
     },
+  },
+  {
+    accessorKey: "durationSeconds",
+    header: "Thời lượng",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1.5 text-gray-500 font-medium">
+        <IconClock className="size-3.5" />
+        <span className="text-xs">
+          {formatDuration(row.original.durationSeconds || 0)}
+        </span>
+      </div>
+    ),
   },
   {
     accessorKey: "status",
