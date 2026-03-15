@@ -10,10 +10,11 @@ import {
   UpdateTranscriptRequest,
   GetUserLessonsParams,
   SubmitDictationRequest,
-  CheckSegmentRequest,
   UpdateDictationTemplatesRequest,
   GetYoutubeTranscriptParams,
   CheckVoiceRequest,
+  CheckShadowingSegmentRequest,
+  CheckDictationSegmentRequest,
 } from "@/types/lesson.type";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/error";
@@ -129,17 +130,14 @@ export const useLessonActions = () => {
   });
 
   return {
-    // Gọi thông thường (Không await được)
     createLesson: createMutation.mutate,
     updateLesson: updateMutation.mutate,
     deleteLesson: deleteMutation.mutate,
     updateStatus: updateStatusMutation.mutate,
 
-    // NÊN THÊM: Gọi dạng Async (Await được trong form submit để redirect)
     createLessonAsync: createMutation.mutateAsync,
     updateLessonAsync: updateMutation.mutateAsync,
 
-    // Trạng thái loading
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
@@ -180,20 +178,17 @@ export const useRegenerateTemplates = () => {
 export const useUpdateDictationTemplates = () => {
   const queryClient = useQueryClient();
 
-  // Thêm Generics: <Kiểu_Data_Trả_Về, Kiểu_Lỗi, Kiểu_Dữ_Liệu_Đầu_Vào>
   return useMutation<
     { message: string },
     any,
     { id: string; data: UpdateDictationTemplatesRequest }
   >({
-    // Giải nén object để truyền vào 2 tham số cho service
     mutationFn: ({ id, data }) =>
       lessonService.updateDictationTemplates(id, data),
     onSuccess: (_, variables) => {
       toast.success("Đã lưu cấu hình đục lỗ!", {
         id: "update-templates-success",
       });
-      // Làm mới cache Preview để fetch lại data mới nhất
       queryClient.invalidateQueries({
         queryKey: ["lesson-preview", variables.id],
       });
@@ -205,6 +200,7 @@ export const useUpdateDictationTemplates = () => {
     },
   });
 };
+
 // --- 6. Hook Cập nhật Transcript ---
 export const useUpdateTranscript = () => {
   const queryClient = useQueryClient();
@@ -234,7 +230,7 @@ export const useUpdateTranscript = () => {
   });
 };
 
-// --- 7. Hook Tạo từ Youtube
+// --- 7. Hook Tạo từ Youtube ---
 export const useCreateFromYoutube = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -249,7 +245,6 @@ export const useCreateFromYoutube = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
 
-      // Chuyển hướng sang trang chi tiết
       if (data.lessonId) {
         router.push(`/admin/lessons/${data.lessonId}`);
       }
@@ -266,7 +261,7 @@ export const useCreateFromYoutube = () => {
   });
 };
 
-// --- 8. Hook Preview YouTube trước khi tạo bài học ---
+// --- 8. Hook Preview YouTube ---
 export const useYoutubePreview = (url: string) => {
   return useQuery({
     queryKey: ["youtube-preview", url],
@@ -318,7 +313,7 @@ export const useDictationExercise = (id: string, level: string) => {
   });
 };
 
-// Hook submit dictation
+// Hook submit toàn bộ bài dictation
 export const useSubmitDictation = () => {
   const queryClient = useQueryClient();
 
@@ -338,12 +333,14 @@ export const useSubmitDictation = () => {
       queryClient.invalidateQueries({ queryKey: ["user-lesson"] });
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Lỗi khi nộp bài");
+      toast.error(
+        error?.response?.data?.message || "Lỗi khi nộp bài Dictation",
+      );
     },
   });
 };
 
-// Hook lấy segments cho shadowing
+// Hook lấy segments
 export const useSegments = (id: string, level: string) => {
   return useQuery({
     queryKey: ["segments", id, level],
@@ -352,8 +349,10 @@ export const useSegments = (id: string, level: string) => {
   });
 };
 
-// Hook check segment
-export const useCheckSegment = () => {
+// ---------------------------------------------------------
+// Hook Check Shadowing Segment (Gõ Text thay vì Voice)
+// ---------------------------------------------------------
+export const useCheckShadowingSegment = () => {
   return useMutation({
     mutationFn: ({
       id,
@@ -362,7 +361,7 @@ export const useCheckSegment = () => {
     }: {
       id: string;
       segmentIndex: number;
-      data: CheckSegmentRequest;
+      data: CheckShadowingSegmentRequest;
     }) => lessonService.checkSegment(id, segmentIndex, data),
     onSuccess: (result) => {
       const accuracy = result.accuracy;
@@ -375,14 +374,69 @@ export const useCheckSegment = () => {
       }
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Lỗi khi kiểm tra");
+      toast.error(
+        error?.response?.data?.message || "Lỗi khi kiểm tra Shadowing Segment",
+      );
     },
   });
 };
 
+// ---------------------------------------------------------
+// Hook Check Dictation Segment (Gõ Text cho Dictation)
+// ---------------------------------------------------------
+export const useCheckDictationSegment = () => {
+  return useMutation({
+    mutationFn: ({
+      id,
+      segmentIndex,
+      data,
+    }: {
+      id: string;
+      segmentIndex: number;
+      data: CheckDictationSegmentRequest;
+    }) => lessonService.checkDictationSegment(id, segmentIndex, data),
+    onSuccess: (result) => {
+      const accuracy = result.accuracy;
+      if (accuracy >= 90) {
+        toast.success(`Chính xác! (${accuracy.toFixed(0)}%)`);
+      } else {
+        toast.warning(`Sai một vài chỗ. (${accuracy.toFixed(0)}%)`);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || "Lỗi khi kiểm tra Dictation Segment",
+      );
+    },
+  });
+};
+
+// ---------------------------------------------------------
+// Hook Check Voice (Dùng STT nhận diện giọng nói)
+// ---------------------------------------------------------
 export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
   return useMutation({
     mutationFn: (data: CheckVoiceRequest) =>
       lessonService.checkVoice(lessonId, segmentIndex, data),
+    onSuccess: (result) => {
+      const accuracy = result.accuracyScore;
+      if (accuracy >= 90) {
+        toast.success(`Phát âm xuất sắc! (${accuracy.toFixed(0)}%)`);
+      } else if (accuracy >= 70) {
+        toast.info(
+          `Khá tốt, hãy chú ý các từ bị sai nhé! (${accuracy.toFixed(0)}%)`,
+        );
+      } else {
+        toast.error(
+          `Cần luyện tập phát âm câu này thêm. (${accuracy.toFixed(0)}%)`,
+        );
+      }
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message ||
+          "Hệ thống phân tích giọng nói đang lỗi.",
+      );
+    },
   });
 };

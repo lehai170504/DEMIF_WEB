@@ -1,15 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, RotateCcw, ChevronRight, Sparkles } from "lucide-react";
+import {
+  Mic,
+  MicOff,
+  RotateCcw,
+  ChevronRight,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { CheckSegmentResponse } from "@/types/lesson.type";
+import { CheckVoiceResponse } from "@/types/lesson.type"; // Cập nhật Type mới
 
 interface ShadowingRecorderProps {
   isRecording: boolean;
   onRecord: () => void;
-  checkResult?: CheckSegmentResponse | null;
+  checkResult?: CheckVoiceResponse | null; // Cập nhật Type khớp với trang cha
   isChecking: boolean;
   onNext: () => void;
   onRetry: () => void;
@@ -25,76 +32,104 @@ export function ShadowingRecorder({
   onRetry,
   speechSupported,
 }: ShadowingRecorderProps) {
-  const accuracy = checkResult?.accuracy ?? 0;
+  // FIX: Lấy accuracyScore từ CheckVoiceResponse (Dự phòng lấy accuracy nếu BE chưa đổi tên)
+  const accuracy =
+    checkResult?.accuracyScore ?? (checkResult as any)?.accuracy ?? 0;
+
+  // FIX: Dự phòng trường hợp mảng từ BE trả về là detectedWords hoặc words
+  const wordsList =
+    checkResult?.detectedWords || (checkResult as any)?.words || [];
 
   const getAccuracyColor = (val: number) => {
-    if (val >= 80) return "text-emerald-400";
-    if (val >= 60) return "text-orange-400";
-    return "text-rose-400";
+    if (val >= 80) return "text-emerald-500";
+    if (val >= 60) return "text-blue-500"; // Chuyển từ cam sang xanh
+    return "text-rose-500";
   };
 
   return (
     <div className="flex flex-col gap-6 h-full">
-      <div className="flex-1 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-lg min-h-[400px]">
+      <div className="flex-1 bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-xl min-h-[400px] transition-all">
         {/* Status Indicator */}
         <div className="absolute top-6 left-0 w-full text-center">
           <span
             className={cn(
-              "text-[10px] font-black uppercase tracking-[0.2em] py-1 px-3 rounded-full border transition-colors",
+              "text-[10px] font-black uppercase tracking-[0.2em] py-1.5 px-4 rounded-full border transition-all duration-300",
               isRecording
                 ? "border-red-500/50 text-red-500 bg-red-500/10 animate-pulse"
                 : isChecking
-                ? "border-orange-500/50 text-orange-400 bg-orange-500/10 animate-pulse"
-                : "border-gray-200 dark:border-white/10 text-gray-500 dark:text-zinc-500 bg-gray-100 dark:bg-white/5",
+                  ? "border-blue-500/50 text-blue-500 bg-blue-500/10 animate-pulse"
+                  : "border-gray-200 dark:border-white/10 text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-white/5",
             )}
           >
-            {isRecording ? "Đang ghi âm..." : isChecking ? "Đang chấm điểm..." : "Sẵn sàng"}
+            {isRecording
+              ? "Đang lắng nghe..."
+              : isChecking
+                ? "AI đang phân tích..."
+                : "Phòng thu âm"}
           </span>
         </div>
 
         {/* Mic Button */}
-        <div className="relative z-10 mb-8 mt-4">
-          {isRecording && (
-            <span className="absolute inset-0 rounded-full border-2 border-red-500 opacity-50 animate-ping"></span>
-          )}
+        <div className="relative z-10 mb-8 mt-4 group">
+          <AnimatePresence>
+            {isRecording && (
+              <motion.span
+                initial={{ scale: 1, opacity: 0.5 }}
+                animate={{ scale: 1.5, opacity: 0 }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="absolute inset-0 rounded-full border-2 border-red-500 bg-red-500/20"
+              />
+            )}
+          </AnimatePresence>
+
           <Button
             onClick={onRecord}
-            disabled={isRecording || isChecking || !speechSupported}
+            disabled={isChecking || !speechSupported}
             className={cn(
-              "w-32 h-32 rounded-full transition-all duration-300 flex items-center justify-center border-4",
+              "w-36 h-36 rounded-full transition-all duration-500 flex flex-col items-center justify-center border-[6px] shadow-2xl",
               isRecording
-                ? "bg-red-500 text-white border-red-400 shadow-[0_0_40px_rgba(239,68,68,0.4)]"
-                : "bg-gray-100 dark:bg-[#27272a] text-orange-500 dark:text-white border-gray-300 dark:border-[#3f3f46] hover:border-orange-500 hover:text-orange-600 dark:hover:text-orange-500 hover:shadow-[0_0_30px_rgba(249,115,22,0.2)]",
+                ? "bg-red-500 text-white border-red-200 dark:border-red-900/50 scale-105 shadow-[0_0_40px_rgba(239,68,68,0.4)]"
+                : "bg-white dark:bg-[#18181b] text-blue-600 border-gray-50 dark:border-white/5 hover:border-blue-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]",
             )}
           >
-            {isRecording ? (
+            {isChecking ? (
+              <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+            ) : isRecording ? (
               <MicOff className="h-12 w-12" />
             ) : (
-              <Mic className="h-12 w-12" />
+              <Mic className="h-12 w-12 group-hover:animate-bounce" />
             )}
           </Button>
         </div>
 
-        <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium mb-2 text-center">
+        <p className="text-gray-900 dark:text-white text-base font-bold mb-1 text-center">
           {!speechSupported
-            ? "Trình duyệt không hỗ trợ nhận dạng giọng nói"
+            ? "Trình duyệt không hỗ trợ Voice"
             : isRecording
-            ? "Đang lắng nghe giọng của bạn..."
-            : "Nhấn vào micro để bắt đầu nói"}
+              ? "Hãy nói to và rõ ràng..."
+              : isChecking
+                ? "Hệ thống đang chấm điểm..."
+                : "Nhấn vào micro để bắt đầu nói"}
         </p>
-        <p className="text-xs text-gray-500 dark:text-zinc-600">
-          Hệ thống sẽ tự động chấm điểm sau khi bạn nói xong
+        <p className="text-xs text-gray-500 dark:text-zinc-500 text-center max-w-[250px] mx-auto leading-relaxed">
+          {isRecording
+            ? "Đang thu âm giọng nói của bạn"
+            : "Sau khi nói xong, AI sẽ tự động phân tích"}
         </p>
 
         {/* Recording Visualizer */}
         {isRecording && (
-          <div className="absolute bottom-0 left-0 w-full h-16 flex items-end justify-center gap-1 pb-4 opacity-30">
-            {Array.from({ length: 30 }).map((_, i) => (
+          <div className="absolute bottom-0 left-0 w-full h-16 flex items-end justify-center gap-1.5 pb-6 px-10">
+            {Array.from({ length: 24 }).map((_, i) => (
               <motion.div
                 key={i}
-                className="w-1 bg-red-500 rounded-t-full"
-                animate={{ height: Math.random() * 40 + 5 }}
-                transition={{ duration: 0.1, repeat: Infinity }}
+                className="w-1.5 bg-gradient-to-t from-red-600 to-red-400 rounded-full"
+                animate={{ height: [10, Math.random() * 40 + 10, 10] }}
+                transition={{
+                  duration: 0.4,
+                  repeat: Infinity,
+                  delay: i * 0.05,
+                }}
               />
             ))}
           </div>
@@ -102,69 +137,82 @@ export function ShadowingRecorder({
       </div>
 
       {/* Score Feedback */}
-      <AnimatePresence>
-        {checkResult && !isRecording && (
+      <AnimatePresence mode="wait">
+        {checkResult && !isRecording && !isChecking && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 shadow-lg"
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden"
           >
-            <div className="flex items-center gap-2 mb-4 text-xs font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
-              <Sparkles className="h-4 w-4 text-orange-500" />
-              Kết quả
+            <div className="flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-widest text-blue-500">
+              <Sparkles className="h-4 w-4" />
+              Kết quả AI
             </div>
 
             {/* Accuracy score */}
-            <div className="flex items-center justify-center gap-3 mb-5">
-              <span className={cn("text-5xl font-black", getAccuracyColor(accuracy))}>
+            <div className="flex items-baseline justify-center gap-2 mb-8">
+              <span
+                className={cn(
+                  "text-6xl font-black tracking-tighter",
+                  getAccuracyColor(accuracy),
+                )}
+              >
                 {accuracy.toFixed(0)}
               </span>
-              <span className="text-xl font-bold text-gray-500 dark:text-zinc-500">%</span>
+              <span className="text-2xl font-bold text-gray-400 dark:text-zinc-600">
+                %
+              </span>
             </div>
 
             {/* Word-by-word comparison */}
-            {(checkResult.words?.length ?? 0) > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-5">
-                {checkResult.words.map((w, i) => (
+            {wordsList.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-2 mb-8 bg-gray-50 dark:bg-white/[0.02] p-6 rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
+                {wordsList.map((w: any, i: number) => (
                   <span
                     key={i}
                     className={cn(
-                      "px-2 py-0.5 rounded-lg text-sm font-bold border",
+                      "px-3 py-1.5 rounded-xl text-sm font-bold border transition-all",
                       w.isCorrect
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 shadow-sm",
                     )}
-                    title={!w.isCorrect && w.expected ? `Cần: "${w.expected}"` : undefined}
+                    title={
+                      !w.isCorrect && w.expected
+                        ? `Cần: "${w.expected}"`
+                        : undefined
+                    }
                   >
                     {w.word}
                     {!w.isCorrect && w.expected && (
-                      <span className="ml-1 text-[10px] opacity-70">→ {w.expected}</span>
+                      <span className="ml-1.5 text-[10px] font-black opacity-60">
+                        → {w.expected}
+                      </span>
                     )}
                   </span>
                 ))}
               </div>
             )}
 
-            {checkResult.feedback && (
-              <p className="text-xs text-gray-500 dark:text-zinc-500 italic mb-4">
-                {checkResult.feedback}
+            {(checkResult as any).feedback && (
+              <p className="text-xs text-gray-500 dark:text-zinc-500 italic mb-6 text-center">
+                {(checkResult as any).feedback}
               </p>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <Button
                 onClick={onRetry}
                 variant="outline"
-                className="flex-1 h-12 rounded-xl border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-zinc-300 bg-transparent"
+                className="flex-1 h-14 rounded-2xl border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-300 font-bold"
               >
                 <RotateCcw className="h-4 w-4 mr-2" /> Thử lại
               </Button>
               <Button
                 onClick={onNext}
-                className="flex-1 h-12 rounded-xl bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200 font-bold"
+                className="flex-1 h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-500/30"
               >
-                Tiếp tục <ChevronRight className="h-4 w-4 ml-2" />
+                Tiếp theo <ChevronRight className="h-5 w-5 ml-2" />
               </Button>
             </div>
           </motion.div>
@@ -173,4 +221,3 @@ export function ShadowingRecorder({
     </div>
   );
 }
-

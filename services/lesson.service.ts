@@ -18,14 +18,16 @@ import {
   SubmitDictationRequest,
   SubmitDictationResponse,
   GetSegmentsResponse,
-  CheckSegmentRequest,
-  CheckSegmentResponse,
   UpdateLessonRequest,
   UpdateDictationTemplatesRequest,
   GetYoutubeTranscriptParams,
   YoutubeTranscriptResponse,
   CheckVoiceRequest,
   CheckVoiceResponse,
+  CheckShadowingSegmentRequest,
+  CheckShadowingSegmentResponse,
+  CheckDictationSegmentRequest,
+  CheckDictationSegmentResponse,
 } from "@/types/lesson.type";
 
 export const lessonService = {
@@ -143,6 +145,7 @@ export const lessonService = {
     );
     return (response as any).data ?? response;
   },
+
   // ============ USER ENDPOINTS ============
 
   // GET /api/lessons - Lấy danh sách lessons (public + premium)
@@ -197,8 +200,8 @@ export const lessonService = {
   checkSegment: async (
     id: string,
     segmentIndex: number,
-    data: CheckSegmentRequest,
-  ): Promise<CheckSegmentResponse> => {
+    data: CheckShadowingSegmentRequest,
+  ): Promise<CheckShadowingSegmentResponse> => {
     const response = await axiosClient.post(
       `/lessons/${id}/segments/${segmentIndex}/shadowing`,
       data,
@@ -206,6 +209,7 @@ export const lessonService = {
     return (response as any).data ?? response;
   },
 
+  // POST /lessons/{id}/segments/{segmentIndex}/check-voice
   checkVoice: async (
     id: string,
     segmentIndex: number,
@@ -216,5 +220,18 @@ export const lessonService = {
       data,
     );
     return response.data;
+  },
+
+  // POST /lessons/{id}/segments/{segmentIndex}/check - Dành riêng cho Dictation
+  checkDictationSegment: async (
+    id: string,
+    segmentIndex: number,
+    data: CheckDictationSegmentRequest,
+  ): Promise<CheckDictationSegmentResponse> => {
+    const response = await axiosClient.post(
+      `/lessons/${id}/segments/${segmentIndex}/check`,
+      data,
+    );
+    return (response as any).data ?? response;
   },
 };

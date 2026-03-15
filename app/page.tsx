@@ -18,6 +18,7 @@ import { AboutLanding } from "@/components/layouts/Landing/AboutLanding";
 import { FaqLanding } from "@/components/layouts/Landing/FaqLanding";
 import { CtaLanding } from "@/components/layouts/Landing/CtaLanding";
 import { AppleStyleSection } from "@/components/ui/AppleStyleSection";
+import { RunningMascot } from "@/components/layouts/Landing/RunningMascot";
 
 export default function LandingPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -48,6 +49,8 @@ export default function LandingPage() {
   return (
     <div className="bg-gray-200 dark:bg-[#020202] min-h-screen selection:bg-[#FF7A00] selection:text-white">
       <HeaderLanding />
+
+      <RunningMascot />
 
       <main className="w-full relative z-0 no-scrollbar">
         {/* ============================================== */}

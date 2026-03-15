@@ -303,27 +303,36 @@ export interface GetSegmentsResponse {
 }
 
 // Segment Check
-export interface CheckSegmentRequest {
-  level: string;
-  userText: string;
-  timeSpentSeconds: number;
-}
-
+// ==========================================
+// SHARED TYPES (Dùng chung cho cả 2 phần)
+// ==========================================
 export interface WordComparison {
   word: string;
   isCorrect: boolean;
   expected?: string;
 }
 
-export interface CheckSegmentResponse {
+// ==========================================
+// SHADOWING: Check Segment (Gõ text thay thế Voice)
+// ==========================================
+export interface CheckShadowingSegmentRequest {
+  level: string;
+  userText: string;
+  timeSpentSeconds: number;
+}
+
+export interface CheckShadowingSegmentResponse {
   segmentIndex: number;
   transcript: string;
   userText: string;
   words: WordComparison[];
-  accuracy: number;
+  accuracy: number; // Điểm 0-100
   feedback?: string;
 }
 
+// ==========================================
+// SHADOWING: Check Voice (Nhận diện giọng nói STT)
+// ==========================================
 export interface CheckVoiceRequest {
   level: string;
   spokenText: string;
@@ -333,10 +342,30 @@ export interface CheckVoiceRequest {
 
 export interface CheckVoiceResponse {
   isCorrect: boolean;
-  accuracyScore: number; // Điểm độ chính xác từ BE (0-100)
-  originalText: string; // Văn bản gốc để đối chiếu
+  accuracyScore: number; // Điểm 0-100
+  originalText: string;
   detectedWords: {
     word: string;
     isCorrect: boolean;
+    expected?: string;
   }[];
+  feedback?: string;
+}
+
+// ==========================================
+// DICTATION: Check Segment (Chấm điểm từng câu Dictation)
+// ==========================================
+export interface CheckDictationSegmentRequest {
+  level: string;
+  userText: string; // Hoặc bạn có thể đổi thành mảng answers tùy BE yêu cầu
+  timeSpentSeconds: number;
+}
+
+export interface CheckDictationSegmentResponse {
+  segmentIndex: number;
+  transcript: string;
+  userText: string;
+  words: WordComparison[]; // Tái sử dụng interface WordComparison ở trên
+  accuracy: number;
+  feedback?: string;
 }
