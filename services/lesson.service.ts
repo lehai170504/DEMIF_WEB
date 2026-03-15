@@ -20,6 +20,10 @@ import {
   GetSegmentsResponse,
   CheckSegmentRequest,
   CheckSegmentResponse,
+  UpdateLessonRequest,
+  UpdateDictationTemplatesRequest,
+  GetYoutubeTranscriptParams,
+  YoutubeTranscriptResponse,
 } from "@/types/lesson.type";
 
 export const lessonService = {
@@ -38,12 +42,15 @@ export const lessonService = {
 
   // CREATE
   createLesson: async (data: CreateLessonRequest) => {
-    const response = await axiosClient.post("/admin/lessons", data);
+    const response = await axiosClient.post(
+      "/admin/lessons/quick-create",
+      data,
+    );
     return (response as any).data ?? response;
   },
 
   // UPDATE
-  updateLesson: async (id: string, data: Partial<CreateLessonRequest>) => {
+  updateLesson: async (id: string, data: UpdateLessonRequest) => {
     const response = await axiosClient.put(`/admin/lessons/${id}`, data);
     return (response as any).data ?? response;
   },
@@ -68,6 +75,17 @@ export const lessonService = {
   regenerateTemplates: async (id: string): Promise<{ message: string }> => {
     const response = await axiosClient.post(
       `/admin/lessons/${id}/regenerate-templates`,
+    );
+    return (response as any).data ?? response;
+  },
+
+  updateDictationTemplates: async (
+    id: string,
+    data: UpdateDictationTemplatesRequest,
+  ): Promise<{ message: string }> => {
+    const response = await axiosClient.put(
+      `/admin/lessons/${id}/dictation-templates`,
+      data,
     );
     return (response as any).data ?? response;
   },
@@ -114,6 +132,15 @@ export const lessonService = {
     return (response as any).data ?? response;
   },
 
+  getYoutubeTranscript: async (
+    params: GetYoutubeTranscriptParams,
+  ): Promise<YoutubeTranscriptResponse> => {
+    const response = await axiosClient.get(
+      "/admin/lessons/youtube/transcripts",
+      { params },
+    );
+    return (response as any).data ?? response;
+  },
   // ============ USER ENDPOINTS ============
 
   // GET /api/lessons - Lấy danh sách lessons (public + premium)

@@ -10,6 +10,23 @@ interface TableOfContentsProps {
 export function TableOfContents({ sections }: TableOfContentsProps) {
   if (sections.length === 0) return null;
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 100;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <Card className="sticky top-28 border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] overflow-hidden rounded-[2rem]">
       <div className="p-6">
@@ -26,10 +43,11 @@ export function TableOfContents({ sections }: TableOfContentsProps) {
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
+                onClick={(e) => handleClick(e, section.id)}
                 className="text-sm font-medium text-gray-600 dark:text-zinc-500 hover:text-orange-500 transition-colors flex items-start gap-3 group relative"
               >
                 <span className="absolute -left-[21px] top-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-zinc-700 group-hover:bg-orange-500 transition-colors" />
-                <span className="group-hover:translate-x-1 transition-transform leading-relaxed">
+                <span className="group-hover:translate-x-1 transition-transform leading-relaxed line-clamp-1">
                   {section.title}
                 </span>
               </a>

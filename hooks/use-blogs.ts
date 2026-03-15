@@ -1,12 +1,13 @@
-// src/hooks/use-blogs.ts
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { blogService } from "@/services/blog.service";
 
-export const useBlogs = (params?: any) => {
+export const useBlogs = () => {
   return useQuery({
-    queryKey: ["blogs", params],
-    queryFn: () => blogService.getBlogs(),
-    placeholderData: keepPreviousData,
-    staleTime: 5000,
+    queryKey: ["blogs"],
+    queryFn: async () => {
+      const result = await blogService.getBlogs();
+      return result ?? [];
+    },
+    staleTime: 1000 * 60 * 5,
   });
 };

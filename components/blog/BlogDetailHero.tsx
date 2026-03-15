@@ -2,34 +2,26 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Clock, Eye, Heart, Calendar, ArrowLeft } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Eye, Calendar, ArrowLeft, User } from "lucide-react";
 import { motion } from "framer-motion";
 
-// Định nghĩa kiểu dữ liệu (hoặc import từ file types chung)
+// Định nghĩa lại kiểu dữ liệu sát với thực tế BlogDto
 interface BlogPost {
   id: string;
   title: string;
-  excerpt: string;
+  excerpt: string | null; // Đã fix lỗi string | null
   category: string;
-  author: {
-    name: string;
-    role: string;
-    avatar?: string;
-  };
-  publishedAt: string;
-  readTime: number;
-  views: number;
-  likes: number;
+  authorId: string; // Dùng authorId thay vì object author phức tạp
+  createdAt: string; // Dùng createdAt thay vì publishedAt
+  viewCount: number; // Dùng viewCount thay vì views
 }
 
 interface BlogDetailHeroProps {
   post: BlogPost;
 }
 
-// Hàm format date đơn giản
 const formatDate = (dateString: string) => {
+  if (!dateString) return "N/A";
   return new Date(dateString).toLocaleDateString("vi-VN", {
     year: "numeric",
     month: "long",
@@ -38,6 +30,11 @@ const formatDate = (dateString: string) => {
 };
 
 export function BlogDetailHero({ post }: BlogDetailHeroProps) {
+  // Lấy chữ cái đầu của authorId làm Avatar Fallback
+  const authorInitial = post.authorId
+    ? post.authorId.charAt(0).toUpperCase()
+    : "A";
+
   return (
     <div className="relative pt-20 pb-16 bg-white dark:bg-[#050505]">
       {/* Background Effects */}
@@ -62,54 +59,49 @@ export function BlogDetailHero({ post }: BlogDetailHeroProps) {
 
           {/* Category */}
           <div className="mb-6">
-            <Badge className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-3 py-1 text-xs font-bold uppercase tracking-widest hover:bg-orange-500/20">
+            <Badge className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-3 py-1 text-xs font-bold uppercase tracking-widest hover:bg-orange-500/20 shadow-sm">
               {post.category}
             </Badge>
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-gray-900 dark:text-white leading-[1.15] tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-gray-900 dark:text-white leading-[1.15] tracking-tight first-letter:capitalize">
             {post.title}
           </h1>
 
-          {/* Excerpt */}
-          <p className="text-lg md:text-xl text-gray-600 dark:text-zinc-400 mb-10 leading-relaxed font-light">
-            {post.excerpt}
-          </p>
+          {/* Excerpt (Chỉ hiển thị khi không bị null) */}
+          {post.excerpt && post.excerpt !== "string" && (
+            <p className="text-lg md:text-xl text-gray-600 dark:text-zinc-400 mb-10 leading-relaxed font-light">
+              {post.excerpt}
+            </p>
+          )}
 
           {/* Meta Info Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-y border-gray-200 dark:border-white/10">
             {/* Author */}
             <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12 border-2 border-gray-200 dark:border-white/10">
-                <AvatarImage src={post.author.avatar} />
-                <AvatarFallback className="bg-gray-200 dark:bg-zinc-800 text-gray-700 dark:text-zinc-400 font-bold">
-                  {post.author.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="flex items-center justify-center h-12 w-12 rounded-full border-2 border-gray-200 dark:border-white/10 bg-gradient-to-br from-orange-400 to-orange-600 text-white font-black text-lg shadow-sm">
+                {authorInitial}
+              </div>
               <div>
-                <p className="font-bold text-gray-900 dark:text-white text-sm">
-                  {post.author.name}
+                <p className="font-bold text-gray-900 dark:text-white text-sm uppercase truncate max-w-[150px] sm:max-w-xs">
+                  {post.authorId}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
-                  {post.author.role}
+                <p className="text-[10px] text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
+                  Tác giả
                 </p>
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
+            {/* Stats (Chỉ giữ lại Ngày và Lượt xem) */}
+            <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[11px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-400 dark:text-zinc-400" />
-                <span>{formatDate(post.publishedAt)}</span>
+                <Calendar className="h-4 w-4 text-orange-400" />
+                <span>{formatDate(post.createdAt)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-gray-400 dark:text-zinc-400" />
-                <span>{post.readTime} phút đọc</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-gray-400 dark:text-zinc-400" />
-                <span>{post.views}</span>
+                <Eye className="h-4 w-4 text-purple-400" />
+                <span>{post.viewCount?.toLocaleString() || 0} lượt xem</span>
               </div>
             </div>
           </div>

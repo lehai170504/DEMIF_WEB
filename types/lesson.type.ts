@@ -12,6 +12,10 @@ export interface LessonDto {
   audioUrl: string | null;
   mediaUrl: string | null;
   mediaType: string | null;
+
+  videoId: string | null;
+  embedUrl: string | null;
+
   thumbnailUrl: string | null;
 
   durationSeconds: number;
@@ -22,7 +26,7 @@ export interface LessonDto {
   isPremiumOnly: boolean;
   displayOrder: number;
   tags: string | null;
-  status: string; // Đồng bộ string
+  status: string;
 
   completionsCount: number;
   avgScore: number;
@@ -30,6 +34,7 @@ export interface LessonDto {
   updatedAt: string | null;
 }
 
+// Tham số query cho API Get All
 export interface GetLessonsParams {
   page?: number;
   pageSize?: number;
@@ -47,26 +52,48 @@ export interface GetLessonsResponse {
 }
 
 // Các interface liên quan đến tạo và cập nhật bài học
+// ==========================================
+// Dùng cho POST /api/admin/lessons/quick-create
+// ==========================================
 export interface CreateLessonRequest {
   title: string;
   description: string;
-  lessonType: string;
-  level: string;
+  transcript: string; // Chỉ có ở POST
+  format: string; // Chỉ có ở POST (ví dụ: "srt", "vtt", "plain")
+  mediaUrl: string;
+  mediaType: string;
+  durationSeconds: number; // Chỉ có ở POST
+  level: string; // Ví dụ: "Beginner"
+  lessonType: string; // Ví dụ: "Dictation"
   category: string;
-  audioUrl?: string | null;
-  mediaUrl?: string | null;
-  mediaType?: string | null;
-  durationSeconds: number;
-  thumbnailUrl?: string | null;
-  fullTranscript: string;
-  timedTranscript?: string | null;
   isPremiumOnly: boolean;
   displayOrder: number;
   tags?: string | null;
-  status: string;
+  thumbnailUrl?: string | null;
 }
 
-export interface UpdateLessonRequest extends Partial<CreateLessonRequest> {}
+// ==========================================
+// Dùng cho PUT /api/admin/lessons/{id}
+// ==========================================
+export interface UpdateLessonRequest {
+  title?: string;
+  description?: string;
+  lessonType?: string;
+  level?: string;
+  category?: string;
+  audioUrl?: string | null; // Chỉ có ở PUT
+  mediaUrl?: string | null;
+  mediaType?: string | null;
+  thumbnailUrl?: string | null;
+  isPremiumOnly?: boolean;
+  displayOrder?: number;
+  tags?: string | null;
+  fullTranscript?: string;
+}
+export interface DictationWord {
+  text: string;
+  isBlank: boolean;
+}
 
 export interface DictationSegmentPreview {
   index: number;
@@ -74,8 +101,8 @@ export interface DictationSegmentPreview {
   endTime: number;
   text: string;
   wordCount: number;
+  words?: DictationWord[];
 }
-
 // --- 3. Interface cho API preview bài tập điền từ (Dictation) ---
 export interface DictationPreviewResponse {
   lessonId: string;
@@ -117,19 +144,20 @@ export interface UpdateTranscriptResponse {
 
 // --- 6. Interface cho API tạo bài học từ YouTube ---
 export interface CreateLessonFromYoutubeRequest {
-  youtubeUrl: string;
-  captionLanguage: string; // vd: "en", "vi"
+  youTubeUrl: string;
+  captionLanguage: string; // Ví dụ: "en", "vi"
   lessonType: string; // "Dictation" | "Shadowing"
-  level: string;
-  category: string;
-  isPremiumOnly: boolean;
-  displayOrder: number;
-  tags?: string;
-  status: string;
-  titleOverride?: string; // Nếu muốn đặt tiêu đề khác với tiêu đề video
-  descriptionOverride?: string;
-}
+  level: string; // "Beginner" | "Intermediate" | "Advanced"
+  category: string; // Ví dụ: "Music", "Movie", "TED"
+  isPremiumOnly: boolean; // true | false
+  displayOrder: number; // Thứ tự hiển thị
+  status: string; // "draft" | "published" | "archived"
 
+  // Các trường có thể để trống hoặc null
+  tags?: string | null;
+  titleOverride?: string | null;
+  descriptionOverride?: string | null;
+}
 export interface CreateLessonFromYoutubeResponse {
   lessonId: string;
   title: string;
@@ -150,6 +178,27 @@ export interface YoutubePreviewResponse {
   hasCaptions: boolean;
   availableCaptionLanguages: string[];
   suggestedCategory: string;
+}
+
+export interface GetYoutubeTranscriptParams {
+  url: string;
+  preferredLanguage?: string; // Mặc định 'en'
+  includeText?: boolean; // Mặc định true
+}
+
+export interface YoutubeTranscriptLine {
+  text: string;
+  start: number;
+  duration: number;
+}
+
+export interface YoutubeTranscriptResponse {
+  lines: YoutubeTranscriptLine[];
+  fullText: string;
+}
+
+export interface UpdateDictationTemplatesRequest {
+  dictationTemplatesJson: string;
 }
 
 // ============ USER API TYPES ============

@@ -87,7 +87,7 @@ export function EditBlogDialog({
   }, [previewUrl]);
 
   const onSubmit = (values: BlogFormValues) => {
-    // 1. Tạo payload cơ bản từ dữ liệu form
+    // 1. Khởi tạo Object Request
     const payload: CreateBlogRequest = {
       Title: values.Title,
       Content: values.Content,
@@ -96,12 +96,14 @@ export function EditBlogDialog({
       Status: values.Status ?? "Published",
     };
 
-    // 2. CHỈ THÊM ẢNH MỚI NẾU CÓ CHỌN (instanceof File)
-    // Nếu ThumbnailFile là undefined, payload sẽ không chứa thuộc tính này.
-    // BE khi nhận được FormData thiếu key "ThumbnailFile" sẽ hiểu là giữ nguyên ảnh cũ.
+    // 2. Xử lý logic File
     if (values.ThumbnailFile instanceof File) {
+      // Nếu người dùng chọn file mới -> Đưa vào payload
       payload.ThumbnailFile = values.ThumbnailFile;
     }
+    // LƯU Ý: Nếu thiết kế của BE bắt buộc phải có trường này kể cả khi không đổi,
+    // bạn cần trao đổi lại vì thông thường File cũ đã nằm trên Server,
+    // chúng ta không thể gửi ngược từ URL về File object được.
 
     updateBlog(
       { id: blog.id, data: payload },
@@ -109,6 +111,7 @@ export function EditBlogDialog({
         onSuccess: () => {
           onOpenChange(false);
           setPreviewUrl(null);
+          // manualForm.reset(); // Nếu cần
         },
       },
     );

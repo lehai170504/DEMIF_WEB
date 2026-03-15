@@ -16,7 +16,7 @@ export interface CreateBlogRequest {
   Title: string;
   Content: string;
   Summary?: string;
-  ThumbnailFile?: File; 
   Tags?: string;
   Status?: string;
+  ThumbnailFile?: File;
 }

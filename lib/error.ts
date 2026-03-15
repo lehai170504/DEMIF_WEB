@@ -1,12 +1,13 @@
 // src/lib/error.ts
 export const extractErrorMessage = (
   error: any,
-  fallbackMessage: string,
+  fallbackMessage?: string, // Thêm dấu ? ở đây
 ): string => {
   return (
     error?.response?.data?.error ||
     error?.response?.data?.detail ||
     error?.response?.data?.message ||
-    fallbackMessage
+    fallbackMessage ||
+    "Đã có lỗi xảy ra. Vui lòng thử lại sau."
   );
 };

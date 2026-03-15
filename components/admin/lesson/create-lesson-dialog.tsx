@@ -32,14 +32,23 @@ import {
   Search,
   AlertCircle,
   CheckCircle2,
+  FileText,
 } from "lucide-react";
 
 import {
   useLessonActions,
   useCreateFromYoutube,
   useYoutubePreview,
+  useYoutubeTranscript,
 } from "@/hooks/use-lesson";
-import { LessonSchema, LessonFormValues } from "@/schemas/lesson.schema";
+import {
+  CreateLessonSchema,
+  CreateLessonFormValues,
+} from "@/schemas/lesson.schema";
+import {
+  CreateLessonRequest,
+  CreateLessonFromYoutubeRequest,
+} from "@/types/lesson.type";
 import { LessonFormFields } from "./lesson-form-fields";
 import { LESSON_LEVELS } from "./lesson.constants";
 import { YoutubePreviewCard } from "./youtube-preview-card";
@@ -63,14 +72,21 @@ export default function CreateLessonDialog({
   const [ytType, setYtType] = React.useState("Dictation");
   const [ytLang, setYtLang] = React.useState("en");
 
-  // Truy vấn thông tin xem trước của Video
+  // Hook lấy thông tin Video Preview
   const {
     data: preview,
     isLoading: isPreviewLoading,
     isError: isPreviewError,
   } = useYoutubePreview(ytUrl);
 
-  // Tự động cập nhật ngôn ngữ phụ đề khả dụng
+  // Hook lấy Transcript (Phụ đề) để xem trước
+  const { data: transcript, isLoading: isTranscriptLoading } =
+    useYoutubeTranscript({
+      url: ytUrl,
+      preferredLanguage: ytLang,
+    });
+
+  // Tự động chọn ngôn ngữ đầu tiên khi Preview trả về danh sách ngôn ngữ
   React.useEffect(() => {
     if (
       preview?.availableCaptionLanguages &&
@@ -81,41 +97,39 @@ export default function CreateLessonDialog({
   }, [preview]);
 
   // --- Quản Lý Form Thủ Công ---
-  const manualForm = useForm<LessonFormValues>({
-    resolver: zodResolver(LessonSchema),
+  const manualForm = useForm<CreateLessonFormValues>({
+    resolver: zodResolver(CreateLessonSchema),
     defaultValues: {
       title: "",
       description: "",
-      lessonType: "Dictation",
-      level: "Beginner",
-      category: "General",
-      status: "draft",
-      isPremiumOnly: false,
-      durationSeconds: 0,
-      displayOrder: 0,
-      audioUrl: "",
+      transcript: "",
+      format: "srt",
       mediaUrl: "",
       mediaType: "audio",
-      thumbnailUrl: "",
-      fullTranscript: "",
-      timedTranscript: "",
+      durationSeconds: 0,
+      level: "Beginner",
+      lessonType: "Dictation",
+      category: "General",
+      isPremiumOnly: false,
+      displayOrder: 0,
       tags: "",
+      thumbnailUrl: "",
     },
   });
 
-  const onManualSubmit = (values: LessonFormValues) => {
-    const formattedTags = values.tags
-      ? JSON.stringify(values.tags.split(",").map((t: string) => t.trim()))
-      : null;
+  const onManualSubmit = (values: CreateLessonFormValues) => {
+    const formattedTags =
+      values.tags && values.tags.trim() !== "" ? values.tags.trim() : null;
 
-    const payload = {
+    const payload: CreateLessonRequest = {
       ...values,
-      tags: formattedTags,
       durationSeconds: Number(values.durationSeconds),
       displayOrder: Number(values.displayOrder),
+      tags: formattedTags,
+      thumbnailUrl: values.thumbnailUrl || null,
     };
 
-    createLesson(payload as any, {
+    createLesson(payload, {
       onSuccess: () => {
         setOpen(false);
         manualForm.reset();
@@ -123,123 +137,121 @@ export default function CreateLessonDialog({
     });
   };
 
+  // --- Xử lý Submit YouTube ---
   const handleYoutubeSubmit = () => {
     if (!ytUrl || !preview?.hasCaptions) return;
-    createFromYoutube(
-      {
-        youtubeUrl: ytUrl,
-        captionLanguage: ytLang,
-        lessonType: ytType,
-        level: ytLevel,
-        category: preview.suggestedCategory || "YouTube Import",
-        isPremiumOnly: false,
-        displayOrder: 0,
-        status: "draft", // Luôn mặc định là bản nháp sau khi nhập
+
+    // PAYLOAD FIX TRIỆT ĐỂ: Khớp 100% với JSON Request Schema
+    const payload: CreateLessonFromYoutubeRequest = {
+      youTubeUrl: ytUrl, // Tên biến khớp với Backend (T và U viết hoa)
+      captionLanguage: ytLang,
+      lessonType: ytType,
+      level: ytLevel,
+      category: preview.suggestedCategory || "YouTube Import",
+      isPremiumOnly: false,
+      displayOrder: 0,
+      status: "draft",
+      tags: null,
+      titleOverride: null,
+      descriptionOverride: null,
+    };
+
+    createFromYoutube(payload, {
+      onSuccess: () => {
+        setOpen(false);
+        setYtUrl("");
+        manualForm.reset();
       },
-      {
-        onSuccess: () => {
-          setOpen(false);
-          setYtUrl("");
-        },
-      },
-    );
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {children ? (
-          children
-        ) : (
-          <Button className="h-10 gap-2 bg-orange-500 hover:bg-orange-600 text-white font-mono font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all">
+        {children || (
+          <Button className="h-10 gap-2 bg-orange-500 hover:bg-orange-600 text-white font-mono font-bold rounded-xl shadow-lg transition-all">
             <Plus className="h-4 w-4" /> Thêm Bài Học Mới
           </Button>
         )}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[900px] bg-white border-gray-200 text-gray-900 font-mono max-h-[95vh] overflow-y-auto no-scrollbar p-0 rounded-[2.5rem] shadow-2xl">
-        {/* Tiêu Đề Chính */}
+      <DialogContent className="sm:max-w-[900px] bg-white text-gray-900 font-mono max-h-[95vh] overflow-y-auto no-scrollbar p-0 rounded-[2.5rem] shadow-2xl border-none">
         <DialogHeader className="px-8 py-6 border-b border-gray-100 bg-gray-50/50 sticky top-0 z-20 backdrop-blur-md">
-          <DialogTitle className="flex items-center gap-2 text-2xl font-black uppercase tracking-tight text-gray-900">
-            <BookPlus className="h-7 w-7 text-orange-500" /> Khởi Tạo Bài Tập Hệ
-            Thống
+          <DialogTitle className="flex items-center gap-2 text-2xl font-black uppercase tracking-tight">
+            <BookPlus className="h-7 w-7 text-orange-500" /> Khởi Tạo Bài Tập
           </DialogTitle>
         </DialogHeader>
 
         <div className="p-8">
           <Tabs defaultValue="manual" className="w-full">
-            {/* Lựa Chọn Phương Thức */}
             <TabsList className="grid grid-cols-2 w-full mb-10 bg-gray-100 p-1.5 rounded-2xl h-14">
               <TabsTrigger
                 value="manual"
-                className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all"
+                className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white transition-all"
               >
-                <Plus className="w-4 h-4 mr-2 text-gray-400" /> Khởi Tạo Thủ
-                Công
+                <Plus className="w-4 h-4 mr-2" /> Thủ Công
               </TabsTrigger>
               <TabsTrigger
                 value="youtube"
-                className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-red-600 data-[state=active]:shadow-sm transition-all"
+                className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-red-600 transition-all"
               >
-                <Youtube className="w-4 h-4 mr-2 text-red-500" /> Nhập Từ
-                YouTube
+                <Youtube className="w-4 h-4 mr-2 text-red-500" /> YouTube
               </TabsTrigger>
             </TabsList>
 
-            {/* Nội Dung: Khởi Tạo Thủ Công */}
+            {/* TAB 1: KHỞI TẠO THỦ CÔNG */}
             <TabsContent value="manual" className="mt-0 outline-none">
               <Form {...manualForm}>
                 <form onSubmit={manualForm.handleSubmit(onManualSubmit)}>
-                  <LessonFormFields form={manualForm} />
+                  <LessonFormFields
+                    form={manualForm as any}
+                    isEditMode={false}
+                  />
                   <DialogFooter className="pt-8 mt-10 border-t border-gray-100">
                     <Button
                       type="submit"
                       disabled={isCreating}
-                      className="w-full h-14 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl shadow-xl transition-all active:scale-[0.98]"
+                      className="w-full h-14 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl shadow-xl transition-all"
                     >
                       {isCreating ? (
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       ) : (
                         <CheckCircle2 className="mr-2 h-5 w-5" />
                       )}
-                      {isCreating
-                        ? "Đang Xử Lý Hệ Thống..."
-                        : "Xác Nhận Tạo Bài Tập"}
+                      {isCreating ? "Đang Xử Lý..." : "Xác Nhận Tạo Bài Tập"}
                     </Button>
                   </DialogFooter>
                 </form>
               </Form>
             </TabsContent>
 
-            {/* Nội Dung: Nhập Từ YouTube */}
+            {/* TAB 2: NHẬP TỪ YOUTUBE */}
             <TabsContent value="youtube" className="mt-0 outline-none">
               <div className="space-y-8 py-4 max-w-2xl mx-auto">
-                {/* Biểu Ngữ AI */}
-                <div className="p-6 bg-red-50 rounded-3xl border border-red-100 flex items-start gap-5 shadow-sm">
+                <div className="p-6 bg-red-50 rounded-3xl border border-red-100 flex items-start gap-5">
                   <div className="p-3 bg-white rounded-2xl shadow-sm">
                     <Sparkles className="w-7 h-7 text-red-500" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm font-black text-red-900 uppercase tracking-tight">
-                      Trí Tuệ Nhân Tạo Tự Động Hóa
+                      Tự Động Hóa AI
                     </p>
-                    <p className="text-xs text-red-700/80 leading-relaxed italic font-medium">
-                      Hệ thống sẽ tự động bóc tách tiêu đề, mô tả và phụ đề từ
-                      đường dẫn YouTube để khởi tạo bài tập chỉ trong vài giây.
+                    <p className="text-xs text-red-700/80 italic font-medium leading-relaxed">
+                      Hệ thống sẽ bóc tách phụ đề từ YouTube để khởi tạo bài tập
+                      tự động chỉ với một đường dẫn video.
                     </p>
                   </div>
                 </div>
 
-                {/* Nhập URL & Khu Vực Xem Trước */}
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">
-                      Đường Dẫn YouTube Video
+                      Đường Dẫn YouTube
                     </label>
                     <div className="relative group">
                       <Input
-                        placeholder="Dán đường dẫn video tại đây..."
-                        className="h-16 rounded-2xl border-gray-200 focus:ring-red-500 shadow-sm text-lg px-6 font-bold pr-12 transition-all"
+                        placeholder="Dán đường dẫn video..."
+                        className="h-16 rounded-2xl border-gray-200 shadow-sm text-lg px-6 font-bold pr-12 transition-all focus:ring-red-500"
                         value={ytUrl}
                         onChange={(e) => setYtUrl(e.target.value)}
                       />
@@ -251,7 +263,7 @@ export default function CreateLessonDialog({
                     <div className="h-48 flex flex-col items-center justify-center bg-gray-50 rounded-2xl border border-dashed border-gray-200 gap-3">
                       <Loader2 className="animate-spin text-red-400 w-8 h-8" />
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest animate-pulse">
-                        Đang phân tích dữ liệu video...
+                        Đang phân tích video...
                       </p>
                     </div>
                   )}
@@ -262,55 +274,81 @@ export default function CreateLessonDialog({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
+                        className="space-y-4"
                       >
                         <YoutubePreviewCard data={preview} />
+
+                        {/* HIỂN THỊ PREVIEW TRANSCRIPT (CHỈNH SỬA MỚI) */}
+                        {transcript && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="p-5 bg-slate-50 border border-slate-100 rounded-[2rem] relative overflow-hidden shadow-inner group"
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <FileText className="w-3 h-3" /> Phụ đề xem
+                                trước ({ytLang.toUpperCase()})
+                              </p>
+                              {isTranscriptLoading && (
+                                <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+                              )}
+                            </div>
+                            <div className="max-h-32 overflow-y-auto pr-2 custom-scrollbar transition-all">
+                              <p
+                                className={cn(
+                                  "text-[11px] leading-relaxed text-slate-600 font-medium italic",
+                                  isTranscriptLoading &&
+                                    "opacity-30 blur-[1px]",
+                                )}
+                              >
+                                {transcript.fullText ||
+                                  "Không tìm thấy nội dung văn bản cho ngôn ngữ này."}
+                              </p>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none" />
+                          </motion.div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
 
                   {isPreviewError && ytUrl && (
-                    <p className="text-[10px] text-red-500 font-black uppercase italic text-center py-3 bg-red-50 rounded-xl border border-red-100">
-                      Không tìm thấy video hoặc đường dẫn không hợp lệ.
+                    <p className="text-[10px] text-red-500 font-black uppercase text-center py-3 bg-red-50 rounded-xl border border-red-100">
+                      Đường dẫn video không hợp lệ hoặc không tìm thấy.
                     </p>
                   )}
                 </div>
 
-                {/* Cảnh Báo Phụ Đề */}
                 {preview && !preview.hasCaptions && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm animate-pulse"
-                  >
-                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm">
+                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                       <p className="text-xs font-black text-red-900 uppercase tracking-tight">
-                        Nội Dung Không Khả Dụng
+                        Không tìm thấy phụ đề
                       </p>
-                      <p className="text-[11px] text-red-700 leading-relaxed font-bold italic">
-                        Video này không có phụ đề Manual (do người dùng tải
-                        lên). Hệ thống không thể tự động khởi tạo dữ liệu
-                        Dictation.
+                      <p className="text-[11px] text-red-700 italic font-bold">
+                        Video này không có phụ đề Manual (đã tải lên). Hệ thống
+                        không thể tự động khởi tạo dữ liệu.
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
 
-                {/* Cấu Hình Thông Số Nhanh */}
                 <div
                   className={cn(
-                    "grid grid-cols-3 gap-6 transition-all duration-500",
+                    "grid grid-cols-3 gap-4 transition-all duration-300",
                     (!preview || !preview.hasCaptions) &&
-                      "opacity-40 pointer-events-none grayscale",
+                      "opacity-30 pointer-events-none grayscale",
                   )}
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
                       Cấp Độ
                     </label>
                     <Select value={ytLevel} onValueChange={setYtLevel}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold shadow-sm">
-                        <SelectValue placeholder="Chọn cấp độ" />
+                      <SelectTrigger className="h-11 rounded-xl bg-gray-50 font-bold border-none shadow-sm focus:ring-red-500">
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {LESSON_LEVELS.map((l) => (
@@ -321,13 +359,13 @@ export default function CreateLessonDialog({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
-                      Loại Bài Tập
+                      Loại Bài
                     </label>
                     <Select value={ytType} onValueChange={setYtType}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold shadow-sm">
-                        <SelectValue placeholder="Chọn loại bài" />
+                      <SelectTrigger className="h-11 rounded-xl bg-gray-50 font-bold border-none shadow-sm focus:ring-red-500">
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Dictation">Dictation</SelectItem>
@@ -335,13 +373,13 @@ export default function CreateLessonDialog({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
-                      Ngôn Ngữ Phụ Đề
+                      Ngôn Ngữ
                     </label>
                     <Select value={ytLang} onValueChange={setYtLang}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 font-bold shadow-sm">
-                        <SelectValue placeholder="Chọn ngôn ngữ" />
+                      <SelectTrigger className="h-11 rounded-xl bg-gray-50 font-bold border-none shadow-sm focus:ring-red-500">
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {preview?.availableCaptionLanguages?.length ? (
@@ -358,14 +396,13 @@ export default function CreateLessonDialog({
                   </div>
                 </div>
 
-                {/* Nút Thực Thi */}
                 <Button
-                  className="w-full h-16 bg-red-600 hover:bg-red-700 text-white font-black text-xl rounded-2xl shadow-xl shadow-red-500/20 transition-all active:scale-[0.98] mt-6 disabled:opacity-50 disabled:grayscale"
+                  className="w-full h-16 bg-red-600 hover:bg-red-700 text-white font-black text-lg rounded-2xl shadow-xl shadow-red-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
                   disabled={
                     isYoutubePending ||
                     !preview?.hasCaptions ||
-                    isPreviewLoading ||
-                    !ytUrl
+                    !ytUrl ||
+                    isPreviewLoading
                   }
                   onClick={handleYoutubeSubmit}
                 >
@@ -375,8 +412,8 @@ export default function CreateLessonDialog({
                     <Sparkles className="mr-3 h-6 w-6" />
                   )}
                   {isYoutubePending
-                    ? "Đang Xử Lý Dữ Liệu..."
-                    : "Tự Động Tạo Bài Tập Từ Video"}
+                    ? "Đang Xử Lý Hệ Thống..."
+                    : "Tự Động Tạo Bài Tập"}
                 </Button>
               </div>
             </TabsContent>

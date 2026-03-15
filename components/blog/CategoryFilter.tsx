@@ -2,13 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// 1. Chỉnh sửa interface, sử dụng 'id' thay cho 'slug'
 interface BlogCategory {
   id: string;
   name: string;
-  slug: string;
   count: number;
 }
 
@@ -25,27 +24,14 @@ export function CategoryFilter({
 }: CategoryFilterProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {/* Nút "Tất cả" mặc định (có thể thêm vào mảng categories hoặc xử lý riêng) */}
-      <Button
-        variant="ghost"
-        onClick={() => onCategoryChange("all")}
-        className={cn(
-          "h-10 rounded-xl px-5 font-bold text-sm transition-all duration-300",
-          selectedCategory === "all"
-            ? "bg-orange-500 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-zinc-200"
-            : "bg-transparent text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5",
-        )}
-      >
-        Tất cả
-      </Button>
-
       {categories.map((category) => {
-        const isActive = selectedCategory === category.slug;
+        // Xét active qua category.id
+        const isActive = selectedCategory === category.id;
         return (
           <Button
             key={category.id}
             variant="ghost"
-            onClick={() => onCategoryChange(category.slug)}
+            onClick={() => onCategoryChange(category.id)} // Truyền id
             className={cn(
               "h-10 rounded-xl px-4 font-bold text-sm transition-all duration-300 border border-transparent",
               isActive
@@ -55,16 +41,18 @@ export function CategoryFilter({
           >
             <span className="flex items-center gap-2">
               {category.name}
-              <Badge
-                className={cn(
-                  "px-1.5 py-0 rounded-md text-[10px] min-w-[20px] justify-center transition-colors h-5",
-                  isActive
-                    ? "bg-white dark:bg-black text-orange-600 dark:text-white"
-                    : "bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-white",
-                )}
-              >
-                {category.count}
-              </Badge>
+              {category.id !== "all" && (
+                <Badge
+                  className={cn(
+                    "px-1.5 py-0 rounded-md text-[10px] min-w-[20px] justify-center transition-colors h-5",
+                    isActive
+                      ? "bg-white dark:bg-black text-orange-600 dark:text-white"
+                      : "bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-white",
+                  )}
+                >
+                  {category.count}
+                </Badge>
+              )}
             </span>
           </Button>
         );

@@ -1,4 +1,3 @@
-// src/components/admin/lesson/transcript-import-dialog.tsx
 "use client";
 
 import { useState } from "react";
@@ -51,23 +50,34 @@ export function TranscriptImportDialog({ lessonId }: { lessonId: string }) {
           <Upload className="h-3.5 w-3.5" /> Nhập Transcript nhanh
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] font-mono">
-        <DialogHeader>
+
+      {/* 1. sm:max-w-[600px]: Giới hạn chiều rộng
+          2. max-h-[90vh]: Giới hạn chiều cao tối đa của toàn bộ Dialog là 90% màn hình
+          3. flex flex-col: Sắp xếp các phần tử con theo chiều dọc 
+      */}
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col font-mono p-0 overflow-hidden rounded-[1.5rem]">
+        <DialogHeader className="p-6 border-b border-gray-100 shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-orange-500" /> Nhập nội dung
             Transcript
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+
+        {/* Vùng chứa nội dung: 
+            - flex-1: Chiếm toàn bộ không gian còn lại
+            - overflow-y-auto: Cho phép cuộn dọc khi nội dung dài
+            - no-scrollbar: Có thể thêm nếu muốn giao diện sạch hơn 
+        */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase">
+            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
               Định dạng nguồn
             </label>
             <Select value={format} onValueChange={(v: any) => setFormat(v)}>
-              <SelectTrigger className="h-10">
+              <SelectTrigger className="h-11 rounded-xl shadow-sm border-gray-200">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl">
                 <SelectItem value="plain">
                   Văn bản thuần (Plain Text)
                 </SelectItem>
@@ -76,24 +86,34 @@ export function TranscriptImportDialog({ lessonId }: { lessonId: string }) {
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase">
-              Nội dung
+            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+              Nội dung văn bản
             </label>
             <Textarea
               placeholder="Dán nội dung transcript hoặc phụ đề vào đây..."
-              className="min-h-[250px] font-mono text-xs"
+              className="min-h-[350px] font-mono text-xs rounded-2xl border-gray-200 focus:ring-orange-500 p-4 leading-relaxed"
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
+            <p className="text-[10px] text-gray-400 italic">
+              * Lưu ý: Hệ thống sẽ tự động bóc tách và tạo lại các mốc thời gian
+              dựa trên định dạng bạn chọn.
+            </p>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>
+
+        <DialogFooter className="p-6 border-t border-gray-100 bg-gray-50/50 shrink-0">
+          <Button
+            variant="ghost"
+            onClick={() => setOpen(false)}
+            className="rounded-xl font-bold"
+          >
             Hủy
           </Button>
           <Button
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl px-6 shadow-lg shadow-orange-500/20 transition-all active:scale-95"
             disabled={isPending || !content}
             onClick={handleImport}
           >
@@ -102,7 +122,7 @@ export function TranscriptImportDialog({ lessonId }: { lessonId: string }) {
             ) : (
               <Upload className="mr-2 h-4 w-4" />
             )}
-            Xử lý & Tạo lại Templates
+            {isPending ? "Đang xử lý..." : "Xác nhận & Tái tạo"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -11,6 +11,8 @@ import {
   GetUserLessonsParams,
   SubmitDictationRequest,
   CheckSegmentRequest,
+  UpdateDictationTemplatesRequest,
+  GetYoutubeTranscriptParams,
 } from "@/types/lesson.type";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/error";
@@ -76,7 +78,7 @@ export const useLessonActions = () => {
     onSuccess: (_, variables) => {
       toast.success("Cập nhật bài học thành công!", {
         id: "update-lesson-success",
-      }); // Thêm ID
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.id] });
       queryClient.invalidateQueries({
@@ -95,7 +97,7 @@ export const useLessonActions = () => {
     onSuccess: () => {
       toast.success("Đã xóa bài học khỏi hệ thống.", {
         id: "delete-lesson-success",
-      }); // Thêm ID
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
     onError: (error: any) =>
@@ -114,7 +116,7 @@ export const useLessonActions = () => {
     onSuccess: (data) => {
       toast.success(data.message || "Cập nhật trạng thái thành công", {
         id: "status-update-success",
-      }); // Thêm ID
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
       queryClient.invalidateQueries({ queryKey: ["lesson", data.lessonId] });
     },
@@ -126,10 +128,17 @@ export const useLessonActions = () => {
   });
 
   return {
+    // Gọi thông thường (Không await được)
     createLesson: createMutation.mutate,
     updateLesson: updateMutation.mutate,
     deleteLesson: deleteMutation.mutate,
     updateStatus: updateStatusMutation.mutate,
+
+    // NÊN THÊM: Gọi dạng Async (Await được trong form submit để redirect)
+    createLessonAsync: createMutation.mutateAsync,
+    updateLessonAsync: updateMutation.mutateAsync,
+
+    // Trạng thái loading
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
@@ -144,23 +153,57 @@ export const useRegenerateTemplates = () => {
   return useMutation({
     mutationFn: (id: string) => lessonService.regenerateTemplates(id),
     onSuccess: (data, lessonId) => {
-      toast.success("Đồng bộ thành công!", {
+      toast.success("Reset Templates thành công!", {
         id: "regen-template-success",
-        description: data?.message || "Đã tạo lại Templates cho bài học.",
+        description:
+          data?.message ||
+          "Hệ thống đã reset và tự động chọn lại các từ đục lỗ.",
       });
-      queryClient.invalidateQueries({ queryKey: ["lesson-preview", lessonId] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["lesson-preview", lessonId],
+        exact: true,
+      });
     },
     onError: (error: any) =>
-      toast.error("Lỗi hệ thống", {
+      toast.error("Không thể tái tạo Templates", {
         id: "regen-template-error",
         description: extractErrorMessage(
           error,
-          "Không thể tạo lại Templates lúc này.",
+          "Lỗi hệ thống khi đang reset bản nháp.",
         ),
       }),
   });
 };
 
+export const useUpdateDictationTemplates = () => {
+  const queryClient = useQueryClient();
+
+  // Thêm Generics: <Kiểu_Data_Trả_Về, Kiểu_Lỗi, Kiểu_Dữ_Liệu_Đầu_Vào>
+  return useMutation<
+    { message: string },
+    any,
+    { id: string; data: UpdateDictationTemplatesRequest }
+  >({
+    // Giải nén object để truyền vào 2 tham số cho service
+    mutationFn: ({ id, data }) =>
+      lessonService.updateDictationTemplates(id, data),
+    onSuccess: (_, variables) => {
+      toast.success("Đã lưu cấu hình đục lỗ!", {
+        id: "update-templates-success",
+      });
+      // Làm mới cache Preview để fetch lại data mới nhất
+      queryClient.invalidateQueries({
+        queryKey: ["lesson-preview", variables.id],
+      });
+    },
+    onError: (error: any) => {
+      toast.error("Lỗi khi lưu cấu hình", {
+        description: extractErrorMessage(error),
+      });
+    },
+  });
+};
 // --- 6. Hook Cập nhật Transcript ---
 export const useUpdateTranscript = () => {
   const queryClient = useQueryClient();
@@ -233,6 +276,18 @@ export const useYoutubePreview = (url: string) => {
   });
 };
 
+export const useYoutubeTranscript = (params: GetYoutubeTranscriptParams) => {
+  return useQuery({
+    queryKey: ["youtube-transcript", params.url, params.preferredLanguage],
+    queryFn: () => lessonService.getYoutubeTranscript(params),
+    enabled:
+      !!params.url &&
+      (params.url.includes("youtube.com") || params.url.includes("youtu.be")),
+    staleTime: 1000 * 60 * 10,
+    retry: 1,
+  });
+};
+
 // ============ USER HOOKS ============
 
 // Hook lấy danh sách lessons cho user
@@ -270,7 +325,8 @@ export const useSubmitDictation = () => {
     mutationFn: ({ id, data }: { id: string; data: SubmitDictationRequest }) =>
       lessonService.submitDictation(id, data),
     onSuccess: (result) => {
-      const correctPercentage = (result.correctCount / result.totalBlanks) * 100;
+      const correctPercentage =
+        (result.correctCount / result.totalBlanks) * 100;
       if (correctPercentage >= 80) {
         toast.success(`Xuất sắc! Điểm: ${result.score.toFixed(0)}`);
       } else if (correctPercentage >= 50) {

@@ -2,64 +2,78 @@ import axiosClient from "@/lib/axios-client";
 import { BlogDto, CreateBlogRequest } from "@/types/blog.type";
 
 export const blogService = {
-  // GET List - Lấy danh sách bài viết
+  // 1. Lấy toàn bộ bài viết
   getBlogs: async (): Promise<BlogDto[]> => {
-    const response = await axiosClient.get("/Blogs");
-    return (response as any).data ?? response;
+    try {
+      const response = await axiosClient.get("/blogs");
+      const data = response?.data !== undefined ? response.data : response;
+
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error("Critical API Error:", error);
+      return [];
+    }
   },
 
-  // GET Detail - Lấy chi tiết bài viết theo ID
+  // 2. Lấy chi tiết bài viết
   getBlogById: async (id: string): Promise<BlogDto> => {
-    const response = await axiosClient.get(`/Blogs/${id}`);
-    return (response as any).data ?? response;
+    try {
+      const response = await axiosClient.get(`/blogs/${id}`);
+      return response as unknown as BlogDto;
+    } catch (error) {
+      console.error("Lỗi API getBlogById:", error);
+      throw error;
+    }
   },
-
-  // CREATE - Tạo bài viết mới (Sử dụng Multipart Form Data cho ThumbnailFile)
+  // 3. Tạo mới bài viết
   createBlog: async (data: CreateBlogRequest): Promise<BlogDto> => {
     const formData = new FormData();
     formData.append("Title", data.Title);
+    ``;
     formData.append("Content", data.Content);
     if (data.Summary) formData.append("Summary", data.Summary);
     if (data.Tags) formData.append("Tags", data.Tags);
     if (data.Status) formData.append("Status", data.Status);
-
-    // Đính kèm file binary nếu có
-    if (data.ThumbnailFile) {
+    if (data.ThumbnailFile)
       formData.append("ThumbnailFile", data.ThumbnailFile);
-    }
 
-    const response = await axiosClient.post("/Blogs", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await axiosClient.post("/admin/blogs", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
-    return (response as any).data ?? response;
+    return response.data;
   },
 
+  // 4. Cập nhật bài viết (Sửa từ updateStatus thành updateBlog)
   updateBlog: async (id: string, data: CreateBlogRequest): Promise<BlogDto> => {
     const formData = new FormData();
     formData.append("Title", data.Title);
     formData.append("Content", data.Content);
-    if (data.Summary) formData.append("Summary", data.Summary);
-    if (data.Tags) formData.append("Tags", data.Tags);
-    if (data.Status) formData.append("Status", data.Status);
 
-    // Chỉ đính kèm file nếu người dùng chọn ảnh mới
+    // Chỉ append nếu có giá trị để tránh gửi chuỗi "null" hoặc "undefined" sang BE
+    if (data.Summary !== undefined && data.Summary !== null) {
+      formData.append("Summary", data.Summary);
+    }
+    if (data.Tags !== undefined && data.Tags !== null) {
+      formData.append("Tags", data.Tags);
+    }
+    if (data.Status) {
+      formData.append("Status", data.Status);
+    }
+
+    // Quan trọng: Chỉ append ThumbnailFile nếu người dùng chọn ảnh mới (là kiểu File)
+    // Nếu data.ThumbnailFile là link URL (ảnh cũ), ta không append để BE giữ nguyên ảnh cũ
     if (data.ThumbnailFile instanceof File) {
       formData.append("ThumbnailFile", data.ThumbnailFile);
     }
 
-    const response = await axiosClient.put(`/Blogs/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await axiosClient.put(`/admin/blogs/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
-    return (response as any).data ?? response;
+    return response.data;
   },
 
-  // DELETE - Xóa bài viết
+  // 5. Xóa bài viết
   deleteBlog: async (id: string): Promise<void> => {
-    const response = await axiosClient.delete(`/Blogs/${id}`);
-    return (response as any).data ?? response;
+    await axiosClient.delete(`/admin/blogs/${id}`);
   },
 };
