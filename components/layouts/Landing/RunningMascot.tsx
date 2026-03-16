@@ -1,119 +1,105 @@
 "use client";
 
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useVelocity,
-} from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import Lottie from "lottie-react";
 import animationData from "@/public/animations/character-run.json";
+import { ArrowUp } from "lucide-react";
 
 export function RunningMascot() {
   const { scrollYProgress } = useScroll();
+  const [isVisible, setIsVisible] = useState(false);
 
-  // 1. Làm mượt tiến trình cuộn
+  // Làm mượt tiến trình cuộn cho vòng tròn Progress
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
 
-  // 2. Tính toán Tốc độ (Velocity) để tạo hiệu ứng vệt mờ
-  const scrollVelocity = useVelocity(smoothProgress);
-  const velocitySpring = useSpring(scrollVelocity, {
-    stiffness: 50,
-    damping: 20,
-  });
+  // Ẩn mascot ở Hero Section, chỉ hiện khi bắt đầu cuộn xuống
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.onChange((v) => {
+      setIsVisible(v > 0.05);
+    });
+    return () => unsubscribe();
+  }, [scrollYProgress]);
 
-  // Khi cuộn nhanh, các bóng phía sau sẽ dạt ra xa (khoảng cách tối đa 40px)
-  const trailOffset = useTransform(velocitySpring, [-1, 0, 1], [40, 0, -40]);
-  // Khi cuộn nhanh, vệt mờ mới hiện lên (opacity tăng)
-  const trailOpacity = useTransform(
-    velocitySpring,
-    [-1, -0.1, 0, 0.1, 1],
-    [0.4, 0, 0, 0, 0.4],
-  );
-
-  // 3. Logic Chạy ngang & Nhảy (Giữ nguyên combo thần thánh)
-  const x = useTransform(smoothProgress, [0, 1], ["-10vw", "110vw"]);
-  const jumpY = useTransform(smoothProgress, (v) => {
-    const jump = Math.abs(Math.sin(v * Math.PI * 10)) * 70; // Nhảy cao 70px
-    return -jump;
-  });
-
-  const rotate = useTransform(smoothProgress, [0, 1], [5, 15]);
+  // Hàm cuộn lên đầu trang
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <motion.div
-      style={{
-        x,
-        position: "fixed",
-        bottom: "100px",
-        zIndex: 100,
+      initial={{ opacity: 0, scale: 0.5, y: 50 }}
+      animate={{
+        opacity: isVisible ? 1 : 0,
+        scale: isVisible ? 1 : 0.5,
+        y: isVisible ? 0 : 50,
+        pointerEvents: isVisible ? "auto" : "none",
       }}
-      className="pointer-events-none flex flex-col items-center"
+      transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
+      className="fixed bottom-8 right-8 z-[100] group cursor-pointer"
+      onClick={scrollToTop}
     >
-      <motion.div style={{ y: jumpY, rotate }} className="relative">
-        {/* VẾT BÓNG MỜ 2 (Xa nhất) */}
-        <motion.div
-          style={{
-            x: trailOffset,
-            opacity: trailOpacity,
-            filter: "blur(4px) grayscale(1)",
-          }}
-          className="absolute inset-0 scale-95 origin-bottom"
+      <div className="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center bg-white/10 dark:bg-black/50 backdrop-blur-md rounded-full shadow-2xl border border-white/20 dark:border-white/10 overflow-hidden">
+        {/* Vòng tròn hiển thị % cuộn trang (Progress Ring) */}
+        <svg
+          className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
+          viewBox="0 0 100 100"
         >
-          <Lottie animationData={animationData} loop={true} />
-        </motion.div>
+          {/* Vòng mờ phía sau */}
+          <circle
+            cx="50"
+            cy="50"
+            r="48"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-gray-300 dark:text-gray-800"
+          />
+          {/* Vòng cam chạy theo cuộn */}
+          <motion.circle
+            cx="50"
+            cy="50"
+            r="48"
+            fill="none"
+            stroke="#FF7A00"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray="301.59" // 2 * PI * r
+            style={{
+              strokeDashoffset: useTransform(
+                smoothProgress,
+                [0, 1],
+                [301.59, 0],
+              ),
+            }}
+            className="drop-shadow-[0_0_5px_rgba(255,122,0,0.8)]"
+          />
+        </svg>
 
-        {/* VẾT BÓNG MỜ 1 (Gần nhân vật hơn) */}
-        <motion.div
-          style={{
-            x: useTransform(velocitySpring, [-1, 1], [20, -20]),
-            opacity: trailOpacity,
-            filter: "blur(2px)",
-          }}
-          className="absolute inset-0 scale-100 origin-bottom"
-        >
-          <Lottie animationData={animationData} loop={true} />
-        </motion.div>
-
-        {/* NHÂN VẬT CHÍNH */}
-        <div className="w-24 h-24 md:w-32 md:h-32 relative z-10 drop-shadow-[0_0_15px_rgba(255,122,0,0.3)]">
+        {/* NHÂN VẬT CHẠY TẠI CHỖ */}
+        <div className="w-12 h-12 md:w-16 md:h-16 relative z-10 transition-transform duration-300 group-hover:scale-0 group-hover:opacity-0">
           <Lottie animationData={animationData} loop={true} autoplay={true} />
         </div>
 
-        {/* Hiệu ứng bụi chân khi chạm đất */}
-        <motion.div
-          style={{ opacity: useTransform(jumpY, [0, -10], [1, 0]) }}
-          className="absolute -left-4 bottom-4 flex gap-1"
-        >
-          {[1, 2].map((i) => (
-            <motion.div
-              key={i}
-              animate={{
-                x: [0, -40],
-                y: [0, -10],
-                opacity: [0.5, 0],
-                scale: [1, 0],
-              }}
-              transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.1 }}
-              className="w-2 h-2 bg-orange-500/20 rounded-full blur-[1px]"
-            />
-          ))}
-        </motion.div>
-      </motion.div>
+        {/* ICON CUỘN LÊN (Hiện ra khi Hover) */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+          <div className="w-10 h-10 bg-[#FF7A00] rounded-full flex items-center justify-center text-white shadow-[0_0_15px_#FF7A00]">
+            <ArrowUp strokeWidth={3} size={20} />
+          </div>
+        </div>
 
-      {/* Bóng đổ dưới sàn */}
-      <motion.div
-        style={{
-          scale: useTransform(jumpY, [0, -70], [1, 0.4]),
-          opacity: useTransform(jumpY, [0, -70], [0.3, 0.05]),
-        }}
-        className="w-16 h-2 bg-black/30 blur-lg rounded-full"
-      />
+        {/* Hiệu ứng Glow mờ đằng sau */}
+        <div className="absolute inset-0 bg-[#FF7A00]/10 rounded-full blur-xl pointer-events-none" />
+      </div>
+
+      {/* Tooltip nhỏ */}
+      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-lg">
+        Lên đầu trang
+      </div>
     </motion.div>
   );
 }

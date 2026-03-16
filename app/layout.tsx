@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import QueryProvider from "./providers";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
-import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { RunningMascot } from "@/components/layouts/Landing/RunningMascot";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -55,7 +55,9 @@ export default function RootLayout({
           storageKey="demif-user-theme"
         >
           <AmbientBackground />
-          <ScrollToTopButton />
+
+          {/* NÚT CUỘN LÊN BẰNG MASCOT ÁP DỤNG TOÀN TRANG */}
+          <RunningMascot />
 
           <div className="relative z-10 flex flex-col min-h-screen">
             <QueryProvider>
@@ -71,10 +73,10 @@ export default function RootLayout({
             closeButton
             className="fixed"
             style={{
-              position: "fixed", // Bắt buộc cố định
-              top: 20, // Cách đỉnh 20px
-              right: 20, // Cách phải 20px
-              zIndex: 99999, // Luôn nằm trên cùng
+              position: "fixed",
+              top: 20,
+              right: 20,
+              zIndex: 99999,
             }}
           />
 
