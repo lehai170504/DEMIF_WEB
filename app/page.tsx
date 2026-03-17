@@ -5,16 +5,29 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import dynamic from "next/dynamic";
 
 import { HeaderLanding } from "@/components/layouts/Landing/HeaderLanding";
 import { FooterLanding } from "@/components/layouts/Landing/FooterLanding";
 import { CinematicJourney } from "@/components/layouts/Landing/CinematicJourney";
 
 import { StatsLanding } from "@/components/layouts/Landing/StatsLanding";
-import { TestimonialsLanding } from "@/components/layouts/Landing/TestimonialsLanding";
-import { Pricing } from "@/components/layouts/Pricing/Pricing";
-import { AboutLanding } from "@/components/layouts/Landing/AboutLanding";
-import { FaqLanding } from "@/components/layouts/Landing/FaqLanding";
+const TestimonialsLanding = dynamic(
+  () => import("@/components/layouts/Landing/TestimonialsLanding"),
+  { ssr: false },
+);
+const Pricing = dynamic(() => import("@/components/layouts/Pricing/Pricing"), {
+  ssr: false,
+  loading: () => <div className="h-screen bg-black/5 animate-pulse" />,
+});
+const AboutLanding = dynamic(
+  () => import("@/components/layouts/Landing/AboutLanding"),
+  { ssr: false },
+);
+const FaqLanding = dynamic(
+  () => import("@/components/layouts/Landing/FaqLanding"),
+  { ssr: false },
+);
 import { CtaLanding } from "@/components/layouts/Landing/CtaLanding";
 import { AppleStyleSection } from "@/components/ui/AppleStyleSection";
 

@@ -8,10 +8,11 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: ["i.pravatar.cc"],
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion', 'lottie-react'],
+    optimizePackageImports: ["lucide-react", "framer-motion", "lottie-react"],
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

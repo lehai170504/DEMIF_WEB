@@ -37,6 +37,7 @@ import {
   Globe,
   Activity,
 } from "lucide-react";
+import Image from "next/image";
 
 const features_vi = [
   {
@@ -91,9 +92,9 @@ export function CinematicJourney() {
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 150,
-    damping: 35,
-    restDelta: 0.001,
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.01,
   });
 
   const bgScale = useTransform(
@@ -241,6 +242,12 @@ export function CinematicJourney() {
                   animationData={studentStudyAnim}
                   loop={true}
                   autoplay={true}
+                  rendererSettings={{
+                    preserveAspectRatio: "xMidYMid slice",
+                    progressiveLoad: true,
+                    hideOnTransparent: true,
+                  }}
+                  style={{ width: "100%", height: "100%" }}
                 />
               </div>
 
@@ -250,7 +257,16 @@ export function CinematicJourney() {
                 className="absolute top-4 left-0 md:-left-6 p-2 rounded-3xl bg-white/70 dark:bg-white/10 border border-white/20 backdrop-blur-xl shadow-2xl flex items-center pr-6 z-20"
               >
                 <div className="w-14 h-14">
-                  <Lottie animationData={accuracyAnim} loop={true} />
+                  <Lottie
+                    animationData={accuracyAnim}
+                    loop={true}
+                    rendererSettings={{
+                      preserveAspectRatio: "xMidYMid slice",
+                      progressiveLoad: true,
+                      hideOnTransparent: true,
+                    }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
                 </div>
                 <div>
                   <div className="text-[9px] font-black text-orange-500 uppercase">
@@ -268,7 +284,16 @@ export function CinematicJourney() {
                 className="absolute bottom-10 right-0 md:-right-4 p-2 rounded-3xl bg-white/70 dark:bg-white/10 border border-white/20 backdrop-blur-xl shadow-2xl flex items-center pr-6 z-20"
               >
                 <div className="w-14 h-14 scale-125">
-                  <Lottie animationData={energyAnim} loop={true} />
+                  <Lottie
+                    animationData={energyAnim}
+                    loop={true}
+                    rendererSettings={{
+                      preserveAspectRatio: "xMidYMid slice",
+                      progressiveLoad: true,
+                      hideOnTransparent: true,
+                    }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
                 </div>
                 <div>
                   <div className="text-[9px] font-black text-orange-500 uppercase">
@@ -289,7 +314,16 @@ export function CinematicJourney() {
                   <Activity size={10} className="text-blue-500" /> Live Audio
                 </div>
                 <div className="w-24 h-8 overflow-hidden">
-                  <Lottie animationData={waveAnim} loop={true} />
+                  <Lottie
+                    animationData={waveAnim}
+                    loop={true}
+                    rendererSettings={{
+                      preserveAspectRatio: "xMidYMid slice",
+                      progressiveLoad: true,
+                      hideOnTransparent: true,
+                    }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
                 </div>
               </motion.div>
             </motion.div>
@@ -332,7 +366,16 @@ export function CinematicJourney() {
                 hấp thụ ngôn ngữ của bạn.
               </p>
               <div className="w-80 h-80 opacity-80 mix-blend-multiply dark:mix-blend-screen">
-                <Lottie animationData={aiBrainAnim} loop={true} />
+                <Lottie
+                  animationData={aiBrainAnim}
+                  loop={true}
+                  rendererSettings={{
+                    preserveAspectRatio: "xMidYMid slice",
+                    progressiveLoad: true,
+                    hideOnTransparent: true,
+                  }}
+                  style={{ width: "100%", height: "100%" }}
+                />
               </div>
             </motion.div>
 
@@ -374,7 +417,16 @@ export function CinematicJourney() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="w-48 h-48 mb-6"
           >
-            <Lottie animationData={robotAnim} loop={true} />
+            <Lottie
+              animationData={robotAnim}
+              loop={true}
+              rendererSettings={{
+                preserveAspectRatio: "xMidYMid slice",
+                progressiveLoad: true,
+                hideOnTransparent: true,
+              }}
+              style={{ width: "100%", height: "100%" }}
+            />
           </motion.div>
 
           <div className="text-center mb-16 relative z-20">
@@ -486,8 +538,8 @@ export function CinematicJourney() {
             </motion.div>
 
             {/* Social Proof & Trust Badges */}
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-6 mt-12">
+              <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="flex -space-x-4">
                   {[
                     "https://i.pravatar.cc/100?img=1",
@@ -497,42 +549,45 @@ export function CinematicJourney() {
                   ].map((src, idx) => (
                     <div
                       key={idx}
-                      // NÂNG CẤP 3: Hover hiệu ứng cho Avatar
-                      className="w-24 h-24 rounded-full border-4 border-white dark:border-[#050505] overflow-hidden bg-gray-200 hover:scale-110 hover:z-10 transition-transform duration-200"
+                      className="relative w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-white dark:border-[#050505] overflow-hidden bg-gray-200 hover:scale-110 hover:z-10 transition-transform duration-200 shadow-xl"
                     >
-                      <img
+                      <Image
                         src={src}
                         alt="Student Avatar"
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 768px) 56px, 64px"
+                        className="object-cover"
                       />
                     </div>
                   ))}
-                  <div className="w-12 h-12 rounded-full border-4 border-white dark:border-[#050505] bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-900 dark:text-white z-0">
+                  {/* Cân đối lại kích thước thẻ +10k cho bằng với Avatar */}
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-white dark:border-[#050505] bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] md:text-xs font-black text-gray-900 dark:text-white z-0 shadow-xl">
                     +10k
                   </div>
                 </div>
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 text-left">
+
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center md:text-left leading-snug">
                   Đã giúp{" "}
                   <strong className="text-gray-900 dark:text-white">
                     hàng ngàn học viên
                   </strong>
                   <br />
-                  giao tiếp tự tin hơn.
+                  giao tiếp tự tin hơn mỗi ngày.
                 </div>
               </div>
 
               {/* Cam kết niềm tin */}
-              <div className="flex flex-wrap justify-center gap-6 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-4">
+              <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-500 uppercase tracking-[0.2em] mt-2">
                 <span className="flex items-center gap-2 group cursor-default">
                   <CheckCircle2
-                    size={16}
+                    size={14}
                     className="text-emerald-500 group-hover:scale-125 transition-transform"
                   />{" "}
                   Tự do trải nghiệm
                 </span>
                 <span className="flex items-center gap-2 group cursor-default">
                   <CheckCircle2
-                    size={16}
+                    size={14}
                     className="text-emerald-500 group-hover:scale-125 transition-transform"
                   />{" "}
                   Hủy bất cứ lúc nào

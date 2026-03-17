@@ -12,7 +12,7 @@ import {
   Cpu,
 } from "lucide-react";
 
-export function AboutLanding() {
+export default function AboutLanding() {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef(null);

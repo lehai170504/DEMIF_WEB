@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { HelpCircle, Plus } from "lucide-react";
 import Link from "next/link";
 
-export function FaqLanding() {
+export default function FaqLanding() {
   const faqs = [
     {
       q: "Phương pháp Shadowing là gì?",

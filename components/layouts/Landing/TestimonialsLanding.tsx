@@ -63,7 +63,7 @@ const testimonials: TestimonialItem[] = [
   },
 ];
 
-export function TestimonialsLanding() {
+export default function TestimonialsLanding() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({

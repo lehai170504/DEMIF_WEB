@@ -8,7 +8,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useActivePlans } from "@/hooks/use-subscription";
 
-export function Pricing() {
+export default function Pricing() {
   const { data: plans, isLoading } = useActivePlans();
 
   const formatBillingCycle = (cycle: string) => {
