@@ -1,0 +1,174 @@
+"use client";
+
+import { CheckCircle, CreditCard, Download, Zap, Crown, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useMySubscription } from "@/hooks/use-subscription";
+
+export function BillingSubscription() {
+  const { data: mySubscription, isLoading } = useMySubscription();
+
+  // Format date to Vietnamese format
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN");
+  };
+
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
+      {/* Current Plan Card - Neon Style */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-white to-gray-50 dark:from-[#18181b] dark:to-black border border-gray-200 dark:border-white/10 p-1">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+        <div className="relative bg-white/50 dark:bg-[#18181b]/50 backdrop-blur-xl rounded-[2.3rem] p-8 md:p-10">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+            </div>
+          ) : mySubscription ? (
+            <>
+              <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg shadow-orange-500/20">
+                      <Crown className="h-6 w-6 text-white fill-white" />
+                    </div>
+                    <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1 uppercase tracking-widest text-[10px] font-black">
+                      {mySubscription.status}
+                    </Badge>
+                  </div>
+                  <h4 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+                    {mySubscription.plan?.name || "Gói đăng ký"}
+                  </h4>
+                  <p className="text-gray-600 dark:text-zinc-400 font-medium">
+                    Gia hạn tiếp theo:{" "}
+                    <span className="text-gray-900 dark:text-white">
+                      {formatDate(mySubscription.endDate)}
+                    </span>
+                  </p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-bold h-12"
+                  onClick={() => window.location.href = '/upgrade'}
+                >
+                  Quản lý gói
+                </Button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 pt-8 border-t border-gray-200 dark:border-white/5">
+                {mySubscription.plan?.features?.map((feature, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-zinc-300"
+                  >
+                    <CheckCircle className="h-5 w-5 text-emerald-500 fill-emerald-500/10" />
+                    {feature}
+                  </div>
+                )) || [
+                  "Không giới hạn bài tập",
+                  "Phân tích phát âm AI",
+                  "Tải về bài học Offline",
+                  "Hỗ trợ 1-1 ưu tiên",
+                ].map((feature, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-zinc-300"
+                  >
+                    <CheckCircle className="h-5 w-5 text-emerald-500 fill-emerald-500/10" />
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="py-12 text-center space-y-4">
+              <div className="p-3 bg-gray-100 dark:bg-white/5 rounded-xl w-fit mx-auto">
+                <Crown className="h-8 w-8 text-gray-400 dark:text-zinc-600" />
+              </div>
+              <div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Chưa có gói đăng ký
+                </h4>
+                <p className="text-gray-600 dark:text-zinc-400 mb-6">
+                  Nâng cấp tài khoản để trải nghiệm đầy đủ tính năng
+                </p>
+                <Button
+                  className="rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold h-12 px-8"
+                  onClick={() => window.location.href = '/upgrade'}
+                >
+                  Xem các gói đăng ký
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Payment History */}
+      <div className="space-y-6">
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 dark:text-zinc-500 pl-2">
+          Lịch sử thanh toán
+        </h3>
+        <div className="rounded-[2rem] border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] overflow-hidden shadow-xl">
+          <Table>
+            <TableHeader className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="font-bold text-gray-500 dark:text-zinc-400 text-xs uppercase tracking-wider pl-6 py-4">
+                  Mã đơn
+                </TableHead>
+                <TableHead className="font-bold text-gray-500 dark:text-zinc-400 text-xs uppercase tracking-wider">
+                  Ngày
+                </TableHead>
+                <TableHead className="font-bold text-gray-500 dark:text-zinc-400 text-xs uppercase tracking-wider">
+                  Số tiền
+                </TableHead>
+                <TableHead className="text-right font-bold text-gray-500 dark:text-zinc-400 text-xs uppercase tracking-wider pr-6">
+                  Hóa đơn
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[1, 2].map((i) => (
+                <TableRow
+                  key={i}
+                  className="hover:bg-gray-50 dark:hover:bg-white/5 border-b border-gray-200 dark:border-white/5 last:border-none transition-colors"
+                >
+                  <TableCell className="font-mono text-xs text-gray-500 dark:text-zinc-500 pl-6 py-4">
+                    INV-2026-00{i}
+                  </TableCell>
+                  <TableCell className="font-medium text-sm text-gray-700 dark:text-zinc-300">
+                    01/01/2026
+                  </TableCell>
+                  <TableCell className="font-black text-gray-900 dark:text-white">
+                    499.000đ
+                  </TableCell>
+                  <TableCell className="text-right pr-6">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 rounded-lg text-gray-500 dark:text-zinc-500 hover:text-orange-500 hover:bg-orange-500/10"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
+  );
+}

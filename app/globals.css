@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Updated theme to softer warm white (beige/cream tones) with orange accents */
+/* --- 1. DEFINITIONS: VARIABLES --- */
 :root {
   /* Warm beige/cream backgrounds instead of pure white */
   --background: oklch(0.98 0.01 60);
@@ -92,6 +92,7 @@
   --sidebar-ring: oklch(0.72 0.19 45);
 }
 
+/* --- 2. THEME CONFIG --- */
 @theme inline {
   --font-sans: var(--font-poppins);
   --font-mono: var(--font-inter);
@@ -133,22 +134,125 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-
+/* --- 3. UTILITIES --- */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
-    display: none; /* Dành cho Chrome, Safari và Opera */
+    display: none;
   }
   .no-scrollbar {
-    -ms-overflow-style: none; /* Dành cho IE và Edge */
-    scrollbar-width: none; /* Dành cho Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Class này dùng thủ công nếu cần 3D, KHÔNG dùng toàn body */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .hover-3d {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-3d:hover {
+    transform: translateY(-2px) rotateX(4deg) rotateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 122, 0, 0.2);
+  }
+
+  .logo-glow {
+    filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.4));
+    animation: pulse-glow 3s infinite ease-in-out;
+  }
+
+  .glass-header {
+    background: rgba(var(--background), 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 
+/* --- 4. BASE STYLES --- */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  
+  html {
+    scroll-behavior: smooth;
   }
+
+  body {
+    /* QUAN TRỌNG: Xóa perspective toàn cục để fix lỗi fixed position */
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* --- 5. KEYFRAMES --- */
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 122, 0, 0.3)); }
+  50% { filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.6)); }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@theme {
+  --animate-shimmer: shimmer 2s linear infinite;
+}
+
+
+/* Ẩn thanh cuộn cho toàn bộ trang web nhưng vẫn cho phép cuộn bằng chuột/cảm ứng */
+html, body {
+  scroll-behavior: smooth;
+  -ms-overflow-style: none; /* Dành cho IE và Edge */
+  scrollbar-width: none;    /* Dành cho Firefox */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Dành cho Chrome, Safari, Opera */
+}
+
+@layer utilities {
+  /* Animation cho CPU hoặc các Icon AI xoay chậm */
+  @keyframes spin-slow-neon {
+    from {
+      transform: rotate(0deg);
+      filter: drop-shadow(0 0 2px #FF7A00);
+    }
+    50% {
+      filter: drop-shadow(0 0 10px #FF7A00);
+    }
+    to {
+      transform: rotate(360deg);
+      filter: drop-shadow(0 0 2px #FF7A00);
+    }
+  }
+
+  .animate-spin-slow-neon {
+    animation: spin-slow-neon 12s linear infinite;
+  }
+
+  /* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 5s ease infinite;
 }

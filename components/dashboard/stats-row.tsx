@@ -1,25 +1,87 @@
-import { Card } from "@/components/ui/card"
-import { Target, FileText, CheckCircle, Headphones } from "lucide-react"
+"use client";
+
+import { Card } from "@/components/ui/card";
+import { Target, FileText, CheckCircle, Headphones, Flame } from "lucide-react";
 
 export function StatsRow() {
   const stats = [
-    { icon: Target, label: "Ngày liên tiếp", value: "0", color: "text-red-500", bgColor: "bg-red-50" },
-    { icon: FileText, label: "Từ đã nghe", value: "9", color: "text-blue-500", bgColor: "bg-blue-50" },
-    { icon: CheckCircle, label: "Bài đã nộp", value: "1", color: "text-green-500", bgColor: "bg-green-50" },
-    { icon: Headphones, label: "Bài đang nghe", value: "1", color: "text-orange-500", bgColor: "bg-orange-50" },
-  ]
+    {
+      icon: Flame,
+      label: "Ngày liên tiếp",
+      value: "0",
+      color: "text-orange-500",
+      border: "border-orange-500/20",
+      bg: "bg-orange-500/10",
+      glow: "shadow-orange-500/20",
+    },
+    {
+      icon: FileText,
+      label: "Từ đã nghe",
+      value: "9",
+      color: "text-blue-500",
+      border: "border-blue-500/20",
+      bg: "bg-blue-500/10",
+      glow: "shadow-blue-500/20",
+    },
+    {
+      icon: CheckCircle,
+      label: "Bài đã nộp",
+      value: "1",
+      color: "text-emerald-500",
+      border: "border-emerald-500/20",
+      bg: "bg-emerald-500/10",
+      glow: "shadow-emerald-500/20",
+    },
+    {
+      icon: Headphones,
+      label: "Đang nghe",
+      value: "1",
+      color: "text-purple-500",
+      border: "border-purple-500/20",
+      bg: "bg-purple-500/10",
+      glow: "shadow-purple-500/20",
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
       {stats.map((stat, index) => (
-        <Card key={index} className="p-4 border-orange-200/50 bg-white text-center">
-          <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center mx-auto mb-2`}>
-            <stat.icon className={`h-5 w-5 ${stat.color}`} />
+        <Card
+          key={index}
+          className={`relative overflow-hidden p-5 border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] rounded-[2rem] transition-all hover:-translate-y-1 hover:border-gray-300 dark:hover:border-white/10 group`}
+        >
+          {/* Background Icon Decor */}
+          <stat.icon
+            className={`absolute -right-4 -bottom-4 h-24 w-24 opacity-[0.05] group-hover:scale-110 transition-transform duration-500 ${stat.color} blur-sm`}
+          />
+
+          <div className="flex flex-col items-start relative z-10">
+            {/* Icon Box */}
+            <div
+              className={`p-3 rounded-2xl ${stat.bg} ${stat.color} mb-4 border ${stat.border} shadow-lg ${stat.glow}`}
+            >
+              <stat.icon className="h-5 w-5" />
+            </div>
+
+            {/* Value & Label */}
+            <div className="space-y-1">
+              <div
+                className={`text-4xl font-black italic tracking-tighter text-gray-900 dark:text-white`}
+              >
+                {stat.value}
+              </div>
+              <div className="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors">
+                {stat.label}
+              </div>
+            </div>
           </div>
-          <div className={`text-2xl font-bold ${stat.color} mb-1`}>{stat.value}</div>
-          <div className="text-xs text-slate-600">{stat.label}</div>
+
+          {/* Bottom highlight bar */}
+          <div
+            className={`absolute bottom-0 left-0 h-1 w-full opacity-0 group-hover:opacity-100 transition-opacity ${stat.bg.replace("/10", "")}`}
+          />
         </Card>
       ))}
     </div>
-  )
+  );
 }

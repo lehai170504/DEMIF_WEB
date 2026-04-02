@@ -1,32 +1,35 @@
 // app/admin/layout.tsx
+"use client";
 
-import { ReactNode } from "react";
-import AdminNavbar from "../../components/admin/AdminNavbar";
+import AdminNavbar from "../../components/admin/navbar";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminFooter from "../../components/admin/AdminFooter";
+import AdminGuard from "@/components/auth/admin-guard";
 
-interface AdminLayoutProps {
-  children: ReactNode;
-}
-
-export default function RootAdminLayout({ children }: AdminLayoutProps) {
+export default function RootAdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex h-screen bg-muted/40 font-mono">
-      <AdminSidebar />
+    <AdminGuard>
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
+        <AdminSidebar />
 
-      <div className="flex flex-col flex-1 md:ml-64 overflow-hidden">
-        <header className="z-10 border-b bg-background">
+        <div className="flex flex-col flex-1 md:pl-[78px] transition-all duration-300 h-full">
           <AdminNavbar />
-        </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="max-w-full mx-auto">{children}</div>
-        </main>
+          <main className="flex-1 overflow-y-auto no-scrollbar relative z-10 p-4 md:p-6">
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-[1600px] mx-auto">
+              {children}
+            </div>
+          </main>
 
-        <footer className="z-10 border-t bg-background shrink-0">
-          <AdminFooter />
-        </footer>
+          <footer className="shrink-0 p-4 border-t border-gray-200 bg-white/80 backdrop-blur-md text-center text-xs text-gray-500 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-20">
+            <AdminFooter />
+          </footer>
+        </div>
       </div>
-    </div>
+    </AdminGuard>
   );
 }

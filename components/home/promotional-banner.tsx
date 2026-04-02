@@ -1,110 +1,199 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface Banner {
-  id: string
-  title: string
-  subtitle: string
-  image: string
-  cta: string
-  link: string
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  cta: string;
+  link: string;
+  color: string;
 }
 
 const banners: Banner[] = [
   {
     id: "1",
     title: "Giải mọi bài tập",
-    subtitle: "Nhanh chóng và chính xác nhất",
+    subtitle: "Nhanh chóng và chính xác nhất với trợ lý AI thế hệ mới",
     image: "/promo-banner-1.jpg",
-    cta: "Hỏi hiền phí ngay",
+    cta: "Hỏi ngay",
     link: "/ai-assistant",
+    color: "from-blue-600/20 via-indigo-600/20 to-violet-600/20",
   },
   {
     id: "2",
-    title: "Bí quyết học tốt điểm cao",
-    subtitle: "Phương pháp học thông minh từ chuyên gia",
+    title: "Bí quyết học tốt",
+    subtitle: "Khám phá lộ trình học thông minh từ các thủ khoa",
     image: "/promo-banner-2.jpg",
-    cta: "Khám phá ngay",
+    cta: "Khám phá",
     link: "/blog/study-tips",
+    color: "from-emerald-600/20 via-teal-600/20 to-cyan-600/20",
   },
-]
+];
 
 export function PromotionalBanner() {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0,
+      scale: 0.9,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0,
+      scale: 0.9,
+    }),
+  };
+
+  const handleNext = useCallback(() => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % banners.length);
+  }, []);
+
+  const handlePrevious = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+  };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % banners.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [])
-
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length)
-  }
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % banners.length)
-  }
+    const timer = setInterval(handleNext, 6000);
+    return () => clearInterval(timer);
+  }, [handleNext]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 shadow-lg">
-      <motion.div
-        key={currentIndex}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="relative h-64 p-8"
-      >
-        <div className="relative z-10 flex h-full items-center justify-between">
-          <div className="max-w-md space-y-4">
-            <h3 className="font-display text-3xl font-bold text-white">{banners[currentIndex].title}</h3>
-            <p className="text-lg text-white/90">{banners[currentIndex].subtitle}</p>
-            <Button className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">{banners[currentIndex].cta}</Button>
+    <div className="group relative h-[320px] w-full overflow-hidden rounded-[2.5rem] bg-gray-100 dark:bg-[#0F0F11] border border-gray-200 dark:border-white/10 shadow-2xl">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-[length:30px_30px] opacity-[0.03] z-0" />
+
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        <motion.div
+          key={currentIndex}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            x: { type: "spring", stiffness: 300, damping: 30 },
+            opacity: { duration: 0.2 },
+          }}
+          className={`absolute inset-0 flex items-center justify-between p-10 md:p-16 bg-gradient-to-r ${banners[currentIndex].color}`}
+        >
+          {/* Content Left */}
+          <div className="relative z-10 max-w-lg space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 dark:bg-white/5 px-3 py-1 text-[10px] font-bold backdrop-blur-md border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white uppercase tracking-widest"
+            >
+              <Sparkles className="h-3 w-3 text-yellow-400 animate-pulse" />
+              Tính năng mới
+            </motion.div>
+
+            <div className="space-y-2">
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-none"
+              >
+                {banners[currentIndex].title}
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-lg text-gray-700 dark:text-zinc-400 font-medium max-w-sm"
+              >
+                {banners[currentIndex].subtitle}
+              </motion.p>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Button className="h-12 rounded-xl bg-white text-black font-black uppercase tracking-widest text-xs px-8 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 hover:bg-slate-200">
+                {banners[currentIndex].cta}{" "}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </motion.div>
           </div>
 
-          <div className="relative h-48 w-64">
-            <Image
-              src={banners[currentIndex].image || "/placeholder.svg"}
-              alt={banners[currentIndex].title}
-              fill
-              className="object-contain"
-            />
+          {/* Image Right (3D Floating) */}
+          <div className="relative hidden h-full w-1/3 md:block">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, rotateY: 30 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              exit={{ scale: 0.8, opacity: 0, rotateY: -30 }}
+              transition={{ duration: 0.5 }}
+              className="relative h-full w-full"
+            >
+              {/* Glow behind image */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/30 to-blue-500/30 blur-[60px] rounded-full" />
+
+              <Image
+                src={banners[currentIndex].image || "/placeholder.svg"}
+                alt={banners[currentIndex].title}
+                fill
+                className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+              />
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
+      </AnimatePresence>
 
-        {/* Navigation */}
-        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-          {banners.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`h-2 rounded-full transition-all ${
-                index === currentIndex ? "w-8 bg-white" : "w-2 bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Arrow buttons */}
+      {/* Navigation Controls */}
+      <div className="absolute inset-x-6 top-1/2 z-20 flex -translate-y-1/2 justify-between pointer-events-none">
         <button
-          onClick={goToPrevious}
-          className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/20 p-2 backdrop-blur-sm transition-all hover:bg-white/30"
+          onClick={handlePrevious}
+          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/50 dark:bg-black/20 text-gray-700 dark:text-white/50 backdrop-blur-md border border-gray-300 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-black/40 hover:text-gray-900 dark:hover:text-white hover:scale-110"
         >
-          <ChevronLeft className="h-5 w-5 text-white" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
         <button
-          onClick={goToNext}
-          className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/20 p-2 backdrop-blur-sm transition-all hover:bg-white/30"
+          onClick={handleNext}
+          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/50 dark:bg-black/20 text-gray-700 dark:text-white/50 backdrop-blur-md border border-gray-300 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-black/40 hover:text-gray-900 dark:hover:text-white hover:scale-110"
         >
-          <ChevronRight className="h-5 w-5 text-white" />
+          <ChevronRight className="h-5 w-5" />
         </button>
-      </motion.div>
+      </div>
+
+      {/* Progress Dots */}
+      <div className="absolute bottom-6 left-10 z-20 flex gap-2">
+        {banners.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              setDirection(index > currentIndex ? 1 : -1);
+              setCurrentIndex(index);
+            }}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              index === currentIndex
+                ? "w-8 bg-gray-900 dark:bg-white"
+                : "w-2 bg-gray-900/20 dark:bg-white/20 hover:bg-gray-900/40 dark:hover:bg-white/40"
+            }`}
+          />
+        ))}
+      </div>
     </div>
-  )
+  );
 }

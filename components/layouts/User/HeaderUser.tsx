@@ -1,8 +1,18 @@
-// src/components/layouts/Dashboard/Header.jsx
+"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User, Zap } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  User,
+  Menu,
+  ChevronDown,
+  Sparkles,
+  CreditCard,
+  LayoutGrid,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,151 +21,279 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react"; // 1. Import hook
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
+const navLinks = [
+  { name: "Trang chủ", href: "/home" },
+  { name: "Chính tả", href: "/dictation" },
+  { name: "Shadowing", href: "/shadowing" },
+  { name: "Ôn tập", href: "/review" },
+  { name: "Bảng xếp hạng", href: "/leaderboard" },
+  { name: "Bài viết", href: "/blog" },
+];
 
 export function HeaderUser() {
+  const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  // 2. Thêm state isMounted để kiểm tra client-side rendering
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const firstLetter = user?.username
+    ? user.username.charAt(0).toUpperCase()
+    : "U";
+  const displayName = user?.username || "Người dùng";
+  const displayEmail = user?.email || "Chưa cập nhật email";
+
   return (
-    // Header chính: sticky, hiệu ứng blur, shadow nhẹ
-    <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-orange-200/50 shadow-sm">
-      <div className="container mx-auto px-6 py-3">
-        <div className="flex items-center justify-between h-14 font-mono">
-          {/* Logo và Tên ứng dụng */}
-          <div className="flex items-center gap-2">
-            <Link href="/home" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF7A00] to-orange-300 flex items-center justify-center shadow-md">
-                <span className="text-lg font-bold text-white">D</span>
+    <motion.header
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      className="sticky top-0 z-[100] w-full border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-black/20 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-black/10"
+    >
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
+        <div className="flex h-20 items-center justify-between gap-8 font-mono">
+          {/* --- LEFT: LOGO SECTION --- */}
+          <div className="flex items-center gap-10">
+            <Link href="/home" className="flex items-center gap-3 group">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+                className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] shadow-lg shadow-orange-500/20 border border-white/10"
+              >
+                <img
+                  src="/DemifLogo.png"
+                  alt="Demif Logo"
+                  className="w-7 h-7 brightness-0 invert drop-shadow-md"
+                />
+                <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.div>
+
+              <div className="flex flex-col">
+                <span className="text-2xl font-black tracking-tighter italic uppercase text-gray-900 dark:text-white leading-none group-hover:text-orange-500 dark:group-hover:text-orange-100 transition-colors">
+                  DEMIF<span className="text-[#FF7A00] not-italic">.</span>
+                </span>
               </div>
-              {/* Logo font chính: Chắc chắn hơn */}
-              <span className="text-xl font-bold text-gray-800">DEMIF</span>
             </Link>
+
+            {/* --- MIDDLE: DESKTOP NAVIGATION --- */}
+            <nav className="hidden xl:flex items-center gap-1 p-1.5 bg-gray-100/80 border border-gray-200 dark:bg-white/5 dark:border-white/5 rounded-2xl backdrop-blur-md">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "relative px-5 py-2.5 text-[12px] font-bold rounded-xl transition-colors duration-200 whitespace-nowrap",
+                      isActive
+                        ? "text-gray-900 dark:text-white"
+                        : "text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white",
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-pill"
+                        className="absolute inset-0 bg-gradient-to-r from-[#FF7A00]/20 to-[#FF9E2C]/20 border border-[#FF7A00]/30 rounded-xl shadow-[0_0_20px_rgba(255,122,0,0.15)]"
+                        transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10 uppercase tracking-wider">
+                      {link.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Menu Điều hướng Chính (Dùng Button/Link chuẩn) */}
-          <nav className="hidden md:flex items-center gap-1">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/home">Trang chủ</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dictation">Chính tả</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/shadowing">Bóng đổ</Link>
-            </Button>
-            {/* Thêm các link từ header đầu tiên và tối ưu hóa */}
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/review">Ôn tập</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/leaderboard">Bảng xếp hạng</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/classroom">Lớp học</Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/blog">Blog</Link>
-            </Button>
-          </nav>
+          {/* --- RIGHT: ACTIONS SECTION --- */}
+          <div className="flex items-center gap-3 sm:gap-5">
+            {/* A. Upgrade PRO Button */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden md:flex h-11 px-6 rounded-xl border-[#FF7A00]/50 bg-[#FF7A00]/10 text-[#FF7A00] font-black text-[10px] uppercase tracking-widest hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] hover:shadow-[0_0_20px_rgba(255,122,0,0.4)] transition-all duration-300 gap-2"
+                asChild
+              >
+                <Link href="/upgrade">
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 2,
+                      repeatDelay: 3,
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                  </motion.div>
+                  Upgrade_Pro
+                </Link>
+              </Button>
+            </motion.div>
 
-          {/* Nâng cấp và Hồ sơ Người dùng */}
-          <div className="flex items-center gap-3">
-            {/* Nút CTA Nâng cấp - Màu cam chủ đạo */}
-            <Button
-              className="rounded-full bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] 
-             pl-4 pr-5 py-2 text-sm font-semibold text-white 
-             shadow-xl shadow-orange-500/50 
-             hover:from-[#FF9E2C] hover:to-[#FF7A00] 
-             transition-all duration-300 transform hover:translate-y-[-1px]"
-              size="sm"
-              asChild
-            >
-              <Link href="/upgrade">
-                <Zap className="w-4 h-4 mr-1 fill-white text-white" />
-                Nâng cấp
-              </Link>
-            </Button>
+            {/* Theme Toggle Button */}
+            <ThemeToggle />
 
-            {/* Avatar Người dùng (Tối ưu hóa từ Header 1) */}
+            <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-white/10" />
+
+            {/* B. User Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  // Tăng cường hiệu ứng trigger: border cam, shadow, và hiệu ứng scale khi hover
-                  className="rounded-full h-10 w-10 p-0 overflow-hidden 
-                 border-2 border-transparent 
-                 shadow-md transition-all duration-300 
-                 hover:border-[#FF7A00] hover:shadow-lg hover:scale-[1.05]"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all outline-none group border border-transparent hover:border-gray-200 dark:hover:border-white/10"
                 >
-                  <div
-                    className="flex h-full w-full items-center justify-center 
-                      bg-gradient-to-br from-green-500 to-green-600 
-                      text-sm font-bold text-white shadow-inner"
-                  >
-                    H
+                  {/* --- 3. Avatar động (Đã fix Hydration) --- */}
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-white font-black text-xs shadow-lg relative overflow-hidden">
+                    {/* Chỉ render img khi client đã load (isMounted = true) */}
+                    {isMounted && user?.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={displayName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      // Server và Client render lần đầu sẽ giống nhau ở đây
+                      <span className="relative z-10">{firstLetter}</span>
+                    )}
+                    <div className="absolute inset-0 bg-[#FF7A00]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </Button>
+
+                  {/* --- 4. Tên hiển thị động --- */}
+                  <div className="hidden sm:block text-left">
+                    <p className="text-[12px] font-bold leading-none text-gray-700 dark:text-zinc-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors max-w-[100px] truncate">
+                      {displayName}
+                    </p>
+                    <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase tracking-widest">
+                      Online
+                    </p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-gray-500 dark:text-zinc-500 group-hover:text-gray-900 dark:group-hover:text-white group-data-[state=open]:rotate-180 transition-all duration-300" />
+                </motion.button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
-                className="w-60 p-1 rounded-xl shadow-2xl border border-gray-100/50 font-mono"
                 align="end"
+                className="w-72 p-3 rounded-[1.5rem] border border-gray-200 dark:border-white/10 bg-white dark:bg-[#09090b]/90 backdrop-blur-xl shadow-2xl shadow-gray-300/50 dark:shadow-black/50 font-mono mt-4 mr-2"
               >
-                <div className="p-2 pb-3 pt-2">
-                  <DropdownMenuLabel className="font-extrabold text-gray-800 text-base leading-snug">
-                    Hà Vi
-                  </DropdownMenuLabel>
-                  <DropdownMenuLabel className="text-xs font-normal text-gray-500 truncate mt-[-2px]">
-                    havi.student@demif.com
-                  </DropdownMenuLabel>
+                <DropdownMenuLabel className="p-0 mb-2">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5">
+                    {/* Avatar Lớn trong Menu (Cũng cần fix tương tự) */}
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20 overflow-hidden">
+                      {isMounted && user?.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={displayName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        firstLetter
+                      )}
+                    </div>
+
+                    <div className="overflow-hidden">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white uppercase truncate">
+                        {displayName}
+                      </p>
+                      <p
+                        className="text-[10px] text-gray-600 dark:text-zinc-400 font-medium truncate"
+                        title={displayEmail}
+                      >
+                        {displayEmail}
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+
+                <div className="space-y-1">
+                  {[
+                    {
+                      icon: User,
+                      label: "Tài khoản",
+                      href: "/profile/edit",
+                    },
+                    {
+                      icon: LayoutGrid,
+                      label: "Bảng quản lý",
+                      href: "/dashboard",
+                    },
+                    {
+                      icon: CreditCard,
+                      label: "Gói dịch vụ",
+                      href: "/upgrade",
+                    },
+                    {
+                      icon: Settings,
+                      label: "Cài đặt",
+                      href: "/profile/settings",
+                    },
+                  ].map((item) => (
+                    <DropdownMenuItem
+                      key={item.label}
+                      asChild
+                      className="rounded-xl cursor-pointer p-3 focus:bg-gray-100 dark:focus:bg-white/10 focus:text-gray-900 dark:focus:text-white text-gray-600 dark:text-zinc-400 transition-all duration-200 group border border-transparent focus:border-gray-200 dark:focus:border-white/5"
+                    >
+                      <Link
+                        href={item.href}
+                        className="flex items-center w-full"
+                      >
+                        <item.icon className="mr-3 h-4 w-4 text-gray-500 dark:text-zinc-500 group-focus:text-[#FF7A00] transition-colors" />
+                        <span className="font-bold text-[10px] uppercase tracking-wider">
+                          {item.label}
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
                 </div>
 
-                <DropdownMenuSeparator className="my-1" />
+                <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-white/10" />
 
-                {/* Mục 1: Hồ sơ (Profile) - Highlight màu cam */}
-                <Link href="/profile" passHref>
-                  <DropdownMenuItem
-                    className="cursor-pointer font-medium 
-                   focus:bg-orange-50 focus:text-[#FF7A00] 
-                   data-[highlighted]:bg-orange-50 data-[highlighted]:text-[#FF7A00] 
-                   transition-colors duration-150 rounded-lg p-2"
-                  >
-                    <User className="mr-3 h-4 w-4" />
-                    <span>Hồ sơ cá nhân</span>
-                  </DropdownMenuItem>
-                </Link>
-
-                {/* Mục khác (ví dụ: Cài đặt) */}
-                <Link href="/settings" passHref>
-                  <DropdownMenuItem
-                    className="cursor-pointer font-medium 
-                   focus:bg-gray-100 focus:text-gray-900
-                   data-[highlighted]:bg-gray-100 data-[highlighted]:text-gray-900 
-                   transition-colors duration-150 rounded-lg p-2"
-                  >
-                    <Settings className="mr-3 h-4 w-4 text-gray-500" />
-                    <span>Cài đặt</span>
-                  </DropdownMenuItem>
-                </Link>
-
-                <DropdownMenuSeparator className="my-1" />
-
-                {/* Mục cuối: Đăng xuất (Log Out) - Màu đỏ nổi bật */}
-                <Link href="/logout" passHref>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    className="cursor-pointer font-medium p-2 rounded-lg 
-                   focus:bg-red-50 focus:text-red-600 
-                   data-[highlighted]:bg-red-50 data-[highlighted]:text-red-600"
-                  >
-                    <LogOut className="mr-3 h-4 w-4" />
-                    <span>Đăng xuất</span>
-                  </DropdownMenuItem>
-                </Link>
+                {/* --- 5. Nút Logout --- */}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="rounded-xl cursor-pointer p-3 text-red-400 focus:bg-red-500/10 focus:text-red-400 focus:border-red-500/20 border border-transparent"
+                >
+                  <LogOut className="mr-3 h-4 w-4" />
+                  <span className="font-bold text-[10px] uppercase tracking-wider">
+                    Đăng xuất
+                  </span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {/* <MobileMenuToggle /> */}
+
+            {/* C. Mobile Burger Menu */}
+            <motion.div whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="xl:hidden rounded-xl bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-zinc-200 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </motion.div>
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

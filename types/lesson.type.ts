@@ -1,0 +1,371 @@
+// src/types/lesson.type.ts
+
+// Đây là file định nghĩa các interface liên quan đến bài học (Lesson) trong hệ thống.
+export interface LessonDto {
+  id: string;
+  title: string;
+  description: string;
+  lessonType: string;
+  level: string;
+
+  category: string | null;
+  audioUrl: string | null;
+  mediaUrl: string | null;
+  mediaType: string | null;
+
+  videoId: string | null;
+  embedUrl: string | null;
+
+  thumbnailUrl: string | null;
+
+  durationSeconds: number;
+  fullTranscript: string;
+  timedTranscript: string | null;
+  hasDictationTemplates: boolean;
+
+  isPremiumOnly: boolean;
+  displayOrder: number;
+  tags: string | null;
+  status: string;
+
+  completionsCount: number;
+  avgScore: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+// Tham số query cho API Get All
+export interface GetLessonsParams {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  search?: string;
+  type?: string;
+}
+
+export interface GetLessonsResponse {
+  items: LessonDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+// Các interface liên quan đến tạo và cập nhật bài học
+// ==========================================
+// Dùng cho POST /api/admin/lessons/quick-create
+// ==========================================
+export interface CreateLessonRequest {
+  title: string;
+  description: string;
+  transcript: string; // Chỉ có ở POST
+  format: string; // Chỉ có ở POST (ví dụ: "srt", "vtt", "plain")
+  mediaUrl: string;
+  mediaType: string;
+  durationSeconds: number; // Chỉ có ở POST
+  level: string; // Ví dụ: "Beginner"
+  lessonType: string; // Ví dụ: "Dictation"
+  category: string;
+  isPremiumOnly: boolean;
+  displayOrder: number;
+  tags?: string | null;
+  thumbnailUrl?: string | null;
+}
+
+// ==========================================
+// Dùng cho PUT /api/admin/lessons/{id}
+// ==========================================
+export interface UpdateLessonRequest {
+  title?: string;
+  description?: string;
+  lessonType?: string;
+  level?: string;
+  category?: string;
+  audioUrl?: string | null; // Chỉ có ở PUT
+  mediaUrl?: string | null;
+  mediaType?: string | null;
+  thumbnailUrl?: string | null;
+  isPremiumOnly?: boolean;
+  displayOrder?: number;
+  tags?: string | null;
+  fullTranscript?: string;
+}
+export interface DictationWord {
+  text: string;
+  isBlank: boolean;
+}
+
+export interface DictationSegmentPreview {
+  index: number;
+  startTime: number;
+  endTime: number;
+  text: string;
+  wordCount: number;
+  words?: DictationWord[];
+}
+// --- 3. Interface cho API preview bài tập điền từ (Dictation) ---
+export interface DictationPreviewResponse {
+  lessonId: string;
+  title: string;
+  status: string;
+  totalSegments: number;
+  totalWords: number;
+  readyToPublish: boolean;
+  publishBlockers: string[];
+  segments: DictationSegmentPreview[];
+}
+
+// --- 4. Các interface liên quan đến cập nhật trạng thái bài học ---
+export interface UpdateLessonStatusRequest {
+  status: string; // "draft" | "published" | "archived"
+}
+
+export interface UpdateLessonStatusResponse {
+  lessonId: string;
+  title: string;
+  previousStatus: string;
+  newStatus: string;
+  message: string;
+}
+
+// --- 5. Interface cho API cập nhật transcript ---
+export interface UpdateTranscriptRequest {
+  rawContent: string;
+  format: "plain" | "vtt" | "srt";
+}
+
+export interface UpdateTranscriptResponse {
+  lessonId: string;
+  segmentCount: number;
+  wordCount: number;
+  dictationTemplatesRegenerated: boolean;
+  message: string;
+}
+
+// --- 6. Interface cho API tạo bài học từ YouTube ---
+export interface CreateLessonFromYoutubeRequest {
+  youTubeUrl: string;
+  captionLanguage: string; // Ví dụ: "en", "vi"
+  lessonType: string; // "Dictation" | "Shadowing"
+  level: string; // "Beginner" | "Intermediate" | "Advanced"
+  category: string; // Ví dụ: "Music", "Movie", "TED"
+  isPremiumOnly: boolean; // true | false
+  displayOrder: number; // Thứ tự hiển thị
+  status: string; // "draft" | "published" | "archived"
+
+  // Các trường có thể để trống hoặc null
+  tags?: string | null;
+  titleOverride?: string | null;
+  descriptionOverride?: string | null;
+}
+export interface CreateLessonFromYoutubeResponse {
+  lessonId: string;
+  title: string;
+  youtubeId: string;
+  segmentCount: number;
+  message: string;
+}
+
+// --- 7. Interface cho API preview thông tin video YouTube trước khi tạo bài học ---
+export interface YoutubePreviewResponse {
+  videoId: string;
+  title: string;
+  description: string;
+  channelTitle: string;
+  durationSeconds: number;
+  thumbnailUrl: string;
+  embedUrl: string;
+  hasCaptions: boolean;
+  availableCaptionLanguages: string[];
+  suggestedCategory: string;
+}
+
+export interface GetYoutubeTranscriptParams {
+  url: string;
+  preferredLanguage?: string; // Mặc định 'en'
+  includeText?: boolean; // Mặc định true
+}
+
+export interface YoutubeTranscriptLine {
+  text: string;
+  start: number;
+  duration: number;
+}
+
+export interface YoutubeTranscriptResponse {
+  lines: YoutubeTranscriptLine[];
+  fullText: string;
+}
+
+export interface UpdateDictationTemplatesRequest {
+  dictationTemplatesJson: string;
+}
+
+// ============ USER API TYPES ============
+
+// GET /api/lessons (Public)
+export interface GetUserLessonsParams {
+  page?: number;
+  pageSize?: number;
+  level?: string; // "Beginner" | "Intermediate" | "Advanced" | "Expert"
+  type?: string; // "Dictation" | "Shadowing"
+  category?: string;
+  status?: string; // "published" | "draft" | "archived"
+}
+
+export interface GetUserLessonsResponse {
+  items: LessonDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+// Dictation Types
+export interface DictationWord {
+  text: string;
+  isBlank: boolean;
+  position: number;
+  answer?: string;
+  hint?: string;
+  length?: number;
+  punctuation?: string;
+}
+
+export interface DictationSegment {
+  startTime: number;
+  endTime: number;
+  originalText: string;
+  words: DictationWord[];
+}
+
+export interface DictationTemplate {
+  level: string;
+  blankPercentage: number;
+  segments: DictationSegment[];
+  totalBlanks: number;
+  totalWords: number;
+}
+
+export interface GetDictationExerciseResponse {
+  lessonId: string;
+  level: string;
+  template: DictationTemplate;
+}
+
+// Dictation Submit
+export interface DictationAnswer {
+  segmentIndex: number;
+  position: number;
+  userInput: string;
+}
+
+export interface SubmitDictationRequest {
+  level: string;
+  answers: DictationAnswer[];
+  timeSpentSeconds: number;
+}
+
+export interface DictationResult {
+  segmentIndex: number;
+  position: number;
+  isCorrect: boolean;
+  userInput: string;
+  correctAnswer?: string;
+}
+
+export interface SubmitDictationResponse {
+  score: number;
+  totalBlanks: number;
+  correctCount: number;
+  results: DictationResult[];
+  feedback?: string;
+}
+
+// Shadowing Types
+export interface TimedSegment {
+  startTime: number;
+  endTime: number;
+  text: string;
+}
+
+export interface LevelConfig {
+  showTranscriptBefore: boolean;
+  showTranscriptAfter: boolean;
+  maxReplays: number; // -1 = unlimited
+}
+
+export interface GetSegmentsResponse {
+  lessonId: string;
+  level: string;
+  segments: TimedSegment[];
+  levelConfig: LevelConfig;
+}
+
+// Segment Check
+// ==========================================
+// SHARED TYPES (Dùng chung cho cả 2 phần)
+// ==========================================
+export interface WordComparison {
+  word: string;
+  isCorrect: boolean;
+  expected?: string;
+}
+
+// ==========================================
+// SHADOWING: Check Segment (Gõ text thay thế Voice)
+// ==========================================
+export interface CheckShadowingSegmentRequest {
+  level: string;
+  userText: string;
+  timeSpentSeconds: number;
+}
+
+export interface CheckShadowingSegmentResponse {
+  segmentIndex: number;
+  transcript: string;
+  userText: string;
+  words: WordComparison[];
+  accuracy: number; // Điểm 0-100
+  feedback?: string;
+}
+
+// ==========================================
+// SHADOWING: Check Voice (Nhận diện giọng nói STT)
+// ==========================================
+export interface CheckVoiceRequest {
+  level: string;
+  spokenText: string;
+  speechConfidence: number;
+  timeSpentSeconds: number;
+}
+
+export interface CheckVoiceResponse {
+  isCorrect: boolean;
+  accuracyScore: number; // Điểm 0-100
+  originalText: string;
+  detectedWords: {
+    word: string;
+    isCorrect: boolean;
+    expected?: string;
+  }[];
+  feedback?: string;
+}
+
+// ==========================================
+// DICTATION: Check Segment (Chấm điểm từng câu Dictation)
+// ==========================================
+export interface CheckDictationSegmentRequest {
+  level: string;
+  userText: string; // Hoặc bạn có thể đổi thành mảng answers tùy BE yêu cầu
+  timeSpentSeconds: number;
+}
+
+export interface CheckDictationSegmentResponse {
+  segmentIndex: number;
+  transcript: string;
+  userText: string;
+  words: WordComparison[]; // Tái sử dụng interface WordComparison ở trên
+  accuracy: number;
+  feedback?: string;
+}

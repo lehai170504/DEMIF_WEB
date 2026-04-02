@@ -1,124 +1,81 @@
-// pages/admin/lessons/page.tsx
-
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { LessonHeader } from "@/components/admin/lesson/lesson-header";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, BookOpen, Plus } from "lucide-react";
-
-import DataTable from "@/components/admin/dashboard/data-table";
-import AddLessonDialog from "@/components/admin/lesson/AddLessonDialog";
-
-import { lessonsData } from "./admin-lessons-data";
-import { schema } from "@/components/admin/dashboard/table-columns";
-
-const allLessons = lessonsData.map((item) => {
-  try {
-    return schema.parse(item);
-  } catch (e) {
-    console.error("Lỗi xác thực dữ liệu Bài Học:", e);
-    return item as any;
-  }
-});
-
-type LessonStatus = "all" | "Published" | "Draft" | "Review";
-type LessonType = "all" | "Dictation" | "Shadowing" | "Test";
+  LessonFilterBar,
+  LessonStatus,
+} from "@/components/admin/lesson/lesson-filter-bar";
+import { LessonTableWrapper } from "@/components/admin/lesson/lesson-table-wrapper";
+import { useLessons } from "@/hooks/use-lesson";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function AdminLessonsPage() {
   const [activeStatus, setActiveStatus] = React.useState<LessonStatus>("all");
-  const [activeType, setActiveType] = React.useState<LessonType>("all");
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
 
-  const filteredLessons = allLessons.filter((lesson) => {
-    const statusMatch =
-      activeStatus === "all" || lesson.status === activeStatus;
-    const typeMatch = activeType === "all" || lesson.type === activeType;
-    const searchMatch = lesson.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    return statusMatch && typeMatch && searchMatch;
+  // Fetch dữ liệu dựa trên status (published, draft, archived)
+  const { data, isLoading, isError, refetch } = useLessons({
+    page,
+    pageSize,
+    status: activeStatus !== "all" ? activeStatus : undefined,
   });
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-primary" /> Quản Lý Bài Học
-        </h1>
-        <AddLessonDialog>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" /> Thêm Bài Mới
-          </Button>
-        </AddLessonDialog>
+  const lessons = data?.items || [];
+  const totalPages = data?.totalPages || 1;
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [activeStatus]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-500 font-mono animate-pulse">
+        <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+        <p className="text-sm font-medium">Đang đồng bộ dữ liệu bài học...</p>
       </div>
+    );
+  }
 
-      <Card className="p-4">
-        <div className="flex flex-col gap-3">
-          <div className="relative flex-1 max-w-lg">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm kiếm theo tiêu đề bài học..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+  if (isError) {
+    return (
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 font-mono">
+        <AlertCircle className="h-10 w-10 text-red-500" />
+        <p className="text-sm font-medium text-slate-600">
+          Lỗi truy xuất dữ liệu từ máy chủ.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => refetch()}
+          className="rounded-xl"
+        >
+          Thử lại
+        </Button>
+      </div>
+    );
+  }
 
-          <div className="flex flex-col md:flex-row gap-3 md:items-center">
-            <div className="flex gap-2 flex-wrap">
-              {["all", "Published", "Draft", "Review"].map((status) => {
-                const statusKey = status as LessonStatus;
-                const count =
-                  status === "all"
-                    ? allLessons.length
-                    : allLessons.filter((l) => l.status === statusKey).length;
-                return (
-                  <Button
-                    key={status}
-                    variant={activeStatus === statusKey ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setActiveStatus(statusKey)}
-                    className={
-                      activeStatus === statusKey ? "" : "hover:bg-muted/50"
-                    }
-                  >
-                    {status} ({count})
-                  </Button>
-                );
-              })}
-            </div>
-
-            <div className="ml-auto w-40">
-              <Select
-                value={activeType}
-                onValueChange={setActiveType as (value: LessonType) => void}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Loại Bài Tập" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả Loại bài</SelectItem>
-                  <SelectItem value="Dictation">Dictation</SelectItem>
-                  <SelectItem value="Shadowing">Shadowing</SelectItem>
-                  <SelectItem value="Test">Test</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <DataTable data={filteredLessons} />
+  return (
+    <div className="w-full space-y-8 pb-10 font-mono text-slate-900 bg-slate-50/50 min-h-screen">
+      <div className="relative z-10 space-y-8 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10">
+        <LessonHeader />
+        <LessonFilterBar
+          activeStatus={activeStatus}
+          onStatusChange={setActiveStatus}
+        />
+        <LessonTableWrapper
+          data={lessons}
+          pageIndex={page - 1}
+          pageSize={pageSize}
+          pageCount={totalPages}
+          onPaginationChange={(newPageIndex, newPageSize) => {
+            setPage(newPageIndex + 1);
+            setPageSize(newPageSize);
+          }}
+        />
+      </div>
     </div>
   );
 }
