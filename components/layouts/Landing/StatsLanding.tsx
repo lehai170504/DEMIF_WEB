@@ -43,7 +43,7 @@ const AnimatedCounter = ({
   return <motion.span ref={ref}>{displayValue}</motion.span>;
 };
 
-export function StatsLanding() {
+export default function StatsLanding() {
   const stats = [
     {
       value: 50,

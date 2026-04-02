@@ -1,9 +1,10 @@
-// src/app/(auth)/login/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Loader2,
   ArrowLeft,
@@ -14,288 +15,204 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthVisual } from "@/components/auth/auth-visual";
-
-// Hooks & Schemas
-import { useLogin, useGoogleOAuthLogin } from "@/hooks/use-auth"; // Dùng hook Google OAuth mới
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { useLogin, useGoogleOAuthLogin } from "@/hooks/use-auth";
 import { loginSchema, LoginFormValues } from "@/schemas/auth.schema";
 
-// Google OAuth
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-
-// Lấy Client ID từ biến môi trường
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
 export default function LoginPage() {
-  // 1. State quản lý form
-  const [formData, setFormData] = useState<LoginFormValues>({
-    email: "",
-    password: "",
-  });
-
-  const [errors, setErrors] = useState<Partial<LoginFormValues>>({});
   const [showPassword, setShowPassword] = useState(false);
 
-  // 2. Init Hooks
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onTouched",
+    defaultValues: { email: "", password: "" },
+  });
+
   const loginMutation = useLogin();
-  const googleLoginMutation = useGoogleOAuthLogin(); // Gọi hook Google OAuth
+  const googleLoginMutation = useGoogleOAuthLogin();
+  const isPending = loginMutation.isPending || googleLoginMutation.isPending;
 
-  // --- HÀM XỬ LÝ NHẬP LIỆU ---
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-
-    if (errors[id as keyof LoginFormValues]) {
-      setErrors((prev) => ({ ...prev, [id]: undefined }));
-    }
-  };
-
-  // --- HÀM XỬ LÝ LOGIN THƯỜNG ---
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate bằng Zod
-    const result = loginSchema.safeParse(formData);
-
-    if (!result.success) {
-      const fieldErrors: any = {};
-      result.error.errors.forEach((err) => {
-        if (!fieldErrors[err.path[0]]) {
-          fieldErrors[err.path[0]] = err.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    loginMutation.mutate(result.data);
+  const onFormSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data);
   };
 
   return (
-    // Bọc toàn bộ giao diện bằng GoogleOAuthProvider để khởi tạo SDK
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="flex flex-col lg:flex-row w-full min-h-screen gap-8 items-center justify-center p-4">
-        {/* CỘT TRÁI: FORM ĐĂNG NHẬP */}
+      <div className="flex flex-col lg:flex-row w-full font-mono min-h-screen gap-8 items-center justify-center p-4">
         <motion.div
-          initial={{ x: -20, opacity: 0 }}
+          initial={{ x: -30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="w-full lg:w-1/2 max-w-[500px] relative"
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full lg:w-1/2 max-w-[480px] relative"
         >
-          <Link
-            href="/"
-            className="absolute -top-12 left-0 flex items-center gap-2 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-all text-sm font-medium group"
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="absolute -top-14 left-0 group flex items-center gap-3 px-5 py-2.5 rounded-2xl transition-all duration-300 active:scale-95"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Quay lại trang chủ
-          </Link>
+            {/* Lớp nền Overlay: Tăng opacity và dùng màu trung tính đậm hơn */}
+            <div className="absolute inset-0 bg-zinc-200/50 dark:bg-zinc-800/40 opacity-0 group-hover:opacity-100 rounded-2xl blur-md transition-all duration-500 scale-90 group-hover:scale-100" />
 
-          <div className="bg-white dark:bg-[#0D0D0D]/60 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 md:p-10 shadow-2xl relative overflow-hidden">
-            {/* Hiệu ứng nền */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF7A00] to-purple-600 rounded-[32px] opacity-10 blur-sm pointer-events-none" />
+            <div className="relative flex items-center gap-2.5 z-10">
+              {/* Icon mũi tên: Tăng độ sáng màu Cam khi hover */}
+              <div className="relative flex items-center justify-center">
+                <ArrowLeft className="w-4 h-4 text-zinc-500 group-hover:text-[#FF7A00] transition-all duration-300 group-hover:-translate-x-1.5 group-hover:drop-shadow-[0_0_8px_rgba(255,122,0,0.8)]" />
+              </div>
+
+              {/* Text: Chuyển hẳn sang trắng/đen đậm để nổi bật trên nền */}
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-300">
+                Quay lại <span className="hidden sm:inline">trang chủ</span>
+              </span>
+            </div>
+
+            {/* Đường kẻ chân: Tăng độ dày lên 2px và dùng gradient rực hơn */}
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              whileHover={{ width: "80%", opacity: 1 }}
+              className="absolute bottom-2 left-5 h-[2px] bg-gradient-to-r from-[#FF7A00] via-[#FFD056] to-transparent shadow-[0_1px_4px_rgba(255,122,0,0.4)]"
+            />
+          </button>
+
+          <div className="bg-white dark:bg-[#0D0D0D]/80 backdrop-blur-3xl border border-gray-200 dark:border-white/5 rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF7A00] to-purple-600 rounded-[40px] opacity-10 blur-sm pointer-events-none" />
 
             <div className="relative z-10">
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <div className="text-center mb-10">
+                <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-3 tracking-tighter leading-none">
                   Chào mừng <span className="text-[#FF7A00]">trở lại</span>
                 </h1>
-                <p className="text-gray-600 dark:text-zinc-400 text-sm italic">
-                  Tiếp tục hành trình luyện nói tiếng Anh cùng AI
+                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em]">
+                  Hành trình chinh phục Tiếng Anh bắt đầu từ đây
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* --- INPUT EMAIL --- */}
-                <div className="space-y-2">
+              <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
+                <div className="space-y-1">
                   <div className="relative group">
                     <input
+                      {...register("email")}
                       type="email"
-                      id="email"
-                      value={formData.email}
-                      onChange={handleChange}
                       placeholder=" "
-                      className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-14 px-4 rounded-xl outline-none transition-all pt-3
-                        ${
-                          errors.email
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
-                        }`}
+                      className={`peer w-full bg-gray-50 dark:bg-zinc-900/50 border text-gray-900 dark:text-white h-16 px-5 rounded-2xl outline-none transition-all pt-4 ${errors.email ? "border-red-500" : "border-zinc-200 dark:border-white/5 focus:border-[#FF7A00]"}`}
                     />
-                    <label
-                      htmlFor="email"
-                      className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-all duration-200 pointer-events-none 
-                    peer-focus:top-3 peer-focus:text-[10px] peer-focus:uppercase peer-focus:tracking-wider
-                    peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:uppercase peer-[:not(:placeholder-shown)]:tracking-wider
-                    ${
-                      errors.email
-                        ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-                        : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
-                    }`}
-                    >
+                    <label className="absolute left-5 top-1/2 -translate-y-1/2 text-sm text-zinc-500 transition-all pointer-events-none peer-focus:top-4 peer-focus:text-[10px] peer-focus:uppercase peer-focus:font-black peer-focus:tracking-widest peer-[:not(:placeholder-shown)]:top-4 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:uppercase">
                       Địa chỉ Email
                     </label>
                     <Mail
-                      className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none transition-all
-                    ${errors.email ? "text-red-500 opacity-100" : "text-gray-400 dark:text-zinc-500 opacity-50 peer-focus:opacity-100 peer-focus:text-[#FF7A00]"}`}
+                      className={`absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 transition-all ${errors.email ? "text-red-500" : "text-zinc-400 opacity-40 peer-focus:opacity-100 peer-focus:text-[#FF7A00]"}`}
                     />
                   </div>
-                  {errors.email && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-red-400 ml-1 font-medium"
-                    >
-                      {errors.email}
-                    </motion.p>
-                  )}
+                  <AnimatePresence>
+                    {errors.email && (
+                      <motion.p
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="text-[10px] text-red-500 ml-2 font-bold uppercase tracking-wider"
+                      >
+                        {errors.email.message}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                {/* --- INPUT PASSWORD --- */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="relative group">
                     <input
+                      {...register("password")}
                       type={showPassword ? "text" : "password"}
-                      id="password"
-                      value={formData.password}
-                      onChange={handleChange}
                       placeholder=" "
-                      className={`peer w-full bg-gray-50 dark:bg-black/40 border text-gray-900 dark:text-white h-14 px-4 rounded-xl outline-none transition-all pt-3 pr-16
-                        ${
-                          errors.password
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-gray-200 dark:border-white/10 focus:border-[#FF7A00]/60"
-                        }`}
+                      className={`peer w-full bg-gray-50 dark:bg-zinc-900/50 border text-gray-900 dark:text-white h-16 px-5 rounded-2xl outline-none transition-all pt-4 pr-14 ${errors.password ? "border-red-500" : "border-zinc-200 dark:border-white/5 focus:border-[#FF7A00]"}`}
                     />
-                    <label
-                      htmlFor="password"
-                      className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-all duration-200 pointer-events-none 
-                    peer-focus:top-3 peer-focus:text-[10px] peer-focus:uppercase peer-focus:tracking-wider
-                    peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:uppercase peer-[:not(:placeholder-shown)]:tracking-wider
-                    ${
-                      errors.password
-                        ? "text-red-400 peer-focus:text-red-400 peer-[:not(:placeholder-shown)]:text-red-400"
-                        : "text-gray-500 dark:text-zinc-500 peer-focus:text-[#FF7A00] peer-[:not(:placeholder-shown)]:text-gray-500 dark:peer-[:not(:placeholder-shown)]:text-zinc-400"
-                    }`}
-                    >
+                    <label className="absolute left-5 top-1/2 -translate-y-1/2 text-sm text-zinc-500 transition-all pointer-events-none peer-focus:top-4 peer-focus:text-[10px] peer-focus:uppercase peer-focus:font-black peer-focus:tracking-widest peer-[:not(:placeholder-shown)]:top-4 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:uppercase">
                       Mật khẩu
                     </label>
-
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
                     >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-
-                  <div className="flex justify-between items-start">
-                    {errors.password ? (
-                      <motion.p
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xs text-red-400 ml-1 font-medium"
-                      >
-                        {errors.password}
-                      </motion.p>
-                    ) : (
-                      <div></div>
-                    )}
-
+                  <div className="flex justify-between items-center px-2">
+                    <AnimatePresence mode="wait">
+                      {errors.password && (
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-[10px] text-red-500 font-bold uppercase tracking-wider"
+                        >
+                          {errors.password.message}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
                     <Link
                       href="/forgot-password"
-                      className="text-xs font-bold text-[#FF7A00] hover:underline whitespace-nowrap mt-1"
+                      className="text-[10px] font-black text-[#FF7A00] hover:underline uppercase tracking-widest ml-auto"
                     >
                       Quên?
                     </Link>
                   </div>
                 </div>
 
-                {/* API Error Message */}
-                {loginMutation.isError && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2"
-                  >
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>
-                      {(loginMutation.error as any)?.response?.data?.detail ||
-                        (loginMutation.error as any)?.response?.data?.message ||
-                        "Đăng nhập thất bại, vui lòng kiểm tra lại thông tin."}
-                    </span>
-                  </motion.div>
-                )}
-
                 <Button
                   type="submit"
-                  disabled={
-                    loginMutation.isPending || googleLoginMutation.isPending
-                  }
-                  className="w-full h-12 bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:brightness-110 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                  disabled={isPending}
+                  className="w-full h-14 bg-[#FF7A00] hover:bg-[#FF9E2C] text-white font-black rounded-2xl shadow-xl transition-all active:scale-[0.97] disabled:opacity-50"
                 >
                   {loginMutation.isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                    <Loader2 className="animate-spin mx-auto" />
                   ) : (
-                    "Đăng nhập ngay"
+                    "ĐĂNG NHẬP NGAY"
                   )}
                 </Button>
               </form>
 
-              {/* Phần Footer */}
-              <div className="relative my-8 text-center">
-                <span className="bg-white dark:bg-[#0D0D0D] px-3 text-[10px] text-gray-500 dark:text-zinc-500 uppercase tracking-widest relative z-10">
-                  Hoặc đăng nhập bằng
-                </span>
-                <div className="absolute top-1/2 left-0 w-full border-t border-gray-200 dark:border-white/5"></div>
+              <div className="relative my-10">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-zinc-200 dark:border-white/5"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black">
+                  <span className="bg-white dark:bg-[#0D0D0D] px-4 text-zinc-500">
+                    Social Connect
+                  </span>
+                </div>
               </div>
 
-              {/* NÚT ĐĂNG NHẬP GOOGLE CHÍNH THỨC TỪ @react-oauth/google */}
               <div className="w-full mt-4">
-                {googleLoginMutation.isPending ? (
-                  <div className="w-full h-12 flex justify-center items-center bg-gray-100 dark:bg-[#0D0D0D] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#FF7A00]" />
-                  </div>
-                ) : (
-                  <div className="w-full relative group">
-                    {/* Hiệu ứng viền sáng nhẹ khi hover */}
-                    <div className="absolute -inset-[1px] bg-gradient-to-r from-gray-200 dark:from-white/10 to-gray-100 dark:to-white/5 rounded-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-                    {/* Container chứa nút Google */}
-                    <div className="w-full overflow-hidden rounded-[40px] shadow-lg transition-all duration-200 active:scale-[0.98] flex justify-center bg-white dark:bg-black/50 backdrop-blur-sm border border-gray-200 dark:border-white/5 group-hover:border-gray-300 dark:group-hover:border-white/20 [&>div]:w-full">
-                      <GoogleLogin
-                        onSuccess={(credentialResponse) => {
-                          if (credentialResponse.credential) {
-                            googleLoginMutation.mutate({
-                              idToken: credentialResponse.credential,
-                            });
-                          }
-                        }}
-                        onError={() => {
-                          console.error("Đăng nhập Google thất bại");
-                        }}
-                        theme="outline"
-                        size="large"
-                        shape="pill"
-                        text="continue_with"
-                      />
-                    </div>
-                  </div>
-                )}
+                <div className="relative flex justify-center w-full overflow-hidden rounded-[40px] border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 hover:border-[#FF7A00]/50 transition-all duration-300 [&>div]:w-full [&>div>iframe]:!w-full">
+                  <GoogleLogin
+                    onSuccess={(res) =>
+                      res.credential &&
+                      googleLoginMutation.mutate({ idToken: res.credential })
+                    }
+                    onError={() => console.error("Google Error")}
+                    theme="outline"
+                    size="large"
+                    shape="pill"
+                    width="100%"
+                  />
+                </div>
               </div>
 
-              <p className="mt-8 text-center text-gray-500 dark:text-zinc-500 text-sm">
+              <p className="mt-10 text-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
                 Mới biết đến Demif?{" "}
                 <Link
                   href="/signup"
-                  className="text-[#FF7A00] font-bold hover:text-[#FF9E2C] hover:underline transition-all"
+                  className="text-[#FF7A00] font-black hover:underline ml-1"
                 >
-                  Tạo tài khoản
+                  Đăng ký ngay
                 </Link>
               </p>
             </div>
           </div>
         </motion.div>
-
         <AuthVisual />
       </div>
     </GoogleOAuthProvider>

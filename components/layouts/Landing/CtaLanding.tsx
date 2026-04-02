@@ -5,7 +5,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export function CtaLanding() {
+export default function CtaLanding() {
   return (
     <section className="relative container mx-auto px-4 py-32 font-mono">
       {/* Background Glow phía sau thẻ CTA */}
