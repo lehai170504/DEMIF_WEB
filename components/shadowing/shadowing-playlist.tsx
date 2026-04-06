@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { CheckCircle2 } from "lucide-react";
 
 interface ShadowingPlaylistProps {
   segments: any[];
@@ -22,8 +23,10 @@ export function ShadowingPlaylist({
       </h3>
       <ol className="space-y-2">
         {segments.map((seg, i) => {
-          const acc =
+          const runTimeAcc =
             checkResults[i]?.accuracyScore ?? checkResults[i]?.accuracy;
+          const finalAcc = runTimeAcc ?? seg.bestScore;
+
           return (
             <li
               key={i}
@@ -33,22 +36,28 @@ export function ShadowingPlaylist({
                 i === currentIdx
                   ? "bg-blue-500/10 border-blue-500/30 text-gray-900 dark:text-white"
                   : "border-transparent hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400",
+                seg.isCompleted && i !== currentIdx && "opacity-75"
               )}
             >
-              <span className="shrink-0 w-5 h-5 rounded-full bg-blue-500/10 text-blue-500 text-[10px] flex items-center justify-center font-black">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-blue-500/10 text-blue-500 text-[10px] flex items-center justify-center font-black relative">
                 {i + 1}
+                {seg.isCompleted && (
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500 absolute -right-1 -bottom-1 bg-white dark:bg-[#18181b] rounded-full" />
+                )}
               </span>
               <span className="leading-relaxed line-clamp-2">{seg.text}</span>
-              {acc !== undefined && (
+              {finalAcc !== null && finalAcc !== undefined && (
                 <span
                   className={cn(
                     "ml-auto shrink-0 text-[10px] font-black px-2 py-1 rounded-md",
-                    acc >= 80
+                    finalAcc >= 80
                       ? "bg-emerald-500/10 text-emerald-500"
+                      : finalAcc >= 50
+                      ? "bg-orange-500/10 text-orange-500"
                       : "bg-rose-500/10 text-rose-500",
                   )}
                 >
-                  {acc.toFixed(0)}%
+                  {finalAcc.toFixed(0)}%
                 </span>
               )}
             </li>

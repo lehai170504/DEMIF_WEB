@@ -61,12 +61,12 @@ export const subscriptionService = {
   // 6. GET CURRENT USER'S SUBSCRIPTION
   getMySubscription: async (): Promise<UserSubscriptionDto | null> => {
     try {
-      const response = await axiosClient.get("/subscription-plans/my-subscription");
+      const response = await axiosClient.get("/me/subscription");
       // Response đã được bóc .data bởi interceptor
       return response as unknown as UserSubscriptionDto;
     } catch (error: any) {
-      // Nếu user chưa có subscription (404 hoặc 401), trả về null thay vì throw error
-      if (error?.response?.status === 404 || error?.response?.status === 401) {
+      // Nếu user chưa có subscription (404), trả về null thay vì throw error
+      if (error?.response?.status === 404) {
         return null;
       }
       
