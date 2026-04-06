@@ -18,30 +18,58 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-
-// ... (Giữ nguyên weeklyData và monthlyProgress)
-const weeklyData = [
-  { day: "T2", lessons: 3, accuracy: 75, minutes: 25 },
-  { day: "T3", lessons: 5, accuracy: 82, minutes: 40 },
-  { day: "T4", lessons: 2, accuracy: 68, minutes: 15 },
-  { day: "T5", lessons: 4, accuracy: 88, minutes: 35 },
-  { day: "T6", lessons: 6, accuracy: 91, minutes: 50 },
-  { day: "T7", lessons: 3, accuracy: 85, minutes: 28 },
-  { day: "CN", lessons: 4, accuracy: 89, minutes: 42 },
-];
-
-const monthlyProgress = [
-  { month: "JAN", completed: 45, accuracy: 78 },
-  { month: "FEB", completed: 52, accuracy: 81 },
-  { month: "MAR", completed: 48, accuracy: 79 },
-  { month: "APR", completed: 65, accuracy: 85 },
-  { month: "MAY", completed: 72, accuracy: 88 },
-  { month: "JUN", completed: 68, accuracy: 86 },
-];
+import { useState } from "react";
+import { format, parseISO } from "date-fns";
+import { useDailyPractice } from "@/hooks/use-stats";
+import { Loader2 } from "lucide-react";
 
 export function LearningAnalyticsChart() {
+  const [filterType, setFilterType] = useState<string>("ALL");
+  const { data: dailyStats, isLoading } = useDailyPractice(
+    30,
+    filterType === "ALL" ? undefined : filterType
+  );
+
+  // Parse weekly data (Last 7 days from the API data)
+  const chartData = dailyStats?.data || [];
+  const weeklyDataRaw = chartData.slice(-7);
+  const weeklyData = weeklyDataRaw.map((item) => ({
+    day: format(parseISO(item.date), "dd/MM"),
+    lessons: item.sessionsCount,
+    minutes: item.minutes,
+  }));
+
+  // Parse monthly data (All 30 days for Area chart)
+  const monthlyData = chartData.map((item) => ({
+    date: format(parseISO(item.date), "dd/MM"),
+    xpEarned: item.xpEarned,
+  }));
+
   return (
-    <div className="grid grid-cols-1 gap-6 font-mono">
+    <div className="grid grid-cols-1 gap-6 font-mono relative">
+      {/* Filter Toggle */}
+      <div className="absolute top-[-70px] right-2 z-20 flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
+        {["ALL", "Dictation", "Shadowing"].map((type) => (
+          <button
+            key={type}
+            onClick={() => setFilterType(type)}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              filterType === type
+                ? "bg-white dark:bg-zinc-800 text-orange-500 shadow-sm"
+                : "text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white"
+            }`}
+          >
+            {type === "ALL" ? "Tất cả" : type}
+          </button>
+        ))}
+      </div>
+
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-sm rounded-[2.5rem]">
+          <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
+        </div>
+      )}
+
       {/* 1. Biểu đồ Tuần - Bar Chart */}
       <Card className="p-8 border border-gray-200 dark:border-white/10 bg-white dark:bg-[#18181b] shadow-2xl rounded-[2.5rem] relative overflow-hidden">
         {/* Background Decor */}
@@ -142,10 +170,10 @@ export function LearningAnalyticsChart() {
             </div>
             <div>
               <h3 className="text-sm font-black uppercase tracking-tighter italic text-gray-900 dark:text-white">
-                ĐỘ CHÍNH XÁC
+                ĐIỂM KINH NGHIỆM (XP)
               </h3>
               <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
-                Phân tích hiệu suất theo tháng
+                Biểu đồ gia tăng XP trong 30 ngày
               </p>
             </div>
           </div>
@@ -153,19 +181,19 @@ export function LearningAnalyticsChart() {
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
-                data={monthlyProgress}
+                data={monthlyData}
                 margin={{ top: 0, right: 0, left: -25, bottom: 0 }}
               >
                 <defs>
                   <linearGradient
-                    id="colorAccuracy"
+                    id="colorXp"
                     x1="0"
                     y1="0"
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -175,14 +203,14 @@ export function LearningAnalyticsChart() {
                   className="dark:stroke-white/5"
                 />
                 <XAxis
-                  dataKey="month"
+                  dataKey="date"
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 10, fontWeight: "bold", fill: "#71717a" }}
                   className="dark:fill-zinc-600"
                   dy={10}
                 />
-                <YAxis hide domain={[0, 100]} />
+                <YAxis hide />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#ffffff",
@@ -195,20 +223,11 @@ export function LearningAnalyticsChart() {
                 />
                 <Area
                   type="monotone"
-                  dataKey="accuracy"
-                  stroke="#10b981"
+                  dataKey="xpEarned"
+                  stroke="#f97316"
                   strokeWidth={3}
                   fillOpacity={1}
-                  fill="url(#colorAccuracy)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="completed"
-                  stroke="#f97316"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  fill="none"
-                  opacity={0.5}
+                  fill="url(#colorXp)"
                 />
               </AreaChart>
             </ResponsiveContainer>

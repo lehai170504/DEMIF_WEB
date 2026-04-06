@@ -72,8 +72,11 @@ export default function ShadowingPracticePage({
   const segments = segmentsData?.segments ?? [];
   const levelConfig = segmentsData?.levelConfig;
   const currentSegment = segments[currentIdx] ?? null;
-  const progress =
-    segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
+  
+  // Mix: Dữ liệu backend trả về và local runtime progress
+  const serverProgress = segmentsData?.progressPercent ?? 0;
+  const localProgress = segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
+  const progress = Math.max(serverProgress, localProgress);
 
   // --- Check Speech API Support ---
   useEffect(() => {
