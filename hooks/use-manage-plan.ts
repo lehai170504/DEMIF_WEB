@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { subscriptionService } from "@/services/subscription.service";
 import { CreatePlanRequest } from "@/types/subscription.type";
 import { toast } from "sonner";
+import { extractErrorMessage } from "@/lib/error";
 
 export const useManagePlan = () => {
   const queryClient = useQueryClient();
@@ -16,7 +17,11 @@ export const useManagePlan = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-subscription-plans"] });
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Lỗi khi cập nhật gói.");
+      const message = extractErrorMessage(
+        error,
+        "Lỗi khi cập nhật gói dịch vụ.",
+      );
+      toast.error(message);
     },
   });
 
@@ -24,11 +29,15 @@ export const useManagePlan = () => {
   const deletePlanMutation = useMutation({
     mutationFn: (id: string) => subscriptionService.deletePlan(id),
     onSuccess: () => {
-      toast.success("Đã xóa gói dịch vụ.");
+      toast.success("Đã xóa gói dịch vụ thành công.");
       queryClient.invalidateQueries({ queryKey: ["admin-subscription-plans"] });
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Lỗi khi xóa gói.");
+      const message = extractErrorMessage(
+        error,
+        "Không thể xóa gói dịch vụ này.",
+      );
+      toast.error(message);
     },
   });
 

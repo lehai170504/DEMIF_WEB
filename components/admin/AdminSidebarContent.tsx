@@ -9,12 +9,12 @@ import {
   FileAudio,
   Bot,
   BarChart3,
-  ShoppingCart,
   LayoutDashboard,
   Activity,
   Loader2,
   CreditCard,
   Newspaper,
+  Users2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,7 +33,6 @@ const MENU_GROUPS = [
     items: [
       { href: "/admin/lessons", icon: BookOpen, label: "Bài tập" },
       { href: "/admin/blogs", icon: Newspaper, label: "Blog" },
-      { href: "/admin/audio", icon: FileAudio, label: "Audio" },
     ],
   },
   {
@@ -45,7 +44,11 @@ const MENU_GROUPS = [
         icon: CreditCard,
         label: "Gói dịch vụ",
       },
-      { href: "/admin/orders", icon: ShoppingCart, label: "Đơn hàng" },
+      {
+        href: "/admin/user-subscriptions",
+        icon: Users2,
+        label: "Người đăng ký",
+      },
       { href: "/admin/feedback", icon: Bot, label: "AI Feedback" },
       { href: "/admin/progress", icon: BarChart3, label: "Tiến độ" },
     ],

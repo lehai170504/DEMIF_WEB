@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { subscriptionService } from "@/services/subscription.service";
 import { CreatePlanRequest } from "@/types/subscription.type";
 import { toast } from "sonner";
+import { extractErrorMessage } from "@/lib/error";
 
 export const useCreatePlan = () => {
   const queryClient = useQueryClient();
@@ -11,13 +12,15 @@ export const useCreatePlan = () => {
     mutationFn: (data: CreatePlanRequest) =>
       subscriptionService.createPlan(data),
     onSuccess: () => {
-      toast.success("Tạo gói dịch vụ thành công!");
-      // Refresh list after creation
+      toast.success("Hệ thống đã khởi tạo gói dịch vụ thành công!");
       queryClient.invalidateQueries({ queryKey: ["admin-subscription-plans"] });
     },
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Lỗi khi tạo gói dịch vụ.";
-      toast.error(msg);
+      const message = extractErrorMessage(
+        error,
+        "Lỗi khi khởi tạo gói dịch vụ.",
+      );
+      toast.error(message);
     },
   });
 };

@@ -54,12 +54,7 @@ export default function AdminSubscriptionPage() {
             <CreatePlanDialog />
           </div>
 
-          <SubscriptionStats
-            totalPlans={data?.totalPlans || 0}
-            totalSubscribers={data?.totalSubscribers || 0}
-            activeSubscribers={data?.activeSubscribers || 0}
-            totalRevenue={data?.totalRevenue || 0}
-          />
+          <SubscriptionStats />
         </div>
 
         <PlanList plans={data?.plans || []} />

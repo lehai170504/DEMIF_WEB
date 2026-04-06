@@ -1,24 +1,23 @@
 // src/types/subscription.type.ts
 
-// Định nghĩa Subscription Plan từ database
 export interface SubscriptionPlanDto {
   id: string;
   name: string;
-  tier: string; // "Premium", "Free", etc.
-  price: number; // decimal từ DB
-  currency: string; // "VND"
-  billingCycle: string; // "Monthly", "Lifetime", "Yearly"
+  tier: string;
+  price: number;
+  currency: string;
+  billingCycle: string;
   durationDays: number | null;
-  features: string[]; // JSON array từ DB
-  limits?: string | null;
-  badgeText?: string | null;
-  badgeColor?: string | null;
-  isActive?: boolean; // Optional - BE có thể không trả về nếu đã filter
-  createdAt?: string; // timestamptz
-  updatedAt?: string | null;
+  features: string[];
+  badgeText: string | null;
+  badgeColor: string | null;
+  isActive: boolean;
+  totalSubscribers: number;
+  activeSubscribers: number;
+  createdAt: string;
+  updatedAt: string | null;
 }
 
-// Response từ GET /api/subscription-plans
 export interface GetPlansResponse {
   totalPlans: number;
   totalSubscribers: number;
@@ -27,6 +26,12 @@ export interface GetPlansResponse {
   plans: SubscriptionPlanDto[];
 }
 
+export interface SubscriptionStatsResponse {
+  totalPlans: number;
+  totalSubscribers: number;
+  activeSubscribers: number;
+  totalRevenue: number;
+}
 // User's active subscription
 export interface UserSubscriptionDto {
   id: string;
@@ -45,10 +50,10 @@ export interface UserSubscriptionDto {
 // Admin only - Payload gửi lên BE khi Tạo/Sửa
 export interface CreatePlanRequest {
   name: string;
-  tier: number; // Luôn gửi số
+  tier: string;
   price: number;
   currency: string;
-  billingCycle: number;
+  billingCycle: string;
   durationDays: number | null;
   features: string[];
   badgeText?: string;

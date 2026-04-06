@@ -1,4 +1,5 @@
 // Params truyền lên
+// 1. Params cho API (Theo Swagger hình ảnh c495c8)
 export interface GetUsersParams {
   Page?: number;
   PageSize?: number;
@@ -6,18 +7,19 @@ export interface GetUsersParams {
   Status?: string;
 }
 
-// Response trả về (Map theo JSON bạn gửi)
+// 2. Đối tượng User
 export interface UserDto {
   id: string;
   email: string;
   username: string;
   avatarUrl: string | null;
-  status: string; // "Active", "Banned", v.v.
+  status: "Active" | "Inactive" | "Banned" | string;
   roles: string[];
   createdAt: string;
   lastLoginAt: string | null;
 }
 
+// 3. Response trả về từ API
 export interface GetUsersResponse {
   users: UserDto[];
   totalCount: number;
@@ -25,7 +27,6 @@ export interface GetUsersResponse {
   pageSize: number;
   totalPages: number;
 }
-
 //=================================
 export interface RoleDto {
   roleId: string;

@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -13,19 +15,18 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   User,
-  MoreVertical,
   Mail,
   Search,
   Calendar,
   Clock,
   UserCheck,
   UserX,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { UserDto } from "@/types/user.type";
-import { UserDetailDrawer } from "./user-detail-drawer";
 
 // MAP Dịch thuật Trạng thái
 const STATUS_MAP: Record<string, string> = {
@@ -54,11 +55,11 @@ interface UserTableProps {
 }
 
 export function UserTable({ users }: UserTableProps) {
-  // --- LOGIC LỌC: CHỈ GIỮ LẠI NHỮNG NGƯỜI KHÔNG CÓ ROLE ADMIN ---
   const memberOnlyList = users.filter((user) => !user.roles?.includes("Admin"));
 
   return (
     <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm overflow-hidden relative font-mono transition-all">
+      {/* Table Header Section */}
       <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-orange-500 rounded-xl text-white shadow-md shadow-orange-500/20">
@@ -79,19 +80,19 @@ export function UserTable({ users }: UserTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
-              <TableHead className="px-8 py-4 text-xs font-semibold text-slate-500">
+              <TableHead className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Danh tính học viên
               </TableHead>
-              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500">
+              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Trạng thái
               </TableHead>
-              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 hidden sm:table-cell">
+              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 hidden sm:table-cell uppercase tracking-wider">
                 Ngày tham gia
               </TableHead>
-              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 hidden lg:table-cell">
+              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 hidden lg:table-cell uppercase tracking-wider">
                 Hoạt động cuối
               </TableHead>
-              <TableHead className="text-right px-8 py-4 text-xs font-semibold text-slate-500">
+              <TableHead className="text-right px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Thao tác
               </TableHead>
             </TableRow>
@@ -110,7 +111,7 @@ export function UserTable({ users }: UserTableProps) {
                   ? format(new Date(user.createdAt), "dd/MM/yyyy", {
                       locale: vi,
                     })
-                  : "N/A";
+                  : "Chưa ghi nhận";
                 const lastLogin = user.lastLoginAt
                   ? format(new Date(user.lastLoginAt), "HH:mm - dd/MM/yyyy", {
                       locale: vi,
@@ -122,6 +123,7 @@ export function UserTable({ users }: UserTableProps) {
                     key={user.id}
                     className="group hover:bg-slate-50/80 transition-colors border-b border-slate-100 last:border-none"
                   >
+                    {/* Cột 1: Thông tin User */}
                     <TableCell className="px-8 py-4">
                       <div className="flex items-center gap-4">
                         <Avatar className="h-10 w-10 rounded-xl border border-slate-200 shadow-sm transition-transform group-hover:scale-105">
@@ -136,18 +138,19 @@ export function UserTable({ users }: UserTableProps) {
                             {user.username?.[0]}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-900 group-hover:text-orange-600 transition-colors">
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-semibold text-slate-900 group-hover:text-orange-600 transition-colors truncate max-w-[200px]">
                             {user.username}
                           </span>
-                          <span className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
-                            <Mail className="h-3 w-3 text-slate-400" />{" "}
+                          <span className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5 truncate max-w-[200px]">
+                            <Mail className="h-3 w-3 text-slate-400" />
                             {user.email}
                           </span>
                         </div>
                       </div>
                     </TableCell>
 
+                    {/* Cột 2: Badge trạng thái */}
                     <TableCell className="text-center py-4">
                       <Badge
                         variant="outline"
@@ -161,11 +164,11 @@ export function UserTable({ users }: UserTableProps) {
                         ) : (
                           <UserX className="w-3 h-3" />
                         )}
-                        {/* Đã dịch trạng thái sang tiếng Việt */}
                         {translatedStatus}
                       </Badge>
                     </TableCell>
 
+                    {/* Cột 3: Ngày tham gia */}
                     <TableCell className="text-center py-4 hidden sm:table-cell">
                       <div className="flex items-center justify-center gap-2 text-slate-600 text-sm font-medium">
                         <Calendar className="w-4 h-4 text-slate-400" />
@@ -173,6 +176,7 @@ export function UserTable({ users }: UserTableProps) {
                       </div>
                     </TableCell>
 
+                    {/* Cột 4: Lịch sử đăng nhập */}
                     <TableCell className="text-center py-4 hidden lg:table-cell">
                       <div className="inline-flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
                         <Clock className="h-3.5 w-3.5 text-slate-400" />
@@ -182,16 +186,20 @@ export function UserTable({ users }: UserTableProps) {
                       </div>
                     </TableCell>
 
+                    {/* Cột 5: Nút chuyển trang chi tiết */}
                     <TableCell className="text-right px-8 py-4">
-                      <UserDetailDrawer userId={user.id}>
+                      <Link href={`/admin/users/${user.id}`}>
                         <Button
                           variant="ghost"
-                          size="icon"
-                          className="h-9 w-9 rounded-xl hover:bg-orange-50 hover:text-orange-600 text-slate-400 transition-colors"
+                          size="sm"
+                          className="h-9 px-3 rounded-xl border border-transparent hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 text-slate-400 transition-all group/btn"
                         >
-                          <MoreVertical className="h-5 w-5" />
+                          <span className="text-xs font-bold mr-1 hidden md:inline">
+                            Chi tiết
+                          </span>
+                          <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                         </Button>
-                      </UserDetailDrawer>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 );
