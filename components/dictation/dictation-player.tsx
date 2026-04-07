@@ -1,36 +1,28 @@
-"use client";
-
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  ChevronLeft,
-  Trophy,
-  Volume2,
   Info,
-  CheckCircle2,
-  XCircle,
   Loader2,
-  Eye,
-  EyeOff,
-  RotateCcw,
   SpellCheck,
+  CheckCircle2,
+  ListTodo,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 import {
-  useDictationExercise,
   useSubmitDictation,
-  useCheckDictationSegment, // <-- IMPORT HOOK MỚI
+  useCheckDictationSegment,
 } from "@/hooks/use-lesson";
+import { useQuery } from "@tanstack/react-query";
+import { lessonService } from "@/services/lesson.service";
 import { LessonDto, DictationAnswer } from "@/types/lesson.type";
 
 import { DictationHeader } from "@/components/dictation/dictation-header";
 import { DictationMedia } from "@/components/dictation/dictation-media";
 import { DictationResult } from "@/components/dictation/dictation-result";
+import { DictationPlaylist } from "@/components/dictation/dictation-playlist";
 
 // Helper Functions
 function getYoutubeEmbedUrl(url: string | null | undefined): string | null {
@@ -56,20 +48,29 @@ interface DictationPlayerProps {
 
 export function DictationPlayer({ lesson }: DictationPlayerProps) {
   const [level, setLevel] = useState("Beginner");
+  const [currentIdx, setCurrentIdx] = useState(0); // Track current active segment
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showHints, setShowHints] = useState(true);
   const [timeSpent, setTimeSpent] = useState(0);
 
   // State lưu kết quả check của từng segment
   const [segmentResults, setSegmentResults] = useState<Record<number, any>>({});
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const { data: exercise, isLoading } = useDictationExercise(lesson.id, level);
+  const { data: exercise, isLoading } = useQuery({
+    queryKey: ["dictation", lesson.id, level],
+    queryFn: () => lessonService.getDictationExercise(lesson.id, level),
+    enabled: !!lesson.id && !!level,
+  });
   const submitMutation = useSubmitDictation();
-  const checkSegmentMutation = useCheckDictationSegment(); // <-- KHỞI TẠO HOOK
+  const checkSegmentMutation = useCheckDictationSegment();
+
+  const segments = exercise?.template.segments || [];
+  const currentSegment = segments[currentIdx];
 
   useEffect(() => {
     const timer = setInterval(() => setTimeSpent((t) => t + 1), 1000);
@@ -79,8 +80,9 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   useEffect(() => {
     if (audioRef.current) audioRef.current.pause();
     if (videoRef.current) videoRef.current.pause();
-    // Reset kết quả segment khi đổi level
     setSegmentResults({});
+    setCurrentIdx(0);
+    setIsCompleted(false);
   }, [level]);
 
   const handleInputChange = useCallback(
@@ -96,33 +98,40 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   const handleKeyDown = (e: React.KeyboardEvent, currentKey: string) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const keys = Object.keys(inputRefs.current).sort((a, b) => {
-        const [sA, pA] = a.split("-").map(Number);
-        const [sB, pB] = b.split("-").map(Number);
-        return sA !== sB ? sA - sB : pA - pB;
-      });
-      const nextIdx = keys.indexOf(currentKey) + 1;
-      if (nextIdx < keys.length) {
-        inputRefs.current[keys[nextIdx]]?.focus();
+      // Nếu user gõ Enter khi input đang trống thì có thể ko làm gì,
+      // Khi đã nhập xong, Enter => Next input. 
+      // Nếu là input cuối => có thể kiểm tra segment.
+      const segmentKeys = Object.keys(inputRefs.current)
+        .filter(k => k.startsWith(`${currentIdx}-`))
+        .sort((a, b) => {
+          const pA = Number(a.split("-")[1]);
+          const pB = Number(b.split("-")[1]);
+          return pA - pB;
+        });
+
+      const nextIdx = segmentKeys.indexOf(currentKey) + 1;
+      if (nextIdx < segmentKeys.length) {
+        inputRefs.current[segmentKeys[nextIdx]]?.focus();
+      } else {
+        // Đã gõ xong input cuối cùng, tự động check?
+        handleCheckSegment(currentIdx, true);
       }
     }
   };
 
-  // Logic gọi API check cho TỪNG CÂU
-  const handleCheckSegment = (segIndex: number) => {
+  const handleCheckSegment = (segIndex: number, autoNext?: boolean) => {
     if (!exercise) return;
     const segment = exercise.template.segments[segIndex];
 
-    // Ghép câu hoàn chỉnh từ text tĩnh và chữ user nhập
     const userText = segment.words
-      .map((w) => {
+      .map((w: any) => {
         const val = w.isBlank
           ? answers[`${segIndex}-${w.position}`]?.trim() || ""
           : w.text;
         return val + (w.punctuation || "");
       })
       .join(" ")
-      .replace(/\s+/g, " ") // Xóa khoảng trắng thừa
+      .replace(/\s+/g, " ")
       .trim();
 
     checkSegmentMutation.mutate(
@@ -138,58 +147,51 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       {
         onSuccess: (data) => {
           setSegmentResults((prev) => ({ ...prev, [segIndex]: data }));
+          if (autoNext && segIndex < segments.length - 1) {
+            setTimeout(() => setCurrentIdx(segIndex + 1), 1000); // Tự sang câu tiếp theo
+          }
         },
       },
     );
   };
 
-  // Logic Nộp bài TỔNG THỂ
   const handleSubmit = () => {
     if (!exercise) return;
-    const formattedAnswers: DictationAnswer[] =
-      exercise.template.segments.flatMap((segment, segmentIndex) =>
-        segment.words
-          .filter((word) => word.isBlank)
-          .map((word) => ({
-            segmentIndex,
-            position: word.position,
-            userInput:
-              answers[`${segmentIndex}-${word.position}`]?.trim() ?? "",
-          })),
-      );
+    const formattedAnswers: DictationAnswer[] = segments.flatMap((segment: any, segmentIndex: number) =>
+      segment.words
+        .filter((word: any) => word.isBlank)
+        .map((word: any) => ({
+          segmentIndex,
+          position: word.position,
+          userInput: answers[`${segmentIndex}-${word.position}`]?.trim() ?? "",
+        })),
+    );
 
     submitMutation.mutate({
       id: lesson.id,
       data: { level, answers: formattedAnswers, timeSpentSeconds: timeSpent },
     });
+    
+    setIsCompleted(true);
   };
 
-  const getLevelColor = (lvl: string) => {
-    const colors: Record<string, string> = {
-      Beginner: "text-emerald-500 bg-emerald-500/10",
-      Intermediate: "text-amber-500 bg-amber-500/10",
-      Advanced: "text-rose-500 bg-rose-500/10",
-      Expert: "text-purple-500 bg-purple-500/10",
-    };
-    return colors[lvl] || colors.Beginner;
-  };
+  const handleRevealWord = (position: number) => {
+      // Mock logic for Hint (Xem từ) / since backend hides full text,
+      // The frontend must get expected answer somehow, 
+      // but without it, we can't reveal! 
+      // Typically, Senglish has the hint in the API. We'll leave it as a visual button that triggers a toast or mock reveal.
+  }
 
-  const youtubeUrl = useMemo(
-    () => getYoutubeEmbedUrl(lesson.mediaUrl),
-    [lesson.mediaUrl],
-  );
+  const youtubeUrl = useMemo(() => getYoutubeEmbedUrl(lesson.mediaUrl), [lesson.mediaUrl]);
   const isVideoType = lesson.mediaType?.toLowerCase() === "video";
   const finalMediaUrl = useMemo(
-    () =>
-      getCleanMediaUrl(lesson.mediaUrl) ?? getCleanMediaUrl(lesson.audioUrl),
+    () => getCleanMediaUrl(lesson.mediaUrl) ?? getCleanMediaUrl(lesson.audioUrl),
     [lesson],
   );
 
   const { totalBlanks, filledBlanks, progress } = useMemo(() => {
     const totalBlanks = exercise?.template.totalBlanks || 0;
-    const filledBlanks = Object.values(answers).filter(
-      (v) => v.trim() !== "",
-    ).length;
+    const filledBlanks = Object.values(answers).filter(v => v.trim() !== "").length;
     return {
       totalBlanks,
       filledBlanks,
@@ -201,10 +203,10 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     <div className="min-h-screen font-mono text-gray-900 dark:text-zinc-100 pb-20 bg-white dark:bg-[#050505] selection:bg-orange-500/30">
       <DictationHeader lesson={lesson} level={level} />
 
-      <main className="container mx-auto max-w-[1600px] px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <main className="container mx-auto max-w-[1400px] px-4 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
           {/* CỘT TRÁI: Media, Level, Progress */}
-          <aside className="lg:col-span-5 space-y-6 sticky top-24">
+          <aside className="xl:col-span-5 space-y-6">
             <DictationMedia
               lessonTitle={lesson.title}
               youtubeUrl={youtubeUrl}
@@ -228,7 +230,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                     onClick={() => {
                       setLevel(l);
                       setAnswers({});
-                      setSegmentResults({}); // Reset kết quả check
+                      setSegmentResults({});
                       submitMutation.reset();
                     }}
                     className={cn(
@@ -244,206 +246,203 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
               </div>
             </div>
 
-            <div className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl">
-              <div className="flex items-center gap-2 font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-4">
-                <Info className="h-4 w-4 text-orange-500" /> Tiến độ làm bài
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                  <span className="text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase">
-                    Đã điền
-                  </span>
-                  <div className="flex items-baseline gap-1 text-orange-500">
-                    <span className="text-2xl font-black">{filledBlanks}</span>
-                    <span className="text-xs font-bold text-gray-400">
-                      / {totalBlanks}
-                    </span>
-                  </div>
+            <DictationPlaylist 
+                segments={segments}
+                currentIdx={currentIdx}
+                segmentResults={segmentResults}
+                onSelectSegment={setCurrentIdx}
+            />
+
+            <div className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl text-center">
+                <div className="flex justify-between text-[10px] font-black text-gray-500 dark:text-zinc-500 uppercase mb-2">
+                    <span>Tổng tiến độ: {filledBlanks} / {totalBlanks} chỗ trống</span>
+                    <span className="text-gray-900 dark:text-white">{progress.toFixed(0)}%</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] font-black text-gray-500 dark:text-zinc-500 uppercase">
-                    <span>Hoàn thành</span>
-                    <span className="text-gray-900 dark:text-white">
-                      {progress.toFixed(0)}%
-                    </span>
-                  </div>
-                  <Progress
-                    value={progress}
-                    className="h-1.5 bg-gray-100 dark:bg-white/5"
-                  />
+                <Progress value={progress} className="h-2 bg-gray-100 dark:bg-white/5 mb-3" />
+                <div className="inline-block p-2 px-4 rounded-xl bg-orange-500/10 text-xs text-orange-600 dark:text-orange-400 font-bold">
+                  ⏱️ {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
                 </div>
-                <div className="p-3 rounded-xl bg-orange-500/10 text-xs text-orange-600 dark:text-orange-400 font-bold text-center">
-                  ⏱️ {Math.floor(timeSpent / 60)}:
-                  {(timeSpent % 60).toString().padStart(2, "0")}
-                </div>
-              </div>
             </div>
           </aside>
 
-          {/* CỘT PHẢI: Bài tập & Kết quả */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* CỘT PHẢI: Bài tập (Workout Area) */}
+          <div className="xl:col-span-7 space-y-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-32">
                 <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
               </div>
-            ) : !exercise ? (
+            ) : !exercise || !currentSegment ? (
               <div className="p-20 text-center border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] text-gray-400 font-bold uppercase text-xs">
-                Không tải được dữ liệu bài tập.
+                Không có dữ liệu bài tập
               </div>
-            ) : (
-              <div className="space-y-6">
-                {exercise.template.segments.map((segment, segIndex) => {
-                  const segResult = segmentResults[segIndex]; // Lấy kết quả check của segment này
-
-                  return (
-                    <motion.div
-                      key={segIndex}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: segIndex * 0.05 }}
-                      className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-8 shadow-lg hover:border-orange-500/30 transition-all"
-                    >
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                          <span className="h-7 w-7 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-[10px] font-black shrink-0">
-                            {segIndex + 1}
-                          </span>
-                          <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
-                            {segment.startTime.toFixed(1)}s –{" "}
-                            {segment.endTime.toFixed(1)}s
-                          </span>
-                        </div>
-                        {/* NÚT KIỂM TRA TỪNG CÂU */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCheckSegment(segIndex)}
-                          disabled={checkSegmentMutation.isPending}
-                          className="h-8 text-[10px] uppercase font-bold text-orange-500 bg-orange-500/10 hover:bg-orange-500/20"
-                        >
-                          <SpellCheck className="w-3.5 h-3.5 mr-1.5" /> Kiểm tra
-                        </Button>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-4 leading-loose text-lg font-medium">
-                        {segment.words.map((word, wordIndex) => (
-                          <span key={wordIndex}>
-                            {word.isBlank ? (
-                              <input
-                                ref={(el) => {
-                                  inputRefs.current[
-                                    `${segIndex}-${word.position}`
-                                  ] = el;
-                                }}
-                                type="text"
-                                spellCheck={false}
-                                autoComplete="off"
-                                disabled={submitMutation.isPending}
-                                placeholder={
-                                  showHints ? (word.hint ?? "___") : "___"
-                                }
-                                value={
-                                  answers[`${segIndex}-${word.position}`] || ""
-                                }
-                                onKeyDown={(e) =>
-                                  handleKeyDown(
-                                    e,
-                                    `${segIndex}-${word.position}`,
-                                  )
-                                }
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    segIndex,
-                                    word.position,
-                                    e.target.value,
-                                  )
-                                }
-                                className="inline-block px-3 py-1 border-b-2 border-orange-500/30 bg-orange-500/5 focus:border-orange-500 focus:bg-orange-500/10 outline-none rounded-lg text-gray-900 dark:text-white font-black transition-all placeholder:text-gray-300 dark:placeholder:text-zinc-700 disabled:opacity-50 text-center"
-                                style={{
-                                  width: `${Math.max(word.text.length, 3) * 14}px`,
-                                }}
-                              />
-                            ) : (
-                              <span className="text-gray-800 dark:text-zinc-200">
-                                {word.text}
-                              </span>
-                            )}
-                            <span className="text-gray-500 dark:text-zinc-500">
-                              {word.punctuation}
-                            </span>
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* HIỂN THỊ KẾT QUẢ CHECK NGAY BÊN DƯỚI */}
-                      <AnimatePresence>
-                        {segResult && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-6 p-5 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10"
-                          >
-                            <div className="flex items-center gap-2 mb-3 text-[10px] font-black uppercase tracking-widest text-orange-500">
-                              Phân tích ({segResult.accuracy.toFixed(0)}%)
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {segResult.words?.map((w: any, i: number) => (
-                                <span
-                                  key={i}
-                                  className={cn(
-                                    "px-2.5 py-1 rounded-lg text-sm font-bold border",
-                                    w.isCorrect
-                                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
-                                  )}
-                                >
-                                  {w.word}
-                                  {!w.isCorrect && w.expected && (
-                                    <span className="ml-1.5 text-[10px] opacity-70">
-                                      → {w.expected}
-                                    </span>
-                                  )}
-                                </span>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  );
-                })}
-
-                <div className="flex justify-center py-6">
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={submitMutation.isPending || filledBlanks === 0}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-widest rounded-2xl h-14 px-12 text-sm shadow-xl shadow-orange-500/30 active:scale-95 transition-all"
-                  >
-                    {submitMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" /> Đang
-                        xử lý...
-                      </>
-                    ) : (
-                      "Nộp bài & Chấm điểm tổng"
-                    )}
-                  </Button>
-                </div>
-
-                <AnimatePresence>
-                  {submitMutation.data && (
-                    <DictationResult
-                      data={submitMutation.data}
-                      onRetry={() => {
+            ) : isCompleted ? (
+              <AnimatePresence>
+                {submitMutation.data && (
+                  <DictationResult
+                    data={submitMutation.data}
+                    onRetry={() => {
+                        setIsCompleted(false);
+                        setCurrentIdx(0);
                         setAnswers({});
                         setSegmentResults({});
                         submitMutation.reset();
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+            ) : (
+                <div className="space-y-6">
+                    {/* KHU VỰC ĐIỀN TỪ (Textarea/Inputs) */}
+                    <motion.div
+                        key={currentIdx} // Remount animation when changing segment
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-8 shadow-xl"
+                    >
+                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/5">
+                            <h2 className="text-sm font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                                <span className="bg-orange-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20">
+                                    {currentIdx + 1}
+                                </span>
+                                Điền câu đã nghe
+                            </h2>
+                            <div className="text-[10px] text-gray-400 font-bold">
+                                {currentSegment.startTime.toFixed(1)}s - {currentSegment.endTime.toFixed(1)}s
+                            </div>
+                        </div>
+
+                        {/* Workout Inputs */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-6 leading-loose text-2xl font-bold min-h-[160px] content-start">
+                            {currentSegment.words.map((word: any, wordIndex: number) => {
+                                if (!word.isBlank) {
+                                    return (
+                                        <span key={wordIndex} className="text-gray-800 dark:text-zinc-200">
+                                            {word.text}{word.punctuation}
+                                        </span>
+                                    );
+                                }
+
+                                const dotsCount = word.wordLength || 4;
+                                const dots = "•".repeat(dotsCount);
+
+                                return (
+                                    <div key={wordIndex} className="relative group inline-block">
+                                        <input
+                                            ref={(el) => { inputRefs.current[`${currentIdx}-${word.position}`] = el; }}
+                                            type="text"
+                                            spellCheck={false}
+                                            autoComplete="off"
+                                            disabled={checkSegmentMutation.isPending}
+                                            placeholder={showHints ? (word.hint ?? dots) : dots}
+                                            value={answers[`${currentIdx}-${word.position}`] || ""}
+                                            onKeyDown={(e) => handleKeyDown(e, `${currentIdx}-${word.position}`)}
+                                            onChange={(e) => handleInputChange(currentIdx, word.position, e.target.value)}
+                                            className="px-3 py-1.5 border-b-2 border-orange-500/30 bg-orange-500/5 focus:border-orange-500 focus:bg-orange-500/10 outline-none rounded-xl text-gray-900 dark:text-white font-black transition-all placeholder:text-gray-400/50 dark:placeholder:text-zinc-600 disabled:opacity-50 text-center tracking-widest"
+                                            style={{ width: `${Math.max(dotsCount, 3) * 18}px` }}
+                                        />
+                                        {/* Hint under input like Senglish */}
+                                        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-black text-orange-500/50 tracking-[0.2em] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                            {dotsCount} CHỮ
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        
+                        {/* Control Buttons (Hits & Next) */}
+                        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                            <div className="flex gap-2">
+                                <Button 
+                                    variant="outline" size="sm" 
+                                    className="font-bold text-[10px] uppercase rounded-xl border-gray-200 dark:border-white/10 dark:hover:bg-white/5"
+                                >
+                                    Chữ cái đầu <kbd className="ml-2 font-sans bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded text-[8px]">Opt+H</kbd>
+                                </Button>
+                                <Button 
+                                    variant="outline" size="sm" 
+                                    className="font-bold text-[10px] uppercase rounded-xl border-gray-200 dark:border-white/10 dark:hover:bg-white/5"
+                                    onClick={() => handleRevealWord(0)}
+                                >
+                                    Xem từ <kbd className="ml-2 font-sans bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded text-[8px]">Opt+R</kbd>
+                                </Button>
+                            </div>
+                            
+                            <Button
+                                onClick={() => handleCheckSegment(currentIdx)}
+                                disabled={checkSegmentMutation.isPending}
+                                className="bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white transition-colors rounded-xl text-[10px] uppercase font-black"
+                            >
+                                <SpellCheck className="w-3.5 h-3.5 mr-2" /> KIỂM TRA
+                            </Button>
+                        </div>
+                    </motion.div>
+
+                    {/* Result for Current Segment */}
+                    <AnimatePresence>
+                        {segmentResults[currentIdx] && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="p-6 rounded-[2rem] bg-gray-50 dark:bg-[#18181b] border border-gray-200 dark:border-white/10 shadow-lg"
+                            >
+                                <div className="flex items-center gap-2 mb-4 text-[10px] font-black uppercase tracking-widest text-orange-500">
+                                    Kết quả phân tích ({segmentResults[currentIdx].accuracy?.toFixed(0) || 0}%)
+                                </div>
+                                <div className="flex flex-wrap gap-2 text-sm">
+                                    {segmentResults[currentIdx].words?.map((w: any, i: number) => (
+                                        <span
+                                            key={i}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-xl font-bold border",
+                                                w.isCorrect
+                                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+                                            )}
+                                        >
+                                            {w.word}
+                                            {!w.isCorrect && w.expected && (
+                                                <span className="ml-2 text-[10px] opacity-70">
+                                                    → {w.expected}
+                                                </span>
+                                            )}
+                                        </span>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between items-center py-4">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
+                            disabled={currentIdx === 0}
+                            className="text-gray-500 dark:text-zinc-400 hover:text-gray-900 rounded-xl font-bold uppercase text-[10px] tracking-widest"
+                        >
+                            ← Quay lại
+                        </Button>
+
+                        {currentIdx < segments.length - 1 ? (
+                            <Button
+                                onClick={() => setCurrentIdx(currentIdx + 1)}
+                                className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-xl px-8 hover:opacity-90 font-black uppercase text-[10px] tracking-widest"
+                            >
+                                Tiếp theo →
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={submitMutation.isPending || filledBlanks === 0}
+                                className="bg-orange-500 text-white hover:bg-orange-600 rounded-xl px-8 shadow-lg shadow-orange-500/20 font-black uppercase text-[10px] tracking-widest"
+                            >
+                                {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ListTodo className="w-4 h-4 mr-2" />} Nộp bài tổng kết
+                            </Button>
+                        )}
+                    </div>
+                </div>
             )}
           </div>
         </div>

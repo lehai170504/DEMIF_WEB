@@ -32,13 +32,18 @@ export function ShadowingRecorder({
   onRetry,
   speechSupported,
 }: ShadowingRecorderProps) {
-  // FIX: Lấy accuracyScore từ CheckVoiceResponse (Dự phòng lấy accuracy nếu BE chưa đổi tên)
-  const accuracy =
-    checkResult?.accuracyScore ?? (checkResult as any)?.accuracy ?? 0;
+  // Mặc định lấy accuracy từ CheckVoiceResponse
+  const accuracy = checkResult?.accuracy ?? (checkResult as any)?.accuracyScore ?? 0;
 
-  // FIX: Dự phòng trường hợp mảng từ BE trả về là detectedWords hoặc words
-  const wordsList =
-    checkResult?.detectedWords || (checkResult as any)?.words || [];
+  // Lấy danh sách từ trả về từ backend (WordResults hoặc words)
+  const rawWords = checkResult?.wordResults || (checkResult as any)?.words || [];
+  
+  // Chuẩn hóa lại format từ vì BE trả về 'status: "correct"' thay vì 'isCorrect: true'
+  const wordsList = rawWords.map((w: any) => ({
+    ...w,
+    isCorrect: w.isCorrect !== undefined ? w.isCorrect : w.status === "correct",
+    expected: w.expected || w.correctAnswer, // Dự phòng các case trả về expected
+  }));
 
   const getAccuracyColor = (val: number) => {
     if (val >= 80) return "text-emerald-500";

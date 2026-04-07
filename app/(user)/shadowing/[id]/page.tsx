@@ -4,6 +4,7 @@ import { use, useState, useRef, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 // Custom Hooks
 import {
@@ -111,29 +112,58 @@ export default function ShadowingPracticePage({
     if (maxReplays !== -1 && replayCount >= maxReplays) return;
 
     const media = mediaRef.current;
-    if (media && lesson?.mediaType !== "youtube") {
-      media.currentTime = currentSegment.startTime;
-      media.play().catch(() => {});
-      setIsPlaying(true);
-      setReplayCount((c) => c + 1);
+    if (!media) return;
 
-      const duration =
-        (currentSegment.endTime - currentSegment.startTime) * 1000 + 300;
-      if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
+    setIsPlaying(true);
+    setReplayCount((c) => c + 1);
+
+    const duration = (currentSegment.endTime - currentSegment.startTime) * 1000 + 300;
+    if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
+
+    if (lesson?.mediaType === "youtube") {
+      const iframe = media as any as HTMLIFrameElement;
+      if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "seekTo", args: [currentSegment.startTime, true] }), "*");
+        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+      }
+      
       stopTimerRef.current = setTimeout(() => {
-        media.pause();
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
+        }
         setIsPlaying(false);
       }, duration);
     } else {
-      setReplayCount((c) => c + 1);
+      const audioVideo = media as any as HTMLMediaElement;
+      audioVideo.currentTime = currentSegment.startTime;
+      audioVideo.play().catch((e) => {
+          console.error("Autoplay failed:", e);
+          toast.error("Không thể tự động phát, vui lòng ấn Play thủ công ở góc trái 1 lần để cấp quyền");
+      });
+      
+      stopTimerRef.current = setTimeout(() => {
+        audioVideo.pause();
+        setIsPlaying(false);
+      }, duration);
     }
   }, [currentSegment, levelConfig, lesson, replayCount]);
 
   const handleStopPlayback = useCallback(() => {
-    mediaRef.current?.pause();
+    const media = mediaRef.current;
+    if (media) {
+      if (lesson?.mediaType === "youtube") {
+        const iframe = media as any as HTMLIFrameElement;
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
+        }
+      } else {
+        const audioVideo = media as any as HTMLMediaElement;
+        audioVideo.pause();
+      }
+    }
     setIsPlaying(false);
     if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
-  }, []);
+  }, [lesson]);
 
   // --- LƯỒNG 1: CHECK BẰNG VOICE ---
   const handleRecord = useCallback(() => {
@@ -240,7 +270,7 @@ export default function ShadowingPracticePage({
   if (lessonLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#050505]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     );
   }
@@ -253,7 +283,7 @@ export default function ShadowingPracticePage({
         score={avgAccuracy}
         onRestart={handleRestart}
         details={[
-          { label: "Độ chính xác", value: avgAccuracy, color: "text-blue-500" },
+          { label: "Độ chính xác", value: avgAccuracy, color: "text-orange-500" },
           {
             label: "Câu đã nói",
             value: completedResults.length,
@@ -273,7 +303,7 @@ export default function ShadowingPracticePage({
     checkVoiceMutation.isPending || checkSegmentMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-blue-500/30">
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30">
       <ShadowingHeader
         title={lesson.title}
         current={currentIdx + 1}
@@ -307,7 +337,7 @@ export default function ShadowingPracticePage({
           <div className="xl:col-span-7 space-y-6">
             {segmentsLoading ? (
               <div className="flex items-center justify-center py-32">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
               </div>
             ) : segments.length === 0 ? (
               <div className="flex items-center justify-center py-32 text-gray-500 text-sm">

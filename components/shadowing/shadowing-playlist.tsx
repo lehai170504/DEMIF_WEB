@@ -34,12 +34,12 @@ export function ShadowingPlaylist({
               className={cn(
                 "flex gap-3 p-3 rounded-xl cursor-pointer text-sm transition-all border",
                 i === currentIdx
-                  ? "bg-blue-500/10 border-blue-500/30 text-gray-900 dark:text-white"
+                  ? "bg-orange-500/10 border-orange-500/30 text-gray-900 dark:text-white"
                   : "border-transparent hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400",
                 seg.isCompleted && i !== currentIdx && "opacity-75"
               )}
             >
-              <span className="shrink-0 w-5 h-5 rounded-full bg-blue-500/10 text-blue-500 text-[10px] flex items-center justify-center font-black relative">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-orange-500/10 text-orange-500 text-[10px] flex items-center justify-center font-black relative">
                 {i + 1}
                 {seg.isCompleted && (
                   <CheckCircle2 className="w-3 h-3 text-emerald-500 absolute -right-1 -bottom-1 bg-white dark:bg-[#18181b] rounded-full" />

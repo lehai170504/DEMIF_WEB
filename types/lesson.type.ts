@@ -358,13 +358,21 @@ export interface CheckVoiceRequest {
 }
 
 export interface CheckVoiceResponse {
-  isCorrect: boolean;
-  accuracyScore: number; // Điểm 0-100
-  originalText: string;
-  detectedWords: {
+  spokenText: string;
+  speechConfidence: number;
+  passThreshold: number;
+  isPassed: boolean;
+  segmentIndex: number;
+  accuracy: number; 
+  correctCount: number;
+  totalWords: number;
+  wrongCount: number;
+  skippedCount: number;
+  transcript: string;
+  wordResults: {
     word: string;
-    isCorrect: boolean;
-    expected?: string;
+    status: string;
+    userTyped: string | null;
   }[];
   feedback?: string;
 }
