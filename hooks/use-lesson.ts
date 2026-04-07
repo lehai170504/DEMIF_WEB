@@ -285,6 +285,24 @@ export const useUserLessons = (params: GetUserLessonsParams) => {
   });
 };
 
+// Lấy chi tiết bài học cho User
+export const useUserLessonDetail = (id: string) => {
+  return useQuery({
+    queryKey: ["user-lesson", id],
+    queryFn: () => lessonService.getUserLessonById(id),
+    enabled: !!id,
+  });
+};
+
+// Lấy danh sách câu cho Shadowing
+export const useSegments = (id: string, level: string) => {
+  return useQuery({
+    queryKey: ["segments", id, level],
+    queryFn: () => lessonService.getSegments(id, level),
+    enabled: !!id && !!level,
+  });
+};
+
 // Nộp toàn bộ bài tập Dictation
 export const useSubmitDictation = () => {
   const queryClient = useQueryClient();
@@ -402,7 +420,7 @@ export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
     mutationFn: (data: CheckVoiceRequest) =>
       lessonService.checkVoice(lessonId, segmentIndex, data),
     onSuccess: (result) => {
-      const accuracy = result.accuracyScore;
+      const accuracy = result.accuracy ?? 0;
       if (accuracy >= 90) {
         toast.success("Phát âm hoàn hảo", {
           description: `Độ chính xác đạt ${accuracy.toFixed(0)}%. Giọng bạn rất chuẩn!`,

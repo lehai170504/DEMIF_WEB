@@ -59,7 +59,7 @@ export function DictationVoiceCard({
         },
         {
           onSuccess: (data) => {
-            if (data.isCorrect) {
+            if (data.isPassed) {
               toast.success("Phát âm chính xác!");
               onSuccess?.();
             } else {
@@ -118,19 +118,19 @@ export function DictationVoiceCard({
         <div
           className={cn(
             "flex items-center gap-2 p-3 rounded-xl font-bold text-sm",
-            checkVoiceMutation.data.isCorrect
+            checkVoiceMutation.data.isPassed
               ? "bg-emerald-500/10 text-emerald-500"
               : "bg-red-500/10 text-red-500",
           )}
         >
-          {checkVoiceMutation.data.isCorrect ? (
+          {checkVoiceMutation.data.isPassed ? (
             <CheckCircle2 size={16} />
           ) : (
             <XCircle size={16} />
           )}
-          {checkVoiceMutation.data.isCorrect ? "Chính xác" : "Cố gắng hơn nữa"}
+          {checkVoiceMutation.data.isPassed ? "Chính xác" : "Cố gắng hơn nữa"}
           <span className="ml-auto">
-            Score: {checkVoiceMutation.data.accuracyScore}%
+            Score: {checkVoiceMutation.data.accuracy}%
           </span>
         </div>
       )}

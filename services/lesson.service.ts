@@ -219,7 +219,7 @@ export const lessonService = {
       `/lessons/${id}/segments/${segmentIndex}/check-voice`,
       data,
     );
-    return response.data;
+    return (response as any).data ?? response;
   },
 
   // POST /lessons/{id}/segments/{segmentIndex}/check - Dành riêng cho Dictation
