@@ -25,7 +25,10 @@ export function BillingSubscription() {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   const isPendingPayment = mySubscription?.status === "PendingPayment";
@@ -54,10 +57,10 @@ export function BillingSubscription() {
                     </Badge>
                   </div>
                   <h4 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
-                    {mySubscription.plan?.name || "Gói đăng ký"}
+                    {mySubscription.planName || "Gói đăng ký"}
                   </h4>
                   <p className="text-gray-600 dark:text-zinc-400 font-medium">
-                    Gia hạn tiếp theo:{" "}
+                     Ngày hết hạn:{" "}
                     <span className="text-gray-900 dark:text-white">
                       {formatDate(mySubscription.endDate)}
                     </span>
@@ -83,15 +86,7 @@ export function BillingSubscription() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 pt-8 border-t border-gray-200 dark:border-white/5">
-                {mySubscription.plan?.features?.map((feature, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-zinc-300"
-                  >
-                    <CheckCircle className="h-5 w-5 text-emerald-500 fill-emerald-500/10" />
-                    {feature}
-                  </div>
-                )) || [
+                {[
                   "Không giới hạn bài tập",
                   "Phân tích phát âm AI",
                   "Tải về bài học Offline",

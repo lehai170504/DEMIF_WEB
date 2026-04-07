@@ -22,6 +22,17 @@ import { BillingSubscription } from "@/components/profile/billing-subscription";
 
 export default function EditProfilePage() {
   const [activeTab, setActiveTab] = useState("account");
+  
+  // Lấy parameter `tab` từ URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (tabParam) {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
   const RedirectToPage = ({ href }: { href: string }) => {
     const router = useRouter();
     useEffect(() => {
