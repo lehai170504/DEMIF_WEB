@@ -34,7 +34,7 @@ export function PaymentToolbar({
   onDateToChange,
 }: PaymentToolbarProps) {
   return (
-    <div className="flex flex-col xl:flex-row gap-4 bg-white/80 dark:bg-zinc-900/80 p-5 rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-sm backdrop-blur-xl z-20 sticky top-4">
+    <div className="flex flex-col xl:flex-row gap-4 bg-white dark:bg-zinc-900 p-5 rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-sm z-20 relative">
       {/* Search Box */}
       <div className="relative flex-[2]">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -94,10 +94,6 @@ export function PaymentToolbar({
             </SelectItem>
           </SelectContent>
         </Select>
-
-        <Button className="h-12 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
-          Xuất CSV
-        </Button>
       </div>
     </div>
   );

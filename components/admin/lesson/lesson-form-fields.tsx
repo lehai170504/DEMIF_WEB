@@ -19,12 +19,16 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
-import {
-  LESSON_TYPES,
-  LESSON_LEVELS, // Đảm bảo hằng số này đã được cập nhật 4 mức độ
-} from "./lesson.constants";
+import { LESSON_TYPES } from "./lesson.constants";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles, FileText, Settings2 } from "lucide-react";
+import {
+  Loader2,
+  Sparkles,
+  FileText,
+  Settings2,
+  FolderTree,
+  Database,
+} from "lucide-react";
 import { useRegenerateTemplates } from "@/hooks/use-lesson";
 import { useParams } from "next/navigation";
 import { TranscriptImportDialog } from "./transcript-import-dialog";
@@ -46,8 +50,8 @@ export function LessonFormFields({
     <div className="space-y-12">
       {/* SECTION 1: CƠ BẢN */}
       <div className="space-y-6">
-        <h4 className="text-sm font-bold text-orange-600 border-b border-orange-100 pb-2 flex items-center gap-2">
-          <Settings2 className="w-4 h-4" /> 1. Thông tin hiển thị
+        <h4 className="text-[10px] font-black text-orange-600 dark:text-orange-500 border-b border-orange-100 dark:border-orange-500/20 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
+          <Settings2 className="w-4 h-4" /> 1. Định danh hiển thị
         </h4>
 
         <FormField
@@ -55,87 +59,74 @@ export function LessonFormFields({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-semibold text-slate-600">
-                Tiêu đề bài học *
+              <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Tiêu đề bài học <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
                 <Input
-                  className="bg-white border-slate-200 shadow-sm h-12 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 font-medium"
+                  className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-14 rounded-2xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 dark:text-white font-bold text-base shadow-inner transition-all"
+                  placeholder="Nhập tiêu đề..."
                   {...field}
                   value={field.value ?? ""}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px] uppercase font-bold" />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="lessonType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Loại bài học *
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Loại bài học <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={String(field.value ?? "Dictation")}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900 focus:ring-orange-500">
+                    <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-orange-500">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-xl">
+                  <SelectContent className="rounded-xl font-bold">
                     {LESSON_TYPES.map((t) => (
                       <SelectItem
                         key={t.value}
                         value={t.value}
-                        className="focus:bg-orange-50"
+                        className="text-xs uppercase tracking-wider"
                       >
                         {t.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
           />
 
-          {/* TRƯỜNG TRÌNH ĐỘ - ĐÃ CẬP NHẬT 4 MỨC ĐỘ */}
           <FormField
             control={form.control}
-            name="level"
+            name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Trình độ *
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Danh mục phân loại <span className="text-red-500">*</span>
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value || "Beginner"}
-                >
-                  <FormControl>
-                    <SelectTrigger className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900 focus:ring-orange-500">
-                      <SelectValue placeholder="Chọn trình độ" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-xl">
-                    {LESSON_LEVELS.map((l) => (
-                      <SelectItem
-                        key={l.value}
-                        value={l.value}
-                        className="focus:bg-orange-50"
-                      >
-                        {l.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
+                <FormControl>
+                  <Input
+                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 dark:text-white font-bold text-sm shadow-inner transition-all"
+                    placeholder="Ví dụ: Giao tiếp, IT..."
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
           />
@@ -146,70 +137,48 @@ export function LessonFormFields({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-semibold text-slate-600">
-                Mô tả bài học *
+              <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Mô tả khái quát
               </FormLabel>
               <FormControl>
                 <Textarea
-                  className="bg-white border-slate-200 shadow-sm min-h-[100px] rounded-xl resize-none text-slate-700 leading-relaxed focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 min-h-[100px] rounded-2xl resize-none text-slate-700 dark:text-slate-300 font-medium leading-relaxed focus:border-orange-500 focus:ring-1 focus:ring-orange-500 shadow-inner p-4"
+                  placeholder="Mô tả nội dung bài học..."
                   {...field}
                   value={field.value ?? ""}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px] uppercase font-bold" />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Danh mục *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-white border-slate-200 shadow-sm h-11 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900"
-                    placeholder="Ví dụ: Giao tiếp, Kinh doanh..."
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Thẻ phân loại (Tags)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-white border-slate-200 shadow-sm h-11 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900"
-                    placeholder="travel, daily..."
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Từ khóa (Tags)
+              </FormLabel>
+              <FormControl>
+                <Input
+                  className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 dark:text-white font-bold text-sm shadow-inner transition-all"
+                  placeholder="Cách nhau bởi dấu phẩy (travel, daily...)"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px] uppercase font-bold" />
+            </FormItem>
+          )}
+        />
       </div>
 
-      {/* CÁC PHẦN CÒN LẠI GIỮ NGUYÊN ... */}
       {/* SECTION 2: TÀI NGUYÊN (MEDIA) */}
       <div className="space-y-6">
-        <h4 className="text-sm font-bold text-blue-600 border-b border-blue-100 pb-2">
-          2. Tài nguyên đa phương tiện
+        <h4 className="text-[10px] font-black text-blue-600 dark:text-blue-500 border-b border-blue-100 dark:border-blue-500/20 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
+          <FolderTree className="w-4 h-4" /> 2. Nguồn dữ liệu (Media)
         </h4>
 
         {isEditMode && (
@@ -218,40 +187,41 @@ export function LessonFormFields({
             name="audioUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Đường dẫn Audio (Có thể bỏ trống nếu dùng Video)
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Đường dẫn Audio (Ghi đè Video)
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-blue-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <div className="grid grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="mediaUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Đường dẫn Media chính (Video/Audio) *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-blue-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-blue-600 dark:text-blue-400 font-bold text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-inner"
                     placeholder="https://..."
                     {...field}
                     value={field.value ?? ""}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-[10px] uppercase font-bold" />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="mediaUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Media Source URL <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-blue-600 dark:text-blue-400 font-bold text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-inner"
+                    placeholder="https://youtube.com/..."
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
           />
@@ -261,85 +231,97 @@ export function LessonFormFields({
             name="mediaType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Loại Media *
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Định dạng <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value ?? "audio"}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900 focus:ring-blue-500">
+                    <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-blue-500">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-xl">
-                    <SelectItem value="audio">Audio (Podcast/MP3)</SelectItem>
-                    <SelectItem value="video">Video (YouTube/MP4)</SelectItem>
+                  <SelectContent className="rounded-xl font-bold">
+                    <SelectItem
+                      value="audio"
+                      className="text-xs uppercase tracking-wider"
+                    >
+                      Audio / Podcast
+                    </SelectItem>
+                    <SelectItem
+                      value="video"
+                      className="text-xs uppercase tracking-wider"
+                    >
+                      Video / YouTube
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
           />
         </div>
 
-        {!isEditMode && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
-            name="durationSeconds"
+            name="thumbnailUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Thời lượng dự kiến (Giây) *
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Ảnh bìa (Thumbnail URL)
                 </FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900"
+                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-inner"
+                    placeholder="https://..."
                     {...field}
-                    value={field.value ?? 0}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? 0 : Number(e.target.value),
-                      )
-                    }
+                    value={field.value ?? ""}
                   />
                 </FormControl>
-                <FormDescription className="text-[10px]">
-                  Cần thiết để AI tính toán cắt file âm thanh.
-                </FormDescription>
-                <FormMessage />
+                <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
           />
-        )}
 
-        <FormField
-          control={form.control}
-          name="thumbnailUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-semibold text-slate-600">
-                Ảnh bìa (Thumbnail URL)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          {!isEditMode && (
+            <FormField
+              control={form.control}
+              name="durationSeconds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    Thời lượng dự kiến (Giây){" "}
+                    <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold text-sm focus:border-blue-500 shadow-inner"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        // Ép lỗi: Nếu không nhập hoặc nhập <= 0 thì set là 1
+                        field.onChange(isNaN(val) || val <= 0 ? 1 : val);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-[10px] uppercase font-bold" />
+                </FormItem>
+              )}
+            />
           )}
-        />
+        </div>
       </div>
 
       {/* SECTION 3: TRANSCRIPT */}
       <div className="space-y-6">
-        <h4 className="text-sm font-bold text-purple-600 border-b border-purple-100 pb-2 flex items-center gap-2">
-          <FileText className="w-4 h-4" /> 3. Nội dung Phụ đề (Transcript)
+        <h4 className="text-[10px] font-black text-purple-600 dark:text-purple-400 border-b border-purple-100 dark:border-purple-500/20 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
+          <FileText className="w-4 h-4" /> 3. Dữ liệu văn bản (Transcript)
         </h4>
 
         {!isEditMode && (
@@ -349,27 +331,40 @@ export function LessonFormFields({
               name="format"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold text-slate-600">
-                    Định dạng văn bản *
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    Cấu trúc văn bản <span className="text-red-500">*</span>
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value ?? "srt"}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900 focus:ring-purple-500">
+                      <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-purple-500">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="srt">SRT (Khuyên dùng)</SelectItem>
-                      <SelectItem value="vtt">VTT</SelectItem>
-                      <SelectItem value="plain">
-                        Văn bản thuần (Plain Text)
+                    <SelectContent className="rounded-xl font-bold">
+                      <SelectItem
+                        value="srt"
+                        className="text-xs uppercase tracking-wider"
+                      >
+                        SRT (Khuyên dùng)
+                      </SelectItem>
+                      <SelectItem
+                        value="vtt"
+                        className="text-xs uppercase tracking-wider"
+                      >
+                        VTT
+                      </SelectItem>
+                      <SelectItem
+                        value="plain"
+                        className="text-xs uppercase tracking-wider"
+                      >
+                        Plain Text (Văn bản thuần)
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] uppercase font-bold" />
                 </FormItem>
               )}
             />
@@ -378,22 +373,23 @@ export function LessonFormFields({
               name="transcript"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold text-slate-600">
-                    Nội dung Phụ đề *
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    Dữ liệu thô (Raw Content){" "}
+                    <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="bg-slate-50 border-slate-200 shadow-inner min-h-[250px] rounded-xl font-mono text-sm text-slate-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="bg-slate-900 dark:bg-black border-slate-800 shadow-inner min-h-[300px] rounded-2xl font-mono text-[11px] text-emerald-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 p-6 leading-relaxed custom-scrollbar"
                       placeholder="Dán nội dung .srt, .vtt hoặc văn bản vào đây..."
                       {...field}
                       value={field.value ?? ""}
                     />
                   </FormControl>
-                  <FormDescription className="text-[10px]">
-                    Hệ thống AI sẽ tự động phân tích đoạn văn này để tạo ra bài
-                    tập Dictation.
+                  <FormDescription className="text-[10px] font-bold text-slate-400 mt-2">
+                    <Sparkles className="w-3 h-3 inline mr-1 text-purple-500" />
+                    Hệ thống AI sẽ phân tích và đồng bộ hóa timestamps tự động.
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] uppercase font-bold" />
                 </FormItem>
               )}
             />
@@ -406,25 +402,26 @@ export function LessonFormFields({
             name="fullTranscript"
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center justify-between mb-1">
-                  <FormLabel className="text-xs font-semibold text-slate-600">
-                    Văn bản gốc (Full Transcript) *
+                <div className="flex items-center justify-between mb-3">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    Văn bản gốc (Full Transcript){" "}
+                    <span className="text-red-500">*</span>
                   </FormLabel>
                   <div className="flex items-center gap-2">
                     {lessonId && <TranscriptImportDialog lessonId={lessonId} />}
                     {lessonId && (
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => regenerateMutation.mutate(lessonId)}
                         disabled={regenerateMutation.isPending || !field.value}
-                        className="h-8 text-xs font-semibold text-purple-600 hover:text-purple-700 hover:bg-purple-50 gap-1.5 border border-purple-100 rounded-lg"
+                        className="h-9 px-4 text-[10px] uppercase tracking-widest font-black text-purple-600 dark:text-purple-400 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-500/10 border-purple-200 dark:border-purple-500/20 rounded-xl"
                       >
                         {regenerateMutation.isPending ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2 className="h-3 w-3 animate-spin mr-2" />
                         ) : (
-                          <Sparkles className="h-3 w-3" />
+                          <Sparkles className="h-3 w-3 mr-2" />
                         )}
                         Đồng bộ Templates
                       </Button>
@@ -434,16 +431,16 @@ export function LessonFormFields({
 
                 <FormControl>
                   <Textarea
-                    className="bg-slate-50 border-slate-200 shadow-inner min-h-[250px] rounded-xl font-mono text-sm text-slate-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    className="bg-slate-900 dark:bg-black border-slate-800 shadow-inner min-h-[300px] rounded-2xl font-mono text-[11px] text-emerald-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 p-6 leading-relaxed custom-scrollbar"
                     {...field}
                     value={field.value ?? ""}
                   />
                 </FormControl>
-                <FormDescription className="text-[10px]">
-                  Chú ý: Nếu bạn thay đổi nội dung này, hệ thống
-                  DictationTemplates của bài học sẽ được tự động tạo lại.
+                <FormDescription className="text-[10px] font-bold text-slate-400 mt-2">
+                  Chú ý: Sửa đổi nội dung này sẽ kích hoạt cơ chế đục lỗ lại từ
+                  đầu.
                 </FormDescription>
-                <FormMessage />
+                <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
           />
@@ -452,61 +449,62 @@ export function LessonFormFields({
 
       {/* SECTION 4: HỆ THỐNG */}
       <div className="space-y-6">
-        <h4 className="text-sm font-bold text-slate-500 border-b border-slate-200 pb-2">
-          4. Cài đặt hệ thống
+        <h4 className="text-[10px] font-black text-slate-400 border-b border-slate-200 dark:border-white/10 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
+          <Database className="w-4 h-4" /> 4. Phân quyền truy cập
         </h4>
-        <div className="grid grid-cols-2 gap-6">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="displayOrder"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-semibold text-slate-600">
-                  Thứ tự hiển thị
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Thứ tự sắp xếp
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    className="bg-white border-slate-200 shadow-sm h-11 rounded-lg text-slate-900"
+                    min={0}
+                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold text-sm shadow-inner"
                     {...field}
                     value={field.value ?? 0}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? 0 : Number(e.target.value),
-                      )
-                    }
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      // Nếu nhập số âm thì tự động đưa về 0
+                      field.onChange(isNaN(val) || val < 0 ? 0 : val);
+                    }}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-[10px] uppercase font-bold" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="isPremiumOnly"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-orange-200 dark:border-orange-500/20 bg-orange-50/50 dark:bg-orange-500/5 p-5 shadow-sm mt-1 sm:mt-6">
+                <div className="space-y-1">
+                  <FormLabel className="text-[11px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-500">
+                    Bật khóa Premium
+                  </FormLabel>
+                  <FormDescription className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                    Yêu cầu trả phí để xem bài này
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-orange-500 scale-110"
+                  />
+                </FormControl>
               </FormItem>
             )}
           />
         </div>
-
-        <FormField
-          control={form.control}
-          name="isPremiumOnly"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="space-y-0.5">
-                <FormLabel className="text-sm font-bold text-slate-900">
-                  Gói nội dung Premium
-                </FormLabel>
-                <FormDescription className="text-xs text-slate-500">
-                  Bật để chỉ cho phép thành viên đã nâng cấp truy cập bài học
-                  này.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={!!field.value}
-                  onCheckedChange={field.onChange}
-                  className="data-[state=checked]:bg-orange-500"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
       </div>
     </div>
   );

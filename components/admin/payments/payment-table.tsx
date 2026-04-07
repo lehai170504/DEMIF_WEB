@@ -149,7 +149,7 @@ export function PaymentTable({ items, isFetching }: PaymentTableProps) {
               <div className="col-span-2 flex items-center justify-end gap-3">
                 <span
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-widest border shadow-sm",
                     statusUi.bg,
                     statusUi.color,
                     statusUi.border,

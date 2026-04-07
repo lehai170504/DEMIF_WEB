@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence, Variants } from "framer-motion"; // THÊM Variants
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -211,9 +211,6 @@ export default function LessonDetailPage() {
               {lesson.status}
             </Badge>
           </div>
-          <p className="text-xs text-slate-500 font-medium bg-slate-100 w-fit px-3 py-1.5 rounded-lg ml-[3.25rem]">
-            <span className="font-mono">ID: {lessonId}</span>
-          </p>
         </div>
 
         <div className="flex items-center gap-3">

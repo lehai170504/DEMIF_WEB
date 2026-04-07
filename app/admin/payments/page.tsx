@@ -51,9 +51,13 @@ export default function AdminPaymentsPage() {
           <div className="flex items-center gap-2 text-emerald-600 mb-2 font-semibold">
             <Receipt className="h-4 w-4" /> TÀI CHÍNH HỆ THỐNG
           </div>
-          <h1 className="text-3xl md:text-4xl font-black">
+          <h1 className="text-3xl md:text-4xl font-mono font-bold">
             Quản lý <span className="text-slate-400">Giao dịch</span>
           </h1>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 max-w-xl">
+            Theo dõi và đối soát dòng tiền, lịch sử thanh toán các gói Premium
+            trên toàn hệ thống.
+          </p>
         </div>
 
         <PaymentToolbar

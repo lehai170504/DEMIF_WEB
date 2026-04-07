@@ -13,6 +13,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { IconChevronDown, IconLayoutColumns } from "@tabler/icons-react";
+import { Inbox } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -98,15 +99,15 @@ export function LessonTableWrapper({
   return (
     <div className="w-full flex flex-col gap-6 font-mono">
       {/* Toolbar: Chỉ giữ lại bộ lọc cột hiển thị */}
-      <div className="flex items-center justify-end px-1">
+      <div className="flex items-center justify-end px-1 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl h-10 shadow-sm font-bold"
+              className="bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl h-11 shadow-sm font-bold transition-all active:scale-95"
             >
-              <IconLayoutColumns className="mr-2 h-4 w-4" />
-              <span className="uppercase text-[10px] tracking-widest">
+              <IconLayoutColumns className="mr-2 h-4 w-4 text-orange-500" />
+              <span className="uppercase text-[10px] tracking-widest font-black">
                 Cấu hình cột
               </span>
               <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -114,7 +115,7 @@ export function LessonTableWrapper({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56 bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 shadow-xl rounded-2xl p-2"
+            className="w-56 bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 shadow-2xl rounded-2xl p-2"
           >
             {table
               .getAllColumns()
@@ -126,7 +127,7 @@ export function LessonTableWrapper({
               .map((column) => (
                 <DropdownMenuCheckboxItem
                   key={column.id}
-                  className="capitalize focus:bg-slate-100 dark:focus:bg-white/5 cursor-pointer rounded-lg font-bold text-[10px] uppercase tracking-wider"
+                  className="capitalize focus:bg-slate-100 dark:focus:bg-white/5 cursor-pointer rounded-xl font-black text-[10px] uppercase tracking-widest py-2.5"
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
@@ -142,9 +143,9 @@ export function LessonTableWrapper({
       </div>
 
       {/* Bảng dữ liệu chính */}
-      <div className="overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 shadow-sm">
+      <div className="overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 shadow-sm animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
         <Table>
-          <TableHeader className="bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-white/5">
+          <TableHeader className="bg-slate-50/80 dark:bg-zinc-900/80 border-b border-slate-100 dark:border-white/5 backdrop-blur-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
@@ -171,7 +172,7 @@ export function LessonTableWrapper({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="group hover:bg-slate-50/50 dark:hover:bg-white/[0.02] border-b border-slate-100 dark:border-white/5 last:border-none transition-colors"
+                  className="group hover:bg-slate-50/80 dark:hover:bg-white/[0.02] border-b border-slate-100 dark:border-white/5 last:border-none transition-colors duration-300"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="px-6 py-4">
@@ -189,10 +190,13 @@ export function LessonTableWrapper({
               <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-60 text-center"
+                  className="h-72 text-center"
                 >
-                  <div className="flex flex-col items-center justify-center gap-2 opacity-50">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+                  <div className="flex flex-col items-center justify-center gap-3 opacity-60">
+                    <div className="p-4 bg-slate-100 dark:bg-zinc-800 rounded-full">
+                      <Inbox className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-2">
                       Hệ thống trống
                     </p>
                     <p className="text-xs font-bold text-slate-400">
@@ -207,7 +211,7 @@ export function LessonTableWrapper({
       </div>
 
       {/* Pagination */}
-      <div className="px-2">
+      <div className="px-2 animate-in fade-in duration-700 delay-300">
         <TablePagination table={table} />
       </div>
     </div>
