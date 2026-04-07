@@ -13,37 +13,36 @@ import {
 
 export const authService = {
   login: async (payload: any): Promise<LoginResponse> => {
-    return await axiosClient.post("/Auth/login", payload);
+    return await axiosClient.post("/auth/login", payload);
   },
 
   getProfile: async (): Promise<UserProfile> => {
-    return await axiosClient.get("/Profile/me");
+    return await axiosClient.get("/profile/me");
   },
 
   logout: async (refreshToken: string) => {
-    return await axiosClient.post("/Auth/logout", { refreshToken });
+    return await axiosClient.post("/auth/logout", { refreshToken });
   },
 
   updateProfile: async (
     payload: UpdateProfilePayload,
   ): Promise<UserProfile> => {
-    return await axiosClient.put("/Profile/me", payload);
+    return await axiosClient.put("/profile/me", payload);
   },
 
   changePassword: async (payload: ChangePasswordPayload) => {
-    return await axiosClient.post("/Profile/change-password", payload);
+    return await axiosClient.post("/profile/change-password", payload);
   },
 
   register: async (payload: RegisterPayload): Promise<RegisterResponse> => {
-    return await axiosClient.post("/Auth/register", payload);
+    return await axiosClient.post("/auth/register", payload);
   },
 
-  // THÊM MỚI HÀM VERIFY EMAIL
   verifyEmail: async (token: string): Promise<VerifyEmailResponse> => {
-    return await axiosClient.get("/Auth/verify-email", { params: { token } });
+    return await axiosClient.get("/auth/verify-email", { params: { token } });
   },
 
   googleLogin: async (payload: GoogleLoginPayload): Promise<LoginResponse> => {
-    return await axiosClient.post("/Auth/google-login", payload);
+    return await axiosClient.post("/auth/google-login", payload);
   },
 };

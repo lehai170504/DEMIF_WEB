@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, BookOpen, Users, ShoppingCart } from "lucide-react";
+import { Plus, BookOpen, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,11 +49,11 @@ export function QuickCreate() {
         </CreateLessonDialog>
 
         <DropdownMenuItem
-          onClick={() => router.push("/admin/orders")}
+          onClick={() => router.push("/admin/user-subscriptions")}
           className="cursor-pointer hover:bg-gray-50 focus:bg-emerald-50 focus:text-emerald-600 rounded-lg py-2.5"
         >
-          <ShoppingCart className="mr-2 h-4 w-4 text-emerald-500" />
-          <span className="font-bold">Xem đơn hàng</span>
+          <Users className="mr-2 h-4 w-4 text-emerald-500" />
+          <span className="font-bold">Xem đăng ký</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

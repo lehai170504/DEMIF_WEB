@@ -2,7 +2,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
-const REFRESH_TOKEN_URL = "/api/Auth/refresh-token";
+const REFRESH_TOKEN_URL = "/api/auth/refresh-token";
 
 const axiosClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -148,7 +148,7 @@ export const publicAxiosClient = axios.create({
 // Public client chỉ rút gọn response, không có auth logic
 publicAxiosClient.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 export default axiosClient;

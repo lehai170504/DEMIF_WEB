@@ -7,16 +7,15 @@ import { motion, AnimatePresence } from "framer-motion";
 // Components
 import { AuthVisual } from "@/components/auth/auth-visual";
 import { RegisterForm } from "@/components/auth/register-form";
-import { VerifyOtpForm } from "@/components/auth/verify-otp-form";
+import { CheckMailStep } from "@/components/auth/check-mail-step"; // Import component mới vào
 
 export default function SignupPage() {
-  // Quản lý trạng thái: Step 1 (Register) -> Step 2 (Verify OTP)
   const [step, setStep] = useState<1 | 2>(1);
   const [registeredEmail, setRegisteredEmail] = useState("");
 
   const handleRegistrationSuccess = (email: string) => {
     setRegisteredEmail(email);
-    setStep(2);
+    setStep(2); // Chuyển sang màn hình thông báo Check Mail
   };
 
   const handleBackToRegister = () => {
@@ -32,27 +31,23 @@ export default function SignupPage() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="w-full lg:w-1/2 max-w-[520px] relative"
       >
-        {/* Nút quay lại trang chủ - Đồng bộ style với Login */}
+        {/* Nút quay lại trang chủ */}
         <button
           onClick={() => (window.location.href = "/")}
           className="absolute -top-14 left-0 group flex items-center gap-3 px-5 py-2.5 rounded-2xl transition-all duration-300 active:scale-95"
         >
-          {/* Lớp nền Overlay: Tăng opacity và dùng màu trung tính đậm hơn */}
           <div className="absolute inset-0 bg-zinc-200/50 dark:bg-zinc-800/40 opacity-0 group-hover:opacity-100 rounded-2xl blur-md transition-all duration-500 scale-90 group-hover:scale-100" />
 
           <div className="relative flex items-center gap-2.5 z-10">
-            {/* Icon mũi tên: Tăng độ sáng màu Cam khi hover */}
             <div className="relative flex items-center justify-center">
               <ArrowLeft className="w-4 h-4 text-zinc-500 group-hover:text-[#FF7A00] transition-all duration-300 group-hover:-translate-x-1.5 group-hover:drop-shadow-[0_0_8px_rgba(255,122,0,0.8)]" />
             </div>
 
-            {/* Text: Chuyển hẳn sang trắng/đen đậm để nổi bật trên nền */}
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-300">
               Quay lại <span className="hidden sm:inline">trang chủ</span>
             </span>
           </div>
 
-          {/* Đường kẻ chân: Tăng độ dày lên 2px và dùng gradient rực hơn */}
           <motion.div
             initial={{ width: 0, opacity: 0 }}
             whileHover={{ width: "80%", opacity: 1 }}
@@ -60,12 +55,10 @@ export default function SignupPage() {
           />
         </button>
 
-        {/* Khung Card Wrapper: Tối ưu Cinematic Glow */}
+        {/* Khung Card Wrapper */}
         <div className="bg-white dark:bg-[#0D0D0D]/80 backdrop-blur-3xl border border-gray-200 dark:border-white/5 rounded-[40px] p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden min-h-[600px] flex flex-col justify-center transition-all duration-500">
-          {/* Hiệu ứng viền phát sáng Gradient chạy ngầm */}
           <div className="absolute -inset-0.5 bg-gradient-to-br from-[#FF7A00]/20 via-purple-600/10 to-transparent rounded-[40px] opacity-30 blur-sm pointer-events-none" />
 
-          {/* CHUYỂN CẢNH MƯỢT MÀ GIỮA REGISTER VÀ OTP */}
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div
@@ -80,7 +73,7 @@ export default function SignupPage() {
                   <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-3 tracking-tighter leading-none">
                     Tạo <span className="text-[#FF7A00]">tài khoản</span>
                   </h1>
-                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
+                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em]">
                     Bắt đầu hành trình cùng AI Mentor
                   </p>
                 </div>
@@ -88,19 +81,11 @@ export default function SignupPage() {
                 <RegisterForm onSuccess={handleRegistrationSuccess} />
               </motion.div>
             ) : (
-              <motion.div
-                key="otp-step"
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -20, opacity: 0 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="relative z-10 w-full"
-              >
-                <VerifyOtpForm
-                  email={registeredEmail}
-                  onBack={handleBackToRegister}
-                />
-              </motion.div>
+              <CheckMailStep
+                key="check-mail-step"
+                email={registeredEmail}
+                onBack={handleBackToRegister}
+              />
             )}
           </AnimatePresence>
         </div>

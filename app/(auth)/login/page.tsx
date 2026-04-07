@@ -180,13 +180,13 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black">
                   <span className="bg-white dark:bg-[#0D0D0D] px-4 text-zinc-500">
-                    Social Connect
+                    Hoặc
                   </span>
                 </div>
               </div>
 
               <div className="w-full mt-4">
-                <div className="relative flex justify-center w-full overflow-hidden rounded-[40px] border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 hover:border-[#FF7A00]/50 transition-all duration-300 [&>div]:w-full [&>div>iframe]:!w-full">
+                <div className="relative flex justify-center w-full transition-all duration-300 hover:opacity-90">
                   <GoogleLogin
                     onSuccess={(res) =>
                       res.credential &&
@@ -197,6 +197,8 @@ export default function LoginPage() {
                     size="large"
                     shape="pill"
                     width="100%"
+                    useOneTap={false}
+                    auto_select={false}
                   />
                 </div>
               </div>

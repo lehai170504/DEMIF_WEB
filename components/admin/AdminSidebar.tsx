@@ -1,23 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import AdminSidebarContent from "./AdminSidebarContent";
 
 export default function AdminSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
   return (
     <aside
       className={cn(
-        "hidden md:flex h-screen flex-col fixed left-0 top-0 z-50 transition-all duration-500 ease-in-out",
-        "bg-white/80 backdrop-blur-2xl border-r border-gray-200 shadow-[20px_0_50px_rgba(0,0,0,0.03)]",
-        isCollapsed ? "w-[78px]" : "w-72",
+        "hidden md:flex flex-col fixed left-4 top-4 bottom-4 z-50 transition-all duration-500 ease-in-out",
+        "bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl border border-slate-200 dark:border-white/5 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden",
+        "w-[280px]" 
       )}
-      onMouseEnter={() => setIsCollapsed(false)}
-      onMouseLeave={() => setIsCollapsed(true)}
     >
-      <AdminSidebarContent isCollapsed={isCollapsed} />
+
+      <AdminSidebarContent isCollapsed={false} />
     </aside>
   );
 }

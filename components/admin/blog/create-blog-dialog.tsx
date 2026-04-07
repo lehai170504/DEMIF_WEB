@@ -100,9 +100,9 @@ export function CreateBlogDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="h-12 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 px-8 text-[11px] flex items-center transition-all active:scale-95 border-b-4 border-orange-700">
+        <Button className="h-12 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 px-8 text-[11px] flex items-center transition-all active:scale-95 border-b-4 border-orange-700">
           <Plus className="w-4 h-4 mr-2 stroke-[3px]" /> Viết bài mới
-        </button>
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[850px] bg-white rounded-[2.5rem] font-mono p-0 overflow-hidden border-none shadow-2xl">
