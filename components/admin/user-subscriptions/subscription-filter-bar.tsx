@@ -41,7 +41,7 @@ export function SubscriptionFilterBar({
         </h1>
 
         {/* Mô tả */}
-        <p className="text-slate-500 text-sm font-medium max-w-lg mt-2">
+        <p className="2">
           Quản lý tài khoản và các gói dịch vụ đã đăng ký trên hệ thống.
         </p>
       </div>

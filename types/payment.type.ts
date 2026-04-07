@@ -55,3 +55,50 @@ export interface CancelPaymentResponse {
   success: boolean;
   message: string;
 }
+
+// Dành cho admin
+export interface PaymentDto {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  status: "Pending" | "Completed" | "Failed" | "Refunded" | string;
+  paymentReference: string;
+  transactionId: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface PagedPaymentResult {
+  items: PaymentDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface GetPaymentsParams {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface PaymentDetailDto extends PaymentDto {
+  planId: string;
+  subscriptionId: string;
+  bankCode: string | null;
+  bankTransactionNo: string | null;
+  gatewayResponse: string | null;
+  note: string | null;
+}
+
+export interface RefundPaymentRequest {
+  reason: string;
+}

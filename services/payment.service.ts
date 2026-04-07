@@ -6,6 +6,10 @@ import {
   SubscribePlanRequest,
   SubscribePlanResponse,
   PaymentHistoryResponse,
+  GetPaymentsParams,
+  PagedPaymentResult,
+  RefundPaymentRequest,
+  PaymentDetailDto,
 } from "@/types/payment.type";
 
 const getAuthHeaders = () => {
@@ -17,13 +21,19 @@ export const paymentService = {
   subscribePlan: async (
     payload: SubscribePlanRequest,
   ): Promise<SubscribePlanResponse> => {
-    const response = await axiosClient.post("/subscription-plans/subscribe", payload, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axiosClient.post(
+      "/subscription-plans/subscribe",
+      payload,
+      {
+        headers: getAuthHeaders(),
+      },
+    );
     return response as unknown as SubscribePlanResponse;
   },
 
-  getPaymentInfo: async (paymentReference: string): Promise<PaymentInfoResponse> => {
+  getPaymentInfo: async (
+    paymentReference: string,
+  ): Promise<PaymentInfoResponse> => {
     const safeReference = encodeURIComponent(paymentReference);
     const response = await axiosClient.get(`/payments/info/${safeReference}`, {
       headers: getAuthHeaders(),
@@ -35,9 +45,12 @@ export const paymentService = {
     paymentReference: string,
   ): Promise<PaymentStatusResponse> => {
     const safeReference = encodeURIComponent(paymentReference);
-    const response = await axiosClient.get(`/payments/${safeReference}/status`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axiosClient.get(
+      `/payments/${safeReference}/status`,
+      {
+        headers: getAuthHeaders(),
+      },
+    );
     return response as unknown as PaymentStatusResponse;
   },
 
@@ -50,9 +63,51 @@ export const paymentService = {
 
   cancelPayment: async (paymentReference: string): Promise<any> => {
     const safeReference = encodeURIComponent(paymentReference);
-    const response = await axiosClient.post(`/payments/${safeReference}/cancel`, {}, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axiosClient.post(
+      `/payments/${safeReference}/cancel`,
+      {},
+      {
+        headers: getAuthHeaders(),
+      },
+    );
     return response;
   },
+};
+
+export const getAdminPayments = async (
+  params: GetPaymentsParams,
+): Promise<PagedPaymentResult> => {
+  const cleanParams = Object.fromEntries(
+    Object.entries(params).filter(([_, v]) => v !== undefined && v !== ""),
+  );
+
+  const response = await axiosClient.get("/admin/payments", {
+    params: cleanParams,
+    headers: getAuthHeaders(),
+  });
+
+  return response as unknown as PagedPaymentResult;
+};
+
+export const getAdminPaymentDetail = async (
+  id: string,
+): Promise<PaymentDetailDto> => {
+  const response = await axiosClient.get(`/admin/payments/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  return response as unknown as PaymentDetailDto;
+};
+
+export const refundAdminPayment = async (
+  id: string,
+  payload: RefundPaymentRequest,
+) => {
+  const response = await axiosClient.post(
+    `/admin/payments/${id}/refund`,
+    payload,
+    {
+      headers: getAuthHeaders(),
+    },
+  );
+  return response;
 };

@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Users,
-  Settings,
   BookOpen,
-  CreditCard,
   Newspaper,
-  Users2,
   LayoutDashboard,
   Loader2,
+  Package,
+  Receipt,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,12 +34,17 @@ const MENU_GROUPS = [
       { href: "/admin/users", icon: Users, label: "Người dùng" },
       {
         href: "/admin/subscriptions",
-        icon: CreditCard,
+        icon: Package,
         label: "Gói dịch vụ",
       },
       {
+        href: "/admin/payments",
+        icon: Receipt,
+        label: "Thanh toán",
+      },
+      {
         href: "/admin/user-subscriptions",
-        icon: Users2,
+        icon: UserCheck,
         label: "Người đăng ký",
       },
     ],
