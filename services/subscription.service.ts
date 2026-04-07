@@ -14,7 +14,6 @@ export const subscriptionService = {
     const response = await axiosClient.get("/admin/subscription-plans");
     return response as unknown as GetPlansResponse;
   },
-
   // Lấy thống kê hệ thống
   getSubscriptionStats: async (): Promise<SubscriptionStatsResponse> => {
     const response = await axiosClient.get("/admin/subscription-plans/stats");
