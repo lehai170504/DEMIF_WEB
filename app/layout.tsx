@@ -7,7 +7,6 @@ import { Suspense } from "react";
 import "./globals.css";
 import QueryProvider from "./providers";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
-import { RunningMascot } from "@/components/layouts/Landing/RunningMascot";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -55,9 +54,6 @@ export default function RootLayout({
           storageKey="demif-user-theme"
         >
           <AmbientBackground />
-
-          {/* NÚT CUỘN LÊN BẰNG MASCOT ÁP DỤNG TOÀN TRANG */}
-          <RunningMascot />
 
           <div className="relative z-10 flex flex-col min-h-screen">
             <QueryProvider>
