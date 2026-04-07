@@ -13,9 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMySubscription } from "@/hooks/use-subscription";
+import { usePaymentHistory } from "@/hooks/use-payment";
+import { useRouter } from "next/navigation";
 
 export function BillingSubscription() {
+  const router = useRouter();
   const { data: mySubscription, isLoading } = useMySubscription();
+  const { data: paymentHistory, isLoading: isLoadingHistory } = usePaymentHistory();
 
   // Format date to Vietnamese format
   const formatDate = (dateString: string | null) => {
@@ -23,6 +27,8 @@ export function BillingSubscription() {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN");
   };
+
+  const isPendingPayment = mySubscription?.status === "PendingPayment";
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
@@ -58,13 +64,22 @@ export function BillingSubscription() {
                   </p>
                 </div>
 
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-bold h-12"
-                  onClick={() => window.location.href = '/upgrade'}
-                >
-                  Quản lý gói
-                </Button>
+                {isPendingPayment ? (
+                  <Button
+                    className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold h-12"
+                    onClick={() => router.push(`/payment?planId=${mySubscription.planId}`)}
+                  >
+                    Tiếp tục thanh toán
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-bold h-12"
+                    onClick={() => router.push('/upgrade')}
+                  >
+                    Quản lý gói
+                  </Button>
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 pt-8 border-t border-gray-200 dark:border-white/5">
@@ -140,31 +155,54 @@ export function BillingSubscription() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[1, 2].map((i) => (
-                <TableRow
-                  key={i}
-                  className="hover:bg-gray-50 dark:hover:bg-white/5 border-b border-gray-200 dark:border-white/5 last:border-none transition-colors"
-                >
-                  <TableCell className="font-mono text-xs text-gray-500 dark:text-zinc-500 pl-6 py-4">
-                    INV-2026-00{i}
-                  </TableCell>
-                  <TableCell className="font-medium text-sm text-gray-700 dark:text-zinc-300">
-                    01/01/2026
-                  </TableCell>
-                  <TableCell className="font-black text-gray-900 dark:text-white">
-                    499.000đ
-                  </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 rounded-lg text-gray-500 dark:text-zinc-500 hover:text-orange-500 hover:bg-orange-500/10"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
+              {isLoadingHistory ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-6 text-gray-500">
+                    <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+                    Đang tải lịch sử...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : paymentHistory?.items?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-6 text-gray-500 text-sm">
+                    Chưa có giao dịch nào
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paymentHistory?.items?.map((item) => (
+                  <TableRow
+                    key={item.id}
+                    className="hover:bg-gray-50 dark:hover:bg-white/5 border-b border-gray-200 dark:border-white/5 last:border-none transition-colors"
+                  >
+                    <TableCell className="font-mono text-xs text-gray-500 dark:text-zinc-500 pl-6 py-4">
+                      {item.referenceCode}
+                    </TableCell>
+                    <TableCell className="font-medium text-sm text-gray-700 dark:text-zinc-300">
+                      {formatDate(item.createdAt)}
+                    </TableCell>
+                    <TableCell className="font-black text-gray-900 dark:text-white">
+                      {new Intl.NumberFormat("vi-VN").format(item.amount)}đ
+                      <div className="text-[10px] font-normal text-gray-400 mt-0.5">
+                        {item.planName}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] uppercase font-bold border-none px-2 py-0.5 ${
+                          item.status === 'Completed'
+                            ? 'bg-emerald-500/10 text-emerald-500'
+                            : item.status === 'Pending'
+                            ? 'bg-amber-500/10 text-amber-500'
+                            : 'bg-red-500/10 text-red-500'
+                        }`}
+                      >
+                        {item.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

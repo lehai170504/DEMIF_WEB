@@ -1,41 +1,44 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Target, FileText, CheckCircle, Headphones, Flame } from "lucide-react";
+import { Target, Clock, Trophy, Flame, Loader2 } from "lucide-react";
+import { useStatsSummary } from "@/hooks/use-stats";
 
 export function StatsRow() {
+  const { data: statsData, isLoading } = useStatsSummary();
+
   const stats = [
     {
       icon: Flame,
       label: "Ngày liên tiếp",
-      value: "0",
+      value: statsData?.currentStreak ?? 0,
       color: "text-orange-500",
       border: "border-orange-500/20",
       bg: "bg-orange-500/10",
       glow: "shadow-orange-500/20",
     },
     {
-      icon: FileText,
-      label: "Từ đã nghe",
-      value: "9",
+      icon: Trophy,
+      label: "Kinh nghiệm",
+      value: statsData?.totalXp ?? 0,
       color: "text-blue-500",
       border: "border-blue-500/20",
       bg: "bg-blue-500/10",
       glow: "shadow-blue-500/20",
     },
     {
-      icon: CheckCircle,
-      label: "Bài đã nộp",
-      value: "1",
+      icon: Target,
+      label: "Chuỗi dài nhất",
+      value: statsData?.longestStreak ?? 0,
       color: "text-emerald-500",
       border: "border-emerald-500/20",
       bg: "bg-emerald-500/10",
       glow: "shadow-emerald-500/20",
     },
     {
-      icon: Headphones,
-      label: "Đang nghe",
-      value: "1",
+      icon: Clock,
+      label: "Phút đã học",
+      value: statsData?.totalPracticeMinutes ?? 0,
       color: "text-purple-500",
       border: "border-purple-500/20",
       bg: "bg-purple-500/10",
@@ -66,9 +69,9 @@ export function StatsRow() {
             {/* Value & Label */}
             <div className="space-y-1">
               <div
-                className={`text-4xl font-black italic tracking-tighter text-gray-900 dark:text-white`}
+                className={`text-4xl font-black italic tracking-tighter text-gray-900 dark:text-white flex items-center gap-2`}
               >
-                {stat.value}
+                {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-gray-400" /> : stat.value}
               </div>
               <div className="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500 group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors">
                 {stat.label}

@@ -282,11 +282,15 @@ export interface SubmitDictationResponse {
   feedback?: string;
 }
 
-// Shadowing Types
 export interface TimedSegment {
+  index: number;
   startTime: number;
   endTime: number;
   text: string;
+  wordCount?: number;
+  isCompleted?: boolean;
+  bestScore?: number | null;
+  attempts?: number | null;
 }
 
 export interface LevelConfig {
@@ -297,9 +301,15 @@ export interface LevelConfig {
 
 export interface GetSegmentsResponse {
   lessonId: string;
+  title?: string;
+  audioUrl?: string;
+  mediaType?: string;
   level: string;
   segments: TimedSegment[];
   levelConfig: LevelConfig;
+  completedCount?: number;
+  progressPercent?: number;
+  totalSegments?: number;
 }
 
 // Segment Check
