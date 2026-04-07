@@ -240,7 +240,7 @@ export function HeaderUser() {
                     {
                       icon: CreditCard,
                       label: "Gói dịch vụ",
-                      href: "/upgrade",
+                      href: "/profile/edit?tab=billing",
                     },
                     {
                       icon: Settings,

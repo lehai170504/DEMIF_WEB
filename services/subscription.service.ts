@@ -64,11 +64,14 @@ export const subscriptionService = {
   },
 
   // 6. GET CURRENT USER'S SUBSCRIPTION
-  getMySubscription: async (): Promise<UserSubscriptionDto | null> => {
+  getMySubscription: async (): Promise<any | null> => {
     try {
       const response = await axiosClient.get("/me/subscription");
-      // Response đã được bóc .data bởi interceptor
-      return response as unknown as UserSubscriptionDto;
+      const result = response as any;
+      if (result && result.hasActiveSubscription && result.subscription) {
+        return result.subscription;
+      }
+      return null;
     } catch (error: any) {
       // Nếu user chưa có subscription (404), trả về null thay vì throw error
       if (error?.response?.status === 404) {

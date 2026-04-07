@@ -40,9 +40,9 @@ export default function UpgradePage() {
     return cycleMap[cycle] || "";
   };
 
-  const isCurrentPlan = (planId: string) => {
+  const isCurrentPlan = (plan: any) => {
     return (
-      mySubscription?.planId === planId && mySubscription?.status === "Active"
+      mySubscription?.planName === plan.name && mySubscription?.status === "Active"
     );
   };
 
@@ -112,7 +112,7 @@ export default function UpgradePage() {
                   plan.badgeText?.toLowerCase().includes("phổ biến") ||
                   plan.badgeText?.toLowerCase().includes("đề xuất");
                 const anim = getCardAnimation(index, paidPlans.length);
-                const isUserActive = isCurrentPlan(plan.id);
+                const isUserActive = isCurrentPlan(plan);
 
                 return (
                   <motion.div

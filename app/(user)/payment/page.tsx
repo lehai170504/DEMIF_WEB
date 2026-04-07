@@ -98,19 +98,38 @@ export default function PaymentPage() {
       }
 
       try {
-        const status = await paymentService.getPaymentStatus(reference);
-        setPaymentStatus(status);
+        const statusResponse = await paymentService.getPaymentStatus(reference);
+        
+        // Normalize the payload in case backend only returns `status` strings and not the boolean flags
+        const isActuallyCompleted = 
+          statusResponse.isCompleted === true || 
+          statusResponse.status === "Completed" || 
+          statusResponse.status === "Paid";
+          
+        const isActuallyFailed = 
+          statusResponse.isFailed === true || 
+          statusResponse.status === "Failed" || 
+          statusResponse.status === "Canceled" || 
+          statusResponse.status === "Cancelled";
+
+        const normalizedStatus: PaymentStatusResponse = {
+          ...statusResponse,
+          isCompleted: isActuallyCompleted,
+          isFailed: isActuallyFailed,
+        };
+
+        setPaymentStatus(normalizedStatus);
         setLastCheckedAt(new Date());
 
-        if (status.isCompleted || status.isFailed) {
+        if (isActuallyCompleted || isActuallyFailed) {
           stopPolling();
 
           if (!hasHandledTerminalStatusRef.current) {
             hasHandledTerminalStatusRef.current = true;
 
-            if (status.isCompleted) {
+            if (isActuallyCompleted) {
               await handlePaymentCompleted();
-            } else if (status.isFailed) {
+            } else if (isActuallyFailed) {
               toast.error("Giao dịch thất bại. Vui lòng thử lại.");
             }
           }
