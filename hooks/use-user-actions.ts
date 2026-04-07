@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user.service";
 import { toast } from "sonner";
+import { extractErrorMessage } from "@/lib/error";
 
 export const useUserActions = () => {
   const queryClient = useQueryClient();
@@ -19,20 +20,36 @@ export const useUserActions = () => {
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       userService.updateStatus(id, status),
     onSuccess: (_, variables) => {
-      toast.success(`Đã cập nhật trạng thái thành: ${variables.status}`);
+      toast.success("Trạng thái đã đổi", {
+        description: `Tài khoản đã được chuyển sang trạng thái: ${variables.status.toUpperCase()}.`,
+      });
       invalidateUser(variables.id);
     },
-    onError: () => toast.error("Lỗi khi cập nhật trạng thái."),
+    onError: (error: any) =>
+      toast.error("Thao tác thất bại", {
+        description: extractErrorMessage(
+          error,
+          "Không thể cập nhật trạng thái người dùng.",
+        ),
+      }),
   });
 
   // 2. Delete User
   const deleteUserMutation = useMutation({
     mutationFn: (id: string) => userService.deleteUser(id),
     onSuccess: () => {
-      toast.success("Đã xóa người dùng thành công");
-      invalidateUser(); // Chỉ cần refresh list
+      toast.success("Đã gỡ bỏ tài khoản", {
+        description: "Người dùng đã được xóa hoàn toàn khỏi hệ thống.",
+      });
+      invalidateUser();
     },
-    onError: () => toast.error("Lỗi khi xóa người dùng."),
+    onError: (error: any) =>
+      toast.error("Lỗi xóa tài khoản", {
+        description: extractErrorMessage(
+          error,
+          "Người dùng này có thể đang có dữ liệu ràng buộc.",
+        ),
+      }),
   });
 
   // 3. Assign Role
@@ -40,10 +57,18 @@ export const useUserActions = () => {
     mutationFn: ({ id, roleName }: { id: string; roleName: string }) =>
       userService.assignRole(id, { roleName }),
     onSuccess: (_, variables) => {
-      toast.success(`Đã cấp quyền ${variables.roleName}`);
+      toast.success("Cấp quyền thành công", {
+        description: `Quyền [${variables.roleName.toUpperCase()}] đã được gán cho tài khoản.`,
+      });
       invalidateUser(variables.id);
     },
-    onError: () => toast.error("Lỗi khi cấp quyền."),
+    onError: (error: any) =>
+      toast.error("Lỗi cấp quyền", {
+        description: extractErrorMessage(
+          error,
+          "Không thể gán quyền này vào lúc này.",
+        ),
+      }),
   });
 
   // 4. Remove Role
@@ -51,10 +76,18 @@ export const useUserActions = () => {
     mutationFn: ({ id, roleName }: { id: string; roleName: string }) =>
       userService.removeRole(id, roleName),
     onSuccess: (_, variables) => {
-      toast.success(`Đã gỡ quyền ${variables.roleName}`);
+      toast.success("Gỡ quyền thành công", {
+        description: `Quyền [${variables.roleName.toUpperCase()}] đã được gỡ khỏi tài khoản.`,
+      });
       invalidateUser(variables.id);
     },
-    onError: () => toast.error("Lỗi khi gỡ quyền."),
+    onError: (error: any) =>
+      toast.error("Lỗi gỡ quyền", {
+        description: extractErrorMessage(
+          error,
+          "Không thể thực hiện thay đổi quyền hạn.",
+        ),
+      }),
   });
 
   return {

@@ -29,7 +29,12 @@ import { cn } from "@/lib/utils";
 
 import { RegenerateConfirmDialog } from "./regenerate-confirm-dialog";
 
+const LEVELS = ["Beginner", "Intermediate", "Advanced", "Expert"];
+
 export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
+  // 1. Quản lý Level hiện tại
+  const [currentLevel, setCurrentLevel] = React.useState("Beginner");
+
   const {
     data: preview,
     isLoading,
@@ -39,14 +44,13 @@ export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
 
   const [localSegments, setLocalSegments] = React.useState<any[]>([]);
   const [hasChanges, setHasChanges] = React.useState(false);
-
-  // STATE ĐIỀU KHIỂN MODAL
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] =
     React.useState(false);
 
   const regenerateMutation = useRegenerateTemplates();
   const updateTemplatesMutation = useUpdateDictationTemplates();
 
+  // 2. Khởi tạo dữ liệu khi Preview thay đổi
   React.useEffect(() => {
     if (preview?.segments && Array.isArray(preview.segments)) {
       const initialized = preview.segments.map((seg: any) => {
@@ -80,21 +84,43 @@ export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
     }
   };
 
+  // 3. Hàm lưu: Bọc đúng cấu trúc level mà Backend yêu cầu
   const handleSaveTemplates = () => {
-    // SỬA Ở ĐÂY: Ép nguyên mảng phẳng (localSegments) thành chuỗi luôn!
-    const jsonString = JSON.stringify(localSegments);
+    // 1. Định nghĩa bảng mã Enum (Backend thường mặc định 0, 1, 2, 3)
+    const levelEnum: Record<string, number> = {
+      Beginner: 0,
+      Intermediate: 1,
+      Advanced: 2,
+      Expert: 3,
+    };
 
-    updateTemplatesMutation.mutate({
-      id: lessonId,
-      data: { dictationTemplatesJson: jsonString },
-    });
+    const payload = {
+      level: levelEnum[currentLevel] ?? 0,
+      segments: localSegments,
+    };
+
+    // 3. Ép thành chuỗi JSON như cũ
+    const jsonString = JSON.stringify(payload);
+
+    updateTemplatesMutation.mutate(
+      {
+        id: lessonId,
+        data: { dictationTemplatesJson: jsonString },
+      },
+      {
+        onSuccess: () => {
+          setHasChanges(false);
+          refetch();
+        },
+      },
+    );
   };
 
-  // HÀM XỬ LÝ KHI BẤM XÁC NHẬN TRONG MODAL
   const handleConfirmRegenerate = () => {
     regenerateMutation.mutate(lessonId, {
       onSuccess: () => {
         setIsRegenerateDialogOpen(false);
+        refetch(); // Cập nhật lại bản đục lỗ AI mới nhất
       },
     });
   };
@@ -120,8 +146,26 @@ export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
     );
 
   return (
-    <div className="space-y-8 font-mono py-2">
-      {/* 1. THỐNG KÊ & TRẠNG THÁI */}
+    <div className="space-y-6 font-mono py-2">
+      {/* 1. BỘ LỌC LEVEL */}
+      <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 dark:bg-zinc-900/50 rounded-[1.5rem] w-fit">
+        {LEVELS.map((lvl) => (
+          <button
+            key={lvl}
+            onClick={() => setCurrentLevel(lvl)}
+            className={cn(
+              "px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+              currentLevel === lvl
+                ? "bg-white dark:bg-zinc-800 text-purple-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300",
+            )}
+          >
+            {lvl}
+          </button>
+        ))}
+      </div>
+
+      {/* 2. THỐNG KÊ & TRẠNG THÁI */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 p-6 rounded-[2rem] bg-slate-950 dark:bg-black text-white flex items-center justify-around shadow-xl border border-slate-800">
           <div className="flex items-center gap-4">
@@ -155,60 +199,55 @@ export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
 
         <div className="h-full">
           {preview.readyToPublish ? (
-            <Alert className="bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 rounded-[2rem] p-6 h-full flex flex-col justify-center">
+            <Alert className="bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 rounded-[2rem] p-6 h-full">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 mb-2" />
               <AlertTitle className="text-sm font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400">
                 Sẵn sàng Publish
               </AlertTitle>
-              <AlertDescription className="text-[11px] font-bold text-emerald-600/80 dark:text-emerald-500/80 leading-relaxed mt-1">
-                Tất cả template đều hợp lệ. Bạn có thể tinh chỉnh các từ bị
-                khuyết bên dưới.
+              <AlertDescription className="text-[11px] font-bold text-emerald-600/80 dark:text-emerald-500/80 mt-1">
+                Cấu hình "{currentLevel}" đã hợp lệ.
               </AlertDescription>
             </Alert>
           ) : (
-            <Alert className="bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 rounded-[2rem] p-6 h-full flex flex-col justify-center">
+            <Alert className="bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 rounded-[2rem] p-6 h-full">
               <XCircle className="h-5 w-5 text-red-600 mb-2" />
               <AlertTitle className="text-sm font-black uppercase tracking-widest text-red-800 dark:text-red-400">
                 Lỗi Cấu Hình
               </AlertTitle>
-              <AlertDescription className="text-[11px] font-bold text-red-600/80 dark:text-red-500/80 leading-relaxed mt-1">
-                {preview.publishBlockers?.join(", ") ||
-                  "Dữ liệu đục lỗ bị thiếu hoặc bị lỗi."}
+              <AlertDescription className="text-[11px] font-bold text-red-600/80 dark:text-red-500/80 mt-1">
+                {preview.publishBlockers?.[0] || "Thiếu dữ liệu đục lỗ."}
               </AlertDescription>
             </Alert>
           )}
         </div>
       </div>
 
-      {/* 2. TOOLBAR ĐIỀU KHIỂN */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 bg-slate-50 dark:bg-zinc-900/50 rounded-[2rem] border border-slate-200 dark:border-white/5">
+      {/* 3. TOOLBAR */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-slate-50 dark:bg-zinc-900/50 rounded-[2rem] border border-slate-200 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <h4 className="text-[11px] font-black uppercase text-slate-900 dark:text-white tracking-widest">
-            Biên tập đục lỗ (Blanks)
+          <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+            Biên tập: {currentLevel}
           </h4>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center justify-center w-5 h-5 bg-white dark:bg-zinc-800 rounded-md border border-slate-200 dark:border-white/10 ml-2">
+              <TooltipTrigger asChild>
+                <div className="p-1.5 bg-white dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-white/10 cursor-help">
                   <Info className="w-3 h-3 text-slate-400" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 text-white text-[10px] font-bold rounded-lg p-2 max-w-[250px] leading-relaxed">
-                Hệ thống AI sẽ tự động tính toán từ nào nên bị đục lỗ. Tuy nhiên
-                bạn có thể bấm trực tiếp vào từng chữ bên dưới để chỉnh sửa lại
-                theo ý mình.
+              <TooltipContent className="bg-slate-900 text-[10px] font-bold p-3 rounded-xl max-w-[200px]">
+                Bấm vào từng chữ để ẩn/hiện từ đục lỗ cho cấp độ {currentLevel}.
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* NÚT MỞ DIALOG REGENERATE */}
           <Button
             variant="outline"
             onClick={() => setIsRegenerateDialogOpen(true)}
             disabled={regenerateMutation.isPending}
-            className="h-10 bg-white dark:bg-zinc-950 border-orange-200 dark:border-orange-500/30 text-orange-600 dark:text-orange-500 hover:bg-orange-50 font-black text-[10px] uppercase tracking-widest rounded-xl shadow-sm transition-all"
+            className="h-11 bg-white dark:bg-zinc-950 border-orange-200 text-orange-600 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-orange-50 transition-all"
           >
             <RefreshCw
               className={cn(
@@ -222,51 +261,50 @@ export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
           <Button
             onClick={handleSaveTemplates}
             disabled={updateTemplatesMutation.isPending || !hasChanges}
-            className="h-10 px-6 bg-purple-600 hover:bg-purple-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-lg shadow-purple-500/20 transition-all active:scale-95"
+            className="h-11 px-6 bg-purple-600 hover:bg-purple-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-lg active:scale-95 transition-all"
           >
             {updateTemplatesMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : (
               <Save className="w-4 h-4 mr-2" />
             )}
-            Lưu Blanks
+            Lưu {currentLevel}
           </Button>
         </div>
       </div>
 
-      {/* 3. EDITOR AREA */}
+      {/* 4. EDITOR AREA */}
       <div className="flex flex-col gap-5 max-h-[600px] overflow-y-auto pr-3 custom-scrollbar">
         {localSegments.length === 0 ? (
-          <div className="p-10 text-center border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2rem]">
+          <div className="p-16 text-center border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2.5rem]">
             <p className="text-xs font-bold text-slate-400">
-              Chưa có dữ liệu Transcript để xử lý.
+              Chưa có dữ liệu để biên tập.
             </p>
           </div>
         ) : (
           localSegments.map((seg: any, sIdx: number) => (
             <div
               key={`seg-${sIdx}`}
-              className="p-6 bg-white dark:bg-zinc-900/50 border border-slate-100 dark:border-white/5 rounded-[2rem] shadow-sm hover:border-purple-200 dark:hover:border-purple-500/30 transition-all group"
+              className="p-7 bg-white dark:bg-zinc-900/50 border border-slate-100 dark:border-white/5 rounded-[2.5rem] shadow-sm hover:border-purple-200 transition-all"
             >
-              <div className="flex justify-between mb-5 border-b border-slate-50 dark:border-white/5 pb-3">
-                <span className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-[0.2em] bg-purple-50 dark:bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-100 dark:border-purple-500/20">
+              <div className="flex justify-between mb-6 border-b border-slate-50 dark:border-white/5 pb-4">
+                <span className="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] bg-purple-50 dark:bg-purple-500/10 px-4 py-2 rounded-xl">
                   Câu #{seg.index + 1}
                 </span>
-                <span className="text-[10px] font-bold text-slate-400 font-sans tracking-widest bg-slate-50 dark:bg-zinc-800 px-3 py-1.5 rounded-lg">
+                <span className="text-[10px] font-bold text-slate-400 px-4 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800">
                   {seg.startTime}s → {seg.endTime}s
                 </span>
               </div>
-
-              <div className="flex flex-wrap gap-2 leading-loose">
+              <div className="flex flex-wrap gap-2.5 leading-[2.5]">
                 {seg.words?.map((wordObj: any, wIdx: number) => (
                   <button
                     key={`word-${sIdx}-${wIdx}`}
                     onClick={() => toggleWordBlank(sIdx, wIdx)}
                     className={cn(
-                      "px-3.5 py-1.5 rounded-xl text-sm font-bold transition-all border outline-none cursor-pointer",
+                      "px-4 py-2 rounded-2xl text-sm font-bold transition-all border outline-none",
                       wordObj.isBlank
                         ? "bg-purple-500 text-white border-purple-600 shadow-md scale-105"
-                        : "bg-slate-50 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-zinc-700 hover:border-purple-300 hover:text-purple-600",
+                        : "bg-slate-50 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-purple-300",
                     )}
                   >
                     {wordObj.text}
@@ -278,7 +316,6 @@ export function DictationPreviewTab({ lessonId }: { lessonId: string }) {
         )}
       </div>
 
-      {/* COMPONENT MODAL XÁC NHẬN NẰM Ở ĐÂY */}
       <RegenerateConfirmDialog
         open={isRegenerateDialogOpen}
         onOpenChange={setIsRegenerateDialogOpen}

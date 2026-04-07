@@ -95,15 +95,23 @@ export interface DictationWord {
   isBlank: boolean;
 }
 
+// src/types/lesson.type.ts
+
+export interface DictationWord {
+  text: string;
+  isBlank: boolean;
+}
+
 export interface DictationSegmentPreview {
   index: number;
   startTime: number;
   endTime: number;
   text: string;
   wordCount: number;
-  words?: DictationWord[];
+  words: DictationWord[];
 }
-// --- 3. Interface cho API preview bài tập điền từ (Dictation) ---
+
+// --- Interface cho API preview bài tập điền từ (Dictation) ---
 export interface DictationPreviewResponse {
   lessonId: string;
   title: string;
@@ -114,7 +122,6 @@ export interface DictationPreviewResponse {
   publishBlockers: string[];
   segments: DictationSegmentPreview[];
 }
-
 // --- 4. Các interface liên quan đến cập nhật trạng thái bài học ---
 export interface UpdateLessonStatusRequest {
   status: string; // "draft" | "published" | "archived"

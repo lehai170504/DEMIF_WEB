@@ -87,3 +87,8 @@ export interface VerifyEmailResponse {
 export interface GoogleLoginPayload {
   idToken: string;
 }
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}

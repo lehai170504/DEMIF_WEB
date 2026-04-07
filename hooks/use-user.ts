@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authService } from "@/services/auth.service";
 import Cookies from "js-cookie";
 import { ChangePasswordPayload, UpdateProfilePayload } from "@/types/auth.type";
-import { toast } from "sonner"; // Import trực tiếp từ library (Chuẩn)
+import { toast } from "sonner";
+import { extractErrorMessage } from "@/lib/error";
 
 export const useUserProfile = () => {
   const accessToken = Cookies.get("accessToken");
@@ -13,7 +14,7 @@ export const useUserProfile = () => {
     queryFn: authService.getProfile,
     enabled: !!accessToken,
     retry: false,
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 30, // 30 phút
   });
 };
 
@@ -24,23 +25,23 @@ export const useUpdateProfile = () => {
     mutationFn: (payload: UpdateProfilePayload) =>
       authService.updateProfile(payload),
     onSuccess: (data) => {
-      // 1. Làm mới cache
+      // 1. Làm mới cache để các component khác lấy data mới
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
 
-      // 2. Cập nhật Optimistic
+      // 2. Cập nhật ngay lập tức data trong cache (Optimistic Update)
       queryClient.setQueryData(["userProfile"], data);
 
-      // 3. Hiển thị Toast (Có thêm description)
-      toast.success("Cập nhật thành công!", {
-        description: "Thông tin hồ sơ của bạn đã được lưu lại.",
+      // 3. Hiển thị Toast Cinematic
+      toast.success("Đã lưu thay đổi", {
+        description: "Thông tin hồ sơ cá nhân đã được đồng bộ thành công.",
       });
     },
     onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật.";
-
       toast.error("Cập nhật thất bại", {
-        description: msg,
+        description: extractErrorMessage(
+          error,
+          "Không thể lưu thông tin hồ sơ.",
+        ),
       });
     },
   });
@@ -51,17 +52,17 @@ export const useChangePassword = () => {
     mutationFn: (payload: ChangePasswordPayload) =>
       authService.changePassword(payload),
     onSuccess: () => {
-      toast.success("Đổi mật khẩu thành công!", {
-        description: "Vui lòng sử dụng mật khẩu mới cho lần đăng nhập sau.",
+      toast.success("Đổi mật khẩu thành công", {
+        description:
+          "Bạn có thể sử dụng mật khẩu mới cho những lần đăng nhập sau.",
       });
     },
     onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message ||
-        error?.response?.data?.detail ||
-        "Đổi mật khẩu thất bại.";
-      toast.error("Lỗi", {
-        description: msg,
+      toast.error("Thao tác thất bại", {
+        description: extractErrorMessage(
+          error,
+          "Mật khẩu hiện tại không chính xác.",
+        ),
       });
     },
   });

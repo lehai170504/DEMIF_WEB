@@ -1,3 +1,5 @@
+// src/hooks/use-blog.ts
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { blogService } from "@/services/blog.service";
 import { toast } from "sonner";
@@ -7,16 +9,23 @@ import { extractErrorMessage } from "@/lib/error";
 export const useManageBlog = () => {
   const queryClient = useQueryClient();
 
-  // 1. Hook tạo bài viết mới
+  // 1. Hook tạo bài viết mới (Export trực tiếp cho Admin)
   const createBlogMutation = useMutation({
     mutationFn: blogService.createBlog,
     onSuccess: () => {
-      // Làm mới danh sách blog để hiển thị bài mới nhất
+      toast.success("Xuất bản thành công", {
+        description: "Bài viết mới đã được đưa lên hệ thống.",
+      });
+      // Làm mới danh sách blog
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      toast.success("Đã xuất bản bài viết mới thành công!");
     },
     onError: (error: any) => {
-      toast.error(extractErrorMessage(error, "Không thể tạo bài viết"));
+      toast.error("Lỗi xuất bản", {
+        description: extractErrorMessage(
+          error,
+          "Không thể tạo bài viết vào lúc này.",
+        ),
+      });
     },
   });
 
@@ -28,13 +37,20 @@ export const useManageBlog = () => {
   >({
     mutationFn: ({ id, data }) => blogService.updateBlog(id, data),
     onSuccess: (_, variables) => {
+      toast.success("Cập nhật hoàn tất", {
+        description: "Nội dung bài viết đã được thay đổi thành công.",
+      });
+      // Refresh cả danh sách và chi tiết bài đó
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
       queryClient.invalidateQueries({ queryKey: ["blog", variables.id] });
-
-      toast.success("Đã lưu thay đổi bài viết thành công!");
     },
     onError: (error: any) => {
-      toast.error(extractErrorMessage(error, "Cập nhật bài viết thất bại"));
+      toast.error("Cập nhật thất bại", {
+        description: extractErrorMessage(
+          error,
+          "Lỗi khi lưu thay đổi bài viết.",
+        ),
+      });
     },
   });
 
@@ -42,11 +58,15 @@ export const useManageBlog = () => {
   const deleteBlogMutation = useMutation({
     mutationFn: blogService.deleteBlog,
     onSuccess: () => {
+      toast.success("Đã gỡ bài viết", {
+        description: "Bài viết đã được loại bỏ hoàn toàn khỏi hệ thống.",
+      });
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      toast.success("Đã gỡ bài viết khỏi hệ thống.");
     },
     onError: (error: any) => {
-      toast.error(extractErrorMessage(error, "Xóa bài viết thất bại"));
+      toast.error("Lỗi xóa bài", {
+        description: extractErrorMessage(error, "Không thể xóa bài viết này."),
+      });
     },
   });
 
@@ -60,7 +80,7 @@ export const useManageBlog = () => {
   };
 };
 
-// 4. Hook lấy chi tiết
+// 4. Hook lấy chi tiết bài viết
 export const useBlogDetail = (id: string) => {
   return useQuery({
     queryKey: ["blog", id],
@@ -69,6 +89,7 @@ export const useBlogDetail = (id: string) => {
       return response ?? null;
     },
     enabled: !!id,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // Cache trong 5 phút
+    retry: 1,
   });
 };

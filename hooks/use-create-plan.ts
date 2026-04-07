@@ -12,7 +12,9 @@ export const useCreatePlan = () => {
     mutationFn: (data: CreatePlanRequest) =>
       subscriptionService.createPlan(data),
     onSuccess: () => {
-      toast.success("Hệ thống đã khởi tạo gói dịch vụ thành công!");
+      toast.success("Tạo gói thành công!", {
+        description: "Hệ thống đã khởi tạo gói dịch vụ mới.",
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-subscription-plans"] });
     },
     onError: (error: any) => {
@@ -20,7 +22,10 @@ export const useCreatePlan = () => {
         error,
         "Lỗi khi khởi tạo gói dịch vụ.",
       );
-      toast.error(message);
+      // Cập nhật cấu trúc Toast mới
+      toast.error("Thao tác thất bại", {
+        description: message,
+      });
     },
   });
 };

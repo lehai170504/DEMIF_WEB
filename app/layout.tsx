@@ -63,17 +63,13 @@ export default function RootLayout({
 
           {/* --- FIX LỖI --- */}
           <Toaster
-            position="top-right"
-            richColors
-            theme="dark"
-            closeButton
-            className="fixed"
-            style={{
-              position: "fixed",
-              top: 20,
-              right: 20,
-              zIndex: 99999,
-            }}
+            position="bottom-right"
+            expand={false}
+            duration={4000}
+            offset={24}
+            visibleToasts={3}
+            mobileOffset={{ bottom: 24, left: 16, right: 16 }}
+            // position="bottom-center"
           />
 
           <Analytics />

@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import {
+  LoginPayload, // Nhớ export type này từ auth.type nha homie
   GoogleLoginPayload,
   LoginResponse,
   RegisterPayload,
@@ -17,7 +18,8 @@ export const useLogin = () => {
   const { handleSuccessfulLogin } = useAuth();
 
   return useMutation({
-    mutationFn: (payload: any) => authService.login(payload),
+    // FIX 1: Bỏ any, ép kiểu rõ ràng
+    mutationFn: (payload: LoginPayload) => authService.login(payload),
     onSuccess: async (data: LoginResponse) => {
       try {
         // 1. Lưu token và fetch profile
@@ -26,7 +28,9 @@ export const useLogin = () => {
           refreshToken: data.refreshToken,
         });
 
-        toast.success("Đăng nhập thành công!");
+        toast.success("Đăng nhập thành công!", {
+          description: "Chào mừng bạn quay lại hệ thống.",
+        });
 
         // 2. Chuyển hướng theo role
         const userRoles = fetchedUser?.roles || (data as any).roles || [];
@@ -34,7 +38,9 @@ export const useLogin = () => {
 
         router.push(targetPath);
       } catch (error) {
-        toast.error("Lỗi đồng bộ dữ liệu sau khi đăng nhập.");
+        toast.error("Lỗi đồng bộ dữ liệu", {
+          description: "Không thể tải thông tin sau khi đăng nhập.",
+        });
       }
     },
     onError: (error: any) => {
@@ -42,14 +48,24 @@ export const useLogin = () => {
         error,
         "Email hoặc mật khẩu không đúng",
       );
-      toast.error(message);
+      // FIX 2: Đồng bộ style Toaster mới
+      toast.error("Đăng nhập thất bại", { description: message });
     },
   });
 };
 
 export const useRegister = () => {
+  const router = useRouter(); // FIX 3: Thêm router để chuyển trang
+
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authService.register(payload),
+    // FIX 4: Thêm luồng Success
+    onSuccess: () => {
+      toast.success("Đăng ký thành công!", {
+        description: "Vui lòng kiểm tra email để xác thực tài khoản.",
+      });
+      router.push("/login"); // Đá về trang login
+    },
     onError: (error: any) => {
       const message = extractErrorMessage(error, "Đăng ký thất bại.");
       toast.error("Lỗi đăng ký", { description: message });
@@ -66,35 +82,29 @@ export const useVerifyEmail = () => {
     mutationFn: (token: string) => authService.verifyEmail(token),
     onSuccess: async (data: any) => {
       try {
-        // Kiểm tra xem Backend có trả về Token sau khi verify không
         if (data.accessToken && data.refreshToken) {
-          // Lưu token và fetch thông tin user
           const fetchedUser = await handleSuccessfulLogin({
             accessToken: data.accessToken,
             refreshToken: data.refreshToken,
           });
 
           toast.success("Xác thực thành công!", {
-            description:
-              "Tài khoản đã được kích hoạt. Đang tự động đăng nhập...",
+            description: "Tài khoản đã được kích hoạt. Đang tự động vào hệ thống...",
           });
 
-          // Điều hướng vào hệ thống theo quyền
           const userRoles = fetchedUser?.roles || data.roles || [];
           const targetPath = getRedirectPath(userRoles);
           router.push(targetPath);
         } else {
-          // Fallback: Nếu Backend KHÔNG trả về Token (chỉ trả về message)
           toast.success("Xác thực thành công!", {
-            description:
-              data.message ||
-              "Tài khoản đã được kích hoạt. Vui lòng đăng nhập lại.",
+            description: data.message || "Tài khoản đã được kích hoạt. Vui lòng đăng nhập lại.",
           });
-          // Trả về trang đăng nhập
           router.push("/login");
         }
       } catch (error) {
-        toast.error("Lỗi đồng bộ dữ liệu sau khi xác thực.");
+        toast.error("Lỗi đồng bộ dữ liệu", {
+          description: "Lỗi thiết lập phiên đăng nhập sau khi xác thực.",
+        });
       }
     },
     onError: (error: any) => {
@@ -121,16 +131,18 @@ export const useGoogleOAuthLogin = () => {
           refreshToken: data.refreshToken,
         });
 
-        toast.success("Đăng nhập Google thành công!", {
-          description: `Chào mừng ${fetchedUser?.username || data.username} quay lại!`,
+        toast.success("Kết nối Google thành công!", {
+          description: `Chào mừng ${fetchedUser?.username || data.username || "bạn"} quay lại!`,
         });
 
-        const userRoles = fetchedUser?.roles || data.roles || [];
+        const userRoles = fetchedUser?.roles || (data as any).roles || [];
         const targetPath = getRedirectPath(userRoles);
 
         router.push(targetPath);
       } catch (error) {
-        toast.error("Lỗi đồng bộ dữ liệu sau khi đăng nhập Google.");
+        toast.error("Lỗi đồng bộ dữ liệu", {
+          description: "Lỗi kết nối phiên làm việc với Google.",
+        });
       }
     },
     onError: (error: any) => {
@@ -138,7 +150,7 @@ export const useGoogleOAuthLogin = () => {
         error,
         "Đăng nhập bằng Google thất bại",
       );
-      toast.error(message);
+      toast.error("Lỗi đăng nhập", { description: message });
     },
   });
 };

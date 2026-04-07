@@ -17,7 +17,9 @@ export const useCreatePayment = () => {
         typeof window !== "undefined"
           ? localStorage.getItem("last-auth-refresh-error")
           : null;
-      const refreshInfo = refreshDebug ? ` | refresh_debug: ${refreshDebug}` : "";
+      const refreshInfo = refreshDebug
+        ? ` | refresh_debug: ${refreshDebug}`
+        : "";
 
       toast.error("Không thể tạo yêu cầu thanh toán", {
         description: `${extractErrorMessage(
@@ -30,7 +32,8 @@ export const useCreatePayment = () => {
 };
 
 export const usePaymentHistory = () => {
-  const hasToken = typeof window !== "undefined" ? !!Cookies.get("accessToken") : false;
+  const hasToken =
+    typeof window !== "undefined" ? !!Cookies.get("accessToken") : false;
 
   return useQuery({
     queryKey: ["payment-history"],
@@ -54,6 +57,6 @@ export const useCancelPayment = () => {
       toast.error("Không thể hủy giao dịch", {
         description: extractErrorMessage(error, "Đã có lỗi xảy ra."),
       });
-    }
+    },
   });
 };

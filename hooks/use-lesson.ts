@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 
 // ============ ADMIN HOOKS ============
 
-// Hook Fetch Danh sách (Admin)
+// Lấy danh sách bài học cho Admin
 export const useLessons = (params: GetLessonsParams) => {
   return useQuery({
     queryKey: ["admin-lessons", params],
@@ -32,7 +32,7 @@ export const useLessons = (params: GetLessonsParams) => {
   });
 };
 
-// --- 2. Hook Fetch Chi tiết 1 bài học theo ID ---
+// Lấy chi tiết bài học
 export const useLesson = (id: string) => {
   return useQuery({
     queryKey: ["lesson", id],
@@ -42,7 +42,7 @@ export const useLesson = (id: string) => {
   });
 };
 
-// --- 3. Hook Fetch Dữ liệu Preview Dictation ---
+// Lấy dữ liệu preview đục lỗ
 export const useLessonPreview = (lessonId?: string) => {
   return useQuery({
     queryKey: ["lesson-preview", lessonId],
@@ -52,24 +52,23 @@ export const useLessonPreview = (lessonId?: string) => {
   });
 };
 
-// --- 4. Hook CRUD (Create, Update, Delete, Patch Status) ---
+// Tổng hợp các Mutation quản lý bài học
 export const useLessonActions = () => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
     mutationFn: (data: CreateLessonRequest) => lessonService.createLesson(data),
     onSuccess: () => {
-      toast.success("Tạo bài học mới thành công!", {
-        id: "create-lesson-success",
+      toast.success("Khởi tạo thành công", {
+        description: "Bài học mới đã được thêm vào hệ thống ở trạng thái Nháp.",
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
     onError: (error: any) =>
-      toast.error("Lỗi tạo bài học", {
-        id: "create-lesson-error",
+      toast.error("Lỗi khởi tạo", {
         description: extractErrorMessage(
           error,
-          "Vui lòng kiểm tra lại dữ liệu.",
+          "Vui lòng kiểm tra lại dữ liệu đầu vào.",
         ),
       }),
   });
@@ -78,8 +77,8 @@ export const useLessonActions = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateLessonRequest }) =>
       lessonService.updateLesson(id, data),
     onSuccess: (_, variables) => {
-      toast.success("Cập nhật bài học thành công!", {
-        id: "update-lesson-success",
+      toast.success("Cập nhật thành công", {
+        description: "Mọi thay đổi đã được đồng bộ hóa lên hệ thống.",
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.id] });
@@ -89,25 +88,26 @@ export const useLessonActions = () => {
     },
     onError: (error: any) =>
       toast.error("Lỗi cập nhật", {
-        id: "update-lesson-error",
-        description: extractErrorMessage(error, "Không thể lưu thay đổi."),
+        description: extractErrorMessage(
+          error,
+          "Không thể lưu thay đổi vào lúc này.",
+        ),
       }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => lessonService.deleteLesson(id),
     onSuccess: () => {
-      toast.success("Đã xóa bài học khỏi hệ thống.", {
-        id: "delete-lesson-success",
+      toast.success("Xóa thành công", {
+        description: "Bài học đã được gỡ bỏ hoàn toàn khỏi hệ thống.",
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
     },
     onError: (error: any) =>
-      toast.error("Lỗi xóa bài học", {
-        id: "delete-lesson-error",
+      toast.error("Lỗi xóa bài", {
         description: extractErrorMessage(
           error,
-          "Bài học có thể đang được sử dụng.",
+          "Dữ liệu đang bị ràng buộc hoặc lỗi phân quyền.",
         ),
       }),
   });
@@ -116,16 +116,18 @@ export const useLessonActions = () => {
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       lessonService.updateStatus(id, status),
     onSuccess: (data) => {
-      toast.success(data.message || "Cập nhật trạng thái thành công", {
-        id: "status-update-success",
+      toast.success("Trạng thái đã đổi", {
+        description: data.message || "Cập nhật trạng thái hiển thị thành công.",
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
       queryClient.invalidateQueries({ queryKey: ["lesson", data.lessonId] });
     },
     onError: (error: any) =>
-      toast.error("Lỗi thay đổi trạng thái", {
-        id: "status-update-error",
-        description: extractErrorMessage(error, "Thao tác không hợp lệ."),
+      toast.error("Thao tác thất bại", {
+        description: extractErrorMessage(
+          error,
+          "Thay đổi trạng thái không hợp lệ.",
+        ),
       }),
   });
 
@@ -134,10 +136,6 @@ export const useLessonActions = () => {
     updateLesson: updateMutation.mutate,
     deleteLesson: deleteMutation.mutate,
     updateStatus: updateStatusMutation.mutate,
-
-    createLessonAsync: createMutation.mutateAsync,
-    updateLessonAsync: updateMutation.mutateAsync,
-
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
@@ -145,63 +143,61 @@ export const useLessonActions = () => {
   };
 };
 
-// --- 5. Hook Tái tạo Templates ---
+// Reset và để AI tự đục lỗ lại
 export const useRegenerateTemplates = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => lessonService.regenerateTemplates(id),
     onSuccess: (data, lessonId) => {
-      toast.success("Reset Templates thành công!", {
-        id: "regen-template-success",
+      toast.success("Tái tạo hoàn tất", {
         description:
-          data?.message ||
-          "Hệ thống đã reset và tự động chọn lại các từ đục lỗ.",
+          data?.message || "AI đã reset và tự động đục lỗ lại từ đầu.",
       });
-
-      queryClient.invalidateQueries({
-        queryKey: ["lesson-preview", lessonId],
-        exact: true,
-      });
+      queryClient.invalidateQueries({ queryKey: ["lesson-preview", lessonId] });
     },
     onError: (error: any) =>
-      toast.error("Không thể tái tạo Templates", {
-        id: "regen-template-error",
+      toast.error("Lỗi tái tạo", {
         description: extractErrorMessage(
           error,
-          "Lỗi hệ thống khi đang reset bản nháp.",
+          "Không thể kích hoạt quy trình AI lúc này.",
         ),
       }),
   });
 };
 
+// Lưu cấu hình đục lỗ thủ công
 export const useUpdateDictationTemplates = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    { message: string },
-    any,
-    { id: string; data: UpdateDictationTemplatesRequest }
-  >({
-    mutationFn: ({ id, data }) =>
-      lessonService.updateDictationTemplates(id, data),
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateDictationTemplatesRequest;
+    }) => lessonService.updateDictationTemplates(id, data),
     onSuccess: (_, variables) => {
-      toast.success("Đã lưu cấu hình đục lỗ!", {
-        id: "update-templates-success",
+      toast.success("Đã lưu cấu hình", {
+        description: "Các vị trí đục lỗ thủ công đã được ghi nhận.",
       });
       queryClient.invalidateQueries({
         queryKey: ["lesson-preview", variables.id],
       });
     },
     onError: (error: any) => {
-      toast.error("Lỗi khi lưu cấu hình", {
-        description: extractErrorMessage(error),
+      toast.error("Lưu thất bại", {
+        description: extractErrorMessage(
+          error,
+          "Lỗi khi đồng bộ cấu hình đục lỗ.",
+        ),
       });
     },
   });
 };
 
-// --- 6. Hook Cập nhật Transcript ---
+// Thay đổi nội dung Transcript
 export const useUpdateTranscript = () => {
   const queryClient = useQueryClient();
 
@@ -209,9 +205,8 @@ export const useUpdateTranscript = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateTranscriptRequest }) =>
       lessonService.updateTranscript(id, data),
     onSuccess: (data, variables) => {
-      toast.success("Đã cập nhật Transcript", {
-        id: "update-transcript-success",
-        description: `Hệ thống đã xử lý ${data.segmentCount} câu thoại và tái tạo templates.`,
+      toast.success("Đã nạp Transcript", {
+        description: `Xử lý xong ${data.segmentCount} câu thoại và tự động đục lỗ lại.`,
       });
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.id] });
       queryClient.invalidateQueries({
@@ -219,18 +214,17 @@ export const useUpdateTranscript = () => {
       });
     },
     onError: (error: any) => {
-      toast.error("Lỗi cập nhật Transcript", {
-        id: "update-transcript-error",
+      toast.error("Lỗi dữ liệu", {
         description: extractErrorMessage(
           error,
-          "Không thể xử lý nội dung transcript này.",
+          "Định dạng Transcript không hợp lệ.",
         ),
       });
     },
   });
 };
 
-// --- 7. Hook Tạo từ Youtube ---
+// Import bài học từ YouTube URL
 export const useCreateFromYoutube = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -239,29 +233,24 @@ export const useCreateFromYoutube = () => {
     mutationFn: (data: CreateLessonFromYoutubeRequest) =>
       lessonService.createFromYoutube(data),
     onSuccess: (data) => {
-      toast.success("Xử lý thành công!", {
-        id: "youtube-create-success",
-        description: `Đã tạo bài học "${data.title}" từ YouTube.`,
+      toast.success("Import thành công", {
+        description: `Đã kéo dữ liệu từ YouTube vào hệ thống.`,
       });
       queryClient.invalidateQueries({ queryKey: ["admin-lessons"] });
-
-      if (data.lessonId) {
-        router.push(`/admin/lessons/${data.lessonId}`);
-      }
+      if (data.lessonId) router.push(`/admin/lessons/${data.lessonId}`);
     },
     onError: (error: any) => {
-      toast.error("Lỗi tạo từ YouTube", {
-        id: "youtube-create-error",
+      toast.error("Lỗi YouTube", {
         description: extractErrorMessage(
           error,
-          "Không thể lấy dữ liệu từ URL này.",
+          "Không thể bóc tách dữ liệu từ đường dẫn này.",
         ),
       });
     },
   });
 };
 
-// --- 8. Hook Preview YouTube ---
+// Xem trước thông tin video YouTube
 export const useYoutubePreview = (url: string) => {
   return useQuery({
     queryKey: ["youtube-preview", url],
@@ -272,6 +261,7 @@ export const useYoutubePreview = (url: string) => {
   });
 };
 
+// Lấy phụ đề từ YouTube
 export const useYoutubeTranscript = (params: GetYoutubeTranscriptParams) => {
   return useQuery({
     queryKey: ["youtube-transcript", params.url, params.preferredLanguage],
@@ -286,7 +276,7 @@ export const useYoutubeTranscript = (params: GetYoutubeTranscriptParams) => {
 
 // ============ USER HOOKS ============
 
-// Hook lấy danh sách lessons cho user
+// Lấy bài học cho User học tập
 export const useUserLessons = (params: GetUserLessonsParams) => {
   return useQuery({
     queryKey: ["user-lessons", params],
@@ -295,25 +285,7 @@ export const useUserLessons = (params: GetUserLessonsParams) => {
   });
 };
 
-// Hook lấy chi tiết lesson cho user
-export const useUserLessonDetail = (id: string) => {
-  return useQuery({
-    queryKey: ["user-lesson", id],
-    queryFn: () => lessonService.getUserLessonById(id),
-    enabled: !!id,
-  });
-};
-
-// Hook lấy dictation exercise
-export const useDictationExercise = (id: string, level: string) => {
-  return useQuery({
-    queryKey: ["dictation", id, level],
-    queryFn: () => lessonService.getDictationExercise(id, level),
-    enabled: !!id && !!level,
-  });
-};
-
-// Hook submit toàn bộ bài dictation
+// Nộp toàn bộ bài tập Dictation
 export const useSubmitDictation = () => {
   const queryClient = useQueryClient();
 
@@ -323,35 +295,34 @@ export const useSubmitDictation = () => {
     onSuccess: (result) => {
       const correctPercentage =
         (result.correctCount / result.totalBlanks) * 100;
+
       if (correctPercentage >= 80) {
-        toast.success(`Xuất sắc! Điểm: ${result.score.toFixed(0)}`);
+        toast.success("Kết quả xuất sắc!", {
+          description: `Bạn đạt ${result.score.toFixed(0)} điểm. Bạn quá giỏi homie!`,
+        });
       } else if (correctPercentage >= 50) {
-        toast.info(`Tốt lắm! Điểm: ${result.score.toFixed(0)}`);
+        toast.info("Làm tốt lắm!", {
+          description: `Số điểm: ${result.score.toFixed(0)}. Cố gắng thêm chút nữa để hoàn hảo nhé.`,
+        });
       } else {
-        toast.warning(`Cần cố gắng thêm. Điểm: ${result.score.toFixed(0)}`);
+        toast.warning("Cần nỗ lực hơn", {
+          description: `Điểm: ${result.score.toFixed(0)}. Hãy thử luyện tập lại để cải thiện trình độ.`,
+        });
       }
       queryClient.invalidateQueries({ queryKey: ["user-lesson"] });
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message || "Lỗi khi nộp bài Dictation",
-      );
+      toast.error("Lỗi nộp bài", {
+        description: extractErrorMessage(
+          error,
+          "Hệ thống ghi nhận điểm đang gặp sự cố.",
+        ),
+      });
     },
   });
 };
 
-// Hook lấy segments
-export const useSegments = (id: string, level: string) => {
-  return useQuery({
-    queryKey: ["segments", id, level],
-    queryFn: () => lessonService.getSegments(id, level),
-    enabled: !!id && !!level,
-  });
-};
-
-// ---------------------------------------------------------
-// Hook Check Shadowing Segment (Gõ Text thay vì Voice)
-// ---------------------------------------------------------
+// Kiểm tra Shadowing qua text input
 export const useCheckShadowingSegment = () => {
   return useMutation({
     mutationFn: ({
@@ -366,24 +337,31 @@ export const useCheckShadowingSegment = () => {
     onSuccess: (result) => {
       const accuracy = result.accuracy;
       if (accuracy >= 90) {
-        toast.success(`Hoàn hảo! Độ chính xác: ${accuracy.toFixed(0)}%`);
+        toast.success("Hoàn hảo!", {
+          description: `Độ chính xác: ${accuracy.toFixed(0)}%. Bạn sao chép y hệt luôn!`,
+        });
       } else if (accuracy >= 70) {
-        toast.info(`Tốt! Độ chính xác: ${accuracy.toFixed(0)}%`);
+        toast.info("Tốt!", {
+          description: `Đạt ${accuracy.toFixed(0)}%. Một vài chỗ cần chú ý hơn.`,
+        });
       } else {
-        toast.warning(`Thử lại nhé! Độ chính xác: ${accuracy.toFixed(0)}%`);
+        toast.warning("Thử lại nhé", {
+          description: `Độ chính xác: ${accuracy.toFixed(0)}%. Hãy lắng nghe kỹ hơn.`,
+        });
       }
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message || "Lỗi khi kiểm tra Shadowing Segment",
-      );
+      toast.error("Lỗi kiểm tra", {
+        description: extractErrorMessage(
+          error,
+          "Không thể phân tích đoạn Shadowing này.",
+        ),
+      });
     },
   });
 };
 
-// ---------------------------------------------------------
-// Hook Check Dictation Segment (Gõ Text cho Dictation)
-// ---------------------------------------------------------
+// Kiểm tra Dictation từng đoạn
 export const useCheckDictationSegment = () => {
   return useMutation({
     mutationFn: ({
@@ -398,22 +376,27 @@ export const useCheckDictationSegment = () => {
     onSuccess: (result) => {
       const accuracy = result.accuracy;
       if (accuracy >= 90) {
-        toast.success(`Chính xác! (${accuracy.toFixed(0)}%)`);
+        toast.success("Chính xác!", {
+          description: `Bạn đạt ${accuracy.toFixed(0)}%. Kỹ năng nghe rất tốt!`,
+        });
       } else {
-        toast.warning(`Sai một vài chỗ. (${accuracy.toFixed(0)}%)`);
+        toast.warning("Chưa chuẩn xác", {
+          description: `Đạt ${accuracy.toFixed(0)}%. Có một vài lỗi chính tả nhỏ.`,
+        });
       }
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message || "Lỗi khi kiểm tra Dictation Segment",
-      );
+      toast.error("Lỗi phân tích", {
+        description: extractErrorMessage(
+          error,
+          "Hệ thống không thể kiểm tra đoạn này.",
+        ),
+      });
     },
   });
 };
 
-// ---------------------------------------------------------
-// Hook Check Voice (Dùng STT nhận diện giọng nói)
-// ---------------------------------------------------------
+// Kiểm tra phát âm qua Voice (Speech to Text)
 export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
   return useMutation({
     mutationFn: (data: CheckVoiceRequest) =>
@@ -421,22 +404,26 @@ export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
     onSuccess: (result) => {
       const accuracy = result.accuracyScore;
       if (accuracy >= 90) {
-        toast.success(`Phát âm xuất sắc! (${accuracy.toFixed(0)}%)`);
+        toast.success("Phát âm hoàn hảo", {
+          description: `Độ chính xác đạt ${accuracy.toFixed(0)}%. Giọng bạn rất chuẩn!`,
+        });
       } else if (accuracy >= 70) {
-        toast.info(
-          `Khá tốt, hãy chú ý các từ bị sai nhé! (${accuracy.toFixed(0)}%)`,
-        );
+        toast.info("Khá ổn", {
+          description: `Đạt ${accuracy.toFixed(0)}%. Chú ý vài từ bị phát âm sai nhé.`,
+        });
       } else {
-        toast.error(
-          `Cần luyện tập phát âm câu này thêm. (${accuracy.toFixed(0)}%)`,
-        );
+        toast.error("Chưa đạt yêu cầu", {
+          description: `Đạt ${accuracy.toFixed(0)}%. Bạn cần luyện tập mở khẩu hình và bật hơi thêm.`,
+        });
       }
     },
     onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          "Hệ thống phân tích giọng nói đang lỗi.",
-      );
+      toast.error("Lỗi nhận diện", {
+        description: extractErrorMessage(
+          error,
+          "Kết nối micrô hoặc hệ thống phân tích giọng nói thất bại.",
+        ),
+      });
     },
   });
 };
