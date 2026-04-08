@@ -89,32 +89,34 @@ export const useVerifyEmail = () => {
           });
 
           toast.success("Xác thực thành công!", {
-            description:
-              "Tài khoản đã được kích hoạt. Đang tự động vào hệ thống...",
+            description: "Tài khoản đã kích hoạt. Đang đưa bạn vào hệ thống...",
           });
 
           const userRoles = fetchedUser?.roles || data.roles || [];
           const targetPath = getRedirectPath(userRoles);
-          router.push(targetPath);
+
+          setTimeout(() => {
+            router.push(targetPath);
+          }, 2500);
         } else {
           toast.success("Xác thực thành công!", {
             description:
-              data.message ||
-              "Tài khoản đã được kích hoạt. Vui lòng đăng nhập lại.",
+              data.message || "Tài khoản đã kích hoạt. Vui lòng đăng nhập.",
           });
-          router.push("/login");
+
+          // Delay một chút rồi mới đá về login
+          setTimeout(() => {
+            router.push("/login");
+          }, 2000);
         }
       } catch (error) {
-        toast.error("Lỗi đồng bộ dữ liệu", {
-          description: "Lỗi thiết lập phiên đăng nhập sau khi xác thực.",
+        toast.error("Lỗi xác thực", {
+          description: "Không thể thiết lập phiên đăng nhập.",
         });
       }
     },
     onError: (error: any) => {
-      const message = extractErrorMessage(
-        error,
-        "Mã xác nhận không hợp lệ hoặc đã hết hạn.",
-      );
+      const message = extractErrorMessage(error, "Mã xác nhận không hợp lệ.");
       toast.error("Lỗi xác thực", { description: message });
     },
   });
