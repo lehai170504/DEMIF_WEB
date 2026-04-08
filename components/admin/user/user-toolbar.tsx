@@ -6,12 +6,11 @@ import { cn } from "@/lib/utils";
 
 export type UserStatus = "all" | "active" | "inactive" | "banned";
 
-// Map trạng thái tiếng Anh sang tiếng Việt để hiển thị đẹp hơn
 const STATUS_MAP: Record<UserStatus, string> = {
-  all: "Tất cả",
-  active: "Hoạt động",
-  inactive: "Đình chỉ",
-  banned: "Bị cấm",
+  all: "Tất cả học viên",
+  active: "Đang hoạt động",
+  inactive: "Tạm đình chỉ",
+  banned: "Đã ban",
 };
 
 interface UserToolbarProps {
@@ -24,20 +23,23 @@ export function UserToolbar({
   onFilterChange,
 }: UserToolbarProps) {
   return (
-    <Card className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm relative overflow-hidden font-mono">
+    <Card className="rounded-[2.5rem] border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 p-6 shadow-sm relative overflow-hidden font-mono transition-colors duration-300 backdrop-blur-md">
+      {/* Tia sáng gradient nhẹ phía trên để tăng chiều sâu */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/10 dark:via-orange-500/20 to-transparent pointer-events-none" />
+
       <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 relative z-10">
         {/* Nhãn lọc */}
-        <div className="flex items-center gap-2 mr-2">
-          <div className="p-1.5 bg-slate-100 rounded-lg border border-slate-200">
-            <Filter className="h-4 w-4 text-slate-500" />
+        <div className="flex items-center gap-3 mr-4">
+          <div className="p-2 bg-slate-100 dark:bg-orange-500/10 rounded-xl border border-slate-200 dark:border-orange-500/20 transition-colors">
+            <Filter className="h-4 w-4 text-slate-500 dark:text-orange-500" />
           </div>
-          <span className="text-sm font-semibold text-slate-600">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-500">
             Lọc trạng thái:
           </span>
         </div>
 
         {/* Các nút chọn trạng thái */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {(["all", "active", "inactive", "banned"] as UserStatus[]).map(
             (status) => {
               const isActive = activeFilter === status;
@@ -46,10 +48,10 @@ export function UserToolbar({
                   key={status}
                   onClick={() => onFilterChange(status)}
                   className={cn(
-                    "px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border active:scale-95",
+                    "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border outline-none active:scale-95",
                     isActive
-                      ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/10"
-                      : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-800 hover:bg-slate-50",
+                      ? "bg-slate-900 dark:bg-orange-500 text-white border-slate-900 dark:border-orange-600 shadow-lg shadow-slate-900/10 dark:shadow-orange-500/20"
+                      : "bg-white dark:bg-zinc-800 border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500 hover:border-slate-300 dark:hover:border-white/10 hover:text-slate-900 dark:hover:text-white",
                   )}
                 >
                   {STATUS_MAP[status]}

@@ -43,7 +43,7 @@ export default function BlogPage() {
                 Quản trị nội dung
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-3xl md:text-4xl font-black uppercase text-slate-900 dark:text-white leading-tight">
               Kho bài viết{" "}
               <span className="text-slate-400 font-medium text-2xl md:text-3xl">
                 Hệ thống

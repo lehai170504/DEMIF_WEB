@@ -10,6 +10,7 @@ import { Breadcrumbs } from "../navbar/breadcrumbs";
 import { QuickCreate } from "../navbar/quick-create";
 import { ServerStatus } from "../navbar/server-status";
 import { UserAccountNav } from "../navbar/user-account-nav";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function AdminNavbar() {
   const pathname = usePathname();
@@ -42,6 +43,7 @@ export default function AdminNavbar() {
         <TooltipProvider>
           <div className="flex items-center gap-2">
             <ServerStatus />
+            <ThemeToggle />
             {/* <NotificationButton /> */}
           </div>
         </TooltipProvider>

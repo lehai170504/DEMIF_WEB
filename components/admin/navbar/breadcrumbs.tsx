@@ -16,6 +16,7 @@ const routeMap: Record<string, string> = {
   progress: "Tiến độ",
   subscriptions: "Gói dịch vụ",
   "user-subscriptions": "Quản lý đăng ký",
+  payments: "Giao dịch",
 };
 
 export function Breadcrumbs({ pathname }: { pathname: string }) {

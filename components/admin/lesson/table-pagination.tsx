@@ -52,10 +52,10 @@ export default function TablePagination<TData>({
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between px-6 pt-4 pb-6 gap-6 font-mono border-t border-slate-100 bg-white/50 backdrop-blur-sm rounded-b-[2rem]">
+    <div className="flex flex-col md:flex-row items-center justify-between px-6 pt-4 pb-6 gap-6 font-mono border-t border-slate-100 dark:border-white/5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm rounded-b-[2rem] transition-colors duration-300">
       {/* PHẦN 1: TRẠNG THÁI LỰA CHỌN */}
       <div className="flex flex-col gap-1 flex-1">
-        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 tracking-wide">
+        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wide uppercase">
           <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
           Hàng đã chọn: {table.getFilteredSelectedRowModel().rows.length} /{" "}
           {table.getFilteredRowModel().rows.length}
@@ -64,23 +64,23 @@ export default function TablePagination<TData>({
 
       <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-8">
         {/* PHẦN 2: CẤU HÌNH SỐ HÀNG */}
-        <div className="flex items-center space-x-3 bg-slate-100/50 p-1 pl-3 rounded-2xl border border-slate-200/60">
-          <p className="text-[10px] font-bold text-slate-500 tracking-tight">
+        <div className="flex items-center space-x-3 bg-slate-100/50 dark:bg-white/5 p-1 pl-3 rounded-2xl border border-slate-200/60 dark:border-white/10">
+          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-tight uppercase">
             Số hàng mỗi trang
           </p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => table.setPageSize(Number(value))}
           >
-            <SelectTrigger className="h-8 w-[70px] bg-white border-none shadow-sm rounded-xl font-bold text-xs focus:ring-orange-500 focus:ring-offset-0 font-mono">
+            <SelectTrigger className="h-8 w-[70px] bg-white dark:bg-zinc-800 border-none shadow-sm rounded-xl font-bold text-xs focus:ring-orange-500 focus:ring-offset-0 font-mono dark:text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="font-mono rounded-xl shadow-2xl">
+            <SelectContent className="font-mono rounded-xl shadow-2xl bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10">
               {[10, 20, 30, 40, 50].map((size) => (
                 <SelectItem
                   key={size}
                   value={`${size}`}
-                  className="text-xs font-bold focus:bg-orange-50 focus:text-orange-600 font-mono"
+                  className="text-xs font-bold focus:bg-orange-50 dark:focus:bg-orange-500/10 focus:text-orange-600 dark:focus:text-orange-400 font-mono"
                 >
                   {size}
                 </SelectItem>
@@ -89,8 +89,8 @@ export default function TablePagination<TData>({
           </Select>
         </div>
 
-        {/* PHẦN 3: ĐIỀU HƯỚNG SỐ TRANG (MOTION PILL) */}
-        <nav className="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-2xl border border-slate-200/50 shadow-inner font-mono">
+        {/* PHẦN 3: ĐIỀU HƯỚNG SỐ TRANG */}
+        <nav className="flex items-center gap-1.5 bg-slate-50 dark:bg-white/5 p-1.5 rounded-2xl border border-slate-200/50 dark:border-white/10 shadow-inner font-mono">
           <PaginationNavButton
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
@@ -109,7 +109,7 @@ export default function TablePagination<TData>({
                 return (
                   <div
                     key={`ellipsis-${idx}`}
-                    className="w-6 flex justify-center text-slate-400"
+                    className="w-6 flex justify-center text-slate-400 dark:text-slate-600"
                   >
                     <MoreHorizontal className="h-3 w-3" />
                   </div>
@@ -122,16 +122,16 @@ export default function TablePagination<TData>({
                   whileTap={{ scale: 0.95 }}
                   onClick={() => table.setPageIndex((page as number) - 1)}
                   className={cn(
-                    "h-8 min-w-[32px] px-2 rounded-xl text-[11px] font-bold transition-all relative font-mono",
+                    "h-8 min-w-[32px] px-2 rounded-xl text-[11px] font-bold transition-all relative font-mono outline-none",
                     isCurrent
                       ? "text-white"
-                      : "text-slate-500 hover:bg-slate-200 hover:text-slate-900",
+                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white",
                   )}
                 >
                   {isCurrent && (
                     <motion.div
                       layoutId="activePagePill"
-                      className="absolute inset-0 bg-slate-900 rounded-xl shadow-md shadow-slate-900/20"
+                      className="absolute inset-0 bg-slate-900 dark:bg-orange-500 rounded-xl shadow-md dark:shadow-orange-500/20"
                       transition={{
                         type: "spring",
                         bounce: 0.3,
@@ -177,10 +177,10 @@ function PaginationNavButton({
         variant="ghost"
         size="icon"
         className={cn(
-          "h-8 w-8 rounded-xl transition-all",
+          "h-8 w-8 rounded-xl transition-all outline-none",
           !disabled
-            ? "text-slate-600 hover:bg-white hover:shadow-sm hover:text-orange-600"
-            : "text-slate-300 cursor-not-allowed opacity-50",
+            ? "text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-zinc-800 hover:shadow-sm hover:text-orange-600 dark:hover:text-orange-400"
+            : "text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50",
         )}
         onClick={onClick}
         disabled={disabled}

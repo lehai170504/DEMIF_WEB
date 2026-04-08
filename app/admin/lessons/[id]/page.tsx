@@ -28,8 +28,9 @@ import {
   LESSON_TYPES,
   LESSON_LEVELS,
 } from "@/components/admin/lesson/lesson.constants";
+import { cn } from "@/lib/utils";
 
-// Hàm xử lý Tags từ chuỗi JSON của BE về dạng text phẩy
+// Helpers giữ nguyên logic
 const parseTagsForInput = (tagsRaw?: string | null) => {
   if (!tagsRaw) return "";
   try {
@@ -53,7 +54,6 @@ const normalizeSelectValue = (
   return match ? match.value : defaultValue;
 };
 
-// ĐÃ SỬA LỖI TYPE: Khai báo rõ kiểu Variants cho object
 const tabVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
   visible: {
@@ -79,7 +79,6 @@ export default function LessonDetailPage() {
   const { data: lesson, isLoading: isFetching } = useLesson(lessonId);
   const { updateLesson, isUpdating } = useLessonActions();
 
-  // KHỞI TẠO FORM VỚI UPDATE SCHEMA
   const form = useForm<UpdateLessonFormValues>({
     resolver: zodResolver(UpdateLessonSchema),
     defaultValues: {
@@ -127,53 +126,40 @@ export default function LessonDetailPage() {
 
   const onSubmit = (values: UpdateLessonFormValues) => {
     if (!lesson) return;
-
     const formattedTags =
       values.tags && values.tags.trim() !== "" ? values.tags.trim() : null;
-
-    // MAP DỮ LIỆU PAYLOAD CHUẨN XÁC CHO BE (PUT)
     const payload: UpdateLessonRequest = {
-      title: values.title,
-      description: values.description,
-      lessonType: values.lessonType,
-      level: values.level,
-      category: values.category,
-      audioUrl: values.audioUrl || null,
-      mediaUrl: values.mediaUrl || null,
-      mediaType: values.mediaType || "audio",
-      thumbnailUrl: values.thumbnailUrl || null,
-      // Gửi fullTranscript nếu có thay đổi. Nếu nó rỗng thì gửi undefined để BE bỏ qua
-      fullTranscript: values.fullTranscript ? values.fullTranscript : undefined,
-      isPremiumOnly: values.isPremiumOnly,
+      ...values,
       displayOrder: Number(values.displayOrder),
       tags: formattedTags,
+      fullTranscript: values.fullTranscript ? values.fullTranscript : undefined,
     };
 
-    updateLesson(
-      { id: lesson.id, data: payload },
-      {
-        onSuccess: () => {
-          // Tuỳ chọn: Chuyển về tab Overview sau khi update thành công
-          // setActiveTab("overview");
-        },
-      },
-    );
+    updateLesson({ id: lesson.id, data: payload });
   };
 
   if (isFetching) {
     return (
-      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-slate-500 font-sans">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-        <p className="text-sm font-medium">Đang tải dữ liệu bài học...</p>
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 font-mono animate-pulse">
+        <Loader2 className="h-10 w-10 animate-spin text-orange-500 mb-4" />
+        <p className="text-[10px] font-black uppercase tracking-[0.2em]">
+          Đang tải dữ liệu bài học...
+        </p>
       </div>
     );
   }
 
   if (!lesson) {
     return (
-      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-slate-500 font-sans">
-        <p className="text-sm font-medium mb-2">Không tìm thấy bài học.</p>
-        <Button variant="link" onClick={() => router.push("/admin/lessons")}>
+      <div className="w-full h-[60vh] flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 font-mono">
+        <p className="text-sm font-bold mb-4 uppercase tracking-widest">
+          Không tìm thấy bài học.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/admin/lessons")}
+          className="rounded-xl border-slate-200 dark:border-white/10"
+        >
           Quay lại danh sách
         </Button>
       </div>
@@ -184,59 +170,69 @@ export default function LessonDetailPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-[1200px] mx-auto space-y-6 pb-12 font-mono px-4 lg:px-8"
+      className="w-full max-w-[1400px] mx-auto space-y-6 pb-12 font-mono px-4 lg:px-12 transition-colors duration-300"
     >
       {/* NÚT QUAY LẠI */}
       <button
         onClick={() => router.push("/admin/lessons")}
-        className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors mb-2 mt-6"
+        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all mb-2 mt-6 group"
       >
-        <ArrowLeft className="h-4 w-4" /> Quay lại danh sách
+        <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-1" />{" "}
+        Quay lại danh sách
       </button>
 
       {/* HEADER CHI TIẾT BÀI HỌC */}
-      <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-orange-50 rounded-xl border border-orange-100">
-              <LayoutTemplate className="h-5 w-5 text-orange-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Chi tiết bài học
+      <div className="bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-white/5 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl border border-orange-100 dark:border-orange-500/20">
+            <LayoutTemplate className="h-6 w-6 text-orange-600 dark:text-orange-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+              Biên tập bài học
             </h1>
-            <Badge
-              variant={lesson.status === "published" ? "default" : "secondary"}
-              className="ml-2 uppercase text-[10px]"
-            >
-              {lesson.status}
-            </Badge>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge
+                variant="outline"
+                className="uppercase text-[9px] font-black tracking-widest border-orange-200 dark:border-orange-500/30 text-orange-600 dark:text-orange-400"
+              >
+                ID: {lesson.id.split("-")[0]}
+              </Badge>
+              <Badge
+                className={cn(
+                  "uppercase text-[9px] font-black tracking-widest",
+                  lesson.status === "published"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400",
+                )}
+              >
+                {lesson.status}
+              </Badge>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
-            className="h-11 bg-white border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl"
+            className="h-12 px-6 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
             onClick={() => setIsDeleteDialogOpen(true)}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            <span className="font-semibold text-sm">Xóa bài</span>
+            <Trash2 className="h-4 w-4 mr-2" /> Xóa bài
           </Button>
 
-          {/* ANIMATION CHO NÚT LƯU */}
           <AnimatePresence mode="wait">
             {activeTab === "edit" && (
               <motion.div
                 key="save-btn"
-                initial={{ opacity: 0, x: 20, width: 0 }}
-                animate={{ opacity: 1, x: 0, width: "auto" }}
-                exit={{ opacity: 0, x: 20, width: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
               >
                 <Button
                   type="submit"
                   form="update-lesson-form"
-                  className="h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md shadow-blue-500/20 px-6 transition-all active:scale-95 whitespace-nowrap"
+                  className="h-12 px-8 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95"
                   disabled={isUpdating}
                 >
                   {isUpdating ? (
@@ -253,132 +249,101 @@ export default function LessonDetailPage() {
       </div>
 
       {/* NỘI DUNG TABS */}
-      <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm min-h-[500px] overflow-hidden">
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full relative"
-        >
-          <TabsList className="w-full bg-slate-100/50 p-1.5 rounded-2xl mb-8 grid grid-cols-3 h-14 relative z-10">
+      <div className="bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-white/5 rounded-[3rem] p-4 shadow-sm min-h-[600px]">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full bg-slate-100/50 dark:bg-white/5 p-2 rounded-[2rem] mb-8 grid grid-cols-3 h-16">
             <TabsTrigger
               value="overview"
-              className="rounded-xl font-semibold text-sm text-slate-500 data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm transition-all"
+              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-lg transition-all"
             >
               Tổng quan
             </TabsTrigger>
             <TabsTrigger
               value="edit"
-              className="rounded-xl font-semibold text-sm text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all"
+              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-lg transition-all"
             >
-              Chỉnh sửa nội dung
+              Nội dung
             </TabsTrigger>
             <TabsTrigger
               value="preview"
-              className="rounded-xl font-semibold text-sm text-slate-500 data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm transition-all"
+              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-purple-600 dark:data-[state=active]:text-purple-400 data-[state=active]:shadow-lg transition-all"
             >
-              Xem trước & Kiểm định
+              Kiểm định
             </TabsTrigger>
           </TabsList>
 
-          <div className="relative">
+          <div className="px-4 pb-4">
             <AnimatePresence mode="wait">
-              {/* TAB 1: TỔNG QUAN */}
               {activeTab === "overview" && (
                 <motion.div
+                  key="ov"
                   variants={tabVariants}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  key="tab-overview"
                 >
-                  <TabsContent
-                    value="overview"
-                    className="mt-0 outline-none m-0"
-                    forceMount
-                  >
-                    <LessonOverviewTab lesson={lesson} />
-                  </TabsContent>
+                  <LessonOverviewTab lesson={lesson} />
                 </motion.div>
               )}
 
-              {/* TAB 2: CHỈNH SỬA */}
               {activeTab === "edit" && (
                 <motion.div
+                  key="ed"
                   variants={tabVariants}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  key="tab-edit"
                 >
-                  <TabsContent
-                    value="edit"
-                    className="mt-0 outline-none m-0"
-                    forceMount
-                  >
-                    <Form {...form}>
-                      <form
-                        id="update-lesson-form"
-                        onSubmit={form.handleSubmit(onSubmit)}
-                      >
-                        <LessonFormFields
-                          form={form as any}
-                          isEditMode={true}
-                        />
+                  <Form {...form}>
+                    <form
+                      id="update-lesson-form"
+                      onSubmit={form.handleSubmit(onSubmit)}
+                    >
+                      <LessonFormFields form={form as any} isEditMode={true} />
 
-                        <AnimatePresence>
-                          {Object.keys(formErrors).length > 0 && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="mt-8 p-5 bg-red-50 border border-red-100 rounded-2xl overflow-hidden"
-                            >
-                              <p className="text-red-600 text-sm font-bold mb-3">
-                                Vui lòng sửa các lỗi sau để lưu:
-                              </p>
-                              <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-red-500 font-medium">
-                                {Object.entries(formErrors).map(
-                                  ([key, err]) => (
-                                    <li
-                                      key={key}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <span className="h-1.5 w-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                                      <span className="text-xs bg-white px-2 py-0.5 rounded-md text-red-400 border border-red-100">
-                                        {key}
-                                      </span>
-                                      <span className="truncate">
-                                        {err?.message as string}
-                                      </span>
-                                    </li>
-                                  ),
-                                )}
-                              </ul>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </form>
-                    </Form>
-                  </TabsContent>
+                      {/* Error Summary */}
+                      <AnimatePresence>
+                        {Object.keys(formErrors).length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-8 p-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[2rem] overflow-hidden"
+                          >
+                            <p className="text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest mb-4">
+                              Lỗi nhập liệu:
+                            </p>
+                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {Object.entries(formErrors).map(([key, err]) => (
+                                <li
+                                  key={key}
+                                  className="flex items-center gap-2 text-xs font-bold text-red-500/80"
+                                >
+                                  <span className="h-1 w-1 rounded-full bg-red-500 shrink-0" />
+                                  <span className="opacity-60 uppercase text-[9px]">
+                                    {key}:
+                                  </span>{" "}
+                                  {err?.message as string}
+                                </li>
+                              ))}
+                            </ul>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </form>
+                  </Form>
                 </motion.div>
               )}
 
-              {/* TAB 3: XEM TRƯỚC */}
               {activeTab === "preview" && (
                 <motion.div
+                  key="pv"
                   variants={tabVariants}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  key="tab-preview"
                 >
-                  <TabsContent
-                    value="preview"
-                    className="mt-0 outline-none m-0"
-                    forceMount
-                  >
-                    <DictationPreviewTab lessonId={lessonId} />
-                  </TabsContent>
+                  <DictationPreviewTab lessonId={lessonId} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -386,7 +351,6 @@ export default function LessonDetailPage() {
         </Tabs>
       </div>
 
-      {/* DIALOG XÓA BÀI HỌC */}
       <DeleteLessonDialog
         lessonId={lessonId}
         lessonTitle={lesson?.title || ""}

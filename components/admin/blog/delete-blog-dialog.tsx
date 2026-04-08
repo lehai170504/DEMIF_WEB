@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2, AlertTriangle, Fingerprint } from "lucide-react";
 import { useManageBlog } from "@/hooks/use-manage-blog";
+import { cn } from "@/lib/utils";
 
 interface DeleteBlogDialogProps {
   blogId: string;
@@ -41,59 +42,60 @@ export function DeleteBlogDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-white rounded-[2.5rem] font-mono p-0 overflow-hidden border-none shadow-2xl">
-        <DialogHeader className="p-10 bg-red-50/50 border-b border-red-100">
-          <div className="flex items-center gap-4 mb-2">
+      <DialogContent className="sm:max-w-[500px] bg-white dark:bg-zinc-950 rounded-[2.5rem] font-mono p-0 overflow-hidden border-none shadow-2xl transition-colors duration-300">
+        {/* Header với tông đỏ cảnh báo mờ */}
+        <DialogHeader className="p-10 bg-red-50/50 dark:bg-red-500/10 border-b border-red-100 dark:border-white/5">
+          <div className="flex items-center gap-4 mb-3">
             <div className="p-3 bg-red-500 rounded-2xl shadow-lg shadow-red-500/20">
               <AlertTriangle className="h-6 w-6 text-white" />
             </div>
-            <DialogTitle className="text-2xl font-bold text-red-600">
+            <DialogTitle className="text-2xl font-black text-red-600 dark:text-red-500 uppercase tracking-tighter">
               Xác Nhận Gỡ Bỏ
             </DialogTitle>
           </div>
-          <DialogDescription className="text-red-400 font-medium text-xs leading-relaxed">
+          <DialogDescription className="text-red-500/80 dark:text-red-400/80 font-bold text-[10px] leading-relaxed uppercase tracking-widest">
             Hành động này sẽ xóa vĩnh viễn bài viết khỏi hệ thống và không thể
-            hoàn tác dữ liệu đã mất.
+            hoàn tác dữ liệu.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-10 space-y-6">
+        <div className="p-10 space-y-8 bg-white dark:bg-zinc-950">
           <div className="space-y-3">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1">
               Đối tượng thực thi
             </p>
-            <div className="p-5 bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
-              <p className="font-bold text-gray-900 leading-tight">
+            <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl space-y-2 group">
+              <p className="font-black text-slate-900 dark:text-white leading-tight text-base">
                 "{blogTitle}"
               </p>
-              <div className="flex items-center gap-2 text-[10px] text-gray-400 font-mono italic">
-                <Fingerprint className="h-3 w-3" />
-                ID: {blogId}
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-mono font-bold uppercase tracking-tighter">
+                <Fingerprint className="h-3.5 w-3.5" />
+                System_ID: {blogId}
               </div>
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-3">
+          <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="flex-1 h-14 rounded-2xl font-bold text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all"
+              className="flex-1 h-14 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all"
             >
-              Hủy bỏ thao tác
+              Hủy bỏ
             </Button>
             <Button
               type="button"
               disabled={isDeleting}
               onClick={handleDelete}
-              className="flex-1 h-14 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-xl shadow-red-600/20 transition-all active:scale-[0.98]"
+              className="flex-1 h-14 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-red-600/20 dark:shadow-red-900/40 transition-all active:scale-95"
             >
               {isDeleting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="mr-2 h-4 w-4" />
               )}
-              Xác nhận xóa ngay
+              Xóa ngay
             </Button>
           </DialogFooter>
         </div>

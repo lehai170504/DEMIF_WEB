@@ -103,12 +103,33 @@ export interface DictationWord {
 }
 
 export interface DictationSegmentPreview {
-  index: number;
+  index?: number;
   startTime: number;
   endTime: number;
-  text: string;
-  wordCount: number;
+  text?: string;
+  originalText?: string; // BE mới đổi/thêm trường này chứa full câu gốc
+  wordCount?: number;
   words: DictationWord[];
+}
+
+export interface DictationWord {
+  text: string;
+  isBlank: boolean;
+  position: number;
+  answer?: string; // BE mới thêm vào để lưu từ gốc bị khuyết
+  hint?: string; // Có thể có hint trong tương lai
+}
+
+export interface DictationPreviewResponse {
+  lessonId: string;
+  title: string;
+  status: string;
+  totalSegments: number;
+  totalWords: number;
+  readyToPublish: boolean;
+  publishBlockers: string[];
+  segments: DictationSegmentPreview[];
+  dictationTemplates?: Record<string, DictationTemplate>;
 }
 
 // --- Interface cho API preview bài tập điền từ (Dictation) ---
@@ -363,7 +384,7 @@ export interface CheckVoiceResponse {
   passThreshold: number;
   isPassed: boolean;
   segmentIndex: number;
-  accuracy: number; 
+  accuracy: number;
   correctCount: number;
   totalWords: number;
   wrongCount: number;

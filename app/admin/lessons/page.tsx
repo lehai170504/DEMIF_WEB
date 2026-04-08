@@ -16,7 +16,6 @@ export default function AdminLessonsPage() {
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
 
-  // Fetch dữ liệu dựa trên status (published, draft, archived)
   const { data, isLoading, isError, refetch } = useLessons({
     page,
     pageSize,
@@ -32,9 +31,11 @@ export default function AdminLessonsPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-500 font-mono animate-pulse">
-        <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-        <p className="text-sm font-medium">Đang đồng bộ dữ liệu bài học...</p>
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-500 dark:text-slate-400 font-mono animate-pulse">
+        <Loader2 className="h-10 w-10 animate-spin text-orange-500 dark:text-orange-400" />
+        <p className="text-[11px] font-black uppercase tracking-widest mt-2">
+          Đang đồng bộ dữ liệu...
+        </p>
       </div>
     );
   }
@@ -42,14 +43,14 @@ export default function AdminLessonsPage() {
   if (isError) {
     return (
       <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 font-mono">
-        <AlertCircle className="h-10 w-10 text-red-500" />
-        <p className="text-sm font-medium text-slate-600">
+        <AlertCircle className="h-10 w-10 text-red-500 dark:text-red-400 mb-2" />
+        <p className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-4">
           Lỗi truy xuất dữ liệu từ máy chủ.
         </p>
         <Button
           variant="outline"
           onClick={() => refetch()}
-          className="rounded-xl"
+          className="rounded-xl font-bold uppercase text-[10px] tracking-widest border-slate-200 dark:border-white/10 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
         >
           Thử lại
         </Button>
@@ -58,13 +59,15 @@ export default function AdminLessonsPage() {
   }
 
   return (
-    <div className="w-full space-y-8 pb-10 font-mono text-slate-900 bg-slate-50/50 min-h-screen">
+    <div className="w-full space-y-8 pb-10 font-mono text-slate-900 dark:text-white bg-slate-50/50 dark:bg-black min-h-screen transition-colors duration-300">
       <div className="relative z-10 space-y-8 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10">
         <LessonHeader />
+
         <LessonFilterBar
           activeStatus={activeStatus}
           onStatusChange={setActiveStatus}
         />
+
         <LessonTableWrapper
           data={lessons}
           pageIndex={page - 1}

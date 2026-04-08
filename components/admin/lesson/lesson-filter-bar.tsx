@@ -24,11 +24,11 @@ export function LessonFilterBar({
   ];
 
   return (
-    <Card className="rounded-[2.5rem] border border-gray-200 bg-white p-8 space-y-4 shadow-sm relative z-10 overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/10 to-transparent pointer-events-none" />
+    <Card className="rounded-[2.5rem] border border-gray-200 dark:border-white/5 bg-white dark:bg-zinc-900/50 p-8 space-y-4 shadow-sm relative z-10 overflow-hidden transition-colors duration-300">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/10 dark:via-orange-500/20 to-transparent pointer-events-none" />
 
       <div className="flex flex-wrap items-center gap-3 relative">
-        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2 flex items-center gap-2">
+        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mr-2 flex items-center gap-2">
           <Filter className="h-3 w-3" /> Lọc trạng thái:
         </span>
 
@@ -40,15 +40,16 @@ export function LessonFilterBar({
               key={item.value}
               onClick={() => onStatusChange(item.value as LessonStatus)}
               className={cn(
-                "px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase transition-colors relative flex items-center gap-2",
-                isActive ? "text-white" : "text-gray-500 hover:text-gray-900",
+                "px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase transition-colors relative flex items-center gap-2 outline-none",
+                isActive
+                  ? "text-white"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white",
               )}
             >
-              {/* Lớp nền hiệu ứng chuyển động */}
               {isActive && (
                 <motion.div
                   layoutId="active-pill"
-                  className="absolute inset-0 bg-orange-500 rounded-xl shadow-lg shadow-orange-500/30"
+                  className="absolute inset-0 bg-orange-500 rounded-xl shadow-lg shadow-orange-500/30 dark:shadow-orange-500/10"
                   transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                 />
               )}

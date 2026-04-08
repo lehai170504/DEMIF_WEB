@@ -40,13 +40,13 @@ const getStatusStyles = (status: string) => {
   const normalizedStatus = status?.toLowerCase() || "unknown";
   switch (normalizedStatus) {
     case "active":
-      return "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm";
+      return "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 shadow-sm";
     case "inactive":
-      return "bg-orange-50 text-orange-700 border-orange-200";
+      return "bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20";
     case "banned":
-      return "bg-red-50 text-red-700 border-red-200";
+      return "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20";
     default:
-      return "bg-slate-50 text-slate-600 border-slate-200";
+      return "bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10";
   }
 };
 
@@ -58,19 +58,20 @@ export function UserTable({ users }: UserTableProps) {
   const memberOnlyList = users.filter((user) => !user.roles?.includes("Admin"));
 
   return (
-    <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm overflow-hidden relative font-mono transition-all">
+    <div className="rounded-[2rem] border border-slate-200 dark:border-white/5 bg-white dark:bg-transparent shadow-sm overflow-hidden relative font-mono transition-all duration-300">
       {/* Table Header Section */}
-      <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-zinc-900/50 backdrop-blur-md">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-orange-500 rounded-xl text-white shadow-md shadow-orange-500/20">
+          <div className="p-3 bg-orange-500 dark:bg-orange-600 rounded-xl text-white shadow-lg shadow-orange-500/20">
             <User className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-bold text-xl text-slate-900 leading-none mb-1.5">
+            <h2 className="font-black text-xl text-slate-900 dark:text-white leading-none mb-1.5 uppercase tracking-tight">
               Danh sách học viên
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
-              Hiển thị {memberOnlyList.length} hồ sơ (Đã ẩn quản trị viên)
+            <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest">
+              Hiển thị {memberOnlyList.length} hồ sơ{" "}
+              <span className="opacity-50">(Hidden Admin)</span>
             </p>
           </div>
         </div>
@@ -79,20 +80,20 @@ export function UserTable({ users }: UserTableProps) {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
-              <TableHead className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <TableRow className="bg-slate-50 dark:bg-zinc-900/30 hover:bg-transparent border-b border-slate-100 dark:border-white/5">
+              <TableHead className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
                 Danh tính học viên
               </TableHead>
-              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <TableHead className="text-center py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
                 Trạng thái
               </TableHead>
-              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 hidden sm:table-cell uppercase tracking-wider">
+              <TableHead className="text-center py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 hidden sm:table-cell uppercase tracking-[0.2em]">
                 Ngày tham gia
               </TableHead>
-              <TableHead className="text-center py-4 text-xs font-semibold text-slate-500 hidden lg:table-cell uppercase tracking-wider">
+              <TableHead className="text-center py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 hidden lg:table-cell uppercase tracking-[0.2em]">
                 Hoạt động cuối
               </TableHead>
-              <TableHead className="text-right px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <TableHead className="text-right px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
                 Thao tác
               </TableHead>
             </TableRow>
@@ -111,7 +112,7 @@ export function UserTable({ users }: UserTableProps) {
                   ? format(new Date(user.createdAt), "dd/MM/yyyy", {
                       locale: vi,
                     })
-                  : "Chưa ghi nhận";
+                  : "N/A";
                 const lastLogin = user.lastLoginAt
                   ? format(new Date(user.lastLoginAt), "HH:mm - dd/MM/yyyy", {
                       locale: vi,
@@ -121,12 +122,12 @@ export function UserTable({ users }: UserTableProps) {
                 return (
                   <TableRow
                     key={user.id}
-                    className="group hover:bg-slate-50/80 transition-colors border-b border-slate-100 last:border-none"
+                    className="group hover:bg-slate-50/80 dark:hover:bg-orange-500/[0.02] transition-colors border-b border-slate-100 dark:border-white/5 last:border-none"
                   >
                     {/* Cột 1: Thông tin User */}
-                    <TableCell className="px-8 py-4">
+                    <TableCell className="px-8 py-5">
                       <div className="flex items-center gap-4">
-                        <Avatar className="h-10 w-10 rounded-xl border border-slate-200 shadow-sm transition-transform group-hover:scale-105">
+                        <Avatar className="h-11 w-11 rounded-[0.8rem] border border-slate-200 dark:border-white/10 shadow-sm transition-transform group-hover:scale-105">
                           <AvatarImage
                             src={
                               user.avatarUrl ||
@@ -134,16 +135,16 @@ export function UserTable({ users }: UserTableProps) {
                             }
                             className="object-cover"
                           />
-                          <AvatarFallback className="bg-slate-100 text-slate-500 font-semibold uppercase">
+                          <AvatarFallback className="bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 font-black uppercase">
                             {user.username?.[0]}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-semibold text-slate-900 group-hover:text-orange-600 transition-colors truncate max-w-[200px]">
+                          <span className="font-black text-slate-900 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors truncate max-w-[200px] text-sm uppercase tracking-tight">
                             {user.username}
                           </span>
-                          <span className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5 truncate max-w-[200px]">
-                            <Mail className="h-3 w-3 text-slate-400" />
+                          <span className="text-[10px] text-slate-500 dark:text-zinc-500 flex items-center gap-1.5 mt-0.5 truncate max-w-[200px] font-bold">
+                            <Mail className="h-3 w-3 text-slate-400 dark:text-zinc-600" />
                             {user.email}
                           </span>
                         </div>
@@ -151,11 +152,11 @@ export function UserTable({ users }: UserTableProps) {
                     </TableCell>
 
                     {/* Cột 2: Badge trạng thái */}
-                    <TableCell className="text-center py-4">
+                    <TableCell className="text-center py-5">
                       <Badge
                         variant="outline"
                         className={cn(
-                          "px-2.5 py-1 rounded-md border font-semibold text-xs flex items-center justify-center gap-1.5 w-fit mx-auto",
+                          "px-3 py-1 rounded-lg border font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-1.5 w-fit mx-auto transition-all",
                           getStatusStyles(user.status),
                         )}
                       >
@@ -169,33 +170,33 @@ export function UserTable({ users }: UserTableProps) {
                     </TableCell>
 
                     {/* Cột 3: Ngày tham gia */}
-                    <TableCell className="text-center py-4 hidden sm:table-cell">
-                      <div className="flex items-center justify-center gap-2 text-slate-600 text-sm font-medium">
-                        <Calendar className="w-4 h-4 text-slate-400" />
+                    <TableCell className="text-center py-5 hidden sm:table-cell">
+                      <div className="flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-black uppercase tracking-tighter">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-600" />
                         {joinedDate}
                       </div>
                     </TableCell>
 
-                    {/* Cột 4: Lịch sử đăng nhập */}
-                    <TableCell className="text-center py-4 hidden lg:table-cell">
-                      <div className="inline-flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-                        <Clock className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="font-medium text-slate-600 text-xs">
+                    {/* Cột 4: Hoạt động cuối */}
+                    <TableCell className="text-center py-5 hidden lg:table-cell">
+                      <div className="inline-flex items-center justify-center gap-2 bg-slate-50/50 dark:bg-white/5 border border-slate-200 dark:border-white/5 px-3 py-1.5 rounded-xl">
+                        <Clock className="h-3 w-3 text-slate-400 dark:text-zinc-600" />
+                        <span className="font-black text-slate-600 dark:text-slate-400 text-[10px] uppercase tracking-tighter">
                           {lastLogin}
                         </span>
                       </div>
                     </TableCell>
 
-                    {/* Cột 5: Nút chuyển trang chi tiết */}
-                    <TableCell className="text-right px-8 py-4">
+                    {/* Cột 5: Action */}
+                    <TableCell className="text-right px-8 py-5">
                       <Link href={`/admin/users/${user.id}`}>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-9 px-3 rounded-xl border border-transparent hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 text-slate-400 transition-all group/btn"
+                          className="h-10 px-4 rounded-xl border border-transparent hover:border-orange-200 dark:hover:border-orange-500/30 hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:text-orange-600 dark:hover:text-orange-400 text-slate-400 dark:text-slate-500 transition-all group/btn"
                         >
-                          <span className="text-xs font-bold mr-1 hidden md:inline">
-                            Chi tiết
+                          <span className="text-[10px] font-black uppercase tracking-widest mr-2 hidden md:inline">
+                            Hồ sơ
                           </span>
                           <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                         </Button>
@@ -206,13 +207,13 @@ export function UserTable({ users }: UserTableProps) {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-60 text-center py-10">
-                  <div className="flex flex-col items-center justify-center gap-3 opacity-60">
-                    <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-2">
-                      <Search className="h-6 w-6 text-slate-400" />
+                <TableCell colSpan={5} className="h-72 text-center py-10">
+                  <div className="flex flex-col items-center justify-center gap-4 opacity-40">
+                    <div className="h-16 w-16 rounded-[2rem] bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mb-2 border border-slate-200 dark:border-white/5">
+                      <Search className="h-8 w-8 text-slate-400" />
                     </div>
-                    <p className="font-medium text-sm text-slate-500">
-                      Không tìm thấy học viên nào phù hợp.
+                    <p className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+                      Empty_Database_Result
                     </p>
                   </div>
                 </TableCell>

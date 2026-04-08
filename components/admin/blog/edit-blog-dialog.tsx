@@ -41,6 +41,7 @@ import { useManageBlog } from "@/hooks/use-manage-blog";
 import { BlogSchema, BlogFormValues } from "@/schemas/blog.schema";
 import { BlogDto, CreateBlogRequest } from "@/types/blog.type";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface EditBlogDialogProps {
   blog: BlogDto;
@@ -64,7 +65,7 @@ export function EditBlogDialog({
       Summary: blog.summary || "",
       Tags: blog.tags || "",
       Status: blog.status || "Published",
-      ThumbnailFile: undefined, // Mặc định không bắt buộc chọn
+      ThumbnailFile: undefined,
     },
   });
 
@@ -87,7 +88,6 @@ export function EditBlogDialog({
   }, [previewUrl]);
 
   const onSubmit = (values: BlogFormValues) => {
-    // 1. Khởi tạo Object Request
     const payload: CreateBlogRequest = {
       Title: values.Title,
       Content: values.Content,
@@ -96,14 +96,9 @@ export function EditBlogDialog({
       Status: values.Status ?? "Published",
     };
 
-    // 2. Xử lý logic File
     if (values.ThumbnailFile instanceof File) {
-      // Nếu người dùng chọn file mới -> Đưa vào payload
       payload.ThumbnailFile = values.ThumbnailFile;
     }
-    // LƯU Ý: Nếu thiết kế của BE bắt buộc phải có trường này kể cả khi không đổi,
-    // bạn cần trao đổi lại vì thông thường File cũ đã nằm trên Server,
-    // chúng ta không thể gửi ngược từ URL về File object được.
 
     updateBlog(
       { id: blog.id, data: payload },
@@ -111,7 +106,6 @@ export function EditBlogDialog({
         onSuccess: () => {
           onOpenChange(false);
           setPreviewUrl(null);
-          // manualForm.reset(); // Nếu cần
         },
       },
     );
@@ -119,9 +113,9 @@ export function EditBlogDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[850px] bg-white rounded-[2.5rem] font-mono p-0 overflow-hidden border-none shadow-2xl">
-        <DialogHeader className="p-10 bg-gray-50/50 border-b border-gray-100">
-          <DialogTitle className="text-2xl font-bold flex items-center gap-3 text-gray-900 leading-none">
+      <DialogContent className="sm:max-w-[850px] bg-white dark:bg-zinc-950 rounded-[2.5rem] font-mono p-0 overflow-hidden border-none shadow-2xl transition-colors duration-300">
+        <DialogHeader className="p-10 bg-gray-50/50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-white/5">
+          <DialogTitle className="text-2xl font-black flex items-center gap-3 text-gray-900 dark:text-white uppercase tracking-tighter">
             <Edit3 className="w-6 h-6 text-blue-500" /> Hiệu đính bài viết
           </DialogTitle>
         </DialogHeader>
@@ -129,34 +123,41 @@ export function EditBlogDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="p-10 space-y-6 max-h-[75vh] overflow-y-auto no-scrollbar font-mono"
+            className="p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar font-mono bg-white dark:bg-zinc-950"
           >
             {/* Visual Preview: Old vs New */}
-            <div className="grid grid-cols-2 gap-4 pb-4 border-b border-dashed border-gray-200">
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">
+            <div className="grid grid-cols-2 gap-6 pb-6 border-b border-dashed border-gray-200 dark:border-white/10">
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
                   Ảnh hiện tại
                 </p>
-                <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-gray-100 bg-gray-50">
+                <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-zinc-900 shadow-inner">
                   <Image
                     src={blog.thumbnailUrl || "/placeholder-blog.png"}
                     alt="Current thumbnail"
                     fill
-                    className="object-cover opacity-60"
+                    className="object-cover opacity-40 dark:opacity-20 grayscale"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/5">
-                    <span className="bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">
-                      ORIGINAL
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-white/90 dark:bg-zinc-800 text-[9px] font-black px-3 py-1.5 rounded-full shadow-sm dark:text-slate-400 border border-white/10 uppercase tracking-widest">
+                      Original
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider ml-1">
-                  Ảnh thay thế (Preview)
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-widest ml-1">
+                  Ảnh thay thế
                 </p>
-                <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-dashed border-blue-200 bg-blue-50/30 flex items-center justify-center">
+                <div
+                  className={cn(
+                    "relative aspect-video rounded-2xl overflow-hidden border-2 border-dashed transition-all flex items-center justify-center",
+                    previewUrl
+                      ? "border-blue-500 dark:border-blue-400 bg-blue-50/10"
+                      : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-900",
+                  )}
+                >
                   {previewUrl ? (
                     <Image
                       src={previewUrl}
@@ -166,9 +167,9 @@ export function EditBlogDialog({
                     />
                   ) : (
                     <div className="text-center space-y-1">
-                      <ImageIcon className="w-8 h-8 text-blue-200 mx-auto" />
-                      <p className="text-[10px] text-blue-300 font-bold px-4">
-                        Giữ ảnh hiện tại
+                      <ImageIcon className="w-8 h-8 text-slate-200 dark:text-zinc-800 mx-auto" />
+                      <p className="text-[9px] text-slate-400 dark:text-zinc-600 font-black uppercase tracking-tighter">
+                        Chưa có thay đổi
                       </p>
                     </div>
                   )}
@@ -183,16 +184,16 @@ export function EditBlogDialog({
                   name="Title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-400 ml-1">
-                        Tiêu đề bài viết
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">
+                        Tiêu đề
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="h-12 bg-gray-50 border-gray-100 font-bold rounded-xl focus:border-blue-500 transition-all font-mono"
+                          className="h-14 bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-bold rounded-xl focus:ring-blue-500 dark:text-white font-mono text-sm shadow-sm transition-all"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage className="text-[10px] font-bold" />
+                      <FormMessage className="text-[10px] font-bold text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -203,7 +204,7 @@ export function EditBlogDialog({
                   name="Status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-400 ml-1">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">
                         Trạng thái
                       </FormLabel>
                       <Select
@@ -211,18 +212,24 @@ export function EditBlogDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-12 bg-gray-50 border-gray-100 font-bold rounded-xl focus:border-blue-500 font-mono text-xs">
+                          <SelectTrigger className="h-14 bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-black rounded-xl font-mono text-[10px] uppercase tracking-widest dark:text-slate-200 shadow-sm">
                             <SelectValue placeholder="Chọn" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="font-mono font-bold">
-                          <SelectItem value="Published">
-                            <div className="flex items-center gap-2 text-emerald-600 text-xs">
+                        <SelectContent className="font-mono bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 shadow-2xl">
+                          <SelectItem
+                            value="Published"
+                            className="focus:bg-emerald-50 dark:focus:bg-emerald-500/10"
+                          >
+                            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase">
                               <Globe className="w-3.5 h-3.5" /> Công khai
                             </div>
                           </SelectItem>
-                          <SelectItem value="Draft">
-                            <div className="flex items-center gap-2 text-orange-500 text-xs">
+                          <SelectItem
+                            value="Draft"
+                            className="focus:bg-orange-50 dark:focus:bg-orange-500/10"
+                          >
+                            <div className="flex items-center gap-2 text-orange-500 font-bold text-[10px] uppercase">
                               <Lock className="w-3.5 h-3.5" /> Bản nháp
                             </div>
                           </SelectItem>
@@ -240,23 +247,23 @@ export function EditBlogDialog({
                 name="ThumbnailFile"
                 render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold text-gray-400 ml-1">
-                      Thay đổi ảnh (Tùy chọn)
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">
+                      Cập nhật ảnh bìa
                     </FormLabel>
                     <FormControl>
-                      <div className="relative h-12">
+                      <div className="relative h-14">
                         <input
                           type="file"
                           accept="image/*"
                           className="absolute inset-0 opacity-0 cursor-pointer z-10"
                           onChange={(e) => handleFileChange(e, onChange)}
                         />
-                        <div className="h-full bg-gray-900 border-gray-800 border rounded-xl flex items-center px-4 gap-3 text-white font-bold text-xs shadow-lg transition-colors hover:bg-blue-600">
-                          <FileImage className="w-4 h-4 text-blue-300" />
+                        <div className="h-full bg-gray-900 dark:bg-zinc-800 border-gray-800 dark:border-white/5 border rounded-xl flex items-center px-5 gap-3 text-white font-black text-[10px] uppercase tracking-widest shadow-lg transition-all hover:bg-blue-600">
+                          <FileImage className="w-4 h-4 text-blue-400" />
                           <span className="truncate">
                             {value instanceof File
                               ? value.name
-                              : "Giữ nguyên ảnh cũ..."}
+                              : "Chọn tệp thay thế..."}
                           </span>
                         </div>
                       </div>
@@ -269,12 +276,12 @@ export function EditBlogDialog({
                 name="Tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold text-gray-400 ml-1">
-                      Thẻ phân loại (Tags)
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">
+                      Thẻ phân loại
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="h-12 bg-gray-50 border-gray-100 font-bold rounded-xl focus:border-blue-500 font-mono"
+                        className="h-14 bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-bold rounded-xl focus:ring-blue-500 dark:text-white font-mono text-sm shadow-sm"
                         {...field}
                         value={field.value ?? ""}
                       />
@@ -289,12 +296,12 @@ export function EditBlogDialog({
               name="Summary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold text-gray-400 ml-1 flex items-center gap-2">
-                    <AlignLeft className="w-3 h-3" /> Tóm tắt
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 flex items-center gap-2">
+                    <AlignLeft className="w-3 h-3" /> Tóm tắt nội dung
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="min-h-[80px] bg-gray-50 border-gray-100 font-mono p-4 rounded-xl resize-none font-bold"
+                      className="min-h-[80px] bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-mono p-4 rounded-2xl resize-none font-bold text-sm shadow-sm focus:ring-blue-500 dark:text-slate-200 custom-scrollbar"
                       {...field}
                       value={field.value ?? ""}
                     />
@@ -308,30 +315,30 @@ export function EditBlogDialog({
               name="Content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold text-gray-400 ml-1">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">
                     Nội dung chi tiết
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="min-h-[200px] bg-gray-50 border-gray-100 font-mono p-5 rounded-[1.5rem] leading-relaxed font-bold text-sm"
+                      className="min-h-[250px] bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-mono p-6 rounded-[2rem] leading-relaxed font-bold text-sm shadow-sm focus:ring-blue-500 dark:text-slate-200 custom-scrollbar"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
+                  <FormMessage className="text-[10px] font-bold text-red-500" />
                 </FormItem>
               )}
             />
 
             <Button
               disabled={isUpdating}
-              className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl transition-all active:scale-[0.98] text-sm font-mono"
+              className="w-full h-20 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-black rounded-[1.5rem] shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98] text-[11px] uppercase tracking-[0.3em] mt-4 font-mono"
             >
               {isUpdating ? (
-                <Loader2 className="animate-spin mr-3 h-5 w-5" />
+                <Loader2 className="animate-spin mr-3 h-6 w-6" />
               ) : (
-                <Save className="w-5 h-5 mr-3" />
+                <Save className="w-6 h-6 mr-3" />
               )}
-              Xác nhận cập nhật hệ thống
+              Xác nhận cập nhật
             </Button>
           </form>
         </Form>
