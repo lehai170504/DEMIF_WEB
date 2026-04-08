@@ -50,13 +50,11 @@ export interface UserSubscriptionDto {
 // Admin only - Payload gửi lên BE khi Tạo/Sửa
 export interface CreatePlanRequest {
   name: string;
-  tier: string;
   price: number;
   currency: string;
-  billingCycle: string;
-  durationDays: number | null;
+  billingCycle: number;
   features: string[];
-  badgeText?: string;
-  badgeColor?: string;
+  badgeText?: string | null;
+  badgeColor?: string | null;
   isActive: boolean;
 }

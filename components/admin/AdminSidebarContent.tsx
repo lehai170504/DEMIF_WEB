@@ -16,36 +16,63 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUserProfile } from "@/hooks/use-user";
 
-const MENU_GROUPS = [
+type MenuItem = {
+  href: string;
+  icon: any;
+  label: string;
+  adminOnly?: boolean;
+};
+
+type MenuGroup = {
+  group: string;
+  items: MenuItem[];
+};
+
+const MENU_GROUPS: MenuGroup[] = [
   {
-    group: "Tổng quan",
-    items: [{ href: "/admin", icon: LayoutDashboard, label: "Dashboard" }],
-  },
-  {
-    group: "Nội dung",
+    group: "TỔNG QUAN",
     items: [
-      { href: "/admin/lessons", icon: BookOpen, label: "Bài tập" },
-      { href: "/admin/blogs", icon: Newspaper, label: "Blog" },
+      {
+        href: "/admin",
+        icon: LayoutDashboard,
+        label: "BẢNG ĐIỀU KHIỂN",
+        adminOnly: true,
+      },
     ],
   },
   {
-    group: "Hệ thống",
+    group: "NỘI DUNG",
     items: [
-      { href: "/admin/users", icon: Users, label: "Người dùng" },
+      { href: "/admin/lessons", icon: BookOpen, label: "BÀI TẬP" },
+      { href: "/admin/blogs", icon: Newspaper, label: "BÀI VIẾT BLOG" },
+    ],
+  },
+  {
+    group: "HỆ THỐNG",
+    items: [
+      {
+        href: "/admin/users",
+        icon: Users,
+        label: "TÀI KHOẢN",
+        adminOnly: true,
+      },
       {
         href: "/admin/subscriptions",
         icon: Package,
-        label: "Gói dịch vụ",
+        label: "GÓI DỊCH VỤ",
+        adminOnly: true,
       },
       {
         href: "/admin/payments",
         icon: Receipt,
-        label: "Thanh toán",
+        label: "GIAO DỊCH",
+        adminOnly: true,
       },
       {
         href: "/admin/user-subscriptions",
         icon: UserCheck,
-        label: "Người đăng ký",
+        label: "NGƯỜI DÙNG - GÓI DỊCH VỤ",
+        adminOnly: true,
       },
     ],
   },
@@ -53,32 +80,32 @@ const MENU_GROUPS = [
 
 const NavItem = ({ href, icon: Icon, label, isActive, showText }: any) => {
   return (
-    <Link href={href} className="block w-full">
+    <Link href={href} className="block w-full outline-none font-mono">
       <div
         className={cn(
-          "group relative flex items-center h-12 rounded-[1rem] transition-all duration-300 mb-2 px-4 mx-3",
+          "group relative flex items-center h-12 rounded-[1rem] transition-all duration-300 mb-1.5 px-4 mx-3",
           "hover:translate-x-1 active:scale-95",
           isActive
-            ? "bg-[#FF7A00] text-white shadow-lg shadow-orange-500/20"
-            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-white",
-          !showText && "justify-center px-0 mx-2 w-12", // Vuông vức khi thu gọn
+            ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/20"
+            : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white",
+          !showText && "justify-center px-0 mx-2 w-12",
         )}
       >
         <Icon
           className={cn(
             "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-110",
             showText && "mr-3",
+            isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100",
           )}
         />
         {showText && (
-          <span className="text-sm font-bold tracking-tight capitalize truncate">
+          <span className="text-[11px] font-black uppercase tracking-widest truncate">
             {label}
           </span>
         )}
 
-        {/* Vạch kẻ chỉ báo trạng thái Active siêu nhỏ bên trái */}
         {isActive && (
-          <div className="absolute -left-3 w-1.5 h-6 bg-[#FF7A00] rounded-r-full shadow-[0_0_8px_rgba(255,122,0,0.8)]" />
+          <div className="absolute -left-3 w-1.5 h-6 bg-orange-500 rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
         )}
       </div>
     </Link>
@@ -98,26 +125,40 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
 
   const avatarSrc =
     user?.avatarUrl ||
-    `https://ui-avatars.com/api/?name=${user?.username || "Admin"}&background=FF7A00&color=fff&bold=true`;
-  const displayName = user?.username || "Admin User";
-  const roleDisplay = user?.roles?.includes("Admin")
-    ? "Master Admin"
-    : "Moderator";
+    `https://ui-avatars.com/api/?name=${user?.username || "A"}&background=FF7A00&color=fff&bold=true`;
+  const displayName = user?.username || "HỆ THỐNG";
+
+  const rolesArray: string[] = Array.isArray(user?.roles)
+    ? user.roles
+    : [user?.roles || ""];
+
+  const isAdmin = rolesArray.some(
+    (r) => typeof r === "string" && r.toLowerCase() === "admin",
+  );
+
+  const roleDisplay = isAdmin ? "QUẢN TRỊ VIÊN" : "ĐIỀU HÀNH VIÊN";
+
+  const visibleMenuGroups = MENU_GROUPS.map((group) => {
+    const filteredItems = group.items.filter(
+      (item) => isAdmin || !item.adminOnly,
+    );
+    return { ...group, items: filteredItems };
+  }).filter((group) => group.items.length > 0);
 
   return (
     <div className="flex flex-col h-full font-mono py-4">
       {/* ================= HEADER: ADMIN PROFILE ================= */}
       <div
         className={cn(
-          "flex items-center justify-center h-20 mb-4 transition-all duration-500",
+          "flex items-center justify-center h-20 mb-6 transition-all duration-500",
           showText ? "px-5" : "px-3",
         )}
       >
         <div
           className={cn(
-            "flex items-center gap-3 w-full p-2.5 rounded-2xl transition-all duration-500 relative overflow-hidden group cursor-pointer",
+            "flex items-center gap-3 w-full p-2.5 rounded-[1.25rem] transition-all duration-500 relative overflow-hidden group cursor-pointer",
             showText
-              ? "bg-slate-50 dark:bg-zinc-900/50 border border-slate-200/60 dark:border-white/5 shadow-inner hover:border-orange-200 dark:hover:border-orange-500/30"
+              ? "bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 shadow-inner hover:border-orange-200 dark:hover:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10"
               : "justify-center",
           )}
         >
@@ -132,24 +173,23 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
                   src={avatarSrc}
                   alt={displayName}
                   className={cn(
-                    "relative rounded-xl border-2 border-white dark:border-zinc-800 object-cover shadow-sm transition-all duration-300 group-hover:scale-105",
-                    showText ? "h-11 w-11" : "h-12 w-12", // Trạng thái thu gọn cho avatar to ra tí cho dễ bấm
+                    "relative rounded-xl border border-slate-200 dark:border-white/10 object-cover shadow-sm transition-all duration-300 group-hover:scale-105",
+                    showText ? "h-11 w-11" : "h-12 w-12",
                   )}
                 />
-                {/* Dấu chấm Online */}
-                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-zinc-900 rounded-full z-10" />
+                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-zinc-950 rounded-full z-10 shadow-sm" />
               </div>
 
               {/* Text Info */}
               {showText && (
-                <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex flex-col min-w-0 flex-1 space-y-0.5">
                   <span
-                    className="font-black text-[13px] text-slate-900 dark:text-white tracking-tighter truncate group-hover:text-[#FF7A00] transition-colors"
+                    className="font-black text-[11px] text-slate-900 dark:text-white uppercase tracking-widest truncate group-hover:text-[#FF7A00] transition-colors"
                     title={displayName}
                   >
                     {displayName}
                   </span>
-                  <span className="text-[9px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-[0.2em] truncate mt-0.5">
+                  <span className="text-[9px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-[0.2em] truncate">
                     {roleDisplay}
                   </span>
                 </div>
@@ -160,21 +200,20 @@ export default function AdminSidebarContent({ isCollapsed, forceOpen }: any) {
       </div>
 
       {/* ================= SCROLL MENU AREA ================= */}
-      <ScrollArea className="flex-1 px-1 no-scrollbar">
-        <div className="space-y-6 pb-20">
-          {" "}
-          {MENU_GROUPS.map((group) => (
-            <div key={group.group} className="relative">
+      <ScrollArea className="flex-1 px-1 custom-scrollbar">
+        <div className="space-y-8 pb-20">
+          {visibleMenuGroups.map((group) => (
+            <div key={group.group} className="relative font-mono">
               {showText ? (
-                <h3 className="px-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-500 mb-3 flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700" />
+                <h3 className="px-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-600 mb-4 flex items-center gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-sm bg-orange-500/50 dark:bg-orange-500/30" />
                   {group.group}
                 </h3>
               ) : (
-                <div className="h-px bg-slate-200 dark:bg-white/5 w-8 mx-auto mb-4 mt-2" />
+                <div className="h-px bg-slate-200 dark:bg-white/5 w-6 mx-auto mb-4 mt-2" />
               )}
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {group.items.map((item) => (
                   <NavItem
                     key={item.href}

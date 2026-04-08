@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -30,39 +29,39 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Sparkles } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  ShieldCheck,
+  Zap,
+  Target,
+  Sparkles,
+} from "lucide-react";
 import { useManagePlan } from "@/hooks/use-manage-plan";
-import {
-  CreatePlanSchema,
-  CreatePlanFormValues,
-} from "@/schemas/subscription.schema";
-import {
-  SubscriptionPlanDto,
-  CreatePlanRequest,
-} from "@/types/subscription.type";
 
-interface EditPlanDialogProps {
-  plan: SubscriptionPlanDto;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+// --- MAP GIÁ TRỊ THEO YÊU CẦU CỦA BE TRONG HÌNH ---
+// BE chỉ hỗ trợ: Weekly, Monthly, Yearly
+const BILLING_CYCLE_MAP: Record<string, number> = {
+  Weekly: 0,
+  Monthly: 1,
+  Yearly: 2,
+};
 
-export function EditPlanDialog({
-  plan,
-  open,
-  onOpenChange,
-}: EditPlanDialogProps) {
+const REVERSE_BILLING_CYCLE_MAP: Record<number, string> = {
+  0: "Weekly",
+  1: "Monthly",
+  2: "Yearly",
+};
+
+export function EditPlanDialog({ plan, open, onOpenChange }: any) {
   const { updatePlan, isUpdating } = useManagePlan();
 
-  const form = useForm<CreatePlanFormValues>({
-    resolver: zodResolver(CreatePlanSchema),
+  const form = useForm({
     defaultValues: {
       name: "",
-      tier: "Free",
       price: 0,
       currency: "VND",
       billingCycle: "Monthly",
-      durationDays: 30,
       featuresString: "",
       badgeText: "",
       badgeColor: "#3B82F6",
@@ -70,16 +69,13 @@ export function EditPlanDialog({
     },
   });
 
-  // Đồng bộ data từ Backend vào Form khi mở Dialog
   React.useEffect(() => {
     if (open && plan) {
       form.reset({
         name: plan.name,
-        tier: plan.tier || "Free",
         price: plan.price,
         currency: plan.currency || "VND",
-        billingCycle: plan.billingCycle || "Monthly",
-        durationDays: plan.durationDays ?? 30,
+        billingCycle: REVERSE_BILLING_CYCLE_MAP[plan.billingCycle] || "Monthly",
         featuresString: plan.features ? plan.features.join("\n") : "",
         badgeText: plan.badgeText || "",
         badgeColor: plan.badgeColor || "#3B82F6",
@@ -88,33 +84,20 @@ export function EditPlanDialog({
     }
   }, [open, plan, form]);
 
-  // 🔥 Logic tự động cập nhật số ngày khi Admin đổi chu kỳ thủ công
-  const watchCycle = form.watch("billingCycle");
-  React.useEffect(() => {
-    if (form.formState.dirtyFields.billingCycle) {
-      if (watchCycle === "Monthly") form.setValue("durationDays", 30);
-      else if (watchCycle === "Yearly") form.setValue("durationDays", 365);
-      else if (watchCycle === "Lifetime") form.setValue("durationDays", 0);
-    }
-  }, [watchCycle, form]);
-
-  const onSubmit = (values: CreatePlanFormValues) => {
+  const onSubmit = (values: any) => {
     const featuresArray = values.featuresString
       .split("\n")
-      .map((f) => f.trim())
-      .filter((f) => f.length > 0);
+      .map((f: string) => f.trim())
+      .filter((f: string) => f.length > 0);
 
-    const payload: CreatePlanRequest = {
+    const payload = {
       name: values.name,
-      tier: values.tier,
       price: Number(values.price),
       currency: values.currency,
-      billingCycle: values.billingCycle,
-      durationDays:
-        values.billingCycle === "Lifetime" ? 0 : Number(values.durationDays),
+      billingCycle: BILLING_CYCLE_MAP[values.billingCycle],
       features: featuresArray,
-      badgeText: values.badgeText || "",
-      badgeColor: values.badgeColor || "",
+      badgeText: values.badgeText || null,
+      badgeColor: values.badgeColor || null,
       isActive: values.isActive,
     };
 
@@ -126,291 +109,259 @@ export function EditPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px] bg-white dark:bg-zinc-950 border-none text-slate-900 dark:text-white max-h-[95vh] overflow-y-auto no-scrollbar rounded-[2.5rem] shadow-2xl p-0 font-mono">
-        {/* Header Section */}
-        <DialogHeader className="p-8 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-white/5 relative overflow-hidden text-left">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] rounded-full pointer-events-none" />
-          <DialogTitle className="flex items-center gap-3 text-2xl tracking-tighter uppercase font-black">
-            <Save className="h-6 w-6 text-blue-500" />
-            Cập nhật cấu hình
+      <DialogContent className="sm:max-w-[650px] bg-white dark:bg-zinc-950 border-none text-slate-900 dark:text-white h-[90vh] flex flex-col rounded-[2.5rem] shadow-2xl p-0 font-mono transition-colors duration-300 overflow-hidden">
+        {/* HEADER CỐ ĐỊNH - Nút X của Shadcn sẽ nằm im ở đây */}
+        <DialogHeader className="p-10 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-white/5 relative shrink-0 text-left">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
+          <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase tracking-tighter relative z-10">
+            <div className="p-2.5 bg-blue-500 rounded-2xl shadow-lg shadow-blue-500/20">
+              <Save className="h-6 w-6 text-white" />
+            </div>
+            CẬP NHẬT CẤU HÌNH GÓI
           </DialogTitle>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-8 space-y-8"
-          >
-            {/* Nhóm 1: Identity */}
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400 flex items-center gap-2 border-b border-slate-100 dark:border-white/5 pb-2 text-left">
-                <Sparkles className="w-4 h-4" /> Thông tin định danh
-              </h4>
-              <div className="grid grid-cols-2 gap-5 text-left">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Tên gói dịch vụ
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-bold rounded-xl focus:border-blue-500 transition-all shadow-sm"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-[10px]" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="tier"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Phân cấp (Tier)
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 font-bold rounded-xl shadow-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="font-mono font-medium">
-                          <SelectItem value="Free">Free</SelectItem>
-                          <SelectItem value="Basic">Basic</SelectItem>
-                          <SelectItem value="Premium">Premium</SelectItem>
-                          <SelectItem value="Enterprise">Enterprise</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Nhóm 2: Commerce */}
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-600 dark:text-orange-400 flex items-center gap-2 border-b border-slate-100 dark:border-white/5 pb-2 text-left">
-                <Sparkles className="w-4 h-4" /> Tài chính & Thời hạn
-              </h4>
-              <div className="grid grid-cols-3 gap-5 text-left">
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Giá bán
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative group">
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-black rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 pr-12 transition-all"
-                            value={
-                              field.value === 0
-                                ? ""
-                                : field.value.toLocaleString("vi-VN")
-                            }
-                            onChange={(e) => {
-                              const rawValue = e.target.value.replace(
-                                /\D/g,
-                                "",
-                              );
-                              field.onChange(
-                                rawValue ? parseInt(rawValue, 10) : 0,
-                              );
-                            }}
-                          />
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 pointer-events-none uppercase tracking-widest">
-                            VND
-                          </div>
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="billingCycle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Chu kỳ
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 font-bold rounded-xl shadow-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="font-mono font-medium">
-                          <SelectItem value="Monthly">Monthly</SelectItem>
-                          <SelectItem value="Yearly">Yearly</SelectItem>
-                          <SelectItem value="Lifetime">Lifetime</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="durationDays"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Số ngày
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-bold rounded-xl disabled:opacity-30 shadow-sm"
-                          {...field}
-                          value={field.value ?? 0}
-                          disabled={watchCycle === "Lifetime"}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Nhóm 3: Marketing */}
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-pink-600 dark:text-pink-400 flex items-center gap-2 border-b border-slate-100 dark:border-white/5 pb-2 text-left">
-                <Sparkles className="w-4 h-4" /> Hiển thị & Tiếp thị
-              </h4>
-              <div className="grid grid-cols-2 gap-5 text-left">
-                <FormField
-                  control={form.control}
-                  name="badgeText"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Nhãn nổi bật (Badge)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ví dụ: Bán chạy nhất"
-                          className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 font-bold rounded-xl focus:border-pink-500 transition-all shadow-sm"
-                          {...field}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="badgeColor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 ml-1">
-                        Màu nhãn (Hex)
-                      </FormLabel>
-                      <div className="flex gap-2">
-                        <div className="w-11 h-11 rounded-xl border border-slate-200 dark:border-white/10 relative overflow-hidden shrink-0 shadow-sm">
-                          <input
-                            type="color"
-                            className="absolute -inset-2 w-16 h-16 cursor-pointer"
-                            value={field.value}
-                            onChange={(e) => field.onChange(e.target.value)}
-                          />
-                        </div>
+        {/* PHẦN FORM CHO PHÉP CUỘN - ẨN SCROLLBAR */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-10 bg-white dark:bg-zinc-950">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+              {/* Nhóm 1: Identity */}
+              <div className="space-y-5">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-left text-blue-500">
+                  <ShieldCheck className="w-4 h-4" /> THÔNG TIN ĐỊNH DANH
+                </h4>
+                <div className="grid grid-cols-1 gap-6 text-left">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 ml-1">
+                          TÊN GÓI DỊCH VỤ
+                        </FormLabel>
                         <FormControl>
                           <Input
-                            className="h-11 bg-white dark:bg-zinc-900 border-slate-200 dark:border-white/10 font-bold rounded-xl uppercase"
+                            className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white font-bold rounded-2xl focus:ring-blue-500/20 transition-all"
                             {...field}
                           />
                         </FormControl>
-                      </div>
+                        <FormMessage className="text-[10px]" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Nhóm 2: Commerce */}
+              <div className="space-y-5">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-left text-orange-500">
+                  <Zap className="w-4 h-4" /> THÔNG SỐ TÀI CHÍNH
+                </h4>
+                <div className="grid grid-cols-2 gap-6 text-left">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 ml-1">
+                          GIÁ BÁN
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Input
+                              type="text"
+                              inputMode="numeric"
+                              className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white font-black rounded-2xl pr-12 focus:ring-orange-500/20 transition-all"
+                              value={
+                                field.value === 0
+                                  ? ""
+                                  : field.value.toLocaleString("vi-VN")
+                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(
+                                  /\D/g,
+                                  "",
+                                );
+                                field.onChange(
+                                  rawValue ? parseInt(rawValue, 10) : 0,
+                                );
+                              }}
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                              VND
+                            </div>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="billingCycle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 ml-1">
+                          CHU KỲ THANH TOÁN
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 font-black rounded-2xl uppercase text-[10px] tracking-widest">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="font-mono bg-white dark:bg-zinc-900 border-white/10">
+                            <SelectItem
+                              value="Weekly"
+                              className="text-[10px] font-black uppercase"
+                            >
+                              HÀNG TUẦN
+                            </SelectItem>
+                            <SelectItem
+                              value="Monthly"
+                              className="text-[10px] font-black uppercase"
+                            >
+                              HÀNG THÁNG
+                            </SelectItem>
+                            <SelectItem
+                              value="Yearly"
+                              className="text-[10px] font-black uppercase"
+                            >
+                              HÀNG NĂM
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Nhóm 3: Marketing */}
+              <div className="space-y-5">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-left text-pink-500">
+                  <Sparkles className="w-4 h-4" /> HIỂN THỊ TIẾP THỊ
+                </h4>
+                <div className="grid grid-cols-2 gap-6 text-left">
+                  <FormField
+                    control={form.control}
+                    name="badgeText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 ml-1">
+                          NHÃN PHỤ TRỢ (TUỲ CHỌN)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ví dụ: PHỔ BIẾN NHẤT"
+                            className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 font-bold rounded-2xl focus:ring-pink-500/20 transition-all"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="badgeColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 ml-1">
+                          MÃ MÀU NHÃN (HEX)
+                        </FormLabel>
+                        <div className="flex gap-3">
+                          <div className="w-12 h-12 rounded-2xl border border-slate-200 dark:border-white/10 relative overflow-hidden shrink-0 shadow-sm">
+                            <input
+                              type="color"
+                              className="absolute -inset-2 w-16 h-16 cursor-pointer"
+                              value={field.value}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </div>
+                          <FormControl>
+                            <Input
+                              className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 font-bold rounded-2xl uppercase"
+                              {...field}
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Nhóm 4: Đặc quyền */}
+              <div className="space-y-5 text-left">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-emerald-500">
+                  <Target className="w-4 h-4" /> DANH SÁCH ĐẶC QUYỀN
+                </h4>
+                <FormField
+                  control={form.control}
+                  name="featuresString"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-200 font-bold text-xs min-h-[160px] rounded-[2rem] p-6 focus:ring-emerald-500/20 transition-all no-scrollbar leading-relaxed"
+                          placeholder="Tính năng 1&#10;Tính năng 2..."
+                          {...field}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
-            </div>
 
-            {/* Nhóm 4: Features */}
-            <div className="space-y-4 text-left">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 flex items-center gap-2 border-b border-slate-100 dark:border-white/5 pb-2">
-                <Sparkles className="w-4 h-4" /> Đặc quyền gói dịch vụ
-              </h4>
               <FormField
                 control={form.control}
-                name="featuresString"
+                name="isActive"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-row items-center justify-between rounded-[2rem] border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 p-6 transition-all hover:bg-white dark:hover:bg-zinc-900">
+                    <div className="space-y-1 text-left">
+                      <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
+                        TRẠNG THÁI HOẠT ĐỘNG
+                      </FormLabel>
+                    </div>
                     <FormControl>
-                      <Textarea
-                        className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-medium text-sm min-h-[140px] rounded-2xl p-4 shadow-inner focus:border-emerald-500 transition-all no-scrollbar"
-                        placeholder="Mở khóa shadowing AI&#10;Học mọi khóa học..."
-                        {...field}
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
-            </div>
+            </form>
+          </Form>
+        </div>
 
-            {/* Trạng thái hoạt động */}
-            <FormField
-              control={form.control}
-              name="isActive"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-zinc-900/30 p-5 transition-all hover:bg-white dark:hover:bg-zinc-900">
-                  <div className="space-y-1 text-left">
-                    <FormLabel className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">
-                      Active Status
-                    </FormLabel>
-                    <FormDescription className="text-[10px] font-medium text-slate-500">
-                      Kích hoạt để hiển thị gói trên ứng dụng.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter className="pt-2 gap-3 sm:gap-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-                className="h-12 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5"
-              >
-                Hủy
-              </Button>
-              <Button
-                type="submit"
-                disabled={isUpdating}
-                className="h-12 px-10 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-600/20 transition-all active:scale-95"
-              >
-                {isUpdating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4" />
-                )}
-                Lưu cấu hình
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        {/* FOOTER CỐ ĐỊNH */}
+        <DialogFooter className="p-8 bg-slate-50/50 dark:bg-zinc-900/50 border-t border-slate-100 dark:border-white/5 shrink-0 gap-4">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="h-14 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
+          >
+            HỦY THAO TÁC
+          </Button>
+          <Button
+            type="button"
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={isUpdating}
+            className="h-14 px-12 bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+          >
+            {isUpdating ? (
+              <Loader2 className="mr-3 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-3 h-4 w-4" />
+            )}
+            LƯU CẤU HÌNH
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

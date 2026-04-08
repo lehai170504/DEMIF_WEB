@@ -50,7 +50,7 @@ export default function UserDetailPage() {
       case "suspended":
         return "Đình chỉ";
       case "banned":
-        return "Bị cấm";
+        return "Đã khóa tài khoản";
       default:
         return "Không rõ";
     }
@@ -61,6 +61,7 @@ export default function UserDetailPage() {
       case "active":
         return "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20";
       case "inactive":
+      case "suspended":
         return "bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20";
       case "banned":
         return "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20";
@@ -71,11 +72,18 @@ export default function UserDetailPage() {
 
   const closeDialog = () => setDialogConfig({ isOpen: false, type: null });
 
+  // 🔥 ĐIỂM FIX LOGIC TẠI ĐÂY:
+  // Cứ KHÔNG PHẢI "active" thì đều coi là đang bị khóa (Bao gồm Inactive, Suspended, Banned)
+  const isLocked = user?.status?.toLowerCase() !== "active";
+
   const handleConfirmAction = () => {
     if (!user) return;
+
     switch (dialogConfig.type) {
       case "ban":
-        const newStatus = user.status === "Banned" ? "Active" : "Banned";
+        // Nếu đang khóa (isLocked = true) -> Mở khóa (Active)
+        // Nếu đang hoạt động (isLocked = false) -> Khóa (Banned)
+        const newStatus = isLocked ? "Active" : "Banned";
         updateStatus(
           { id: user.id, status: newStatus },
           { onSuccess: closeDialog },
@@ -85,14 +93,14 @@ export default function UserDetailPage() {
         deleteUser(user.id, { onSuccess: () => router.push("/admin/users") });
         break;
       case "role":
-        const isAdmin = user.roles.some((r) => r.roleName === "Admin");
-        isAdmin
+        const isModerator = user.roles.some((r) => r.roleName === "Moderator");
+        isModerator
           ? removeRole(
-              { id: user.id, roleName: "Admin" },
+              { id: user.id, roleName: "Moderator" },
               { onSuccess: closeDialog },
             )
           : assignRole(
-              { id: user.id, roleName: "Admin" },
+              { id: user.id, roleName: "Moderator" },
               { onSuccess: closeDialog },
             );
         break;
@@ -107,7 +115,7 @@ export default function UserDetailPage() {
           <div className="absolute inset-0 bg-orange-500/20 blur-xl rounded-full" />
         </div>
         <p className="text-slate-500 dark:text-zinc-500 font-black text-[10px] uppercase tracking-[0.3em] animate-pulse">
-          Retrieving_User_Profile...
+          Đang tải thông tin học viên...
         </p>
       </div>
     );
@@ -119,7 +127,7 @@ export default function UserDetailPage() {
         <XCircle className="h-16 w-16 text-red-500 opacity-80" />
         <div className="space-y-2">
           <p className="text-slate-900 dark:text-white font-black text-xl uppercase tracking-tighter">
-            Error_404: Profile_Not_Found
+            Hồ sơ không tìm thấy
           </p>
           <p className="text-slate-500 dark:text-zinc-500 text-xs font-bold uppercase tracking-widest">
             Hồ sơ không tồn tại hoặc đã bị xóa khỏi Core system.
@@ -136,7 +144,7 @@ export default function UserDetailPage() {
     );
   }
 
-  const isAdmin = user.roles.some((r) => r.roleName === "Admin");
+  const isModerator = user.roles.some((r) => r.roleName === "Moderator");
 
   return (
     <div className="max-w-6xl mx-auto p-6 md:p-10 space-y-10 font-mono relative transition-colors duration-300">
@@ -152,7 +160,7 @@ export default function UserDetailPage() {
         >
           <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-            Back_to_Community
+            Quay lại danh sách
           </span>
         </Button>
       </div>
@@ -191,7 +199,7 @@ export default function UserDetailPage() {
           {/* Action Island */}
           <div className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm backdrop-blur-sm space-y-4">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-zinc-600 mb-6 ml-1">
-              Privilege_Control
+              Thao tác nhanh
             </p>
 
             <Button
@@ -201,28 +209,27 @@ export default function UserDetailPage() {
               disabled={isPending}
             >
               <ShieldCheck className="h-4 w-4 mr-2" />
-              {isAdmin ? "Gỡ quyền Admin" : "Cấp quyền Admin"}
+              {isModerator ? "Gỡ quyền Moderator" : "Cấp quyền Moderator"}
             </Button>
 
+            {/* NÚT KHÓA/MỞ KHÓA ÁP DỤNG LOGIC MỚI */}
             <Button
-              variant={user.status === "Banned" ? "default" : "outline"}
+              variant={isLocked ? "default" : "outline"}
               className={cn(
                 "w-full h-14 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border shadow-sm active:scale-95",
-                user.status === "Banned"
+                isLocked
                   ? "bg-emerald-600 hover:bg-emerald-700 border-none text-white shadow-emerald-500/20"
                   : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20 hover:bg-red-100",
               )}
               onClick={() => setDialogConfig({ isOpen: true, type: "ban" })}
               disabled={isPending}
             >
-              {user.status === "Banned" ? (
+              {isLocked ? (
                 <Check className="h-4 w-4 mr-2" />
               ) : (
                 <Ban className="h-4 w-4 mr-2" />
               )}
-              {user.status === "Banned"
-                ? "Mở khóa tài khoản"
-                : "Đình chỉ tài khoản"}
+              {isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
             </Button>
 
             <Button
@@ -240,19 +247,14 @@ export default function UserDetailPage() {
         <div className="lg:col-span-2 space-y-10 animate-in fade-in slide-in-from-right-6 duration-700">
           <div className="space-y-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-zinc-600 flex items-center gap-3 ml-2">
-              <Fingerprint className="h-4 w-4 text-orange-500" />{" "}
-              Identity_Information
+              <Fingerprint className="h-4 w-4 text-orange-500" /> Thông tin cơ
+              bản
             </h3>
             <div className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm backdrop-blur-sm">
-              <RowItem
-                icon={Mail}
-                label="Email Address"
-                value={user.email}
-                isBold
-              />
+              <RowItem icon={Mail} label="Email" value={user.email} isBold />
               <RowItem
                 icon={Calendar}
-                label="Join Date"
+                label="Ngày tạo"
                 value={
                   user.createdAt
                     ? format(new Date(user.createdAt), "dd MMMM, yyyy", {
@@ -263,7 +265,7 @@ export default function UserDetailPage() {
               />
               <RowItem
                 icon={Clock}
-                label="Last Active"
+                label="Lần đăng nhập cuối"
                 value={
                   user.lastLoginAt
                     ? format(new Date(user.lastLoginAt), "HH:mm - dd/MM/yyyy", {
@@ -275,7 +277,7 @@ export default function UserDetailPage() {
               <div className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors">
                 <span className="text-slate-500 dark:text-zinc-500 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest">
                   <ShieldCheck className="h-4 w-4 text-slate-400 dark:text-zinc-600" />{" "}
-                  System_Roles
+                  Quyền hạn
                 </span>
                 <div className="flex gap-2">
                   {user.roles.map((r) => (
@@ -293,24 +295,24 @@ export default function UserDetailPage() {
 
           <div className="space-y-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-zinc-600 flex items-center gap-3 ml-2">
-              <Target className="h-4 w-4 text-blue-500" /> Academic_Progress
+              <Target className="h-4 w-4 text-blue-500" /> Thông tin học tập
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <StatCard
                 icon={Globe}
-                label="Native"
+                label="Quốc tịch"
                 value={user.nativeLanguage || "---"}
                 color="text-slate-900 dark:text-white"
               />
               <StatCard
                 icon={BookOpen}
-                label="Learning"
+                label="Ngôn ngữ học tập"
                 value={user.targetLanguage || "---"}
                 color="text-blue-600 dark:text-blue-400"
               />
               <StatCard
                 icon={Target}
-                label="Rank"
+                label="Cấp độ hiện tại"
                 value={user.currentLevel || "Beginner"}
                 color="text-emerald-600 dark:text-emerald-400"
               />
@@ -319,6 +321,7 @@ export default function UserDetailPage() {
         </div>
       </div>
 
+      {/* MODAL DIALOG ÁP DỤNG LOGIC MỚI */}
       <ConfirmDialog
         isOpen={dialogConfig.isOpen}
         onClose={closeDialog}
@@ -328,7 +331,7 @@ export default function UserDetailPage() {
           dialogConfig.type === "delete"
             ? "Xóa tài khoản vĩnh viễn"
             : dialogConfig.type === "ban"
-              ? user.status === "Banned"
+              ? isLocked
                 ? "Khôi phục quyền truy cập"
                 : "Tạm khóa quyền truy cập"
               : "Sửa đổi quyền hạn"
@@ -337,7 +340,7 @@ export default function UserDetailPage() {
           dialogConfig.type === "delete"
             ? "Hành động này sẽ xóa vĩnh viễn mọi dữ liệu của học viên này. Không thể khôi phục."
             : dialogConfig.type === "ban"
-              ? `Xác nhận ${user.status === "Banned" ? "kích hoạt lại" : "tạm khóa"} quyền truy cập hệ thống?`
+              ? `Xác nhận ${isLocked ? "kích hoạt lại" : "tạm khóa"} quyền truy cập hệ thống?`
               : `Xác nhận thay đổi quyền quản trị cho tài khoản này?`
         }
         confirmText={

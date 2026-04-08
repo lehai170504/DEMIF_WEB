@@ -196,27 +196,29 @@ export function HeaderUser() {
                 align="end"
                 className="w-72 p-3 rounded-[1.5rem] border border-gray-200 dark:border-white/10 bg-white dark:bg-[#09090b]/90 backdrop-blur-xl shadow-2xl shadow-gray-300/50 dark:shadow-black/50 font-mono mt-4 mr-2"
               >
-                <DropdownMenuLabel className="p-0 mb-2">
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5">
-                    {/* Avatar Lớn trong Menu (Cũng cần fix tương tự) */}
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20 overflow-hidden">
-                      {isMounted && user?.avatarUrl ? (
-                        <img
-                          src={user.avatarUrl}
-                          alt={displayName}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        firstLetter
-                      )}
+                <DropdownMenuLabel className="p-0 mb-3 select-none">
+                  <div className="group/item flex items-center gap-4 p-4 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-white/10">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#FF7A00] to-[#FF9E2C] flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20 overflow-hidden shrink-0 border border-white/20">
+                      <div className="w-full h-full transition-transform duration-500 group-hover/item:scale-110 flex items-center justify-center">
+                        {isMounted && user?.avatarUrl ? (
+                          <img
+                            src={user.avatarUrl}
+                            alt={displayName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xl">{firstLetter}</span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="overflow-hidden">
-                      <p className="text-sm font-bold text-gray-900 dark:text-white uppercase truncate">
+                    {/* Text info */}
+                    <div className="overflow-hidden space-y-0.5">
+                      <p className="text-xs font-mono text-slate-900 dark:text-white tracking-tight truncate">
                         {displayName}
                       </p>
                       <p
-                        className="text-[10px] text-gray-600 dark:text-zinc-400 font-medium truncate"
+                        className="text-[9px] text-slate-500 dark:text-zinc-500 font-mono truncate tracking-tight"
                         title={displayEmail}
                       >
                         {displayEmail}
@@ -224,7 +226,6 @@ export function HeaderUser() {
                     </div>
                   </div>
                 </DropdownMenuLabel>
-
                 <div className="space-y-1">
                   {[
                     {

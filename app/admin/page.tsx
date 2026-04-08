@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CreateLessonDialog from "@/components/admin/lesson/create-lesson-dialog";
 
 export default function AdminDashboard() {
   return (
@@ -30,10 +31,12 @@ export default function AdminDashboard() {
               <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20">
                 <LayoutGrid className="h-4 w-4" />
               </div>
-              <span className="text-sm font-semibold">Hệ thống quản trị</span>
+              <span className="text-sm font-semibold uppercase">
+                Hệ thống quản trị
+              </span>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold leading-tight text-slate-900 dark:text-white">
+            <h1 className="text-3xl md:text-4xl font-black uppercase leading-tight text-slate-900 dark:text-white">
               Tổng quan{" "}
               <span className="text-slate-400 dark:text-zinc-500 font-medium">
                 hệ thống
@@ -48,15 +51,8 @@ export default function AdminDashboard() {
 
           <div className="flex items-center gap-3">
             <Button
-              variant="outline"
-              className="h-12 px-6 font-bold border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all shadow-sm"
-              disabled // Disable tạm chờ API
-            >
-              <Download className="mr-2 h-4 w-4" /> Báo cáo CSV
-            </Button>
-            <Button
               className="h-12 px-6 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-zinc-200 font-bold rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-white/10 transition-all active:scale-95"
-              onClick={() => console.log("Navigate to create lesson")}
+              onClick={() => {}}
             >
               <Plus className="mr-2 h-4 w-4" /> Tạo bài học
             </Button>

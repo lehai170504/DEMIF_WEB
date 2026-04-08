@@ -154,15 +154,6 @@ export default function BlogDetailPage() {
 
                 <BlogArticleContent content={post.content} tags={post.tags} />
 
-                <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    Mã tác giả hệ thống
-                  </p>
-                  <p className="text-sm font-mono text-gray-600 dark:text-gray-300 mt-1">
-                    {post.authorId}
-                  </p>
-                </div>
-
                 <RelatedPosts posts={relatedPosts} />
               </motion.div>
 

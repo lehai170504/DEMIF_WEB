@@ -29,10 +29,18 @@ export function UserAccountNav() {
     await logout();
   };
 
-  const displayName = user?.username || "Admin";
-  const roleDisplay = user?.roles?.includes("Admin")
-    ? "Quản trị viên"
-    : "Điều hành viên";
+  const actualUser = (user as any)?.data || user;
+  const displayName = actualUser?.username || "HỆ THỐNG";
+
+  const rolesArray: string[] = Array.isArray(actualUser?.roles)
+    ? actualUser.roles
+    : [actualUser?.roles || ""];
+
+  const isAdmin = rolesArray.some(
+    (r) => typeof r === "string" && r.toLowerCase() === "admin",
+  );
+
+  const roleDisplay = isAdmin ? "QUẢN TRỊ VIÊN" : "ĐIỀU HÀNH VIÊN";
 
   return (
     <>
@@ -40,25 +48,25 @@ export function UserAccountNav() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="relative h-10 w-10 rounded-full p-0 hover:scale-105 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[#FF7A00] focus-visible:ring-offset-2 ml-1 active:scale-95"
+            className="relative h-10 w-10 rounded-2xl p-0 hover:scale-105 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-[#FF7A00] focus-visible:ring-offset-2 ml-1 active:scale-95 group font-mono"
           >
-            <Avatar className="h-full w-full rounded-full border-2 border-white dark:border-zinc-800 shadow-md">
+            <Avatar className="h-full w-full rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm group-hover:border-orange-500/50 transition-colors">
               <AvatarImage
                 src={
-                  user?.avatarUrl ||
+                  actualUser?.avatarUrl ||
                   `https://ui-avatars.com/api/?name=${displayName}&background=ff7a00&color=fff&bold=true`
                 }
                 className="object-cover"
               />
-              <AvatarFallback className="bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 font-mono font-bold text-xs">
-                {displayName[0]?.toUpperCase()}
+              <AvatarFallback className="bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 font-black text-xs uppercase">
+                {displayName[0]}
               </AvatarFallback>
             </Avatar>
 
-            {/* Chấm trạng thái hoạt động */}
-            <span className="absolute bottom-0 right-0 flex h-3 w-3">
+            {/* Indicator Trạng thái */}
+            <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-zinc-800"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white dark:border-zinc-950"></span>
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -66,56 +74,56 @@ export function UserAccountNav() {
         {/* Dropdown Content */}
         <DropdownMenuContent
           align="end"
-          className="w-64 font-mono p-2 bg-white dark:bg-zinc-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 shadow-2xl rounded-2xl"
-          sideOffset={12}
+          className="w-72 font-mono p-2 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-200 shadow-2xl rounded-[2rem]"
+          sideOffset={16}
         >
           {/* Header Card */}
-          <DropdownMenuLabel className="p-3 mb-1">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 shrink-0">
-                <ShieldCheck className="h-5 w-5 text-[#FF7A00]" />
+          <DropdownMenuLabel className="p-2 mb-2">
+            <div className="flex items-center gap-4 p-3 rounded-[1.25rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-400 shadow-lg shadow-orange-500/20 shrink-0">
+                <ShieldCheck className="h-5 w-5 text-white" />
               </div>
-              <div className="flex flex-col overflow-hidden">
+              <div className="flex flex-col overflow-hidden space-y-0.5">
                 <p
-                  className="font-bold text-slate-900 dark:text-white text-sm truncate"
+                  className="font-black text-slate-900 dark:text-white text-[11px] uppercase tracking-tight truncate"
                   title={displayName}
                 >
                   {displayName}
                 </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5 truncate">
+                <p className="text-[9px] text-slate-500 dark:text-zinc-400 font-black uppercase tracking-widest truncate">
                   {roleDisplay}
                 </p>
               </div>
             </div>
           </DropdownMenuLabel>
 
-          <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/5 mx-1 mb-1" />
+          <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/5 mx-2 mb-2" />
 
-          {/* Nhóm menu chức năng */}
+          {/* Menu chức năng */}
           <DropdownMenuGroup className="p-1 space-y-1">
             <UserMenuItem
               icon={UserIcon}
-              label="Hồ sơ cá nhân"
+              label="HỒ SƠ HỆ THỐNG"
               shortcut="⌘P"
               onClick={() => setIsProfileOpen(true)}
             />
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/5 mx-1 my-1" />
+          <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/5 mx-2 my-2" />
 
           {/* Nút Đăng xuất */}
           <div className="p-1">
             <DropdownMenuItem
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="flex items-center justify-center w-full rounded-xl py-2.5 px-3 cursor-pointer disabled:opacity-50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus:bg-red-50 dark:focus:bg-red-500/10 focus:text-red-700 dark:focus:text-red-300 transition-colors font-bold text-sm outline-none"
+              className="flex items-center justify-center w-full rounded-2xl py-3 px-4 cursor-pointer disabled:opacity-50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus:bg-red-50 dark:focus:bg-red-500/10 focus:text-red-700 dark:focus:text-red-300 transition-colors font-black text-[10px] uppercase tracking-widest outline-none border border-transparent"
             >
               {isLoggingOut ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin text-red-500" />
               ) : (
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-3 h-4 w-4" />
               )}
-              {isLoggingOut ? "Đang xử lý..." : "Đăng xuất hệ thống"}
+              {isLoggingOut ? "ĐANG ĐĂNG XUẤT..." : "ĐĂNG XUẤT HỆ THỐNG"}
             </DropdownMenuItem>
           </div>
         </DropdownMenuContent>
@@ -126,9 +134,6 @@ export function UserAccountNav() {
   );
 }
 
-/**
- * Component hỗ trợ render Menu Item
- */
 function UserMenuItem({
   icon: Icon,
   label,
@@ -143,14 +148,14 @@ function UserMenuItem({
   return (
     <DropdownMenuItem
       onClick={onClick}
-      className="flex items-center rounded-xl py-2.5 px-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800 focus:bg-slate-50 dark:focus:bg-zinc-800 group transition-all duration-200 outline-none"
+      className="flex items-center rounded-2xl py-3 px-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 focus:bg-slate-50 dark:focus:bg-white/5 group transition-all duration-200 outline-none border border-transparent"
     >
-      <Icon className="mr-3 h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-[#FF7A00] group-focus:text-[#FF7A00] transition-colors" />
-      <span className="font-semibold text-xs text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white group-focus:text-slate-900 dark:group-focus:text-white">
+      <Icon className="mr-3 h-4 w-4 text-slate-400 dark:text-zinc-500 group-hover:text-orange-500 group-focus:text-orange-500 transition-colors" />
+      <span className="font-black text-[10px] uppercase tracking-widest text-slate-600 dark:text-zinc-400 group-hover:text-slate-900 dark:group-hover:text-white group-focus:text-slate-900 dark:group-focus:text-white">
         {label}
       </span>
       {shortcut && (
-        <DropdownMenuShortcut className="text-slate-300 dark:text-slate-600 text-[10px] group-hover:text-slate-400 dark:group-hover:text-slate-500 ml-auto tracking-widest font-bold">
+        <DropdownMenuShortcut className="text-slate-300 dark:text-zinc-600 text-[10px] group-hover:text-slate-400 dark:group-hover:text-zinc-500 ml-auto tracking-widest font-black">
           {shortcut}
         </DropdownMenuShortcut>
       )}

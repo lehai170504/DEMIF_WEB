@@ -213,7 +213,7 @@ export function UserTable({ users }: UserTableProps) {
                       <Search className="h-8 w-8 text-slate-400" />
                     </div>
                     <p className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
-                      Empty_Database_Result
+                      Không có người dùng nào được tìm thấy
                     </p>
                   </div>
                 </TableCell>

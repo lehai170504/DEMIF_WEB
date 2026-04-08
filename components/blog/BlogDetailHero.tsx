@@ -78,21 +78,6 @@ export function BlogDetailHero({ post }: BlogDetailHeroProps) {
 
           {/* Meta Info Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-y border-gray-200 dark:border-white/10">
-            {/* Author */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center h-12 w-12 rounded-full border-2 border-gray-200 dark:border-white/10 bg-gradient-to-br from-orange-400 to-orange-600 text-white font-black text-lg shadow-sm">
-                {authorInitial}
-              </div>
-              <div>
-                <p className="font-bold text-gray-900 dark:text-white text-sm uppercase truncate max-w-[150px] sm:max-w-xs">
-                  {post.authorId}
-                </p>
-                <p className="text-[10px] text-gray-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
-                  Tác giả
-                </p>
-              </div>
-            </div>
-
             {/* Stats (Chỉ giữ lại Ngày và Lượt xem) */}
             <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[11px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
               <div className="flex items-center gap-2">
