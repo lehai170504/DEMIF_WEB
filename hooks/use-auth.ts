@@ -54,21 +54,21 @@ export const useLogin = () => {
   });
 };
 
-export const useRegister = () => {
-  const router = useRouter(); // FIX 3: Thêm router để chuyển trang
-
+export const useRegister = (onSuccessCallback?: (email: string) => void) => {
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authService.register(payload),
-    // FIX 4: Thêm luồng Success
-    onSuccess: () => {
-      toast.success("Đăng ký thành công!", {
-        description: "Vui lòng kiểm tra email để xác thực tài khoản.",
+    onSuccess: (data: any, variables: RegisterPayload) => {
+      toast.success("ĐĂNG KÝ THÀNH CÔNG!", {
+        description: "Hệ thống đã gửi email xác thực tài khoản.",
       });
-      router.push("/login"); // Đá về trang login
+
+      if (onSuccessCallback) {
+        onSuccessCallback(variables.email);
+      }
     },
     onError: (error: any) => {
       const message = extractErrorMessage(error, "Đăng ký thất bại.");
-      toast.error("Lỗi đăng ký", { description: message });
+      toast.error("LỖI ĐĂNG KÝ", { description: message });
     },
   });
 };
@@ -89,7 +89,8 @@ export const useVerifyEmail = () => {
           });
 
           toast.success("Xác thực thành công!", {
-            description: "Tài khoản đã được kích hoạt. Đang tự động vào hệ thống...",
+            description:
+              "Tài khoản đã được kích hoạt. Đang tự động vào hệ thống...",
           });
 
           const userRoles = fetchedUser?.roles || data.roles || [];
@@ -97,7 +98,9 @@ export const useVerifyEmail = () => {
           router.push(targetPath);
         } else {
           toast.success("Xác thực thành công!", {
-            description: data.message || "Tài khoản đã được kích hoạt. Vui lòng đăng nhập lại.",
+            description:
+              data.message ||
+              "Tài khoản đã được kích hoạt. Vui lòng đăng nhập lại.",
           });
           router.push("/login");
         }

@@ -15,48 +15,60 @@ export default function MemberGuard({
 
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState(
-    "Đang tải dữ liệu học tập...",
+    "Xác thực quyền truy cập...",
   );
 
   const actualUser = (user as any)?.data || user;
 
-  const isAdmin = actualUser?.roles?.some(
-    (role: string) =>
-      typeof role === "string" && role.toLowerCase() === "admin",
-  );
+  // Kiểm tra danh sách roles
+  const roles = actualUser?.roles?.map((r: string) => r.toLowerCase()) || [];
+  const isAdmin = roles.includes("admin");
+  const isModerator = roles.includes("moderator");
+  const hasAdminAccess = isAdmin || isModerator;
 
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        setTransitionMessage("Yêu cầu đăng nhập...");
+        setTransitionMessage("Xác thực tài khoản cần thiết");
         setIsRedirecting(true);
         setTimeout(() => {
           router.replace("/login");
         }, 1500);
-      } else if (isAdmin) {
-        setTransitionMessage("Đang chuyển về Không gian Quản trị...");
+      } else if (hasAdminAccess) {
+        setTransitionMessage("Phát hiện quyền quản trị viên");
         setIsRedirecting(true);
 
         setTimeout(() => {
-          router.replace("/admin");
-        }, 3000);
+          router.replace(isAdmin ? "/admin" : "/admin/lessons");
+        }, 2000);
       }
     }
-  }, [isLoading, isAuthenticated, isAdmin, router]);
+  }, [isLoading, isAuthenticated, hasAdminAccess, isAdmin, router]);
 
-  // NẾU ĐANG CALL API HOẶC ĐANG BỊ ĐIỀU HƯỚNG -> BẬT MÀN HÌNH 3D
-  if (isLoading || isRedirecting || (isAdmin && isAuthenticated)) {
+  if (isLoading) {
+    return (
+      <RoleTransition message="Xác thực quyền truy cập..." role="checking" />
+    );
+  }
+
+  if (isRedirecting) {
     return (
       <RoleTransition
         message={transitionMessage}
-        role={isAdmin ? "admin" : "member"}
+        role={hasAdminAccess ? (isAdmin ? "admin" : "moderator") : "checking"}
       />
     );
   }
 
-  // Nếu là Admin thì giấu giao diện học viên đi
-  if (isAdmin) return null;
+  if (hasAdminAccess && isAuthenticated) {
+    return (
+      <RoleTransition
+        message="Chuyển hướng..."
+        role={isAdmin ? "admin" : "moderator"}
+      />
+    );
+  }
 
-  // Render giao diện học viên bình thường
+  // 4. Cho phép Member vào học
   return <>{children}</>;
 }

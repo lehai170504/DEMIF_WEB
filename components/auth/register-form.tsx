@@ -3,20 +3,20 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegister } from "@/hooks/use-auth";
 import { registerSchema, RegisterFormValues } from "@/schemas/auth.schema";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { extractErrorMessage } from "@/lib/error";
 
 interface RegisterFormProps {
   onSuccess: (email: string) => void;
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
+  // 1. Gọi hook register
   const registerMutation = useRegister();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -39,12 +39,16 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const onSubmit = (data: RegisterFormValues) => {
     registerMutation.mutate(data, {
       onSuccess: () => {
-        toast.success("Đăng ký thành công!");
+        toast.success("HỆ THỐNG: ĐĂNG KÝ THÀNH CÔNG", {
+          description: "Vui lòng thực hiện xác thực Email.",
+        });
+
         onSuccess(data.email);
       },
     });
   };
 
+  // Hàm renderInput giữ nguyên như cũ của ông
   const renderInput = (
     id: keyof RegisterFormValues,
     label: string,
@@ -88,6 +92,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       {renderInput("username", "Tên đăng nhập")}
       {renderInput("email", "Địa chỉ Email", "email")}
 
+      {/* Password Field */}
       <div className="space-y-1">
         <div className="relative group">
           <input
@@ -114,6 +119,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         )}
       </div>
 
+      {/* Confirm Password Field */}
       <div className="space-y-1">
         <div className="relative group">
           <input
@@ -143,22 +149,22 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       <Button
         type="submit"
         disabled={registerMutation.isPending}
-        className="w-full h-14 bg-[#FF7A00] hover:bg-[#FF9E2C] text-white font-black rounded-2xl shadow-xl transition-all active:scale-[0.97] mt-4 uppercase tracking-widest text-[11px]"
+        className="w-full h-14 bg-[#FF7A00] hover:bg-[#FF9E2C] text-white font-black rounded-2xl shadow-xl transition-all active:scale-[0.97] mt-4 uppercase tracking-[0.2em] text-[11px]"
       >
         {registerMutation.isPending ? (
           <Loader2 className="animate-spin mx-auto" />
         ) : (
-          "ĐĂNG KÝ NGAY"
+          "XÁC NHẬN ĐĂNG KÝ"
         )}
       </Button>
 
-      <p className="mt-8 text-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+      <p className="mt-8 text-center text-zinc-500 text-[10px] font-black uppercase tracking-widest">
         Đã có tài khoản?{" "}
         <Link
           href="/login"
-          className="text-[#FF7A00] font-black hover:underline ml-1"
+          className="text-[#FF7A00] font-black hover:text-orange-400 transition-colors ml-1"
         >
-          Đăng nhập
+          Đăng nhập ngay
         </Link>
       </p>
     </form>

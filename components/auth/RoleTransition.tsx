@@ -9,7 +9,7 @@ interface RoleTransitionProps {
 }
 
 export function RoleTransition({
-  message = "SYSTEM_AUTHENTICATING...",
+  message = "Đang kiểm tra quyền truy cập...",
   role = "checking",
 }: RoleTransitionProps) {
   return (
