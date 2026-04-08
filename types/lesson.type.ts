@@ -277,8 +277,17 @@ export interface DictationTemplate {
 
 export interface GetDictationExerciseResponse {
   lessonId: string;
+  title: string;
+  description?: string;
+  mediaUrl: string;
+  audioUrl: string;
+  mediaType: string;
+  videoId?: string;
+  embedUrl?: string;
+  durationSeconds: number;
   level: string;
   template: DictationTemplate;
+  thumbnailUrl?: string;
 }
 
 // Dictation Submit
@@ -300,12 +309,19 @@ export interface DictationResult {
   isCorrect: boolean;
   userInput: string;
   correctAnswer?: string;
+  message?: string;
 }
 
 export interface SubmitDictationResponse {
+  exerciseId: string;
   score: number;
   totalBlanks: number;
+  answeredBlanks: number;
   correctCount: number;
+  incorrectCount: number;
+  skippedCount: number;
+  level: string;
+  timeSpentSeconds: number;
   results: DictationResult[];
   feedback?: string;
 }
@@ -322,16 +338,22 @@ export interface TimedSegment {
 }
 
 export interface LevelConfig {
+  level: string;
   showTranscriptBefore: boolean;
   showTranscriptAfter: boolean;
   maxReplays: number; // -1 = unlimited
+  showWordCount?: boolean;
 }
 
 export interface GetSegmentsResponse {
   lessonId: string;
   title?: string;
+  description?: string;
   audioUrl?: string;
   mediaType?: string;
+  durationSeconds?: number;
+  thumbnailUrl?: string;
+  isPremiumOnly?: boolean;
   level: string;
   segments: TimedSegment[];
   levelConfig: LevelConfig;

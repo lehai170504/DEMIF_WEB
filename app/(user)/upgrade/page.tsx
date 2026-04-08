@@ -15,10 +15,16 @@ import {
   Loader2,
   Info,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useActivePlans, useMySubscription } from "@/hooks/use-subscription";
+import { useCreatePayment, usePaymentHistory, useCancelPayment } from "@/hooks/use-payment";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { extractErrorMessage } from "@/lib/error";
 
 export default function UpgradePage() {
   const {
@@ -26,7 +32,13 @@ export default function UpgradePage() {
     isLoading: isLoadingPlans,
     error: plansError,
   } = useActivePlans();
-  const { data: mySubscription } = useMySubscription();
+    const { data: mySubscription } = useMySubscription();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  
+  const subscribeMutation = useCreatePayment();
+  const { data: paymentHistory } = usePaymentHistory();
+  const cancelMutation = useCancelPayment();
 
   const formatBillingCycle = (cycle: string) => {
     const cycleMap: Record<string, string> = {
@@ -41,13 +53,62 @@ export default function UpgradePage() {
   };
 
   const isCurrentPlan = (plan: any) => {
+    const status = mySubscription?.status?.toLowerCase();
     return (
-      mySubscription?.planName === plan.name && mySubscription?.status === "Active"
+      (mySubscription?.planName === plan.name || mySubscription?.plan?.name === plan.name) && 
+      (status === "active" || status === "trialing")
     );
   };
 
+  const hasAnyActiveSub = !!mySubscription && (mySubscription.status === "Active" || mySubscription.status === "active" || mySubscription.status === "trialing");
+
+  const handleActivateFreePlan = async (planId: string) => {
+    try {
+      toast.loading("Đang xử lý gói dùng thử...", { id: "activate-free" });
+
+      // 1. Kiểm tra xem có giao dịch nào đang treo (Pending/PendingPayment) cho gói này không
+      const pendingTx = paymentHistory?.items?.find(
+        (tx: any) =>
+          tx.planId === planId &&
+          (tx.status === "Pending" || tx.status === "PendingPayment"),
+      );
+
+      if (pendingTx) {
+        toast.loading("Đang dọn dẹp giao dịch cũ để khởi tạo lại...", {
+          id: "activate-free",
+        });
+        await cancelMutation.mutateAsync(pendingTx.referenceCode);
+        // Đợi một chút để BE cập nhật trạng thái
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+
+      // 2. Kích hoạt gói mới
+      toast.loading("Đang kích hoạt gói dùng thử...", { id: "activate-free" });
+      await subscribeMutation.mutateAsync(planId);
+
+      // Thành công
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-subscription"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["active-subscription-plans"],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["payment-history"] }),
+      ]);
+
+      toast.success("Kích hoạt gói dùng thử thành công!", {
+        id: "activate-free",
+      });
+    } catch (error: any) {
+      const msg = extractErrorMessage(
+        error,
+        "Không thể kích hoạt gói dùng thử.",
+      );
+      toast.error(msg, { id: "activate-free" });
+    }
+  };
+
   // Tách dữ liệu: Gói miễn phí và Gói trả phí
-  const freePlan = plans?.find((p) => p.price === 0 && p.isActive !== false);
+  const freePlans = plans?.filter((p) => p.price === 0 && p.isActive !== false);
   const paidPlans = plans
     ?.filter((p) => p.price > 0 && p.isActive !== false)
     .sort((a, b) => a.price - b.price);
@@ -113,6 +174,7 @@ export default function UpgradePage() {
                   plan.badgeText?.toLowerCase().includes("đề xuất");
                 const anim = getCardAnimation(index, paidPlans.length);
                 const isUserActive = isCurrentPlan(plan);
+                const canPurchase = !hasAnyActiveSub;
 
                 return (
                   <motion.div
@@ -137,12 +199,15 @@ export default function UpgradePage() {
 
                     <Card
                       className={cn(
-                        "w-full flex flex-col p-8 rounded-[2.5rem] transition-all duration-500",
+                        "w-full flex flex-col p-8 rounded-[2.5rem] transition-all duration-500 relative overflow-hidden",
                         isPopular
-                          ? "bg-gray-900 dark:bg-[#0a0a0a] border-[#FF7A00]/50 shadow-[0_20px_50px_rgba(255,122,0,0.15)]"
+                          ? "bg-gradient-to-br from-orange-50/80 to-white dark:from-orange-500/10 dark:to-[#0a0a0a] border-[#FF7A00]/50 shadow-[0_20px_50px_rgba(255,122,0,0.12)] ring-1 ring-orange-500/20"
                           : "bg-white dark:bg-white/[0.03] border-gray-200 dark:border-white/10 hover:border-[#FF7A00]/30 shadow-sm",
                       )}
                     >
+                      {isPopular && (
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-3xl -mr-16 -mt-16 rounded-full" />
+                      )}
                       {plan.badgeText && (
                         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                           <Badge
@@ -168,9 +233,7 @@ export default function UpgradePage() {
                           <h3
                             className={cn(
                               "text-xl font-black",
-                              isPopular
-                                ? "text-white"
-                                : "text-gray-900 dark:text-white",
+                              "text-gray-900 dark:text-white",
                             )}
                           >
                             {plan.name}
@@ -183,9 +246,7 @@ export default function UpgradePage() {
                           <span
                             className={cn(
                               "font-black tracking-tighter text-4xl",
-                              isPopular
-                                ? "text-white"
-                                : "text-gray-900 dark:text-white",
+                              "text-gray-900 dark:text-white",
                             )}
                           >
                             {`${(plan.price / 1000).toLocaleString("vi-VN")}K`}
@@ -194,7 +255,7 @@ export default function UpgradePage() {
                             className={cn(
                               "font-bold mb-1 text-sm",
                               isPopular
-                                ? "text-white/60"
+                                ? "text-orange-600/70 dark:text-white/60"
                                 : "text-gray-500 dark:text-zinc-500",
                             )}
                           >
@@ -212,13 +273,13 @@ export default function UpgradePage() {
                             <div
                               className={cn(
                                 "mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
-                                isPopular ? "bg-[#FF7A00]" : "bg-orange-500/10",
+                                isPopular ? "bg-orange-500" : "bg-orange-500/10",
                               )}
                             >
                               <Check
                                 className={cn(
                                   "w-2.5 h-2.5",
-                                  isPopular ? "text-white" : "text-[#FF7A00]",
+                                  "text-white",
                                 )}
                                 strokeWidth={3}
                               />
@@ -226,7 +287,7 @@ export default function UpgradePage() {
                             <span
                               className={
                                 isPopular
-                                  ? "text-white/90"
+                                  ? "text-gray-800 dark:text-white/90"
                                   : "text-gray-700 dark:text-zinc-300"
                               }
                             >
@@ -238,90 +299,139 @@ export default function UpgradePage() {
 
                       <Button
                         size="lg"
-                        asChild={!isUserActive}
-                        disabled={isUserActive}
+                        asChild
+                        disabled={!isUserActive && !canPurchase}
                         className={cn(
                           "w-full h-12 rounded-xl font-bold text-sm transition-all duration-300",
                           isUserActive
-                            ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 cursor-default"
-                            : isPopular
-                              ? "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:from-[#FF8A10] text-white shadow-lg shadow-[#FF7A00]/25"
-                              : "bg-gray-100 dark:bg-white/5 hover:bg-gray-200 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10",
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500 dark:text-white dark:border-none hover:bg-emerald-100 dark:hover:bg-emerald-600 cursor-pointer shadow-sm"
+                            : !canPurchase
+                              ? "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-zinc-600 border border-gray-200 dark:border-white/10 cursor-not-allowed"
+                              : isPopular
+                                ? "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:from-[#FF8A10] text-white shadow-lg shadow-[#FF7A00]/25"
+                                : "bg-gray-100 dark:bg-white/5 hover:bg-gray-200 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10",
                         )}
                       >
                         {isUserActive ? (
-                          <span>Gói hiện tại</span>
+                          <Link href="/profile/edit?tab=billing">
+                            Quản lý gói
+                          </Link>
+                        ) : !canPurchase ? (
+                          <span className="flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4" />
+                            Đã có gói hoạt động
+                          </span>
                         ) : (
                           <Link href={`/payment?planId=${plan.id}`}>
                             Nâng cấp ngay
                           </Link>
                         )}
                       </Button>
+                      
+                      {!isUserActive && !canPurchase && (
+                        <p className="mt-3 text-[10px] text-center font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-tighter">
+                          Bạn cần hủy hoặc đợi gói cũ hết hạn để thay đổi.
+                        </p>
+                      )}
                     </Card>
                   </motion.div>
                 );
               })}
             </div>
 
-            {/* --- PHẦN 2: GÓI MIỄN PHÍ (DÀI NGANG) --- */}
-            {freePlan && (
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  type: "spring",
-                  stiffness: 100,
-                  damping: 20,
-                  delay: 0.5,
-                }}
-              >
-                <Card className="w-full flex flex-col md:flex-row items-center justify-between p-6 md:p-10 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 shadow-sm">
-                  <div className="flex-1 mb-6 md:mb-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-2xl bg-gray-200 dark:bg-white/10 flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-black text-gray-900 dark:text-white">
-                          {freePlan.name}
-                        </h3>
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] font-bold uppercase dark:border-white/20"
-                        >
-                          Miễn phí trọn đời
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-gray-500 dark:text-zinc-400 text-sm font-medium max-w-md">
-                      Bắt đầu hành trình của bạn với các tính năng cơ bản. Luôn
-                      miễn phí, không cần thẻ tín dụng.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row items-center gap-8">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      {freePlan.features.slice(0, 2).map((feat, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest"
-                        >
-                          <Check className="w-4 h-4 text-emerald-500" /> {feat}
+            {/* --- PHẦN 2: CÁC GÓI MIỄN PHÍ / DÙNG THỬ (DÀI NGANG) --- */}
+            <div className="space-y-6">
+              {freePlans?.map((plan) => {
+                const canPurchase = !hasAnyActiveSub;
+                
+                return (
+                  <motion.div
+                  key={plan.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 20,
+                    delay: 0.2,
+                  }}
+                >
+                  <Card className="w-full flex flex-col md:flex-row items-center justify-between p-6 md:p-10 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 shadow-sm">
+                    <div className="flex-1 mb-6 md:mb-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-2xl bg-gray-200 dark:bg-white/10 flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
                         </div>
-                      ))}
+                        <div>
+                          <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                            {plan.name}
+                          </h3>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] font-bold uppercase dark:border-white/20"
+                          >
+                            {plan.badgeText || "Miễn phí"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-gray-500 dark:text-zinc-400 text-sm font-medium max-w-md">
+                        {plan.price === 0 && plan.billingCycle?.toLowerCase().includes("trial") 
+                          ? "Trải nghiệm đầy đủ tính năng Premium trong thời gian giới hạn."
+                          : "Bắt đầu hành trình của bạn với các tính năng cơ bản. Luôn miễn phí, không cần thẻ tín dụng."
+                        }
+                      </p>
                     </div>
-                    <Button
-                      size="lg"
-                      className="w-full md:w-auto bg-white dark:bg-[#111111] hover:bg-gray-100 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20 font-bold rounded-xl h-12 px-8 opacity-50 cursor-not-allowed"
-                      disabled
-                    >
-                      Đã kích hoạt
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
+
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {plan.features.slice(0, 2).map((feat, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest"
+                          >
+                            <Check className="w-4 h-4 text-emerald-500" /> {feat}
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        size="lg"
+                        className={cn(
+                          "w-full md:w-auto font-bold rounded-xl h-12 px-8 transition-all duration-300",
+                          isCurrentPlan(plan)
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500 dark:text-white dark:border-none hover:bg-emerald-100 dark:hover:bg-emerald-600 cursor-pointer shadow-sm"
+                            : !canPurchase
+                              ? "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-zinc-600 border border-gray-200 dark:border-white/10 cursor-not-allowed"
+                              : "bg-white dark:bg-[#111111] hover:bg-gray-100 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20 shadow-sm"
+                        )}
+                        onClick={() => {
+                          if (isCurrentPlan(plan)) {
+                            router.push("/profile/edit?tab=billing");
+                          } else if (canPurchase) {
+                            handleActivateFreePlan(plan.id);
+                          }
+                        }}
+                        disabled={subscribeMutation.isPending || (!isCurrentPlan(plan) && !canPurchase)}
+                      >
+                        {subscribeMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Đang xử lý...
+                          </>
+                        ) : isCurrentPlan(plan) ? (
+                          "Quản lý gói"
+                        ) : !canPurchase ? (
+                          "Đã có gói hoạt động"
+                        ) : (
+                          "Kích hoạt ngay"
+                        )}
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+            </div>
           </div>
         )}
 

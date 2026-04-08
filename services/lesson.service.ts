@@ -168,7 +168,7 @@ export const lessonService = {
     level: string = "Beginner",
   ): Promise<GetDictationExerciseResponse> => {
     const response = await axiosClient.get(`/lessons/${id}/dictation`, {
-      params: { levelStr: level },
+      params: { level },
     });
     return (response as any).data ?? response;
   },

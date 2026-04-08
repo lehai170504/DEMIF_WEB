@@ -49,7 +49,7 @@ export function DictationPlaylist({
             if (!w.isBlank) return <span key={wIndex}>{w.text} </span>;
             if (showAll) return <span key={wIndex} className="text-orange-500 font-bold">{w.text || "___"} </span>;
             // Nếu bị đục lỗ và không show, render các dấu chấm
-            const dots = "•".repeat(w.wordLength || 4);
+            const dots = "•".repeat(w.length || 4);
             return <span key={wIndex} className="opacity-50 tracking-[0.2em]">{dots} </span>;
           });
 

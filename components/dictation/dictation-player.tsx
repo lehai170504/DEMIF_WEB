@@ -182,12 +182,17 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       // Typically, Senglish has the hint in the API. We'll leave it as a visual button that triggers a toast or mock reveal.
   }
 
-  const youtubeUrl = useMemo(() => getYoutubeEmbedUrl(lesson.mediaUrl), [lesson.mediaUrl]);
-  const isVideoType = lesson.mediaType?.toLowerCase() === "video";
-  const finalMediaUrl = useMemo(
-    () => getCleanMediaUrl(lesson.mediaUrl) ?? getCleanMediaUrl(lesson.audioUrl),
-    [lesson],
-  );
+  const youtubeUrl = useMemo(() => {
+    const url = exercise?.mediaUrl ?? lesson.mediaUrl;
+    return getYoutubeEmbedUrl(url);
+  }, [exercise?.mediaUrl, lesson.mediaUrl]);
+
+  const isVideoType = (exercise?.mediaType ?? lesson.mediaType)?.toLowerCase() === "video";
+
+  const finalMediaUrl = useMemo(() => {
+    const url = exercise?.mediaUrl ?? exercise?.audioUrl ?? lesson.mediaUrl ?? lesson.audioUrl;
+    return getCleanMediaUrl(url);
+  }, [exercise, lesson]);
 
   const { totalBlanks, filledBlanks, progress } = useMemo(() => {
     const totalBlanks = exercise?.template.totalBlanks || 0;
@@ -323,7 +328,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                                     );
                                 }
 
-                                const dotsCount = word.wordLength || 4;
+                                const dotsCount = word.length || 4;
                                 const dots = "•".repeat(dotsCount);
 
                                 return (

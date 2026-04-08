@@ -49,17 +49,23 @@ export const subscriptionService = {
     const response = await publicAxiosClient.get("/subscription-plans");
     const data = response as any;
 
-    // Nếu response có property "plans"
-    if (data && typeof data === "object" && "plans" in data) {
-      return data.plans;
-    }
+    if (!data) return [];
 
-    // Nếu response là array trực tiếp
-    if (Array.isArray(data)) {
-      return data;
-    }
+    // 1. Nếu là array trực tiếp
+    if (Array.isArray(data)) return data;
 
-    // Fallback: trả về empty array
+    // 2. Nếu nằm trong data.plans
+    if (data.plans && Array.isArray(data.plans)) return data.plans;
+
+    // 3. Nếu nằm trong data.data.plans (do interceptor bóc tách không hết hoặc lồng nhau)
+    if (data.data?.plans && Array.isArray(data.data.plans)) return data.data.plans;
+    
+    // 4. Nếu nằm trong data.data (array)
+    if (data.data && Array.isArray(data.data)) return data.data;
+
+    // 5. Nếu nằm trong data.items
+    if (data.items && Array.isArray(data.items)) return data.items;
+
     return [];
   },
 

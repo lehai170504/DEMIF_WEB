@@ -12,13 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMySubscription } from "@/hooks/use-subscription";
+import { useMySubscription, useActivePlans } from "@/hooks/use-subscription";
 import { usePaymentHistory } from "@/hooks/use-payment";
 import { useRouter } from "next/navigation";
 
 export function BillingSubscription() {
   const router = useRouter();
   const { data: mySubscription, isLoading } = useMySubscription();
+  const { data: activePlans } = useActivePlans();
   const { data: paymentHistory, isLoading: isLoadingHistory } = usePaymentHistory();
 
   // Format date to Vietnamese format
@@ -80,18 +81,20 @@ export function BillingSubscription() {
                     className="rounded-xl border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-bold h-12"
                     onClick={() => router.push('/upgrade')}
                   >
-                    Quản lý gói
+                    Xem các gói
                   </Button>
                 )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 pt-8 border-t border-gray-200 dark:border-white/5">
-                {[
-                  "Không giới hạn bài tập",
-                  "Phân tích phát âm AI",
-                  "Tải về bài học Offline",
-                  "Hỗ trợ 1-1 ưu tiên",
-                ].map((feature, idx) => (
+                {(mySubscription.plan?.features || 
+                  activePlans?.find(p => p.id === mySubscription.planId || p.name === mySubscription.planName)?.features || 
+                  [
+                    "Không giới hạn bài tập",
+                    "Phân tích phát âm AI",
+                    "Tải về bài học Offline",
+                    "Hỗ trợ 1-1 ưu tiên",
+                  ]).map((feature: string, idx: number) => (
                   <div
                     key={idx}
                     className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-zinc-300"
