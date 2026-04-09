@@ -52,9 +52,9 @@ export interface CreatePlanRequest {
   name: string;
   price: number;
   currency: string;
-  billingCycle: number;
+  billingCycle: string;
   features: string[];
-  badgeText?: string | null;
-  badgeColor?: string | null;
+  badgeText: string | null;
+  badgeColor: string | null;
   isActive: boolean;
 }
