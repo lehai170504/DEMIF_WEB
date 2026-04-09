@@ -121,7 +121,7 @@ export default function BlogDetailPage() {
     <div className="w-full min-h-screen bg-slate-50/50 dark:bg-zinc-950 pb-20 relative">
       {/* Background Glows */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-orange-400/5 blur-[120px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-neutral-400/5 blur-[120px] rounded-full" />
         <div className="absolute top-[40%] right-[-10%] w-[500px] h-[500px] bg-blue-400/5 blur-[120px] rounded-full" />
       </div>
 

@@ -16,7 +16,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -36,25 +35,15 @@ import {
   Zap,
   Target,
   Sparkles,
+  Lock,
 } from "lucide-react";
 import { useManagePlan } from "@/hooks/use-manage-plan";
 
-// --- MAP GIÁ TRỊ THEO YÊU CẦU CỦA BE TRONG HÌNH ---
-// BE chỉ hỗ trợ: Weekly, Monthly, Yearly
-const BILLING_CYCLE_MAP: Record<string, number> = {
-  Weekly: 0,
-  Monthly: 1,
-  Yearly: 2,
-};
-
-const REVERSE_BILLING_CYCLE_MAP: Record<number, string> = {
-  0: "Weekly",
-  1: "Monthly",
-  2: "Yearly",
-};
-
 export function EditPlanDialog({ plan, open, onOpenChange }: any) {
   const { updatePlan, isUpdating } = useManagePlan();
+
+  const isLockedBySubscribers =
+    plan?.totalSubscribers > 0 || plan?.activeSubscribers > 0;
 
   const form = useForm({
     defaultValues: {
@@ -75,7 +64,14 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
         name: plan.name,
         price: plan.price,
         currency: plan.currency || "VND",
-        billingCycle: REVERSE_BILLING_CYCLE_MAP[plan.billingCycle] || "Monthly",
+        billingCycle:
+          typeof plan.billingCycle === "number"
+            ? plan.billingCycle === 0
+              ? "Weekly"
+              : plan.billingCycle === 1
+                ? "Monthly"
+                : "Yearly"
+            : plan.billingCycle,
         featuresString: plan.features ? plan.features.join("\n") : "",
         badgeText: plan.badgeText || "",
         badgeColor: plan.badgeColor || "#3B82F6",
@@ -94,7 +90,7 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
       name: values.name,
       price: Number(values.price),
       currency: values.currency,
-      billingCycle: BILLING_CYCLE_MAP[values.billingCycle],
+      billingCycle: values.billingCycle,
       features: featuresArray,
       badgeText: values.badgeText || null,
       badgeColor: values.badgeColor || null,
@@ -110,7 +106,6 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[650px] bg-white dark:bg-zinc-950 border-none text-slate-900 dark:text-white h-[90vh] flex flex-col rounded-[2.5rem] shadow-2xl p-0 font-mono transition-colors duration-300 overflow-hidden">
-        {/* HEADER CỐ ĐỊNH - Nút X của Shadcn sẽ nằm im ở đây */}
         <DialogHeader className="p-10 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-white/5 relative shrink-0 text-left">
           <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
           <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase tracking-tighter relative z-10">
@@ -121,11 +116,9 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
           </DialogTitle>
         </DialogHeader>
 
-        {/* PHẦN FORM CHO PHÉP CUỘN - ẨN SCROLLBAR */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-10 bg-white dark:bg-zinc-950">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-              {/* Nhóm 1: Identity */}
               <div className="space-y-5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-left text-blue-500">
                   <ShieldCheck className="w-4 h-4" /> THÔNG TIN ĐỊNH DANH
@@ -145,17 +138,20 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
                       </FormItem>
                     )}
                   />
                 </div>
               </div>
 
-              {/* Nhóm 2: Commerce */}
               <div className="space-y-5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-left text-orange-500">
-                  <Zap className="w-4 h-4" /> THÔNG SỐ TÀI CHÍNH
+                  <Zap className="w-4 h-4" /> THÔNG SỐ TÀI CHÍNH{" "}
+                  {isLockedBySubscribers && (
+                    <span className="text-[8px] text-red-500 font-bold ml-auto">
+                      (ĐÃ CÓ NGƯỜI MUA - KHÓA CHỈNH SỬA)
+                    </span>
+                  )}
                 </h4>
                 <div className="grid grid-cols-2 gap-6 text-left">
                   <FormField
@@ -170,8 +166,8 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                           <div className="relative group">
                             <Input
                               type="text"
-                              inputMode="numeric"
-                              className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white font-black rounded-2xl pr-12 focus:ring-orange-500/20 transition-all"
+                              disabled={isLockedBySubscribers}
+                              className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white font-black rounded-2xl pr-12 focus:ring-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                               value={
                                 field.value === 0
                                   ? ""
@@ -190,6 +186,9 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                               VND
                             </div>
+                            {isLockedBySubscribers && (
+                              <Lock className="absolute -left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-red-500" />
+                            )}
                           </div>
                         </FormControl>
                       </FormItem>
@@ -206,6 +205,7 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
+                          disabled={isLockedBySubscribers}
                         >
                           <FormControl>
                             <SelectTrigger className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 font-black rounded-2xl uppercase text-[10px] tracking-widest">
@@ -239,7 +239,6 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                 </div>
               </div>
 
-              {/* Nhóm 3: Marketing */}
               <div className="space-y-5">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-left text-pink-500">
                   <Sparkles className="w-4 h-4" /> HIỂN THỊ TIẾP THỊ
@@ -255,7 +254,7 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Ví dụ: PHỔ BIẾN NHẤT"
+                            placeholder="Ví dụ: TIẾT KIỆM NHẤT"
                             className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 font-bold rounded-2xl focus:ring-pink-500/20 transition-all"
                             {...field}
                           />
@@ -272,7 +271,7 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                           MÃ MÀU NHÃN (HEX)
                         </FormLabel>
                         <div className="flex gap-3">
-                          <div className="w-12 h-12 rounded-2xl border border-slate-200 dark:border-white/10 relative overflow-hidden shrink-0 shadow-sm">
+                          <div className="w-12 h-12 rounded-2xl border border-slate-200 dark:border-white/10 relative overflow-hidden shrink-0">
                             <input
                               type="color"
                               className="absolute -inset-2 w-16 h-16 cursor-pointer"
@@ -293,7 +292,6 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                 </div>
               </div>
 
-              {/* Nhóm 4: Đặc quyền */}
               <div className="space-y-5 text-left">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-3 border-b border-slate-100 dark:border-white/5 pb-3 text-emerald-500">
                   <Target className="w-4 h-4" /> DANH SÁCH ĐẶC QUYỀN
@@ -305,8 +303,8 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                     <FormItem>
                       <FormControl>
                         <Textarea
-                          className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-200 font-bold text-xs min-h-[160px] rounded-[2rem] p-6 focus:ring-emerald-500/20 transition-all no-scrollbar leading-relaxed"
-                          placeholder="Tính năng 1&#10;Tính năng 2..."
+                          className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-200 font-bold text-xs min-h-[140px] rounded-[2rem] p-6 focus:ring-emerald-500/20 transition-all no-scrollbar leading-relaxed"
+                          placeholder="Mỗi dòng một tính năng..."
                           {...field}
                         />
                       </FormControl>
@@ -320,11 +318,9 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
                 name="isActive"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-[2rem] border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 p-6 transition-all hover:bg-white dark:hover:bg-zinc-900">
-                    <div className="space-y-1 text-left">
-                      <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
-                        TRẠNG THÁI HOẠT ĐỘNG
-                      </FormLabel>
-                    </div>
+                    <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
+                      TRẠNG THÁI HOẠT ĐỘNG
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -338,7 +334,6 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
           </Form>
         </div>
 
-        {/* FOOTER CỐ ĐỊNH */}
         <DialogFooter className="p-8 bg-slate-50/50 dark:bg-zinc-900/50 border-t border-slate-100 dark:border-white/5 shrink-0 gap-4">
           <Button
             type="button"
@@ -359,7 +354,7 @@ export function EditPlanDialog({ plan, open, onOpenChange }: any) {
             ) : (
               <Save className="mr-3 h-4 w-4" />
             )}
-            LƯU CẤU HÌNH
+            LƯU CẬP NHẬT
           </Button>
         </DialogFooter>
       </DialogContent>

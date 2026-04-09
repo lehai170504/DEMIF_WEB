@@ -70,8 +70,7 @@ export function UserTable({ users }: UserTableProps) {
               Danh sách học viên
             </h2>
             <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest">
-              Hiển thị {memberOnlyList.length} hồ sơ{" "}
-              <span className="opacity-50">(Hidden Admin)</span>
+              Hiển thị {memberOnlyList.length} hồ sơ học viên
             </p>
           </div>
         </div>

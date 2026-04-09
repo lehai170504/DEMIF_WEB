@@ -19,7 +19,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -44,13 +43,6 @@ import {
 import { useCreatePlan } from "@/hooks/use-create-plan";
 import { CreatePlanRequest } from "@/types/subscription.type";
 
-// 🔥 ĐÃ FIX THEO LỖI TRÊN MÀN HÌNH: BE chỉ nhận Weekly (0), Monthly (1), Yearly (2)
-const BILLING_CYCLE_MAP: Record<string, number> = {
-  Weekly: 0,
-  Monthly: 1,
-  Yearly: 2,
-};
-
 export function CreatePlanDialog() {
   const [open, setOpen] = React.useState(false);
   const { mutate, isPending } = useCreatePlan();
@@ -74,11 +66,12 @@ export function CreatePlanDialog() {
       .map((f: string) => f.trim())
       .filter((f: string) => f.length > 0);
 
+    // 🔥 FIX LOGIC: Truyền billingCycle dạng chuỗi "Weekly" | "Monthly" | "Yearly"
     const payload: CreatePlanRequest = {
       name: values.name,
       price: Number(values.price),
       currency: values.currency,
-      billingCycle: BILLING_CYCLE_MAP[values.billingCycle],
+      billingCycle: values.billingCycle,
       features: featuresArray,
       badgeText: values.badgeText || null,
       badgeColor: values.badgeColor || null,
@@ -101,9 +94,7 @@ export function CreatePlanDialog() {
         </Button>
       </DialogTrigger>
 
-      {/* CỐ ĐỊNH HEADER VÀ CHIỀU CAO */}
       <DialogContent className="sm:max-w-[650px] bg-white dark:bg-zinc-950 border-none text-slate-900 dark:text-white h-[90vh] flex flex-col rounded-[2.5rem] shadow-2xl p-0 font-mono transition-colors duration-300 overflow-hidden">
-        {/* HEADER CỐ ĐỊNH */}
         <DialogHeader className="p-10 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-white/5 relative shrink-0 text-left">
           <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 blur-[60px] rounded-full pointer-events-none" />
           <DialogTitle className="flex items-center gap-4 text-2xl font-black uppercase tracking-tighter relative z-10">
@@ -117,7 +108,6 @@ export function CreatePlanDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        {/* PHẦN FORM CHO PHÉP CUỘN - ẨN THANH CUỘN */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-10 bg-white dark:bg-zinc-950">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
@@ -141,7 +131,6 @@ export function CreatePlanDialog() {
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
                       </FormItem>
                     )}
                   />
@@ -165,7 +154,6 @@ export function CreatePlanDialog() {
                           <div className="relative group">
                             <Input
                               type="text"
-                              inputMode="numeric"
                               className="h-12 bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white font-black rounded-2xl pr-12 focus:ring-orange-500/20 transition-all"
                               value={
                                 field.value === 0
@@ -299,7 +287,7 @@ export function CreatePlanDialog() {
                       <FormControl>
                         <Textarea
                           className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-200 font-bold text-xs min-h-[140px] rounded-[2rem] p-6 focus:ring-emerald-500/20 transition-all no-scrollbar leading-relaxed"
-                          placeholder="Học không giới hạn&#10;Mở khóa AI..."
+                          placeholder="Mỗi đặc quyền một dòng..."
                           {...field}
                         />
                       </FormControl>
@@ -313,11 +301,9 @@ export function CreatePlanDialog() {
                 name="isActive"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-[2rem] border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 p-6 transition-all hover:bg-white dark:hover:bg-zinc-900">
-                    <div className="space-y-1 text-left">
-                      <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
-                        TRẠNG THÁI HOẠT ĐỘNG
-                      </FormLabel>
-                    </div>
+                    <FormLabel className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
+                      TRẠNG THÁI HOẠT ĐỘNG
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -331,7 +317,6 @@ export function CreatePlanDialog() {
           </Form>
         </div>
 
-        {/* FOOTER CỐ ĐỊNH */}
         <DialogFooter className="p-8 bg-slate-50/50 dark:bg-zinc-900/50 border-t border-slate-100 dark:border-white/5 shrink-0 gap-4">
           <Button
             type="button"
