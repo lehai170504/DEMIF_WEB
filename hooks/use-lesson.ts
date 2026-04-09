@@ -311,21 +311,32 @@ export const useSubmitDictation = () => {
     mutationFn: ({ id, data }: { id: string; data: SubmitDictationRequest }) =>
       lessonService.submitDictation(id, data),
     onSuccess: (result) => {
-      const correctPercentage =
-        (result.correctCount / result.totalBlanks) * 100;
-
-      if (correctPercentage >= 80) {
-        toast.success("Kết quả xuất sắc!", {
-          description: `Bạn đạt ${result.score.toFixed(0)} điểm. Bạn quá giỏi homie!`,
+      // Ưu tiên isFullyCorrect trước
+      if (result.isFullyCorrect) {
+        toast.success("✨ Hoàn hảo tuyệt đối!", {
+          description: `Điểm ${result.score?.toFixed(0)} — Tất cả ${result.totalBlanks} ô đều đúng. Bạn xuất sắc!`,
         });
-      } else if (correctPercentage >= 50) {
-        toast.info("Làm tốt lắm!", {
-          description: `Số điểm: ${result.score.toFixed(0)}. Cố gắng thêm chút nữa để hoàn hảo nhé.`,
+      } else if (!result.isSubmissionComplete) {
+        // Chưa điền đủ — cảnh báo nhẹ nhàng
+        const missing = (result.totalBlanks ?? 0) - (result.answeredBlanks ?? 0);
+        toast.warning("Chưa điền đủ bài", {
+          description: `Còn ${missing} ô bị bỏ qua. Độ chính xác (phần đã điền): ${result.answeredAccuracy?.toFixed(0) ?? 0}%.`,
         });
       } else {
-        toast.warning("Cần nỗ lực hơn", {
-          description: `Điểm: ${result.score.toFixed(0)}. Hãy thử luyện tập lại để cải thiện trình độ.`,
-        });
+        const correctPercentage = (result.correctCount / result.totalBlanks) * 100;
+        if (correctPercentage >= 80) {
+          toast.success("Kết quả xuất sắc!", {
+            description: `Bạn đạt ${result.score?.toFixed(0)} điểm — ${result.answeredAccuracy?.toFixed(0)}% chính xác trên phần đã điền!`,
+          });
+        } else if (correctPercentage >= 50) {
+          toast.info("Làm tốt lắm!", {
+            description: `Điểm: ${result.score?.toFixed(0)}. Cố gắng thêm chút nữa để hoàn hảo nhé.`,
+          });
+        } else {
+          toast.warning("Cần nỗ lực hơn", {
+            description: `Điểm: ${result.score?.toFixed(0)}. Hãy thử luyện tập lại để cải thiện trình độ.`,
+          });
+        }
       }
       queryClient.invalidateQueries({ queryKey: ["user-lesson"] });
     },
@@ -339,6 +350,7 @@ export const useSubmitDictation = () => {
     },
   });
 };
+
 
 // Kiểm tra Shadowing qua text input
 export const useCheckShadowingSegment = () => {

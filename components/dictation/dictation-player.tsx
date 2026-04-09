@@ -18,6 +18,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { lessonService } from "@/services/lesson.service";
 import { LessonDto, DictationAnswer } from "@/types/lesson.type";
+import { useYoutubePlayer } from "@/hooks/use-youtube-player";
 
 import { DictationHeader } from "@/components/dictation/dictation-header";
 import { DictationMedia } from "@/components/dictation/dictation-media";
@@ -60,6 +61,8 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  // Ref giữ segments mới nhất (tránh stale closure trong callback)
+  const segmentsRef = useRef<any[]>([]);
 
   const { data: exercise, isLoading } = useQuery({
     queryKey: ["dictation", lesson.id, level],
@@ -71,6 +74,39 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
 
   const segments = exercise?.template.segments || [];
   const currentSegment = segments[currentIdx];
+
+  // Media URLs — khai báo sớm để dùng trong callbacks bên dưới
+  const youtubeUrl = useMemo(() => {
+    const url = exercise?.mediaUrl ?? lesson.mediaUrl;
+    return getYoutubeEmbedUrl(url);
+  }, [exercise?.mediaUrl, lesson.mediaUrl]);
+
+  const isVideoType = (exercise?.mediaType ?? lesson.mediaType)?.toLowerCase() === "video";
+
+  const finalMediaUrl = useMemo(() => {
+    const url = exercise?.mediaUrl ?? exercise?.audioUrl ?? lesson.mediaUrl ?? lesson.audioUrl;
+    return getCleanMediaUrl(url);
+  }, [exercise, lesson]);
+
+  // Sync segments ref
+  useEffect(() => { segmentsRef.current = segments; }, [segments]);
+
+  // Callback nhận currentTime từ YouTube (infoDelivery) → auto-sync playlist
+  const handleYouTubeTimeUpdate = useCallback((time: number) => {
+    const segs = segmentsRef.current;
+    if (!segs.length) return;
+    const segIdx = segs.findIndex(
+      (seg: any) => time >= seg.startTime && time < seg.endTime,
+    );
+    if (segIdx !== -1) {
+      setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
+    }
+  }, []);
+
+  // YouTube IFrame API (pure postMessage)
+  const { setIframeRef, seekAndPlay } = useYoutubePlayer(
+    youtubeUrl ? handleYouTubeTimeUpdate : undefined,
+  );
 
   useEffect(() => {
     const timer = setInterval(() => setTimeSpent((t) => t + 1), 1000);
@@ -84,6 +120,56 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     setCurrentIdx(0);
     setIsCompleted(false);
   }, [level]);
+
+  // Auto-sync playlist theo audio/video currentTime (nếu không phải YouTube)
+  useEffect(() => {
+    if (youtubeUrl) return; // YouTube được sync qua handleYouTubeTimeUpdate
+    const interval = setInterval(() => {
+      const media =
+        (audioRef.current ?? videoRef.current) as HTMLMediaElement | null;
+      if (!media || media.paused) return;
+      const t = media.currentTime;
+      const segs = segmentsRef.current;
+      const segIdx = segs.findIndex(
+        (seg: any) => t >= seg.startTime && t < seg.endTime,
+      );
+      if (segIdx !== -1) {
+        setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
+      }
+    }, 300);
+    return () => clearInterval(interval);
+  }, [youtubeUrl]);
+
+
+  // Seek + play media đến đầu segment — không tự dừng
+  const seekAndPlaySegment = useCallback(
+    (segIndex: number) => {
+      const seg = segments[segIndex];
+      if (!seg) return;
+
+      if (youtubeUrl) {
+        seekAndPlay(seg.startTime); // không truyền endTime → không tự pause
+      } else {
+        const media =
+          audioRef.current ?? (videoRef.current as HTMLMediaElement | null);
+        if (!media) return;
+        media.currentTime = seg.startTime;
+        media.play().catch(() => {});
+        // Không setTimeout pause → cứ tiếp tục phát
+      }
+    },
+    [segments, youtubeUrl, seekAndPlay],
+  );
+
+  // Khi click segment trong playlist → đổi index VÀ seek + play
+  const handleSelectSegment = useCallback(
+    (idx: number) => {
+      setCurrentIdx(idx);
+      seekAndPlaySegment(idx);
+    },
+    [seekAndPlaySegment],
+  );
+
 
   const handleInputChange = useCallback(
     (segmentIndex: number, position: number, value: string) => {
@@ -182,17 +268,6 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       // Typically, Senglish has the hint in the API. We'll leave it as a visual button that triggers a toast or mock reveal.
   }
 
-  const youtubeUrl = useMemo(() => {
-    const url = exercise?.mediaUrl ?? lesson.mediaUrl;
-    return getYoutubeEmbedUrl(url);
-  }, [exercise?.mediaUrl, lesson.mediaUrl]);
-
-  const isVideoType = (exercise?.mediaType ?? lesson.mediaType)?.toLowerCase() === "video";
-
-  const finalMediaUrl = useMemo(() => {
-    const url = exercise?.mediaUrl ?? exercise?.audioUrl ?? lesson.mediaUrl ?? lesson.audioUrl;
-    return getCleanMediaUrl(url);
-  }, [exercise, lesson]);
 
   const { totalBlanks, filledBlanks, progress } = useMemo(() => {
     const totalBlanks = exercise?.template.totalBlanks || 0;
@@ -219,6 +294,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
               finalMediaUrl={finalMediaUrl}
               audioRef={audioRef}
               videoRef={videoRef}
+              iframeRef={youtubeUrl ? setIframeRef : undefined}
               showHints={showHints}
               onToggleHints={() => setShowHints(!showHints)}
               thumbnailUrl={lesson.thumbnailUrl}
@@ -255,7 +331,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                 segments={segments}
                 currentIdx={currentIdx}
                 segmentResults={segmentResults}
-                onSelectSegment={setCurrentIdx}
+                onSelectSegment={handleSelectSegment}
             />
 
             <div className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl text-center">

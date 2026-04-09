@@ -27,6 +27,7 @@ interface ShadowingMediaProps {
   lesson: any;
   currentSegment: any;
   mediaRef: React.Ref<any>;
+  iframeRef?: (el: HTMLIFrameElement | null) => void;
   levelLabel: string;
   levelColor: string;
 }
@@ -35,6 +36,7 @@ export function ShadowingMedia({
   lesson,
   currentSegment,
   mediaRef,
+  iframeRef,
   levelLabel,
   levelColor,
 }: ShadowingMediaProps) {
@@ -46,8 +48,8 @@ export function ShadowingMedia({
       {lesson.mediaType === "youtube" ? (
         <div className="w-full aspect-video">
           <iframe
-            ref={mediaRef}
-            src={`${getYoutubeEmbedUrl(lesson.mediaUrl) ?? ""}${currentSegment ? `&start=${Math.floor(currentSegment.startTime)}` : ""}`}
+            ref={iframeRef ?? (mediaRef as any)}
+            src={getYoutubeEmbedUrl(lesson.mediaUrl) ?? ""}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

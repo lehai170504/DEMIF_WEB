@@ -324,6 +324,10 @@ export interface SubmitDictationResponse {
   timeSpentSeconds: number;
   results: DictationResult[];
   feedback?: string;
+  // Fields mới từ backend (LESSON_DICTATION_SUBMIT_FE_NOTES.md)
+  answeredAccuracy: number;      // % đúng trên số blank user đã submit
+  isSubmissionComplete: boolean; // true khi user đã điền đủ toàn bộ blank
+  isFullyCorrect: boolean;       // true khi toàn bộ blank của bài đều đúng
 }
 
 export interface TimedSegment {

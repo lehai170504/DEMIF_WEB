@@ -13,6 +13,7 @@ import {
   useCheckVoice,
   useCheckShadowingSegment,
 } from "@/hooks/use-lesson";
+import { useYoutubePlayer } from "@/hooks/use-youtube-player";
 
 // UI Components
 import { ShadowingHeader } from "@/components/shadowing/shadowing-header";
@@ -54,7 +55,26 @@ export default function ShadowingPracticePage({
   // --- Refs ---
   const mediaRef = useRef<HTMLAudioElement | HTMLVideoElement>(null);
   const recognitionRef = useRef<any>(null);
-  const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ref giữ segments mới nhất (tránh stale closure)
+  const segmentsRef = useRef<any[]>([]);
+
+  // Auto-sync: khi YouTube gửi currentTime qua infoDelivery
+  const handleYouTubeTimeUpdate = useCallback((time: number) => {
+    const segs = segmentsRef.current;
+    if (!segs.length) return;
+    const segIdx = segs.findIndex(
+      (seg: any) => time >= seg.startTime && time < seg.endTime,
+    );
+    if (segIdx !== -1) {
+      setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
+    }
+  }, []);
+
+  // YouTube IFrame API (pure postMessage)
+  const { setIframeRef, seekAndPlay: ytSeekAndPlay, pauseVideo: ytPause } = useYoutubePlayer(
+    handleYouTubeTimeUpdate,
+  );
+
 
   // --- Data fetching & Mutations ---
   const {
@@ -73,6 +93,9 @@ export default function ShadowingPracticePage({
   const segments = segmentsData?.segments ?? [];
   const levelConfig = segmentsData?.levelConfig;
   const currentSegment = segments[currentIdx] ?? null;
+
+  // Sync segments ref
+  useEffect(() => { segmentsRef.current = segments; }, [segments]);
   
   // Mix: Dữ liệu backend trả về và local runtime progress
   const serverProgress = segmentsData?.progressPercent ?? 0;
@@ -102,8 +125,28 @@ export default function ShadowingPracticePage({
     setShowTranscript(levelConfig?.showTranscriptBefore ?? false);
     setIsPlaying(false);
     setUserText("");
-    if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
   }, [currentIdx, levelConfig]);
+
+  // Auto-sync playlist theo audio/video currentTime (không phải YouTube)
+  useEffect(() => {
+    if (lesson?.mediaType === "youtube") return;
+    const interval = setInterval(() => {
+      const media = mediaRef.current as HTMLMediaElement | null;
+      if (!media || media.paused) return;
+      // Sync isPlaying state
+      setIsPlaying(!media.paused);
+      const t = media.currentTime;
+      const segs = segmentsRef.current;
+      const segIdx = segs.findIndex(
+        (seg: any) => t >= seg.startTime && t < seg.endTime,
+      );
+      if (segIdx !== -1) {
+        setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
+      }
+    }, 300);
+    return () => clearInterval(interval);
+  }, [lesson?.mediaType]);
+
 
   // --- Media Control ---
   const handlePlaySegment = useCallback(() => {
@@ -111,59 +154,51 @@ export default function ShadowingPracticePage({
     const maxReplays = levelConfig?.maxReplays ?? -1;
     if (maxReplays !== -1 && replayCount >= maxReplays) return;
 
-    const media = mediaRef.current;
-    if (!media) return;
-
     setIsPlaying(true);
     setReplayCount((c) => c + 1);
 
-    const duration = (currentSegment.endTime - currentSegment.startTime) * 1000 + 300;
-    if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
-
     if (lesson?.mediaType === "youtube") {
-      const iframe = media as any as HTMLIFrameElement;
-      if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "seekTo", args: [currentSegment.startTime, true] }), "*");
-        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
-      }
-      
-      stopTimerRef.current = setTimeout(() => {
-        if (iframe.contentWindow) {
-          iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
-        }
-        setIsPlaying(false);
-      }, duration);
+      ytSeekAndPlay(currentSegment.startTime); // không truyền endTime → không tự dừng
     } else {
-      const audioVideo = media as any as HTMLMediaElement;
+      const audioVideo = mediaRef.current as HTMLMediaElement | null;
+      if (!audioVideo) return;
       audioVideo.currentTime = currentSegment.startTime;
       audioVideo.play().catch((e) => {
-          console.error("Autoplay failed:", e);
-          toast.error("Không thể tự động phát, vui lòng ấn Play thủ công ở góc trái 1 lần để cấp quyền");
+        console.error("Autoplay failed:", e);
+        toast.error("Không thể tự động phát, vui lòng ấn Play thủ công trước để cấp quyền");
       });
-      
-      stopTimerRef.current = setTimeout(() => {
-        audioVideo.pause();
-        setIsPlaying(false);
-      }, duration);
+      // Không setTimeout → video/audio tiếp tục chạy
     }
-  }, [currentSegment, levelConfig, lesson, replayCount]);
+  }, [currentSegment, levelConfig, lesson, replayCount, ytSeekAndPlay]);
 
   const handleStopPlayback = useCallback(() => {
-    const media = mediaRef.current;
-    if (media) {
-      if (lesson?.mediaType === "youtube") {
-        const iframe = media as any as HTMLIFrameElement;
-        if (iframe.contentWindow) {
-          iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
-        }
-      } else {
-        const audioVideo = media as any as HTMLMediaElement;
-        audioVideo.pause();
-      }
+    if (lesson?.mediaType === "youtube") {
+      ytPause();
+    } else {
+      const audioVideo = mediaRef.current as HTMLMediaElement | null;
+      audioVideo?.pause();
     }
     setIsPlaying(false);
-    if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
-  }, [lesson]);
+  }, [lesson, ytPause]);
+
+  // Khi click segment trong playlist → seek + play, không tự dừng
+  const handleSelectSegment = useCallback((idx: number) => {
+    setCurrentIdx(idx);
+    const seg = segments[idx];
+    if (!seg) return;
+
+    if (lesson?.mediaType === "youtube") {
+      ytSeekAndPlay(seg.startTime);
+      setIsPlaying(true);
+    } else {
+      const audioVideo = mediaRef.current as HTMLMediaElement | null;
+      if (!audioVideo) return;
+      audioVideo.currentTime = seg.startTime;
+      audioVideo.play().catch(() => {});
+      setIsPlaying(true);
+    }
+  }, [segments, lesson, ytSeekAndPlay]);
+
 
   // --- LƯỒNG 1: CHECK BẰNG VOICE ---
   const handleRecord = useCallback(() => {
@@ -319,6 +354,7 @@ export default function ShadowingPracticePage({
               lesson={lesson}
               currentSegment={currentSegment}
               mediaRef={mediaRef}
+              iframeRef={lesson.mediaType === "youtube" ? setIframeRef : undefined}
               levelLabel={LEVEL_LABELS[level]}
               levelColor={LEVEL_COLORS[level]}
             />
@@ -329,7 +365,7 @@ export default function ShadowingPracticePage({
               segments={segments}
               currentIdx={currentIdx}
               checkResults={checkResults}
-              onSelectSegment={setCurrentIdx}
+              onSelectSegment={handleSelectSegment}
             />
           </div>
 

@@ -8,6 +8,7 @@ interface DictationMediaProps {
   finalMediaUrl: string | null | undefined;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  iframeRef?: (el: HTMLIFrameElement | null) => void;
   showHints: boolean;
   onToggleHints: () => void;
   thumbnailUrl: string | null | undefined;
@@ -20,6 +21,7 @@ export function DictationMedia({
   finalMediaUrl,
   audioRef,
   videoRef,
+  iframeRef,
   showHints,
   onToggleHints,
   thumbnailUrl,
@@ -29,6 +31,7 @@ export function DictationMedia({
       {youtubeUrl ? (
         <div className="w-full aspect-video">
           <iframe
+            ref={iframeRef}
             src={youtubeUrl || undefined}
             className="w-full h-full border-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
