@@ -31,3 +31,33 @@ export const useDailyPractice = (days: number = 30, type?: string) => {
     enabled: hasToken,
   });
 };
+
+export const useProgress = () => {
+  const hasToken = typeof window !== "undefined" ? !!Cookies.get("accessToken") : false;
+
+  return useQuery({
+    queryKey: ["me-progress"],
+    queryFn: () => statsService.getProgress(),
+    enabled: hasToken,
+  });
+};
+
+export const useStreak = () => {
+  const hasToken = typeof window !== "undefined" ? !!Cookies.get("accessToken") : false;
+
+  return useQuery({
+    queryKey: ["me-streak"],
+    queryFn: () => statsService.getStreak(),
+    enabled: hasToken,
+  });
+};
+
+export const useSkillsAnalytics = () => {
+  const hasToken = typeof window !== "undefined" ? !!Cookies.get("accessToken") : false;
+
+  return useQuery({
+    queryKey: ["me-analytics-skills"],
+    queryFn: () => statsService.getSkillsAnalytics(),
+    enabled: hasToken,
+  });
+};

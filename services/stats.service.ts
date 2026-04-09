@@ -3,6 +3,9 @@ import {
   DailyPracticeResponse,
   HeatmapResponse,
   StatsSummaryResponse,
+  ProgressResponse,
+  StreakResponse,
+  SkillAnalyticsResponse,
 } from "@/types/stats.type";
 
 export const statsService = {
@@ -26,5 +29,20 @@ export const statsService = {
       params: { days, type },
     });
     return response as unknown as DailyPracticeResponse;
+  },
+
+  getProgress: async (): Promise<ProgressResponse> => {
+    const response = await axiosClient.get("/me/progress");
+    return response as unknown as ProgressResponse;
+  },
+
+  getStreak: async (): Promise<StreakResponse> => {
+    const response = await axiosClient.get("/me/streak");
+    return response as unknown as StreakResponse;
+  },
+
+  getSkillsAnalytics: async (): Promise<SkillAnalyticsResponse> => {
+    const response = await axiosClient.get("/me/analytics/skills");
+    return response as unknown as SkillAnalyticsResponse;
   },
 };

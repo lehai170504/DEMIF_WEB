@@ -30,3 +30,28 @@ export interface DailyPracticeResponse {
   days: number;
   data: DailyPracticeItem[];
 }
+
+export interface ProgressResponse {
+  totalPoints: number;
+  totalMinutes: number;
+  lessonsCompleted: number;
+  dictationCompleted: number;
+  shadowingCompleted: number;
+  avgDictationScore: number;
+  avgShadowingScore: number;
+  currentLevel: string;
+  levelProgress: number; // percentage normally
+}
+
+export interface StreakResponse {
+  currentStreak: number;
+  longestStreak: number;
+  totalActiveDays: number;
+  freezesAvailable: number;
+  lastActiveDate: string;
+  learnedToday: boolean;
+}
+
+export interface SkillAnalyticsResponse {
+  [key: string]: any; // Flexibly defined since Swagger lacked schema
+}
