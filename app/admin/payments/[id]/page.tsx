@@ -32,7 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { usePaymentDetail, useRefundPayment } from "@/hooks/use-payments";
+import { usePaymentDetail, useRefundPayment } from "@/hooks/use-admin-payments";
 import { cn } from "@/lib/utils";
 import { RefundDialog } from "@/components/admin/payments/refund-dialog";
 

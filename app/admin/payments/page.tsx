@@ -10,7 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { usePayments } from "@/hooks/use-payments";
+import { usePayments } from "@/hooks/use-admin-payments";
 import { cn } from "@/lib/utils";
 import { PaymentToolbar } from "@/components/admin/payments/payment-toolbar";
 import { PaymentTable } from "@/components/admin/payments/payment-table";

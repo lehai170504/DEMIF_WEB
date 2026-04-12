@@ -102,3 +102,10 @@ export interface PaymentDetailDto extends PaymentDto {
 export interface RefundPaymentRequest {
   reason: string;
 }
+
+export interface PaymentStatsResponse {
+  totalRevenue: number;
+  currentMonthRevenue: number;
+  totalTransactions: number;
+  currency: string;
+}
