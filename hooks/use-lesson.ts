@@ -457,3 +457,16 @@ export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
     },
   });
 };
+
+// Đồng bộ tiến độ bài học (Streak & Lesson Tracker)
+export const useSyncLessonProgress = () => {
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { segmentIndex: number; isCompleted: boolean };
+    }) => lessonService.syncProgress(id, data),
+  });
+};

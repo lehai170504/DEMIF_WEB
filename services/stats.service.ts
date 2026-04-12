@@ -45,4 +45,11 @@ export const statsService = {
     const response = await axiosClient.get("/me/analytics/skills");
     return response as unknown as SkillAnalyticsResponse;
   },
+
+  getLeaderboard: async (limit: number = 10): Promise<any> => {
+    const response = await axiosClient.get("/me/stats/leaderboard", {
+      params: { limit },
+    });
+    return response;
+  },
 };

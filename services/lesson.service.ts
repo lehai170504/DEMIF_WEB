@@ -234,4 +234,12 @@ export const lessonService = {
     );
     return (response as any).data ?? response;
   },
+
+  syncProgress: async (
+    id: string,
+    data: { segmentIndex: number; isCompleted: boolean },
+  ): Promise<any> => {
+    const response = await axiosClient.post(`/lessons/${id}/sync-progress`, data);
+    return (response as any).data ?? response;
+  },
 };

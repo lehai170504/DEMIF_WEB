@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import {
   useSubmitDictation,
   useCheckDictationSegment,
+  useSyncLessonProgress,
 } from "@/hooks/use-lesson";
 import { useQuery } from "@tanstack/react-query";
 import { lessonService } from "@/services/lesson.service";
@@ -71,6 +72,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   });
   const submitMutation = useSubmitDictation();
   const checkSegmentMutation = useCheckDictationSegment();
+  const syncProgressMutation = useSyncLessonProgress();
 
   const segments = exercise?.template.segments || [];
   const currentSegment = segments[currentIdx];
@@ -139,6 +141,18 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     }, 300);
     return () => clearInterval(interval);
   }, [youtubeUrl]);
+
+  // Sync Progress to Backend whenever index changes
+  useEffect(() => {
+    if (!lesson.id || isCompleted) return;
+    const timer = setTimeout(() => {
+       syncProgressMutation.mutate({
+         id: lesson.id,
+         data: { segmentIndex: currentIdx, isCompleted: false },
+       });
+    }, 2000); // 2s debounce
+    return () => clearTimeout(timer);
+  }, [currentIdx, lesson.id, isCompleted]);
 
 
   // Seek + play media đến đầu segment — không tự dừng
@@ -258,6 +272,12 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       data: { level, answers: formattedAnswers, timeSpentSeconds: timeSpent },
     });
     
+    // Final sync completion
+    syncProgressMutation.mutate({
+      id: lesson.id,
+      data: { segmentIndex: currentIdx, isCompleted: true },
+    });
+
     setIsCompleted(true);
   };
 
@@ -280,252 +300,262 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   }, [exercise, answers]);
 
   return (
-    <div className="min-h-screen font-mono text-gray-900 dark:text-zinc-100 pb-20 bg-white dark:bg-[#050505] selection:bg-orange-500/30">
+    <div className="min-h-screen font-sans text-zinc-100 bg-[#050505] selection:bg-orange-500/30">
       <DictationHeader lesson={lesson} level={level} />
 
-      <main className="container mx-auto max-w-[1400px] px-4 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          {/* CỘT TRÁI: Media, Level, Progress */}
-          <aside className="xl:col-span-5 space-y-6">
-            <DictationMedia
-              lessonTitle={lesson.title}
-              youtubeUrl={youtubeUrl}
-              isVideoType={isVideoType}
-              finalMediaUrl={finalMediaUrl}
-              audioRef={audioRef}
-              videoRef={videoRef}
-              iframeRef={youtubeUrl ? setIframeRef : undefined}
-              showHints={showHints}
-              onToggleHints={() => setShowHints(!showHints)}
-              thumbnailUrl={lesson.thumbnailUrl}
-            />
+      <main className="container mx-auto max-w-[1700px] px-4 py-6">
+        <div className="flex flex-col xl:flex-row gap-6 items-start h-[calc(100vh-120px)]">
+          
+          {/* LEFT AREA: Media + Workout (70%) */}
+          <div className="flex-1 w-full xl:w-[70%] flex flex-col gap-6 h-full overflow-y-auto no-scrollbar pb-10">
+            
+            {/* Media Card */}
+            <div className="w-full shrink-0">
+               <DictationMedia
+                 lessonTitle={lesson.title}
+                 youtubeUrl={youtubeUrl}
+                 isVideoType={isVideoType}
+                 finalMediaUrl={finalMediaUrl}
+                 audioRef={audioRef}
+                 videoRef={videoRef}
+                 iframeRef={youtubeUrl ? setIframeRef : undefined}
+                 showHints={showHints}
+                 onToggleHints={() => setShowHints(!showHints)}
+                 thumbnailUrl={lesson.thumbnailUrl}
+               />
+            </div>
 
-            <div className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl">
-              <h3 className="font-black text-gray-500 dark:text-zinc-500 uppercase text-[10px] tracking-[0.2em] mb-4 text-center">
-                Chọn cấp độ
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {["Beginner", "Intermediate", "Advanced", "Expert"].map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => {
-                      setLevel(l);
-                      setAnswers({});
-                      setSegmentResults({});
-                      submitMutation.reset();
-                    }}
-                    className={cn(
-                      "px-4 py-3 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all border",
-                      level === l
-                        ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20"
-                        : "bg-transparent text-gray-500 border-gray-200 dark:border-white/5 hover:border-orange-500/50",
+            {/* Workout Area (Focused) */}
+            <div className="flex-1 flex flex-col min-h-[400px]">
+              {isLoading ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+                </div>
+              ) : !exercise || !currentSegment ? (
+                <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[3rem] text-zinc-600 font-bold uppercase text-xs gap-4">
+                   <div className="p-4 rounded-full bg-white/5"><ListTodo className="w-10 h-10" /></div>
+                   Không có dữ liệu bài tập
+                </div>
+              ) : isCompleted ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <AnimatePresence>
+                    {submitMutation.data && (
+                      <DictationResult
+                        data={submitMutation.data}
+                        onRetry={() => {
+                            setIsCompleted(false);
+                            setCurrentIdx(0);
+                            setAnswers({});
+                            setSegmentResults({});
+                            submitMutation.reset();
+                        }}
+                      />
                     )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <motion.div
+                  key={currentIdx}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex-1 flex flex-col bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden relative"
+                >
+                  {/* Watermark/Progress Indicator */}
+                  <div className="absolute top-0 left-0 p-8 flex items-center gap-3 opacity-20">
+                     <span className="text-4xl font-black text-white">#{currentIdx + 1}</span>
+                     <div className="h-1 w-20 bg-white/20 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-white transition-all duration-500" 
+                          style={{ width: `${((currentIdx + 1) / segments.length) * 100}%` }}
+                        />
+                     </div>
+                  </div>
+
+                  {/* Header metadata */}
+                  <div className="flex flex-col items-center mb-10 text-center">
+                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500 mb-2">
+                        Đang lắng nghe
+                     </h3>
+                     <p className="text-zinc-500 text-[10px] font-bold tracking-widest uppercase">
+                        {currentSegment.startTime.toFixed(1)}s — {currentSegment.endTime.toFixed(1)}s
+                     </p>
+                  </div>
+
+                  {/* Inputs Section (Centered) */}
+                  <div className="flex-1 flex items-center justify-center py-6">
+                    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-8 leading-[1.8] text-3xl font-bold max-w-4xl">
+                      {currentSegment.words.map((word: any, wordIndex: number) => {
+                        if (!word.isBlank) {
+                          return (
+                            <span key={wordIndex} className="text-white/40 mb-1">
+                              {word.text}{word.punctuation}
+                            </span>
+                          );
+                        }
+
+                        const dotsCount = word.length || 4;
+                        const dots = "•".repeat(dotsCount);
+
+                        return (
+                          <div key={wordIndex} className="relative group inline-block">
+                            <input
+                              ref={(el) => { inputRefs.current[`${currentIdx}-${word.position}`] = el; }}
+                              type="text"
+                              spellCheck={false}
+                              autoComplete="off"
+                              disabled={checkSegmentMutation.isPending}
+                              placeholder={showHints ? (word.hint ?? dots) : dots}
+                              value={answers[`${currentIdx}-${word.position}`] || ""}
+                              onKeyDown={(e) => handleKeyDown(e, `${currentIdx}-${word.position}`)}
+                              onChange={(e) => handleInputChange(currentIdx, word.position, e.target.value)}
+                              className={cn(
+                                "px-0 py-2 border-b-4 bg-transparent outline-none transition-all text-white font-black text-center tracking-widest",
+                                answers[`${currentIdx}-${word.position}`] 
+                                  ? "border-orange-500/50 focus:border-orange-500" 
+                                  : "border-white/10 focus:border-white/30"
+                              )}
+                              style={{ width: `${Math.max(dotsCount, 3) * 22}px` }}
+                            />
+                            {/* Length Indicator */}
+                            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-white/20 tracking-widest pointer-events-none group-hover:text-orange-500/40 transition-colors uppercase">
+                              {dotsCount} ký tự
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                    {/* Shortcuts info */}
+                    <div className="flex items-center gap-6">
+                       <div className="flex items-center gap-2 text-zinc-500">
+                          <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-sans">Enter</kbd>
+                          <span className="text-[9px] font-bold uppercase tracking-widest">Tiếp theo</span>
+                       </div>
+                       <div className="flex items-center gap-2 text-zinc-500">
+                          <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-sans">Ctrl</kbd>
+                          <span className="text-[9px] font-bold uppercase tracking-widest">Nghe lại</span>
+                       </div>
+                    </div>
+
+                    {/* Hint Buttons */}
+                    <div className="flex items-center gap-3">
+                       <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleRevealWord(0)}
+                          className="h-10 px-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest"
+                       >
+                          Xem từ
+                       </Button>
+                       <Button 
+                          onClick={() => handleCheckSegment(currentIdx)}
+                          disabled={checkSegmentMutation.isPending}
+                          className="h-10 px-8 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20"
+                       >
+                          {checkSegmentMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <SpellCheck className="w-3 h-3 mr-2" />}
+                          Kiểm tra nhanh
+                       </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Navigation (Prev/Next/Submit) */}
+            {!isLoading && exercise && currentSegment && !isCompleted && (
+               <div className="flex items-center justify-between py-2">
+                  <Button
+                      variant="ghost"
+                      onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
+                      disabled={currentIdx === 0}
+                      className="px-6 h-12 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest transition-all"
                   >
-                    {l}
-                  </button>
-                ))}
-              </div>
-            </div>
+                      ← Câu trước
+                  </Button>
 
-            <DictationPlaylist 
-                segments={segments}
-                currentIdx={currentIdx}
-                segmentResults={segmentResults}
-                onSelectSegment={handleSelectSegment}
-            />
+                  {currentIdx < segments.length - 1 ? (
+                      <Button
+                          onClick={() => setCurrentIdx(currentIdx + 1)}
+                          className="px-10 h-12 rounded-2xl bg-white text-black hover:bg-zinc-200 font-black uppercase text-[10px] tracking-widest transition-all shadow-xl"
+                      >
+                          Câu tiếp theo →
+                      </Button>
+                  ) : (
+                      <Button
+                          onClick={handleSubmit}
+                          disabled={submitMutation.isPending || filledBlanks === 0}
+                          className="px-10 h-12 rounded-2xl bg-orange-600 text-white hover:bg-orange-500 font-black uppercase text-[10px] tracking-widest transition-all shadow-xl shadow-orange-500/20"
+                      >
+                          {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ListTodo className="w-4 h-4 mr-2" />}
+                          TỔNG KẾT BÀI HỌC
+                      </Button>
+                  )}
+               </div>
+            )}
+          </div>
 
-            <div className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-6 shadow-xl text-center">
-                <div className="flex justify-between text-[10px] font-black text-gray-500 dark:text-zinc-500 uppercase mb-2">
-                    <span>Tổng tiến độ: {filledBlanks} / {totalBlanks} chỗ trống</span>
-                    <span className="text-gray-900 dark:text-white">{progress.toFixed(0)}%</span>
-                </div>
-                <Progress value={progress} className="h-2 bg-gray-100 dark:bg-white/5 mb-3" />
-                <div className="inline-block p-2 px-4 rounded-xl bg-orange-500/10 text-xs text-orange-600 dark:text-orange-400 font-bold">
-                  ⏱️ {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
-                </div>
-            </div>
-          </aside>
+          {/* RIGHT SIDEBAR: Stats + Playlist (30%) */}
+          <aside className="w-full xl:w-[30%] flex flex-col gap-6 h-full sticky top-0 overflow-hidden">
+            
+            {/* Level & Progress Sidebar Card */}
+            <div className="shrink-0 rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-8 flex flex-col gap-6">
+               <div className="flex items-center justify-between">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Tiến độ bài học</h3>
+                  <span className="text-xl font-black text-white">{progress.toFixed(0)}%</span>
+               </div>
+               
+               <Progress value={progress} className="h-2 bg-white/5" />
 
-          {/* CỘT PHẢI: Bài tập (Workout Area) */}
-          <div className="xl:col-span-7 space-y-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-32">
-                <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-              </div>
-            ) : !exercise || !currentSegment ? (
-              <div className="p-20 text-center border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] text-gray-400 font-bold uppercase text-xs">
-                Không có dữ liệu bài tập
-              </div>
-            ) : isCompleted ? (
-              <AnimatePresence>
-                {submitMutation.data && (
-                  <DictationResult
-                    data={submitMutation.data}
-                    onRetry={() => {
-                        setIsCompleted(false);
-                        setCurrentIdx(0);
+               <div className="grid grid-cols-2 gap-2 mt-2">
+                  {["Beginner", "Intermediate", "Advanced", "Expert"].map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => {
+                        setLevel(l);
                         setAnswers({});
                         setSegmentResults({});
                         submitMutation.reset();
-                    }}
-                  />
-                )}
-              </AnimatePresence>
-            ) : (
-                <div className="space-y-6">
-                    {/* KHU VỰC ĐIỀN TỪ (Textarea/Inputs) */}
-                    <motion.div
-                        key={currentIdx} // Remount animation when changing segment
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-8 shadow-xl"
+                      }}
+                      className={cn(
+                        "h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border",
+                        level === l
+                          ? "bg-white text-black border-white shadow-xl"
+                          : "bg-transparent text-zinc-600 border-white/5 hover:border-white/10 hover:text-zinc-400"
+                      )}
                     >
-                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/5">
-                            <h2 className="text-sm font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                                <span className="bg-orange-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20">
-                                    {currentIdx + 1}
-                                </span>
-                                Điền câu đã nghe
-                            </h2>
-                            <div className="text-[10px] text-gray-400 font-bold">
-                                {currentSegment.startTime.toFixed(1)}s - {currentSegment.endTime.toFixed(1)}s
-                            </div>
-                        </div>
+                      {l}
+                    </button>
+                  ))}
+               </div>
 
-                        {/* Workout Inputs */}
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-6 leading-loose text-2xl font-bold min-h-[160px] content-start">
-                            {currentSegment.words.map((word: any, wordIndex: number) => {
-                                if (!word.isBlank) {
-                                    return (
-                                        <span key={wordIndex} className="text-gray-800 dark:text-zinc-200">
-                                            {word.text}{word.punctuation}
-                                        </span>
-                                    );
-                                }
+               <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                  <div className="flex flex-col">
+                     <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Thời gian luyện tập</span>
+                     <span className="text-xs font-black text-orange-500">
+                        ⏱️ {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
+                     </span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                     <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Số từ hoàn thành</span>
+                     <span className="text-xs font-black text-white">{filledBlanks} / {totalBlanks}</span>
+                  </div>
+               </div>
+            </div>
 
-                                const dotsCount = word.length || 4;
-                                const dots = "•".repeat(dotsCount);
+            {/* Playlist Sidebar Card */}
+            <div className="flex-1 rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 overflow-hidden shadow-2xl min-h-0">
+               <DictationPlaylist 
+                   segments={segments}
+                   currentIdx={currentIdx}
+                   segmentResults={segmentResults}
+                   onSelectSegment={handleSelectSegment}
+               />
+            </div>
+          </aside>
 
-                                return (
-                                    <div key={wordIndex} className="relative group inline-block">
-                                        <input
-                                            ref={(el) => { inputRefs.current[`${currentIdx}-${word.position}`] = el; }}
-                                            type="text"
-                                            spellCheck={false}
-                                            autoComplete="off"
-                                            disabled={checkSegmentMutation.isPending}
-                                            placeholder={showHints ? (word.hint ?? dots) : dots}
-                                            value={answers[`${currentIdx}-${word.position}`] || ""}
-                                            onKeyDown={(e) => handleKeyDown(e, `${currentIdx}-${word.position}`)}
-                                            onChange={(e) => handleInputChange(currentIdx, word.position, e.target.value)}
-                                            className="px-3 py-1.5 border-b-2 border-orange-500/30 bg-orange-500/5 focus:border-orange-500 focus:bg-orange-500/10 outline-none rounded-xl text-gray-900 dark:text-white font-black transition-all placeholder:text-gray-400/50 dark:placeholder:text-zinc-600 disabled:opacity-50 text-center tracking-widest"
-                                            style={{ width: `${Math.max(dotsCount, 3) * 18}px` }}
-                                        />
-                                        {/* Hint under input like Senglish */}
-                                        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-black text-orange-500/50 tracking-[0.2em] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {dotsCount} CHỮ
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        
-                        {/* Control Buttons (Hits & Next) */}
-                        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
-                            <div className="flex gap-2">
-                                <Button 
-                                    variant="outline" size="sm" 
-                                    className="font-bold text-[10px] uppercase rounded-xl border-gray-200 dark:border-white/10 dark:hover:bg-white/5"
-                                >
-                                    Chữ cái đầu <kbd className="ml-2 font-sans bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded text-[8px]">Opt+H</kbd>
-                                </Button>
-                                <Button 
-                                    variant="outline" size="sm" 
-                                    className="font-bold text-[10px] uppercase rounded-xl border-gray-200 dark:border-white/10 dark:hover:bg-white/5"
-                                    onClick={() => handleRevealWord(0)}
-                                >
-                                    Xem từ <kbd className="ml-2 font-sans bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded text-[8px]">Opt+R</kbd>
-                                </Button>
-                            </div>
-                            
-                            <Button
-                                onClick={() => handleCheckSegment(currentIdx)}
-                                disabled={checkSegmentMutation.isPending}
-                                className="bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white transition-colors rounded-xl text-[10px] uppercase font-black"
-                            >
-                                <SpellCheck className="w-3.5 h-3.5 mr-2" /> KIỂM TRA
-                            </Button>
-                        </div>
-                    </motion.div>
-
-                    {/* Result for Current Segment */}
-                    <AnimatePresence>
-                        {segmentResults[currentIdx] && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="p-6 rounded-[2rem] bg-gray-50 dark:bg-[#18181b] border border-gray-200 dark:border-white/10 shadow-lg"
-                            >
-                                <div className="flex items-center gap-2 mb-4 text-[10px] font-black uppercase tracking-widest text-orange-500">
-                                    Kết quả phân tích ({segmentResults[currentIdx].accuracy?.toFixed(0) || 0}%)
-                                </div>
-                                <div className="flex flex-wrap gap-2 text-sm">
-                                    {segmentResults[currentIdx].words?.map((w: any, i: number) => (
-                                        <span
-                                            key={i}
-                                            className={cn(
-                                                "px-3 py-1.5 rounded-xl font-bold border",
-                                                w.isCorrect
-                                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                                                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
-                                            )}
-                                        >
-                                            {w.word}
-                                            {!w.isCorrect && w.expected && (
-                                                <span className="ml-2 text-[10px] opacity-70">
-                                                    → {w.expected}
-                                                </span>
-                                            )}
-                                        </span>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Navigation Buttons */}
-                    <div className="flex justify-between items-center py-4">
-                        <Button
-                            variant="ghost"
-                            onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
-                            disabled={currentIdx === 0}
-                            className="text-gray-500 dark:text-zinc-400 hover:text-gray-900 rounded-xl font-bold uppercase text-[10px] tracking-widest"
-                        >
-                            ← Quay lại
-                        </Button>
-
-                        {currentIdx < segments.length - 1 ? (
-                            <Button
-                                onClick={() => setCurrentIdx(currentIdx + 1)}
-                                className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-xl px-8 hover:opacity-90 font-black uppercase text-[10px] tracking-widest"
-                            >
-                                Tiếp theo →
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleSubmit}
-                                disabled={submitMutation.isPending || filledBlanks === 0}
-                                className="bg-orange-500 text-white hover:bg-orange-600 rounded-xl px-8 shadow-lg shadow-orange-500/20 font-black uppercase text-[10px] tracking-widest"
-                            >
-                                {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ListTodo className="w-4 h-4 mr-2" />} Nộp bài tổng kết
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            )}
-          </div>
         </div>
       </main>
     </div>

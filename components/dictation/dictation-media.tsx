@@ -75,22 +75,18 @@ export function DictationMedia({
         </div>
       )}
 
-      <div className="px-6 py-4 border-t border-white/10 flex items-center gap-3 bg-zinc-950">
-        <Volume2 className="h-4 w-4 text-orange-500 shrink-0" />
-        <span className="text-xs font-bold text-zinc-300 flex-1 line-clamp-1">
-          {lessonTitle}
-        </span>
+      {/* Minimal Footer for Controls Toggle */}
+      <div className="px-6 py-3 border-t border-white/5 flex items-center justify-between bg-[#0a0a0a]">
+        <div className="flex items-center gap-2">
+           <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Live Feedback</span>
+        </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleHints}
-          className="rounded-xl text-[10px] uppercase font-bold text-orange-500 hover:bg-orange-500/10 hover:text-orange-400 h-8"
+          className="rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 h-8 px-4 transition-all"
         >
-          {showHints ? (
-            <EyeOff className="h-3.5 w-3.5 mr-1.5" />
-          ) : (
-            <Eye className="h-3.5 w-3.5 mr-1.5" />
-          )}
           {showHints ? "Ẩn gợi ý" : "Hiện gợi ý"}
         </Button>
       </div>

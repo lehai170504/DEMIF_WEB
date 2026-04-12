@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Trophy, Volume2 } from "lucide-react";
+import { ChevronLeft, Trophy, Video, Volume2, Layout, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LessonDto } from "@/types/lesson.type";
+import { usePathname } from "next/navigation";
 
 interface DictationHeaderProps {
   lesson: LessonDto;
@@ -11,6 +12,8 @@ interface DictationHeaderProps {
 }
 
 export function DictationHeader({ lesson, level }: DictationHeaderProps) {
+  const pathname = usePathname();
+
   const getLevelColor = (lvl: string) => {
     const colors: Record<string, string> = {
       Beginner: "text-emerald-500 bg-emerald-500/10",
@@ -22,43 +25,45 @@ export function DictationHeader({ lesson, level }: DictationHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl">
-      <div className="container mx-auto max-w-[1600px] h-16 flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050505]/90 backdrop-blur-xl">
+      <div className="container mx-auto max-w-[1600px] h-14 flex items-center justify-between px-6">
+        {/* Left Section */}
+        <div className="flex items-center gap-4 flex-1">
           <Button
             variant="ghost"
             size="icon"
             asChild
-            className="rounded-full bg-gray-100 dark:bg-white/5 hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:text-orange-500"
+            className="rounded-full h-8 w-8 hover:bg-white/5"
           >
             <Link href="/dictation">
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div className="space-y-0.5">
-            <h1 className="text-sm md:text-base font-bold tracking-tight text-gray-900 dark:text-white line-clamp-1">
+          <div className="flex items-center gap-3">
+            <Badge
+              className={cn("text-[9px] px-2 py-0 h-4 border-none font-black uppercase tracking-tighter", getLevelColor(level))}
+            >
+              {level.charAt(0)}
+            </Badge>
+            <h1 className="text-sm font-bold tracking-tight text-white line-clamp-1 max-w-[300px]">
               {lesson.title}
             </h1>
-            <div className="flex items-center gap-2 text-[10px] md:text-[11px] text-gray-500 dark:text-zinc-500 uppercase font-black tracking-widest">
-              <Badge
-                className={cn("text-[9px] border-none", getLevelColor(level))}
-              >
-                {level}
-              </Badge>
-              <span className="flex items-center gap-1">
-                <Volume2 className="h-3 w-3" />{" "}
-                {Math.floor((lesson.durationSeconds || 0) / 60)}m
-              </span>
-            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 rounded-full border border-amber-500/20">
-          <Trophy className="h-4 w-4 text-amber-500" />
-          <span className="text-xs font-bold text-amber-500">
-            Điểm cao: {lesson.avgScore?.toFixed(0) || 0}
-          </span>
+
+
+        {/* Right Section */}
+        <div className="flex items-center gap-4 flex-1 justify-end">
+          
+          <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 rounded-lg border border-amber-500/20">
+            <Trophy className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-[10px] font-black text-amber-500 tracking-tighter">
+              {lesson.avgScore?.toFixed(0) || 0}
+            </span>
+          </div>
         </div>
       </div>
     </header>
   );
 }
+

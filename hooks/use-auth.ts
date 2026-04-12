@@ -10,12 +10,13 @@ import {
 } from "@/types/auth.type";
 import { toast } from "sonner";
 import { getRedirectPath } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth as useAuthFromContext } from "@/contexts/AuthContext";
+export { useAuthFromContext as useAuth };
 import { extractErrorMessage } from "@/lib/error";
 
 export const useLogin = () => {
   const router = useRouter();
-  const { handleSuccessfulLogin } = useAuth();
+  const { handleSuccessfulLogin } = useAuthFromContext();
 
   return useMutation({
     // FIX 1: Bỏ any, ép kiểu rõ ràng
@@ -76,7 +77,7 @@ export const useRegister = (onSuccessCallback?: (email: string) => void) => {
 // AUTO-LOGIN SAU KHI VERIFY
 export const useVerifyEmail = () => {
   const router = useRouter();
-  const { handleSuccessfulLogin } = useAuth();
+  const { handleSuccessfulLogin } = useAuthFromContext();
 
   return useMutation({
     mutationFn: (token: string) => authService.verifyEmail(token),
@@ -124,7 +125,7 @@ export const useVerifyEmail = () => {
 
 export const useGoogleOAuthLogin = () => {
   const router = useRouter();
-  const { handleSuccessfulLogin } = useAuth();
+  const { handleSuccessfulLogin } = useAuthFromContext();
 
   return useMutation({
     mutationFn: (payload: GoogleLoginPayload) =>

@@ -1,5 +1,5 @@
 // src/services/auth.service.ts
-import axiosClient from "@/lib/axios-client";
+import axiosClient, { publicAxiosClient } from "@/lib/axios-client";
 import {
   ChangePasswordPayload,
   GoogleLoginPayload,
@@ -13,7 +13,7 @@ import {
 
 export const authService = {
   login: async (payload: any): Promise<LoginResponse> => {
-    return await axiosClient.post("/auth/login", payload);
+    return await publicAxiosClient.post("/auth/login", payload);
   },
 
   getProfile: async (): Promise<UserProfile> => {
@@ -35,14 +35,24 @@ export const authService = {
   },
 
   register: async (payload: RegisterPayload): Promise<RegisterResponse> => {
-    return await axiosClient.post("/auth/register", payload);
+    return await publicAxiosClient.post("/auth/register", payload);
   },
 
   verifyEmail: async (token: string): Promise<VerifyEmailResponse> => {
-    return await axiosClient.get("/auth/verify-email", { params: { token } });
+    return await publicAxiosClient.get("/auth/verify-email", {
+      params: { token },
+    });
   },
 
   googleLogin: async (payload: GoogleLoginPayload): Promise<LoginResponse> => {
-    return await axiosClient.post("/auth/google-login", payload);
+    return await publicAxiosClient.post("/auth/google-login", payload);
+  },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    return await publicAxiosClient.post("/auth/forgot-password", { email });
+  },
+
+  resetPassword: async (payload: any): Promise<{ message: string }> => {
+    return await publicAxiosClient.post("/auth/reset-password", payload);
   },
 };

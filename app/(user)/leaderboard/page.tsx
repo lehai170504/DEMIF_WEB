@@ -6,42 +6,48 @@ import { TopPodium } from "@/components/leaderboard/top-podium";
 import { LeaderboardList } from "@/components/leaderboard/leaderboard-list";
 import { UserSidebar } from "@/components/leaderboard/user-sidebar";
 import { SortControls } from "@/components/leaderboard/sort-controls";
-import { leaderboardData } from "@/lib/data/leaderboard";
+import { useQuery } from "@tanstack/react-query";
+import { statsService } from "@/services/stats.service";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
-// Mock data extension & types logic (giữ nguyên logic của bạn nhưng gọn hơn)
 type SortKey = "totalScore" | "dictationAccuracy" | "shadowingMatchRate";
 
-const extendedLeaderboardData = leaderboardData.map((entry: any) => ({
-  ...entry,
-  dictationAccuracy:
-    entry.userId === "user-1" ? 92 : Math.floor(Math.random() * 25 + 70),
-  shadowingMatchRate:
-    entry.userId === "user-1" ? 88 : Math.floor(Math.random() * 25 + 65),
-  avgFeedbackScore: entry.userId === "user-1" ? 4.7 : Math.random() * 1.5 + 3.5,
-  completedLessons: entry.userId === "user-1" ? 42 : entry.completedLessons,
-  currentStreak: entry.userId === "user-1" ? 15 : entry.currentStreak,
-}));
-
 export default function LeaderboardPage() {
+  const { user } = useAuth();
   const [sortBy, setSortBy] = useState<SortKey>("totalScore");
 
-  // Sorting Logic
-  const sortedData = [...extendedLeaderboardData].sort((a, b) => {
-    if (sortBy === "totalScore") return b.totalScore - a.totalScore;
-    if (sortBy === "dictationAccuracy")
-      return b.dictationAccuracy - a.dictationAccuracy;
-    return b.shadowingMatchRate - a.shadowingMatchRate;
+  const { data: leaderboardData, isLoading, error } = useQuery({
+    queryKey: ["leaderboard"],
+    queryFn: () => statsService.getLeaderboard(20),
   });
 
-  // Re-calculate ranks based on current sort
-  const rankedData = sortedData.map((entry, index) => ({
-    ...entry,
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  // Map API data to component needs
+  const mappedData = (leaderboardData || []).map((entry: any, index: number) => ({
+    userId: entry.userId,
     rank: index + 1,
+    username: entry.username || "Unknown",
+    avatar: entry.avatarUrl,
+    country: entry.level || "Beginner", // Using level as a subtitle/country placeholder
+    totalScore: entry.totalPoints || 0,
+    currentStreak: entry.currentStreak || 0,
+    dictationAccuracy: 0, // Not provided by new API
+    shadowingMatchRate: 0, // Not provided by new API
+    avgFeedbackScore: 0,   // Not provided by new API
+    completedLessons: 0,   // Not provided by new API
   }));
 
-  const topThree = rankedData.slice(0, 3);
-  const restOfList = rankedData.slice(3, 10); // Show top 10 total
-  const currentUser = rankedData.find((u) => u.userId === "user-1");
+  const topThree = mappedData.slice(0, 3);
+  const restOfList = mappedData.slice(3); 
+  const currentUser = mappedData.find((u: any) => u.userId === user?.id);
 
   return (
     <div className="min-h-screen font-mono selection:bg-orange-500/30 pb-20">
@@ -63,18 +69,18 @@ export default function LeaderboardPage() {
               Top Chiến Binh
             </h3>
 
-            {/* Show Current User pinned if not in top 10 (Optional UI UX choice) */}
-            {currentUser && currentUser.rank > 10 && (
+            {/* Show Current User pinned if not in top 10 */}
+            {currentUser && currentUser.rank > 20 && (
               <div className="mb-6">
                 <p className="text-xs text-orange-500 font-bold mb-2 uppercase tracking-wider">
                   Thứ hạng của bạn
                 </p>
-                <LeaderboardList data={[currentUser]} currentUserId="user-1" />
+                <LeaderboardList data={[currentUser]} currentUserId={user?.id || ""} />
                 <div className="my-4 border-t border-dashed border-white/10" />
               </div>
             )}
 
-            <LeaderboardList data={restOfList} currentUserId="user-1" />
+            <LeaderboardList data={restOfList} currentUserId={user?.id || ""} />
           </div>
 
           {/* Right: Sidebar */}
