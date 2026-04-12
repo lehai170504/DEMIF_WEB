@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useRefundPayment } from "@/hooks/use-payments";
+import { useRefundPayment } from "@/hooks/use-admin-payments";
 
 interface RefundDialogProps {
   paymentId: string;

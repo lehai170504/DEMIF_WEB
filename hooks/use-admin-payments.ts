@@ -3,11 +3,13 @@ import {
   getAdminPaymentDetail,
   getAdminPayments,
   refundAdminPayment,
+  getAdminPaymentStats
 } from "@/services/payment.service";
 import {
   PagedPaymentResult,
   GetPaymentsParams,
   RefundPaymentRequest,
+  PaymentStatsResponse,
 } from "@/types/payment.type";
 
 export const usePayments = (params: GetPaymentsParams) => {
@@ -42,5 +44,12 @@ export const useRefundPayment = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["admin-payments"] });
     },
+  });
+};
+
+export const usePaymentStats = () => {
+  return useQuery<PaymentStatsResponse, Error>({
+    queryKey: ["admin-payment-stats"],
+    queryFn: () => getAdminPaymentStats(),
   });
 };
