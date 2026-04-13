@@ -24,8 +24,9 @@ import {
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react"; // 1. Import hook
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 const navLinks = [
   { name: "Trang chủ", href: "/home" },
@@ -40,7 +41,6 @@ export function HeaderUser() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  // 2. Thêm state isMounted để kiểm tra client-side rendering
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export function HeaderUser() {
           </div>
 
           {/* --- RIGHT: ACTIONS SECTION --- */}
-          <div className="flex items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* A. Upgrade PRO Button */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
@@ -153,7 +153,10 @@ export function HeaderUser() {
             {/* Theme Toggle Button */}
             <ThemeToggle />
 
-            <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-white/10" />
+            {/* --- NÚT CHUÔNG THÔNG BÁO Ở ĐÂY --- */}
+            <NotificationBell />
+
+            <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-white/10 mx-1" />
 
             {/* B. User Profile Dropdown */}
             <DropdownMenu>
@@ -163,9 +166,8 @@ export function HeaderUser() {
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all outline-none group border border-transparent hover:border-gray-200 dark:hover:border-white/10"
                 >
-                  {/* --- 3. Avatar động (Đã fix Hydration) --- */}
+                  {/* Avatar */}
                   <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-white font-black text-xs shadow-lg relative overflow-hidden">
-                    {/* Chỉ render img khi client đã load (isMounted = true) */}
                     {isMounted && user?.avatarUrl ? (
                       <img
                         src={user.avatarUrl}
@@ -173,13 +175,12 @@ export function HeaderUser() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      // Server và Client render lần đầu sẽ giống nhau ở đây
                       <span className="relative z-10">{firstLetter}</span>
                     )}
                     <div className="absolute inset-0 bg-[#FF7A00]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
 
-                  {/* --- 4. Tên hiển thị động --- */}
+                  {/* Tên hiển thị */}
                   <div className="hidden sm:block text-left">
                     <p className="text-[12px] font-bold leading-none text-gray-700 dark:text-zinc-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors max-w-[100px] truncate">
                       {displayName}
@@ -269,7 +270,7 @@ export function HeaderUser() {
 
                 <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-white/10" />
 
-                {/* --- 5. Nút Logout --- */}
+                {/* Nút Logout */}
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="rounded-xl cursor-pointer p-3 text-red-400 focus:bg-red-500/10 focus:text-red-400 focus:border-red-500/20 border border-transparent"
