@@ -91,29 +91,6 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
         )}
       </div>
 
-      {/* Newsletter Card - Glass Style */}
-      <div className="mt-8 p-6 rounded-[2rem] bg-gradient-to-br from-gray-100 to-white dark:from-[#18181b] dark:to-[#09090b] border border-gray-200 dark:border-white/10 relative overflow-hidden group shadow-2xl">
-        {/* Glow Effect */}
-        <div className="absolute -right-10 -bottom-10 h-32 w-32 bg-orange-500/10 blur-[60px] rounded-full group-hover:bg-orange-500/20 transition-colors duration-500" />
-
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center gap-2 text-orange-500">
-            <Sparkles className="h-4 w-4 fill-current animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-              Newsletter
-            </span>
-          </div>
-
-          <h5 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-            Nhận bí quyết học <br />{" "}
-            <span className="text-gray-600 dark:text-zinc-400">tiếng Anh hàng tuần</span>
-          </h5>
-
-          <Button className="w-full h-10 bg-gray-900 dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-[0_0_20px_rgba(255,122,0,0.1)] hover:shadow-orange-500/40">
-            Đăng ký ngay
-          </Button>
-        </div>
-      </div>
     </motion.div>
   );
 }

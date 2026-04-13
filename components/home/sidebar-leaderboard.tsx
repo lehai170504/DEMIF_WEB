@@ -73,7 +73,7 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h3 className="text-lg font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                Bảng vàng tuần
+                Bảng xếp hạng
               </h3>
               <p className="text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
                 Cập nhật 5 phút trước
@@ -160,9 +160,11 @@ export function SidebarLeaderboard({ entries }: SidebarLeaderboardProps) {
           </div>
 
           {/* CTA Button */}
-          <button className="w-full py-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-zinc-300 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-orange-500 hover:text-white hover:border-orange-500 shadow-lg hover:shadow-orange-500/25">
-            Thách đấu ngay
-          </button>
+          <Link href="/leaderboard" className="block w-full">
+            <button className="w-full py-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-zinc-300 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-orange-500 hover:text-white hover:border-orange-500 shadow-lg hover:shadow-orange-500/25">
+              Xem chi tiết
+            </button>
+          </Link>
         </div>
       </div>
     </motion.div>
