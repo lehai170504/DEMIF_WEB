@@ -1,15 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Sparkles,
   Clock,
-  BookOpen,
   TrendingUp,
   Zap,
   ChevronRight,
-  Plus,
   BookMarked,
   LayoutGrid,
 } from "lucide-react";
@@ -17,14 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { AddVocabularyForm } from "@/components/vocabulary/add-vocabulary-form";
 
 interface ReviewHeaderProps {
   dueCount: number;
@@ -39,8 +28,6 @@ export function ReviewHeader({
   mastery,
   learningCount,
 }: ReviewHeaderProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
     <div className="space-y-8 mb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -57,22 +44,6 @@ export function ReviewHeader({
         </div>
 
         <div className="flex items-center gap-3">
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-bold rounded-2xl h-12 px-6 uppercase tracking-widest text-[10px] border border-gray-200 dark:border-white/10 transition-all active:scale-95">
-                <Plus className="w-4 h-4 mr-2 text-neutral-800" /> Lưu từ mới
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[450px] bg-white dark:bg-[#0D0D0D] border-none rounded-[2rem] p-6">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-black uppercase tracking-tight dark:text-white">
-                  Thêm <span className="text-orange-500">Định danh</span>
-                </DialogTitle>
-              </DialogHeader>
-              <AddVocabularyForm onSuccess={() => setIsModalOpen(false)} />
-            </DialogContent>
-          </Dialog>
-
           <Button
             asChild
             className="bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl h-12 px-6 uppercase tracking-widest text-[10px] shadow-lg shadow-orange-500/20 active:scale-95 transition-all group"

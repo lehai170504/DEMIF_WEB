@@ -11,12 +11,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { CheckVoiceResponse } from "@/types/lesson.type"; // Cập nhật Type mới
+import { CheckVoiceResponse } from "@/types/lesson.type";
 
 interface ShadowingRecorderProps {
   isRecording: boolean;
   onRecord: () => void;
-  checkResult?: CheckVoiceResponse | null; // Cập nhật Type khớp với trang cha
+  checkResult?: CheckVoiceResponse | null;
   isChecking: boolean;
   onNext: () => void;
   onRetry: () => void;
@@ -32,22 +32,21 @@ export function ShadowingRecorder({
   onRetry,
   speechSupported,
 }: ShadowingRecorderProps) {
-  // Mặc định lấy accuracy từ CheckVoiceResponse
-  const accuracy = checkResult?.accuracy ?? (checkResult as any)?.accuracyScore ?? 0;
+  const accuracy =
+    checkResult?.accuracy ?? (checkResult as any)?.accuracyScore ?? 0;
 
-  // Lấy danh sách từ trả về từ backend (WordResults hoặc words)
-  const rawWords = checkResult?.wordResults || (checkResult as any)?.words || [];
-  
-  // Chuẩn hóa lại format từ vì BE trả về 'status: "correct"' thay vì 'isCorrect: true'
+  const rawWords =
+    checkResult?.wordResults || (checkResult as any)?.words || [];
+
   const wordsList = rawWords.map((w: any) => ({
     ...w,
     isCorrect: w.isCorrect !== undefined ? w.isCorrect : w.status === "correct",
-    expected: w.expected || w.correctAnswer, // Dự phòng các case trả về expected
+    expected: w.expected || w.correctAnswer,
   }));
 
   const getAccuracyColor = (val: number) => {
     if (val >= 80) return "text-emerald-500";
-    if (val >= 60) return "text-blue-500"; // Chuyển từ cam sang xanh
+    if (val >= 60) return "text-blue-500";
     return "text-rose-500";
   };
 
@@ -58,7 +57,7 @@ export function ShadowingRecorder({
         <div className="absolute top-6 left-0 w-full text-center">
           <span
             className={cn(
-              "text-[10px] font-black uppercase tracking-[0.2em] py-1.5 px-4 rounded-full border transition-all duration-300",
+              "text-[10px] font-black font-mono uppercase tracking-[0.2em] py-1.5 px-4 rounded-full border transition-all duration-300",
               isRecording
                 ? "border-red-500/50 text-red-500 bg-red-500/10 animate-pulse"
                 : isChecking
@@ -107,7 +106,7 @@ export function ShadowingRecorder({
           </Button>
         </div>
 
-        <p className="text-gray-900 dark:text-white text-base font-bold mb-1 text-center">
+        <p className="text-gray-900 dark:text-white text-base font-bold font-mono mb-1 text-center">
           {!speechSupported
             ? "Trình duyệt không hỗ trợ Voice"
             : isRecording
@@ -150,7 +149,7 @@ export function ShadowingRecorder({
             exit={{ opacity: 0, scale: 0.95 }}
             className="bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden"
           >
-            <div className="flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-widest text-blue-500">
+            <div className="flex items-center gap-2 mb-6 text-[10px] font-black font-mono uppercase tracking-widest text-blue-500">
               <Sparkles className="h-4 w-4" />
               Kết quả AI
             </div>
@@ -177,7 +176,7 @@ export function ShadowingRecorder({
                   <span
                     key={i}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-sm font-bold border transition-all",
+                      "px-3 py-1.5 rounded-xl text-sm font-bold font-mono border transition-all",
                       w.isCorrect
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                         : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 shadow-sm",
@@ -209,13 +208,13 @@ export function ShadowingRecorder({
               <Button
                 onClick={onRetry}
                 variant="outline"
-                className="flex-1 h-14 rounded-2xl border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-300 font-bold"
+                className="flex-1 h-14 rounded-2xl border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-300 font-bold font-mono"
               >
                 <RotateCcw className="h-4 w-4 mr-2" /> Thử lại
               </Button>
               <Button
                 onClick={onNext}
-                className="flex-1 h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-500/30"
+                className="flex-1 h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black font-mono uppercase text-xs tracking-widest shadow-lg shadow-blue-500/30"
               >
                 Tiếp theo <ChevronRight className="h-5 w-5 ml-2" />
               </Button>

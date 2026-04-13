@@ -1,9 +1,8 @@
 "use client";
 
-import { use, useState, useRef, useEffect, useCallback } from "react";
+import { use, useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { notFound } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 // Custom Hooks
@@ -14,23 +13,20 @@ import {
   useCheckShadowingSegment,
 } from "@/hooks/use-lesson";
 import { useYoutubePlayer } from "@/hooks/use-youtube-player";
+import { useAddVocabulary } from "@/hooks/use-vocabulary";
 
 // UI Components
 import { ShadowingHeader } from "@/components/shadowing/shadowing-header";
-import { ShadowingPlayer } from "@/components/shadowing/shadowing-player";
-import { ShadowingRecorder } from "@/components/shadowing/shadowing-recorder";
 import { ShadowingResult } from "@/components/shadowing/shadowing-result";
-
-// Tách Components
 import { ShadowingMedia } from "@/components/shadowing/shadowing-media";
+import { ShadowingPlaylist } from "@/components/shadowing/shadowing-playlist";
+import { ShadowingWorkout } from "@/components/shadowing/shadowing-workout";
+import { QuickAddVocabDialog } from "@/components/dictation/quick-add-vocab-dialog";
 import {
-  ShadowingLevelSelector,
   Level,
   LEVEL_LABELS,
   LEVEL_COLORS,
 } from "@/components/shadowing/shadowing-level-selector";
-import { ShadowingPlaylist } from "@/components/shadowing/shadowing-playlist";
-import { ShadowingTextFallback } from "@/components/shadowing/shadowing-text-fallback";
 
 export default function ShadowingPracticePage({
   params,
@@ -44,49 +40,20 @@ export default function ShadowingPracticePage({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [replayCount, setReplayCount] = useState(0);
   const [userText, setUserText] = useState("");
-
   const [checkResults, setCheckResults] = useState<Record<number, any>>({});
   const [speechSupported, setSpeechSupported] = useState(true);
+
+  // --- Vocabulary State ---
+  const [selectedWord, setSelectedWord] = useState("");
+  const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
 
   // --- Refs ---
   const mediaRef = useRef<HTMLAudioElement | HTMLVideoElement>(null);
   const recognitionRef = useRef<any>(null);
-  // Ref giữ segments mới nhất (tránh stale closure)
   const segmentsRef = useRef<any[]>([]);
-
-  // Auto-sync: khi YouTube gửi currentTime qua infoDelivery + Auto-pause
-  function handleYouTubeTimeUpdate(time: number) {
-    const segs = segmentsRef.current;
-    if (!segs.length) return;
-    
-    const currentSeg = segs[currentIdx];
-
-    // logic: Nếu đang ở cuối câu hiện tại (+ grace period), thì dừng và KHÔNG nhảy sang câu tiếp theo
-    if (currentSeg && time >= currentSeg.endTime) {
-       if (time >= currentSeg.endTime + 0.3) {
-          ytPause();
-          setIsPlaying(false);
-       }
-       return; 
-    }
-
-    const segIdx = segs.findIndex(
-      (seg: any) => time >= seg.startTime && time < seg.endTime,
-    );
-    if (segIdx !== -1) {
-      setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
-    }
-  }
-
-  // YouTube IFrame API (pure postMessage)
-  const { setIframeRef, seekAndPlay: ytSeekAndPlay, pauseVideo: ytPause } = useYoutubePlayer(
-    handleYouTubeTimeUpdate,
-  );
-
 
   // --- Data fetching & Mutations ---
   const {
@@ -101,20 +68,60 @@ export default function ShadowingPracticePage({
 
   const checkVoiceMutation = useCheckVoice(id, currentIdx);
   const checkSegmentMutation = useCheckShadowingSegment();
+  const addVocabMutation = useAddVocabulary();
 
   const segments = segmentsData?.segments ?? [];
   const levelConfig = segmentsData?.levelConfig;
-  const currentSegment = segments[currentIdx] ?? null;
+
+  const currentSegment = useMemo(() => {
+    return segments.length > 0 && segments[currentIdx]
+      ? segments[currentIdx]
+      : null;
+  }, [segments, currentIdx]);
 
   // Sync segments ref
-  useEffect(() => { segmentsRef.current = segments; }, [segments]);
-  
-  // Mix: Dữ liệu backend trả về và local runtime progress
-  const serverProgress = segmentsData?.progressPercent ?? 0;
-  const localProgress = segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
-  const progress = Math.max(serverProgress, localProgress);
+  useEffect(() => {
+    segmentsRef.current = segments;
+  }, [segments]);
 
-  // --- Check Speech API Support ---
+  // --- logic: Xử lý YouTube Sync ---
+  function handleYouTubeTimeUpdate(time: number) {
+    const segs = segmentsRef.current;
+    if (!segs.length) return;
+
+    const currentSeg = segs[currentIdx];
+
+    if (currentSeg && time >= currentSeg.endTime) {
+      if (time >= currentSeg.endTime + 0.3) {
+        ytPause();
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const segIdx = segs.findIndex(
+      (seg: any) => time >= seg.startTime && time < seg.endTime,
+    );
+    if (segIdx !== -1 && segIdx !== currentIdx) {
+      setCurrentIdx(segIdx);
+    }
+  }
+
+  const {
+    setIframeRef,
+    seekAndPlay: ytSeekAndPlay,
+    pauseVideo: ytPause,
+  } = useYoutubePlayer(handleYouTubeTimeUpdate);
+
+  // --- Progress Calculations ---
+  const progress = useMemo(() => {
+    const serverProgress = segmentsData?.progressPercent ?? 0;
+    const localProgress =
+      segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
+    return Math.max(serverProgress, localProgress);
+  }, [segmentsData, segments.length, currentIdx]);
+
+  // --- Browser Support Check ---
   useEffect(() => {
     const hasSR =
       typeof window !== "undefined" &&
@@ -122,53 +129,14 @@ export default function ShadowingPracticePage({
     setSpeechSupported(hasSR);
   }, []);
 
-  // --- Reset logic ---
+  // --- Reset logic khi đổi Level ---
   useEffect(() => {
     setCurrentIdx(0);
     setCheckResults({});
     setReplayCount(0);
-    setShowTranscript(false);
     setIsPlaying(false);
     setUserText("");
   }, [level]);
-
-  useEffect(() => {
-    setReplayCount(0);
-    setShowTranscript(levelConfig?.showTranscriptBefore ?? false);
-    setIsPlaying(false);
-    setUserText("");
-  }, [currentIdx, levelConfig]);
-
-  // Auto-sync playlist theo audio/video currentTime (không phải YouTube) + Auto-pause
-  useEffect(() => {
-    if (lesson?.mediaType === "youtube") return;
-    const interval = setInterval(() => {
-      const media = mediaRef.current as HTMLMediaElement | null;
-      if (!media || media.paused) return;
-      
-      const t = media.currentTime;
-      const segs = segmentsRef.current;
-      const currentSeg = segs[currentIdx];
-
-      // logic: Dừng ở cuối câu hiện tại
-      if (currentSeg && t >= currentSeg.endTime) {
-        if (t >= currentSeg.endTime + 0.3) {
-          media.pause();
-          setIsPlaying(false);
-        }
-        return;
-      }
-
-      const segIdx = segs.findIndex(
-        (seg: any) => t >= seg.startTime && t < seg.endTime,
-      );
-      if (segIdx !== -1) {
-        setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
-      }
-    }, 300);
-    return () => clearInterval(interval);
-  }, [lesson?.mediaType, currentIdx]);
-
 
   // --- Media Control ---
   const handlePlaySegment = useCallback(() => {
@@ -180,16 +148,14 @@ export default function ShadowingPracticePage({
     setReplayCount((c) => c + 1);
 
     if (lesson?.mediaType === "youtube") {
-      ytSeekAndPlay(currentSegment.startTime); // không truyền endTime → không tự dừng
+      ytSeekAndPlay(currentSegment.startTime);
     } else {
       const audioVideo = mediaRef.current as HTMLMediaElement | null;
       if (!audioVideo) return;
       audioVideo.currentTime = currentSegment.startTime;
-      audioVideo.play().catch((e) => {
-        console.error("Autoplay failed:", e);
-        toast.error("Không thể tự động phát, vui lòng ấn Play thủ công trước để cấp quyền");
+      audioVideo.play().catch(() => {
+        toast.error("Vui lòng ấn Play thủ công trước để cấp quyền trình duyệt");
       });
-      // Không setTimeout → video/audio tiếp tục chạy
     }
   }, [currentSegment, levelConfig, lesson, replayCount, ytSeekAndPlay]);
 
@@ -197,48 +163,43 @@ export default function ShadowingPracticePage({
     if (lesson?.mediaType === "youtube") {
       ytPause();
     } else {
-      const audioVideo = mediaRef.current as HTMLMediaElement | null;
-      audioVideo?.pause();
+      mediaRef.current?.pause();
     }
     setIsPlaying(false);
   }, [lesson, ytPause]);
 
-  // Khi click segment trong playlist → seek + play, không tự dừng
-  const handleSelectSegment = useCallback((idx: number) => {
-    setCurrentIdx(idx);
-    const seg = segments[idx];
-    if (!seg) return;
+  const handleSelectSegment = useCallback(
+    (idx: number) => {
+      setCurrentIdx(idx);
+      const seg = segments[idx];
+      if (!seg) return;
 
-    if (lesson?.mediaType === "youtube") {
-      ytSeekAndPlay(seg.startTime);
-      setIsPlaying(true);
-    } else {
-      const audioVideo = mediaRef.current as HTMLMediaElement | null;
-      if (!audioVideo) return;
-      audioVideo.currentTime = seg.startTime;
-      audioVideo.play().catch(() => {});
-      setIsPlaying(true);
-    }
-  }, [segments, lesson, ytSeekAndPlay]);
+      if (lesson?.mediaType === "youtube") {
+        ytSeekAndPlay(seg.startTime);
+        setIsPlaying(true);
+      } else {
+        const audioVideo = mediaRef.current as HTMLMediaElement | null;
+        if (!audioVideo) return;
+        audioVideo.currentTime = seg.startTime;
+        audioVideo.play().catch(() => {});
+        setIsPlaying(true);
+      }
+    },
+    [segments, lesson, ytSeekAndPlay],
+  );
 
-
-  // --- LƯỒNG 1: CHECK BẰNG VOICE ---
+  // --- Shadowing Logic ---
   const handleRecord = useCallback(() => {
     if (!speechSupported || !lesson) return;
-
     const SR =
       (window as any).SpeechRecognition ??
       (window as any).webkitSpeechRecognition;
     const recognition = new SR();
     recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
     recognition.onresult = (e: any) => {
       const text = e.results[0][0].transcript;
       const confidence = e.results[0][0].confidence;
       setIsRecording(false);
-
       checkVoiceMutation.mutate(
         {
           level,
@@ -247,38 +208,25 @@ export default function ShadowingPracticePage({
           timeSpentSeconds: 5,
         },
         {
-          onSuccess: (result) => {
-            setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
-            if (levelConfig?.showTranscriptAfter) setShowTranscript(true);
-          },
+          onSuccess: (result) =>
+            setCheckResults((prev) => ({ ...prev, [currentIdx]: result })),
         },
       );
     };
-
     recognition.onerror = () => setIsRecording(false);
     recognition.onend = () => setIsRecording(false);
-
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
-  }, [
-    speechSupported,
-    lesson,
-    currentIdx,
-    level,
-    levelConfig,
-    checkVoiceMutation,
-  ]);
+  }, [speechSupported, lesson, currentIdx, level, checkVoiceMutation]);
 
   const handleStopRecording = useCallback(() => {
     recognitionRef.current?.stop();
     setIsRecording(false);
   }, []);
 
-  // --- LƯỒNG 2: CHECK BẰNG TEXT ---
   const handleCheckText = () => {
     if (!userText.trim()) return;
-
     checkSegmentMutation.mutate(
       {
         id,
@@ -286,43 +234,32 @@ export default function ShadowingPracticePage({
         data: { level, userText, timeSpentSeconds: 5 },
       },
       {
-        onSuccess: (result) => {
-          setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
-          if (levelConfig?.showTranscriptAfter) setShowTranscript(true);
-        },
+        onSuccess: (result) =>
+          setCheckResults((prev) => ({ ...prev, [currentIdx]: result })),
       },
     );
   };
 
   const handleNext = useCallback(() => {
-    if (currentIdx < segments.length - 1) {
-      handleSelectSegment(currentIdx + 1);
-    } else {
-      setIsCompleted(true);
-    }
+    if (currentIdx < segments.length - 1) handleSelectSegment(currentIdx + 1);
+    else setIsCompleted(true);
   }, [currentIdx, segments.length, handleSelectSegment]);
 
-  const handleRestart = () => {
-    setCurrentIdx(0);
-    setIsCompleted(false);
-    setCheckResults({});
-    setReplayCount(0);
-    setShowTranscript(false);
-    setIsPlaying(false);
-    setUserText("");
-  };
+  // --- Vocabulary Logic ---
+  const handleOpenVocabDialog = useCallback((word: string) => {
+    setSelectedWord(word.trim());
+    setIsVocabDialogOpen(true);
+  }, []);
 
-  // --- Dữ liệu tổng kết ---
-  const completedResults = Object.values(checkResults);
-  const avgAccuracy =
-    completedResults.length > 0
-      ? Math.round(
-          completedResults.reduce(
-            (s, r) => s + (r.accuracyScore ?? r.accuracy ?? 0),
-            0,
-          ) / completedResults.length,
-        )
-      : 0;
+  const handleSaveVocab = (data: any) => {
+    addVocabMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success(`Đã lưu "${data.word}" vào sổ tay!`);
+        setIsVocabDialogOpen(false);
+      },
+      onError: () => toast.error("Không thể lưu từ vựng lúc này."),
+    });
+  };
 
   if (lessonLoading) {
     return (
@@ -335,32 +272,35 @@ export default function ShadowingPracticePage({
   if (error || !lesson) return notFound();
 
   if (isCompleted) {
+    const completedResults = Object.values(checkResults);
+    const avgAccuracy =
+      completedResults.length > 0
+        ? Math.round(
+            completedResults.reduce((s, r) => s + (r.accuracyScore ?? 0), 0) /
+              completedResults.length,
+          )
+        : 0;
     return (
       <ShadowingResult
         score={avgAccuracy}
-        onRestart={handleRestart}
+        onRestart={() => {
+          setCurrentIdx(0);
+          setIsCompleted(false);
+          setCheckResults({});
+        }}
         details={[
-          { label: "Độ chính xác", value: avgAccuracy, color: "text-orange-500" },
           {
-            label: "Câu đã nói",
-            value: completedResults.length,
-            color: "text-emerald-500",
-          },
-          {
-            label: "Câu còn lại",
-            value: segments.length - completedResults.length,
-            color: "text-rose-500",
+            label: "Độ chính xác",
+            value: avgAccuracy,
+            color: "text-orange-500",
           },
         ]}
       />
     );
   }
 
-  const isChecking =
-    checkVoiceMutation.isPending || checkSegmentMutation.isPending;
-
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-[#050505] font-sans text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 overflow-hidden">
+    <div className="h-screen flex flex-col bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 overflow-hidden">
       <ShadowingHeader
         title={lesson.title}
         current={currentIdx + 1}
@@ -371,82 +311,77 @@ export default function ShadowingPracticePage({
       />
 
       <main className="flex-1 flex flex-col lg:flex-row min-h-0">
-        {/* LEFT COLUMN: Media & Practice */}
         <div className="flex-1 min-w-0 flex flex-col h-full border-r border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/[0.01]">
-          {/* Top: Fixed Media Card */}
           <div className="shrink-0 p-4 border-b border-gray-100 dark:border-white/5">
             <div className="max-w-[440px] mx-auto">
-              <ShadowingMedia
-                lesson={lesson}
-                currentSegment={currentSegment}
-                mediaRef={mediaRef}
-                iframeRef={lesson.mediaType === "youtube" ? setIframeRef : undefined}
-                levelLabel={LEVEL_LABELS[level]}
-                levelColor={LEVEL_COLORS[level]}
+              {/* KIỂM TRA LESSON VÀ CURRENTSEGMENT TRƯỚC KHI RENDER */}
+              {lesson && (
+                <ShadowingMedia
+                  lesson={lesson}
+                  currentSegment={currentSegment}
+                  mediaRef={mediaRef}
+                  iframeRef={
+                    lesson.mediaType === "youtube" ? setIframeRef : undefined
+                  }
+                  levelLabel={LEVEL_LABELS[level]}
+                  levelColor={LEVEL_COLORS[level]}
+                  onAddVocab={handleOpenVocabDialog}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+            <div className="max-w-4xl mx-auto pb-12">
+              <ShadowingWorkout
+                isLoading={segmentsLoading}
+                segmentsLength={segments.length}
+                isRecording={isRecording}
+                handleStopRecording={handleStopRecording}
+                handleRecord={handleRecord}
+                checkResult={checkResults[currentIdx]}
+                isChecking={
+                  checkVoiceMutation.isPending || checkSegmentMutation.isPending
+                }
+                handleNext={handleNext}
+                handleRetry={() =>
+                  setCheckResults((p) => {
+                    const n = { ...p };
+                    delete n[currentIdx];
+                    return n;
+                  })
+                }
+                speechSupported={speechSupported}
+                userText={userText}
+                setUserText={setUserText}
+                handleCheckText={handleCheckText}
               />
             </div>
           </div>
-
-          {/* Bottom: Scrollable Practice Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-            <div className="max-w-4xl mx-auto space-y-8 pb-12">
-              <div className="space-y-8">
-                {segmentsLoading ? (
-                  <div className="flex items-center justify-center py-32">
-                    <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-                  </div>
-                ) : segments.length === 0 ? (
-                  <div className="flex items-center justify-center py-32 text-gray-500 text-sm italic">
-                    Bài học chưa có dữ liệu cho cấp độ này.
-                  </div>
-                ) : (
-                  <>
-                    <ShadowingRecorder
-                      isRecording={isRecording}
-                      onRecord={isRecording ? handleStopRecording : handleRecord}
-                      checkResult={checkResults[currentIdx] ?? null}
-                      isChecking={isChecking}
-                      onNext={handleNext}
-                      onRetry={() => {
-                        setUserText("");
-                        setCheckResults((prev) => {
-                          const next = { ...prev };
-                          delete next[currentIdx];
-                          return next;
-                        });
-                      }}
-                      speechSupported={speechSupported}
-                    />
-
-                    <AnimatePresence>
-                      {!checkResults[currentIdx] && !isRecording && (
-                        <ShadowingTextFallback
-                          userText={userText}
-                          isChecking={isChecking}
-                          onUserTextChange={setUserText}
-                          onCheckText={handleCheckText}
-                        />
-                      )}
-                    </AnimatePresence>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* RIGHT COLUMN: Sidebar (Playlist) */}
         <div className="w-full lg:w-[500px] shrink-0 bg-white dark:bg-[#050505] flex flex-col h-full shadow-2xl">
-            <ShadowingPlaylist
-              segments={segments}
-              currentIdx={currentIdx}
-              checkResults={checkResults}
-              onSelectSegment={handleSelectSegment}
-              isPlaying={isPlaying}
-              onPlayPause={isPlaying ? handleStopPlayback : handlePlaySegment}
-            />
+          <ShadowingPlaylist
+            segments={segments}
+            currentIdx={currentIdx}
+            checkResults={checkResults}
+            onSelectSegment={handleSelectSegment}
+            isPlaying={isPlaying}
+            onPlayPause={isPlaying ? handleStopPlayback : handlePlaySegment}
+          />
         </div>
       </main>
+
+      <QuickAddVocabDialog
+        isOpen={isVocabDialogOpen}
+        onOpenChange={setIsVocabDialogOpen}
+        word={selectedWord}
+        lessonId={id}
+        topic={lesson.category || "General"}
+        contextSentence={currentSegment?.text || ""}
+        isAdding={addVocabMutation.isPending}
+        onSave={handleSaveVocab}
+      />
     </div>
   );
 }
