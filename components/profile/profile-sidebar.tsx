@@ -1,24 +1,13 @@
 "use client";
 
-import {
-  User,
-  Lock,
-  Shield,
-  Smartphone,
-  CreditCard,
-  ChevronRight,
-  Settings,
-} from "lucide-react";
+import { User, Lock, CreditCard, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const menuItems = [
   { id: "account", label: "Thông tin cá nhân", icon: User },
   { id: "password", label: "Mật khẩu", icon: Lock },
-  { id: "mfa", label: "Bảo mật 2FA", icon: Shield },
-  { id: "devices", label: "Thiết bị", icon: Smartphone },
   { id: "billing", label: "Thanh toán", icon: CreditCard },
-  { id: "settings", label: "Cài đặt", icon: Settings },
 ];
 
 export function ProfileSidebar({ activeTab, onTabChange }: any) {
@@ -35,7 +24,9 @@ export function ProfileSidebar({ activeTab, onTabChange }: any) {
             className={cn(
               "group relative w-full flex items-center justify-between px-5 py-4 rounded-[1.5rem] transition-colors duration-300 overflow-hidden",
               // Loại bỏ background tĩnh ở đây, chúng ta sẽ dùng motion.div để làm background động
-              isActive ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300",
+              isActive
+                ? "text-gray-900 dark:text-white"
+                : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300",
             )}
           >
             {/* --- 1. Hiệu ứng nền trượt (Floating Background) --- */}

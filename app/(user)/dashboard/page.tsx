@@ -14,11 +14,13 @@ import { StatsRow } from "@/components/dashboard/stats-row";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { LearningAnalyticsChart } from "@/components/dashboard/learning-analytics-chart";
 import { SkillBreakdownChart } from "@/components/dashboard/skill-breakdown-chart";
-import { motion } from "framer-motion";
+import { SuggestedLessonCard } from "@/components/dashboard/suggested-lesson-card"; // Import mới
+import { motion, Variants } from "framer-motion";
 import { useUserLessons } from "@/hooks/use-lesson";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-// Glass card component
+// Glass card component (Wrapper chuẩn)
 const GlassCard = ({
   children,
   className = "",
@@ -29,94 +31,71 @@ const GlassCard = ({
   hoverEffect?: boolean;
 }) => (
   <motion.div
-    whileHover={hoverEffect ? { y: -3, scale: 1.004 } : {}}
-    transition={{ type: "spring", stiffness: 300 }}
-    className={`
-      relative overflow-hidden
-      bg-white dark:bg-white/5 backdrop-blur-xl
-      border border-gray-200 dark:border-white/10
-      rounded-[2rem]
-      shadow-lg shadow-gray-200/50 dark:shadow-black/20
-      ${className}
-    `}
+    whileHover={hoverEffect ? { y: -4 } : {}}
+    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    className={cn(
+      "relative overflow-hidden bg-white dark:bg-[#0D0D0D] border border-gray-200 dark:border-white/5 rounded-[2rem] shadow-xl shadow-gray-200/50 dark:shadow-black/20",
+      className,
+    )}
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-gray-100/50 dark:from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    <div className="absolute inset-0 bg-gradient-to-br from-white/50 dark:from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     {children}
   </motion.div>
 );
 
-// Small lesson card
-function SuggestedLessonCard({ lesson }: { lesson: any }) {
-  const router = useRouter();
-  return (
-    <div
-      onClick={() => router.push(`/dictation/${lesson.id}`)}
-      className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-[#FF7A00]/30 transition-all cursor-pointer group"
-    >
-      <div className="relative w-14 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-zinc-800">
-        {lesson.thumbnailUrl ? (
-          <img src={lesson.thumbnailUrl} alt={lesson.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-gray-400" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
-            <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[7px] border-l-gray-900 border-b-[4px] border-b-transparent ml-0.5" />
-          </div>
-        </div>
-      </div>
-      <div className="flex-1 min-w-0 text-left">
-        <p className="text-[10px] font-black text-gray-900 dark:text-white truncate leading-tight">{lesson.title}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[8px] font-bold text-[#FF7A00] bg-orange-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
-            {lesson.source ?? "DEMIF"}
-          </span>
-          {lesson.viewCount != null && (
-            <span className="text-[8px] text-gray-400 dark:text-zinc-600">
-              {lesson.viewCount.toLocaleString("vi-VN")} lượt
-            </span>
-          )}
-        </div>
-      </div>
-      <ArrowRight className="h-3 w-3 text-gray-400 dark:text-zinc-600 group-hover:text-[#FF7A00] group-hover:translate-x-1 transition-all flex-shrink-0" />
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const router = useRouter();
-  const { data: lessonsData, isLoading: isLoadingLessons } = useUserLessons({ page: 1, pageSize: 3 });
-  const suggestedLessons = (lessonsData?.items ?? []).slice(0, 3);
+  const { data: lessonsData, isLoading: isLoadingLessons } = useUserLessons({
+    page: 1,
+    pageSize: 4,
+  });
+
+  const suggestedLessons = (lessonsData?.items ?? []).slice(0, 4);
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
-  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
+
+  const itemVariant: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  };
 
   return (
-    <div className="w-full font-mono pb-20">
-      <main className="max-w-[1600px] mx-auto px-4 sm:px-8 py-8 space-y-6">
-
+    <div className="w-full min-h-screen font-mono pb-24 bg-gray-50/50 dark:bg-[#050505]">
+      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 space-y-8">
         {/* ── HEADER ── */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-6"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-200 dark:border-white/5"
         >
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-[#FF7A00]">
               <LayoutDashboard className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-[0.3em]">Trung tâm điều khiển</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">
+                Trung tâm điều khiển
+              </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-none text-gray-900 dark:text-white">
-              Tổng quan <span className="text-gray-400 dark:text-zinc-600">Học tập</span>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none text-gray-900 dark:text-white flex items-center gap-3">
+              Tổng quan
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500 p-2 rounded-lg">
+                Học tập
+              </span>
             </h1>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest bg-gray-100 dark:bg-white/5 px-4 py-2 rounded-full border border-gray-200 dark:border-white/5">
-            <History className="h-3 w-3" /> Cập nhật: Vừa xong
+          <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 dark:text-zinc-500 uppercase tracking-widest bg-white dark:bg-[#0D0D0D] px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 shadow-sm">
+            <History className="h-3.5 w-3.5 text-orange-500" /> Cập nhật: Vừa
+            xong
           </div>
         </motion.div>
 
@@ -125,97 +104,95 @@ export default function DashboardPage() {
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="space-y-6"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start"
         >
+          {/* CỘT TRÁI */}
+          <div className="lg:col-span-8 flex flex-col gap-6 lg:gap-8">
+            <motion.div
+              variants={itemVariant}
+              className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8"
+            >
+              <div className="md:col-span-4 h-full">
+                <GlassCard className="p-0 h-full" hoverEffect>
+                  <UserProfileCard />
+                </GlassCard>
+              </div>
+              <div className="md:col-span-8 h-full">
+                <GlassCard className="p-0 h-full" hoverEffect>
+                  <ScoreCard />
+                </GlassCard>
+              </div>
+            </motion.div>
 
-          {/* ══ ROW 1: Profile (3) | Score (9) ══ */}
-          <motion.div variants={item} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            {/* Profile */}
-            <div className="lg:col-span-3">
-              <GlassCard className="p-0 h-full" hoverEffect>
-                <UserProfileCard />
-              </GlassCard>
-            </div>
+            <motion.div variants={itemVariant}>
+              <StatsRow />
+            </motion.div>
 
-            {/* Score — uses its own Card internally */}
-            <div className="lg:col-span-9">
-              <motion.div
-                className="h-full"
-                whileHover={{ y: -3 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <ScoreCard />
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* ══ ROW 2: Stats (full width) ══ */}
-          <motion.div variants={item}>
-            <StatsRow />
-          </motion.div>
-
-          {/* ══ ROW 3: Analytics (8) | Skills + Suggested stacked (4) ══ */}
-          <motion.div variants={item} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Analytics Chart — internal Cards */}
-            <div className="lg:col-span-8">
-              <motion.div whileHover={{ y: -3 }} transition={{ type: "spring", stiffness: 300 }}>
+            <motion.div variants={itemVariant}>
+              <GlassCard className="p-0">
                 <LearningAnalyticsChart />
-              </motion.div>
-            </div>
+              </GlassCard>
+            </motion.div>
 
-            {/* Right side: SkillBreakdown + SuggestedLessons stacked */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
-              {/* Skill Breakdown — internal Card */}
-              <motion.div whileHover={{ y: -3 }} transition={{ type: "spring", stiffness: 300 }}>
+            <motion.div variants={itemVariant}>
+              <GlassCard className="p-0">
+                <StreakCalendar />
+              </GlassCard>
+            </motion.div>
+          </div>
+
+          {/* CỘT PHẢI */}
+          <div className="lg:col-span-4 flex flex-col gap-6 lg:gap-8 sticky top-8">
+            <motion.div variants={itemVariant}>
+              <GlassCard className="p-0">
                 <SkillBreakdownChart />
-              </motion.div>
+              </GlassCard>
+            </motion.div>
 
-              {/* Suggested Lessons */}
-              <GlassCard className="p-5 flex-1">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-400">
-                    Gợi ý bài học
-                  </h3>
-                  <div className="p-1.5 bg-orange-500/20 rounded-md">
-                    <BookOpen className="h-3.5 w-3.5 text-[#FF7A00]" />
+            <motion.div variants={itemVariant} className="flex-1 flex flex-col">
+              <GlassCard className="p-6 md:p-8 flex flex-col h-full flex-1">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-white/5 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-orange-500/10 rounded-xl text-orange-500 border border-orange-500/20 shadow-inner">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">
+                      Tiếp tục học
+                    </h3>
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3 flex-1 relative z-10">
                   {isLoadingLessons ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
                     </div>
                   ) : suggestedLessons.length > 0 ? (
                     suggestedLessons.map((lesson: any) => (
                       <SuggestedLessonCard key={lesson.id} lesson={lesson} />
                     ))
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-6 gap-2">
-                      <BookOpen className="w-8 h-8 text-gray-300 dark:text-zinc-700" />
-                      <p className="text-xs text-gray-400 dark:text-zinc-600 text-center">
-                        Không có bài học nào
+                    <div className="flex flex-col items-center justify-center py-12 gap-3 opacity-60">
+                      <div className="p-4 bg-gray-100 dark:bg-white/5 rounded-full">
+                        <BookOpen className="w-8 h-8 text-gray-400 dark:text-zinc-600" />
+                      </div>
+                      <p className="text-[10px] font-black text-gray-500 dark:text-zinc-500 uppercase tracking-widest">
+                        Chưa có bài học nào
                       </p>
                     </div>
                   )}
                 </div>
 
                 <Button
-                  variant="ghost"
                   onClick={() => router.push("/dictation")}
-                  className="w-full mt-4 h-9 border border-gray-200 dark:border-white/10 rounded-lg font-bold text-[9px] uppercase tracking-widest text-gray-500 dark:text-zinc-400 hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] transition-all duration-300"
+                  className="w-full mt-8 h-14 bg-gray-100 dark:bg-white/[0.02] hover:bg-orange-500 border border-gray-200 dark:border-white/5 text-gray-600 dark:text-zinc-400 hover:text-white hover:border-orange-500 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 group relative z-10 shadow-sm"
                 >
-                  Xem tất cả bài học <ArrowRight className="ml-2 h-3 w-3" />
+                  Khám phá thêm
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </GlassCard>
-            </div>
-          </motion.div>
-
-          {/* ══ ROW 4: Streak Calendar (full width) ══ */}
-          <motion.div variants={item}>
-            <StreakCalendar />
-          </motion.div>
-
+            </motion.div>
+          </div>
         </motion.div>
       </main>
     </div>

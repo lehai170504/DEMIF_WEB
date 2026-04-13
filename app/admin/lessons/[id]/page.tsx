@@ -9,7 +9,14 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Save, Trash2, ArrowLeft, LayoutTemplate } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  Trash2,
+  ArrowLeft,
+  LayoutTemplate,
+  Star,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 import { useLesson, useLessonActions } from "@/hooks/use-lesson";
@@ -77,7 +84,8 @@ export default function LessonDetailPage() {
   const [activeTab, setActiveTab] = React.useState<string>("overview");
 
   const { data: lesson, isLoading: isFetching } = useLesson(lessonId);
-  const { updateLesson, isUpdating } = useLessonActions();
+  // TRÍCH XUẤT THÊM updateStatus TỪ HOOK
+  const { updateLesson, updateStatus, isUpdating } = useLessonActions();
 
   const form = useForm<UpdateLessonFormValues>({
     resolver: zodResolver(UpdateLessonSchema),
@@ -166,6 +174,8 @@ export default function LessonDetailPage() {
     );
   }
 
+  const isPublished = lesson.status?.toLowerCase() === "published";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -201,8 +211,8 @@ export default function LessonDetailPage() {
               <Badge
                 className={cn(
                   "uppercase text-[9px] font-black tracking-widest",
-                  lesson.status === "published"
-                    ? "bg-emerald-500 text-white"
+                  isPublished
+                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
                     : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400",
                 )}
               >
@@ -212,15 +222,44 @@ export default function LessonDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* --- NÚT ĐĂNG / GỠ BÀI --- */}
+          <Button
+            variant="outline"
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all",
+              isPublished
+                ? "border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                : "border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10",
+            )}
+            onClick={() =>
+              updateStatus({
+                id: lesson.id,
+                status: isPublished ? "draft" : "published",
+              })
+            }
+            disabled={isUpdating}
+          >
+            <Star
+              className={cn(
+                "h-4 w-4 mr-2",
+                isPublished ? "fill-amber-600/20" : "",
+              )}
+            />
+            {isPublished ? "Gỡ bài (Draft)" : "Đăng bài (Publish)"}
+          </Button>
+
+          {/* NÚT XÓA */}
           <Button
             variant="outline"
             className="h-12 px-6 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
             onClick={() => setIsDeleteDialogOpen(true)}
+            disabled={isUpdating}
           >
             <Trash2 className="h-4 w-4 mr-2" /> Xóa bài
           </Button>
 
+          {/* NÚT LƯU THAY ĐỔI (Chỉ hiện ở tab Edit) */}
           <AnimatePresence mode="wait">
             {activeTab === "edit" && (
               <motion.div
