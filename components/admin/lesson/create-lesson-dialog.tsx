@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, BookPlus, Youtube, UploadCloud } from "lucide-react";
+import { Plus, BookPlus, Youtube, Mic } from "lucide-react"; 
 
 import { YoutubeAutoTab } from "./youtube-auto-tab";
 import { QuickCreateTab } from "./quick-create-tab";
@@ -57,6 +57,7 @@ export default function CreateLessonDialog({
         <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto no-scrollbar">
           {/* CỘT TRÁI: KHU VỰC FORM (8 PHẦN) */}
           <div className="lg:col-span-8 p-8 border-r border-slate-100 dark:border-white/5">
+            {/* Đặt defaultValue là youtube */}
             <Tabs defaultValue="youtube" className="w-full">
               <TabsList className="grid grid-cols-2 w-full mb-8 bg-slate-100 dark:bg-zinc-900 p-1.5 rounded-2xl h-14">
                 <TabsTrigger
@@ -67,10 +68,10 @@ export default function CreateLessonDialog({
                   Auto
                 </TabsTrigger>
                 <TabsTrigger
-                  value="manual"
-                  className="rounded-xl font-black text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 transition-all"
+                  value="audio"
+                  className="rounded-xl font-black text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-[#FF7A00] transition-all"
                 >
-                  <UploadCloud className="w-3.5 h-3.5 mr-2" /> Quick Create
+                  <Mic className="w-3.5 h-3.5 mr-2" /> Upload Audio
                 </TabsTrigger>
               </TabsList>
 
@@ -82,15 +83,13 @@ export default function CreateLessonDialog({
               </TabsContent>
 
               <TabsContent
-                value="manual"
+                value="audio"
                 className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500"
               >
                 <QuickCreateTab onSuccess={handleSuccess} />
               </TabsContent>
             </Tabs>
           </div>
-
-          {/* CỘT PHẢI: HƯỚNG DẪN WORKFLOW (4 PHẦN) */}
           <LessonWorkflowGuide />
         </div>
       </DialogContent>
