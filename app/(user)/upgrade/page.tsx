@@ -1,30 +1,21 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Check,
-  Star,
-  Zap,
-  Crown,
-  Shield,
-  Mic,
-  Headphones,
-  Loader2,
-  Info,
-  Sparkles,
-  AlertCircle,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { Shield, Loader2 } from "lucide-react";
 import { useActivePlans, useMySubscription } from "@/hooks/use-subscription";
-import { useCreatePayment, usePaymentHistory, useCancelPayment } from "@/hooks/use-payment";
+import {
+  useCreatePayment,
+  usePaymentHistory,
+  useCancelPayment,
+} from "@/hooks/use-payment";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { extractErrorMessage } from "@/lib/error";
+
+// Import các component đã tách file
+import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
+import { FreePlanRow } from "@/components/subscription/FreePlanRow";
 
 export default function UpgradePage() {
   const {
@@ -32,14 +23,14 @@ export default function UpgradePage() {
     isLoading: isLoadingPlans,
     error: plansError,
   } = useActivePlans();
-    const { data: mySubscription } = useMySubscription();
+  const { data: mySubscription } = useMySubscription();
   const queryClient = useQueryClient();
-  const router = useRouter();
-  
+
   const subscribeMutation = useCreatePayment();
   const { data: paymentHistory } = usePaymentHistory();
   const cancelMutation = useCancelPayment();
 
+  // --- HELPERS ---
   const formatBillingCycle = (cycle: string) => {
     const cycleMap: Record<string, string> = {
       "0": "/năm",
@@ -55,18 +46,19 @@ export default function UpgradePage() {
   const isCurrentPlan = (plan: any) => {
     const status = mySubscription?.status?.toLowerCase();
     return (
-      (mySubscription?.planName === plan.name || mySubscription?.plan?.name === plan.name) && 
+      (mySubscription?.planName === plan.name ||
+        mySubscription?.plan?.name === plan.name) &&
       (status === "active" || status === "trialing")
     );
   };
 
-  const hasAnyActiveSub = !!mySubscription && (mySubscription.status === "Active" || mySubscription.status === "active" || mySubscription.status === "trialing");
+  const hasAnyActiveSub =
+    !!mySubscription &&
+    ["Active", "active", "trialing"].includes(mySubscription.status);
 
   const handleActivateFreePlan = async (planId: string) => {
     try {
-      toast.loading("Đang xử lý gói dùng thử...", { id: "activate-free" });
-
-      // 1. Kiểm tra xem có giao dịch nào đang treo (Pending/PendingPayment) cho gói này không
+      toast.loading("Đang xử lý kích hoạt...", { id: "activate-free" });
       const pendingTx = paymentHistory?.items?.find(
         (tx: any) =>
           tx.planId === planId &&
@@ -74,19 +66,12 @@ export default function UpgradePage() {
       );
 
       if (pendingTx) {
-        toast.loading("Đang dọn dẹp giao dịch cũ để khởi tạo lại...", {
-          id: "activate-free",
-        });
         await cancelMutation.mutateAsync(pendingTx.referenceCode);
-        // Đợi một chút để BE cập nhật trạng thái
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        await new Promise((resolve) => setTimeout(resolve, 600));
       }
 
-      // 2. Kích hoạt gói mới
-      toast.loading("Đang kích hoạt gói dùng thử...", { id: "activate-free" });
       await subscribeMutation.mutateAsync(planId);
 
-      // Thành công
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["my-subscription"] }),
         queryClient.invalidateQueries({
@@ -95,368 +80,152 @@ export default function UpgradePage() {
         queryClient.invalidateQueries({ queryKey: ["payment-history"] }),
       ]);
 
-      toast.success("Kích hoạt gói dùng thử thành công!", {
+      toast.success("Kích hoạt gói thành công!", { id: "activate-free" });
+    } catch (error: any) {
+      toast.error(extractErrorMessage(error, "Lỗi kích hoạt gói dùng thử."), {
         id: "activate-free",
       });
-    } catch (error: any) {
-      const msg = extractErrorMessage(
-        error,
-        "Không thể kích hoạt gói dùng thử.",
-      );
-      toast.error(msg, { id: "activate-free" });
     }
   };
 
-  // Tách dữ liệu: Gói miễn phí và Gói trả phí
-  const freePlans = plans?.filter((p) => p.price === 0 && p.isActive !== false);
+  // Phân loại data
   const paidPlans = plans
     ?.filter((p) => p.price > 0 && p.isActive !== false)
     .sort((a, b) => a.price - b.price);
 
-  // Logic hiệu ứng trượt tương tự trang mẫu
-  const getCardAnimation = (index: number, total: number) => {
-    if (index === 0)
-      return { initial: { opacity: 0, x: -80 }, animate: { opacity: 1, x: 0 } };
-    if (index === total - 1)
-      return { initial: { opacity: 0, x: 80 }, animate: { opacity: 1, x: 0 } };
-    return { initial: { opacity: 0, y: 80 }, animate: { opacity: 1, y: 0 } };
-  };
+  const freePlans = plans?.filter((p) => p.price === 0 && p.isActive !== false);
+
+  if (isLoadingPlans)
+    return (
+      <div className="h-screen flex flex-col justify-center items-center font-mono bg-white dark:bg-[#050505]">
+        <Loader2 className="w-12 h-12 animate-spin text-orange-500 mb-4" />
+        <p className="text-xs font-black uppercase tracking-widest animate-pulse">
+          Đang kết nối vệ tinh...
+        </p>
+      </div>
+    );
+
+  if (plansError)
+    return (
+      <div className="h-screen flex flex-col justify-center items-center font-mono bg-white dark:bg-[#050505]">
+        <p className="text-red-500 font-bold uppercase tracking-widest">
+          Không thể tải thông tin gói cước.
+        </p>
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 pb-20 overflow-hidden">
-      {/* Background Decor */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] max-w-4xl h-[400px] bg-[#FF7A00]/5 blur-[120px] rounded-full -z-10" />
-      </div>
+    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono pb-24 relative overflow-x-hidden">
+      {/* Glow Effect nền */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-orange-500/5 blur-[120px] rounded-full -z-10" />
 
-      <main className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+      <main className="container mx-auto px-4 pt-20">
         {/* --- HEADER --- */}
-        <div className="text-center mb-16 max-w-2xl mx-auto px-4">
+        <div className="text-center mb-24 relative z-20">
           <motion.div
-            initial={{ opacity: 0, y: -30 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
-            <Badge className="mb-4 bg-[#FF7A00]/10 text-[#FF7A00] border-none px-4 py-1.5 rounded-full uppercase tracking-widest text-[10px] font-bold">
-              Bảng giá Premium
+            <Badge className="bg-orange-500/10 text-orange-500 border-none px-4 py-1.5 rounded-full uppercase tracking-[0.3em] text-[9px] font-black mb-6">
+              Pricing Plans
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter leading-[1.1]">
-              Đầu tư cho{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C]">
-                tương lai
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none mb-6 text-gray-900 dark:text-white">
+              Mở khóa{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
+                giới hạn
               </span>
             </h1>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm md:text-base font-medium">
-              Nâng cấp để mở khóa toàn bộ sức mạnh của AI Mentor trong việc
-              luyện nghe & nói.
+            <p className="text-gray-500 dark:text-zinc-400 text-sm md:text-lg max-w-2xl mx-auto font-medium">
+              Đầu tư vào kiến thức là khoản đầu tư sinh lời nhất. Chọn gói
+              Premium phù hợp để bứt phá kỹ năng ngoại ngữ ngay hôm nay.
             </p>
           </motion.div>
         </div>
 
-        {isLoadingPlans ? (
-          <div className="flex flex-col justify-center items-center py-20">
-            <Loader2 className="w-12 h-12 animate-spin text-orange-500 mb-4" />
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest animate-pulse">
-              Đang tải gói đăng ký...
-            </p>
-          </div>
-        ) : plansError ? (
-          <div className="text-center py-20 text-red-500 font-bold">
-            Không thể tải danh sách gói. Vui lòng thử lại sau.
-          </div>
-        ) : (
-          <div className="max-w-6xl mx-auto w-full">
-            {/* --- PHẦN 1: CÁC GÓI TRẢ PHÍ (GRID 3 CỘT) --- */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch mb-16">
-              {paidPlans?.map((plan, index) => {
-                const isPopular =
-                  plan.badgeText?.toLowerCase().includes("phổ biến") ||
-                  plan.badgeText?.toLowerCase().includes("đề xuất");
-                const anim = getCardAnimation(index, paidPlans.length);
-                const isUserActive = isCurrentPlan(plan);
-                const canPurchase = !hasAnyActiveSub;
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-32 items-stretch relative z-10">
+            {paidPlans?.map((plan, index) => {
+              const isPopular =
+                plan.badgeText?.toLowerCase().includes("phổ biến") ||
+                plan.badgeText?.toLowerCase().includes("đề xuất");
 
-                return (
-                  <motion.div
-                    key={plan.id}
-                    initial={anim.initial}
-                    whileInView={anim.animate}
-                    viewport={{ once: true }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 20,
-                      delay: index * 0.15,
-                    }}
-                    className={cn(
-                      "relative flex w-full",
-                      isPopular ? "md:-translate-y-4 z-10" : "z-0",
-                    )}
-                  >
-                    {isPopular && (
-                      <div className="absolute inset-0 bg-[#FF7A00] blur-2xl opacity-10 dark:opacity-20 rounded-[3rem] -z-10" />
-                    )}
-
-                    <Card
-                      className={cn(
-                        "w-full flex flex-col p-8 rounded-[2.5rem] transition-all duration-500 relative overflow-hidden",
-                        isPopular
-                          ? "bg-gradient-to-br from-orange-50/80 to-white dark:from-orange-500/10 dark:to-[#0a0a0a] border-[#FF7A00]/50 shadow-[0_20px_50px_rgba(255,122,0,0.12)] ring-1 ring-orange-500/20"
-                          : "bg-white dark:bg-white/[0.03] border-gray-200 dark:border-white/10 hover:border-[#FF7A00]/30 shadow-sm",
-                      )}
-                    >
-                      {isPopular && (
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-3xl -mr-16 -mt-16 rounded-full" />
-                      )}
-                      {plan.badgeText && (
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                          <Badge
-                            className={cn(
-                              "border-none px-4 py-1.5 shadow-lg rounded-full flex items-center gap-1.5",
-                              isPopular
-                                ? "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] text-white"
-                                : "bg-gray-200 dark:bg-white/20 text-gray-800 dark:text-white",
-                            )}
-                          >
-                            {isPopular && (
-                              <Star className="w-3.5 h-3.5 fill-white" />
-                            )}
-                            <span className="font-bold tracking-wide text-[10px] uppercase">
-                              {plan.badgeText}
-                            </span>
-                          </Badge>
-                        </div>
-                      )}
-
-                      <div className="mb-6 mt-2">
-                        <div className="flex justify-between items-center mb-4">
-                          <h3
-                            className={cn(
-                              "text-xl font-black",
-                              "text-gray-900 dark:text-white",
-                            )}
-                          >
-                            {plan.name}
-                          </h3>
-                          {isPopular && (
-                            <Zap className="w-5 h-5 text-[#FF7A00] fill-[#FF7A00]" />
-                          )}
-                        </div>
-                        <div className="flex items-end gap-1 mb-2">
-                          <span
-                            className={cn(
-                              "font-black tracking-tighter text-4xl",
-                              "text-gray-900 dark:text-white",
-                            )}
-                          >
-                            {`${(plan.price / 1000).toLocaleString("vi-VN")}K`}
-                          </span>
-                          <span
-                            className={cn(
-                              "font-bold mb-1 text-sm",
-                              isPopular
-                                ? "text-orange-600/70 dark:text-white/60"
-                                : "text-gray-500 dark:text-zinc-500",
-                            )}
-                          >
-                            {formatBillingCycle(plan.billingCycle)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <ul className="space-y-4 mb-8 flex-grow">
-                        {plan.features.map((feature, i) => (
-                          <li
-                            key={i}
-                            className="flex items-start gap-3 text-xs md:text-sm font-medium"
-                          >
-                            <div
-                              className={cn(
-                                "mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
-                                isPopular ? "bg-orange-500" : "bg-orange-500/10",
-                              )}
-                            >
-                              <Check
-                                className={cn(
-                                  "w-2.5 h-2.5",
-                                  "text-white",
-                                )}
-                                strokeWidth={3}
-                              />
-                            </div>
-                            <span
-                              className={
-                                isPopular
-                                  ? "text-gray-800 dark:text-white/90"
-                                  : "text-gray-700 dark:text-zinc-300"
-                              }
-                            >
-                              {feature}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <Button
-                        size="lg"
-                        asChild
-                        disabled={!isUserActive && !canPurchase}
-                        className={cn(
-                          "w-full h-12 rounded-xl font-bold text-sm transition-all duration-300",
-                          isUserActive
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500 dark:text-white dark:border-none hover:bg-emerald-100 dark:hover:bg-emerald-600 cursor-pointer shadow-sm"
-                            : !canPurchase
-                              ? "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-zinc-600 border border-gray-200 dark:border-white/10 cursor-not-allowed"
-                              : isPopular
-                                ? "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:from-[#FF8A10] text-white shadow-lg shadow-[#FF7A00]/25"
-                                : "bg-gray-100 dark:bg-white/5 hover:bg-gray-200 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10",
-                        )}
-                      >
-                        {isUserActive ? (
-                          <Link href="/profile/edit?tab=billing">
-                            Quản lý gói
-                          </Link>
-                        ) : !canPurchase ? (
-                          <span className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
-                            Đã có gói hoạt động
-                          </span>
-                        ) : (
-                          <Link href={`/payment?planId=${plan.id}`}>
-                            Nâng cấp ngay
-                          </Link>
-                        )}
-                      </Button>
-                      
-                      {!isUserActive && !canPurchase && (
-                        <p className="mt-3 text-[10px] text-center font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-tighter">
-                          Bạn cần hủy hoặc đợi gói cũ hết hạn để thay đổi.
-                        </p>
-                      )}
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* --- PHẦN 2: CÁC GÓI MIỄN PHÍ / DÙNG THỬ (DÀI NGANG) --- */}
-            <div className="space-y-6">
-              {freePlans?.map((plan) => {
-                const canPurchase = !hasAnyActiveSub;
-                
-                return (
-                  <motion.div
+              return (
+                <SubscriptionPlanCard
                   key={plan.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 20,
-                    delay: 0.2,
-                  }}
-                >
-                  <Card className="w-full flex flex-col md:flex-row items-center justify-between p-6 md:p-10 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 shadow-sm">
-                    <div className="flex-1 mb-6 md:mb-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-2xl bg-gray-200 dark:bg-white/10 flex items-center justify-center">
-                          <Sparkles className="w-5 h-5 text-gray-600 dark:text-zinc-400" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-black text-gray-900 dark:text-white">
-                            {plan.name}
-                          </h3>
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-bold uppercase dark:border-white/20"
-                          >
-                            {plan.badgeText || "Miễn phí"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <p className="text-gray-500 dark:text-zinc-400 text-sm font-medium max-w-md">
-                        {plan.price === 0 && plan.billingCycle?.toLowerCase().includes("trial") 
-                          ? "Trải nghiệm đầy đủ tính năng Premium trong thời gian giới hạn."
-                          : "Bắt đầu hành trình của bạn với các tính năng cơ bản. Luôn miễn phí, không cần thẻ tín dụng."
+                  plan={plan}
+                  index={index}
+                  isPopular={isPopular}
+                  isUserActive={isCurrentPlan(plan)}
+                  hasAnyActiveSub={hasAnyActiveSub}
+                  formatBillingCycle={formatBillingCycle}
+                  animation={
+                    index === 0
+                      ? {
+                          initial: { opacity: 0, x: -50 },
+                          animate: { opacity: 1, x: 0 },
                         }
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row items-center gap-8">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {plan.features.slice(0, 2).map((feat, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest"
-                          >
-                            <Check className="w-4 h-4 text-emerald-500" /> {feat}
-                          </div>
-                        ))}
-                      </div>
-                      <Button
-                        size="lg"
-                        className={cn(
-                          "w-full md:w-auto font-bold rounded-xl h-12 px-8 transition-all duration-300",
-                          isCurrentPlan(plan)
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500 dark:text-white dark:border-none hover:bg-emerald-100 dark:hover:bg-emerald-600 cursor-pointer shadow-sm"
-                            : !canPurchase
-                              ? "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-zinc-600 border border-gray-200 dark:border-white/10 cursor-not-allowed"
-                              : "bg-white dark:bg-[#111111] hover:bg-gray-100 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20 shadow-sm"
-                        )}
-                        onClick={() => {
-                          if (isCurrentPlan(plan)) {
-                            router.push("/profile/edit?tab=billing");
-                          } else if (canPurchase) {
-                            handleActivateFreePlan(plan.id);
+                      : index === 2
+                        ? {
+                            initial: { opacity: 0, x: 50 },
+                            animate: { opacity: 1, x: 0 },
                           }
-                        }}
-                        disabled={subscribeMutation.isPending || (!isCurrentPlan(plan) && !canPurchase)}
-                      >
-                        {subscribeMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Đang xử lý...
-                          </>
-                        ) : isCurrentPlan(plan) ? (
-                          "Quản lý gói"
-                        ) : !canPurchase ? (
-                          "Đã có gói hoạt động"
-                        ) : (
-                          "Kích hoạt ngay"
-                        )}
-                      </Button>
-                    </div>
-                  </Card>
-                </motion.div>
+                        : {
+                            initial: { opacity: 0, y: 50 },
+                            animate: { opacity: 1, y: 0 },
+                          }
+                  }
+                />
               );
             })}
+          </div>
+
+          {/* --- CÁC GÓI MIỄN PHÍ / DÙNG THỬ (HÀNG NGANG) --- */}
+          <div className="space-y-6 mb-24 relative z-0">
+            <div className="flex items-center gap-4 mb-10 px-4">
+              <div className="h-px flex-1 bg-gray-100 dark:bg-white/5" />
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 whitespace-nowrap">
+                Hoặc bắt đầu trải nghiệm
+              </span>
+              <div className="h-px flex-1 bg-gray-100 dark:bg-white/5" />
+            </div>
+
+            <div className="space-y-4">
+              {freePlans?.map((plan) => (
+                <FreePlanRow
+                  key={plan.id}
+                  plan={plan}
+                  isCurrent={isCurrentPlan(plan)}
+                  canPurchase={!hasAnyActiveSub}
+                  onActivate={handleActivateFreePlan}
+                  isPending={subscribeMutation.isPending}
+                />
+              ))}
             </div>
           </div>
-        )}
 
-        {/* --- FOOTER: TRUST BADGE --- */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="mt-20 text-center"
-        >
-          <div className="inline-flex flex-col items-center gap-4 p-8 rounded-[2.5rem] bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 max-w-2xl">
-            <Shield className="w-10 h-10 text-orange-500/50" />
-            <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium leading-relaxed">
-              Hệ thống thanh toán bảo mật 256-bit. Cam kết hoàn tiền trong 7
-              ngày nếu không hài lòng. <br />
-              Bạn có thể hủy đăng ký bất kỳ lúc nào chỉ với một cú nhấp chuột.
-            </p>
-            <Link
-              href="/faq"
-              className="text-[#FF7A00] font-black hover:text-orange-400 text-xs uppercase tracking-[0.2em] border-b-2 border-orange-500/20 pb-1"
-            >
-              Tìm hiểu thêm chính sách
-            </Link>
-          </div>
-        </motion.div>
+          {/* --- SECURITY FOOTER --- */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center pt-10"
+          >
+            <div className="p-8 rounded-[3rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 flex flex-col items-center gap-5 text-center max-w-3xl shadow-sm">
+              <Shield className="w-12 h-12 text-orange-500/20" />
+              <div className="space-y-2">
+                <p className="text-gray-900 dark:text-zinc-200 text-sm font-black uppercase tracking-widest">
+                  Thanh toán an toàn & Bảo mật
+                </p>
+                <p className="text-gray-500 dark:text-zinc-500 text-sm font-medium leading-relaxed">
+                  Chúng tôi sử dụng cổng thanh toán VNPay/MoMo đạt chuẩn quốc
+                  tế. Cam kết hoàn tiền trong vòng 7 ngày nếu dịch vụ không đạt
+                  kỳ vọng của bạn.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </main>
     </div>
   );

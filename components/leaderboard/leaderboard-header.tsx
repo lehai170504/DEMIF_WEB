@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trophy } from "lucide-react";
+import { ArrowLeft, Trophy, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function LeaderboardHeader() {
@@ -10,43 +10,50 @@ export function LeaderboardHeader() {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-12 relative z-10"
+      className="mb-4 lg:mb-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4"
     >
-      <div className="flex justify-between items-center mb-8">
+      {/* Nút quay lại */}
+      <div className="w-full md:w-auto flex justify-start">
         <Button
           variant="ghost"
           asChild
-          className="rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+          className="rounded-2xl h-10 px-5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-all font-bold text-[11px] uppercase tracking-widest group"
         >
           <Link href="/dashboard">
-            <ArrowLeft className="h-5 w-5 mr-2" /> Dashboard
+            <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
+            Về trung tâm
           </Link>
         </Button>
       </div>
 
-      <div className="text-center relative">
-        {/* Glowing Background Behind Icon */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-orange-500/30 blur-[80px] rounded-full pointer-events-none" />
-
+      {/* Cụm Tiêu đề ngang (Thu gọn) */}
+      <div className="flex items-center gap-4 text-center md:text-left relative">
         <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="w-24 h-24 mx-auto mb-6 bg-gradient-to-b from-[#2a2a2d] to-[#18181b] rounded-3xl border border-white/10 flex items-center justify-center shadow-2xl shadow-orange-500/20 relative z-10"
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="w-16 h-16 shrink-0 bg-gradient-to-br from-orange-500/10 to-transparent dark:from-[#2a2a2d] dark:to-[#18181b] rounded-2xl border border-orange-500/20 dark:border-white/10 flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.15)]"
         >
-          <Trophy className="h-10 w-10 text-orange-500 drop-shadow-[0_0_15px_rgba(255,122,0,0.6)]" />
+          <Trophy className="h-7 w-7 text-orange-500 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
         </motion.div>
 
-        <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
-          Bảng Xếp Hạng{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
-            Huyền Thoại
-          </span>
-        </h1>
-        <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-          Nơi vinh danh những chiến binh kiên trì nhất. Hãy giữ vững chuỗi
-          Streak để ghi tên mình vào lịch sử!
-        </p>
+        <div>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tighter flex items-center gap-2">
+            Đấu Trường
+            <span className="relative">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-400">
+                Huyền Thoại
+              </span>
+              <Sparkles className="absolute -top-3 -right-5 h-5 w-5 text-amber-400 animate-pulse opacity-80" />
+            </span>
+          </h1>
+          <p className="text-gray-500 dark:text-zinc-400 text-xs md:text-sm font-medium mt-1">
+            Tích lũy XP, giữ vững Streak và khắc tên mình vào bảng vàng!
+          </p>
+        </div>
       </div>
+      
+      {/* Spacer để cân bằng justify-between */}
+      <div className="hidden md:block w-[140px]"></div>
     </motion.div>
   );
 }

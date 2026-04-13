@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useBlogs } from "@/hooks/use-blogs";
 import { BlogDto } from "@/types/blog.type";
-import { Loader2, RefreshCw, Search } from "lucide-react"; // Thêm Search icon
+import { Loader2, RefreshCw, Search } from "lucide-react";
 
 // Import các component UI
 import { BlogHero } from "@/components/blog/BlogHero";
@@ -72,7 +72,7 @@ export default function BlogPage() {
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
 
-  // 4. CÁC BIẾN PHỤ TRỢ (Categories, Tags, Featured...)
+  // 4. CÁC BIẾN PHỤ TRỢ
   const blogCategories = useMemo(() => {
     const uniqueCategories = Array.from(
       new Set(publishedBlogs.map((b) => b.category)),
@@ -97,11 +97,13 @@ export default function BlogPage() {
         .slice(0, 3),
     [publishedBlogs],
   );
+
   const popularPosts = useMemo(
     () =>
       [...publishedBlogs].sort((a, b) => b.viewCount - a.viewCount).slice(0, 4),
     [publishedBlogs],
   );
+
   const allTags = useMemo(
     () =>
       Array.from(
@@ -114,7 +116,9 @@ export default function BlogPage() {
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
+    window.scrollTo({ top: 400, behavior: "smooth" }); // Scroll nhẹ xuống danh sách
   };
+
   const handleReset = () => {
     setSearchQuery("");
     setSelectedCategory("all");
@@ -125,6 +129,7 @@ export default function BlogPage() {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
+
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -136,38 +141,41 @@ export default function BlogPage() {
 
   if (isLoading)
     return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-white dark:bg-[#050505]">
+      <div className="w-full min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-[#050505]">
         <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
       </div>
     );
 
   return (
-    <div className="w-full min-h-screen bg-white dark:bg-[#050505] font-mono pb-20 relative overflow-x-hidden">
+    <div className="w-full min-h-screen bg-gray-50 dark:bg-[#050505] font-mono pb-24 relative overflow-x-hidden">
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] bg-orange-500/5 blur-[120px] rounded-full" />
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.03] z-0" />
+        <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-orange-500/5 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.02] z-0" />
       </div>
 
       <div className="relative z-10">
-        {/* BlogHero giờ đây không chứa thanh Search nữa */}
+        {/* BlogHero */}
         <BlogHero />
 
-        <main className="container mx-auto px-4 lg:px-8 max-w-7xl">
+        <main className="container mx-auto px-4 lg:px-6 pt-4 max-w-7xl">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-16"
+            className="space-y-12 lg:space-y-16"
           >
             {/* Featured Posts Section */}
             {featuredPosts.length > 0 &&
               selectedCategory === "all" &&
               searchQuery === "" && (
-                <motion.section variants={itemVariants} className="pt-8">
-                  <div className="mb-8 flex items-center gap-3 px-2">
+                <motion.section
+                  variants={itemVariants}
+                  className="pt-4 lg:pt-8"
+                >
+                  <div className="mb-6 md:mb-8 flex items-center gap-3 px-2">
                     <div className="h-8 w-1.5 bg-gradient-to-b from-orange-500 to-red-500 rounded-full" />
-                    <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
                       Tiêu điểm tuần
                     </h2>
                   </div>
@@ -175,9 +183,11 @@ export default function BlogPage() {
                 </motion.section>
               )}
 
-            <div className="flex flex-col lg:flex-row gap-12 items-start">
-              {/* LEFT COLUMN: DANH SÁCH BÀI VIẾT (Tập trung chính) */}
-              <div className="flex-1 w-full space-y-8 min-w-0">
+            {/* --- MAIN GRID LAYOUT --- */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+              {/* LEFT COLUMN: DANH SÁCH BÀI VIẾT (8/12) */}
+              <div className="lg:col-span-8 flex flex-col gap-8 min-w-0">
+                {/* Thanh Lọc & Kết quả */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <CategoryFilter
                     categories={blogCategories}
@@ -209,7 +219,7 @@ export default function BlogPage() {
                       animate="visible"
                       className="space-y-12"
                     >
-                      <div className="grid md:grid-cols-2 gap-8">
+                      <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
                         {filteredPosts
                           .slice(
                             (currentPage - 1) * POSTS_PER_PAGE,
@@ -225,28 +235,34 @@ export default function BlogPage() {
                             </motion.div>
                           ))}
                       </div>
+
                       {filteredPosts.length > POSTS_PER_PAGE && (
-                        <BlogPagination
-                          currentPage={currentPage}
-                          totalPages={totalPages}
-                          onPageChange={setCurrentPage}
-                          startIndex={startIndex}
-                          endIndex={endIndex}
-                          totalPosts={filteredPosts.length}
-                        />
+                        <div className="pt-8 flex justify-center">
+                          <BlogPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => {
+                              setCurrentPage(page);
+                              window.scrollTo({ top: 400, behavior: "smooth" });
+                            }}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            totalPosts={filteredPosts.length}
+                          />
+                        </div>
                       )}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* RIGHT COLUMN: SIDEBAR (Thanh công cụ phụ trợ) */}
-              <aside className="lg:w-[380px] w-full space-y-10 sticky top-28">
+              {/* RIGHT COLUMN: SIDEBAR (4/12) */}
+              <aside className="lg:col-span-4 flex flex-col gap-8 sticky top-28">
                 {/* THANH SEARCH ĐÃ CHUYỂN VÀO ĐÂY */}
-                <div className="p-1 bg-gradient-to-br from-gray-200 dark:from-white/10 to-transparent rounded-[2rem] shadow-xl">
-                  <div className="p-6 bg-white dark:bg-[#0a0a0a] rounded-[1.9rem]">
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-2">
-                      Tìm kiếm
+                <div className="p-1 bg-gradient-to-br from-gray-200 dark:from-white/10 to-transparent rounded-[2.5rem] shadow-xl overflow-hidden">
+                  <div className="p-6 bg-white dark:bg-[#0a0a0a] rounded-[2.4rem] h-full">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-2">
+                      Tìm kiếm bài viết
                     </h3>
                     <div className="relative group">
                       <input
@@ -257,7 +273,7 @@ export default function BlogPage() {
                           setSearchQuery(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="w-full h-14 pl-12 pr-4 bg-gray-100 dark:bg-white/5 border border-transparent focus:border-orange-500/50 rounded-2xl outline-none transition-all font-bold text-sm"
+                        className="w-full h-14 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 focus:border-orange-500/50 focus:bg-white dark:focus:bg-white/10 rounded-[1.5rem] outline-none transition-all font-bold text-sm text-gray-900 dark:text-white"
                       />
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                     </div>
@@ -266,7 +282,7 @@ export default function BlogPage() {
 
                 {/* Popular Posts */}
                 {popularPosts.length > 0 && (
-                  <div className="p-8 rounded-[2rem] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl">
+                  <div className="p-6 lg:p-8 rounded-[2.5rem] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl">
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />{" "}
                       Đang thịnh hành
@@ -276,7 +292,7 @@ export default function BlogPage() {
                 )}
 
                 {/* Tags Cloud */}
-                <div className="p-8 rounded-[2rem] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl">
+                <div className="p-6 lg:p-8 rounded-[2.5rem] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl">
                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500" /> Chủ đề
                   </h3>
@@ -285,12 +301,15 @@ export default function BlogPage() {
                     onTagClick={(tag) => {
                       setSearchQuery(tag);
                       setCurrentPage(1);
+                      window.scrollTo({ top: 400, behavior: "smooth" });
                     }}
                   />
                 </div>
 
                 {/* Newsletter */}
-                <NewsletterCard />
+                <div className="hidden lg:block">
+                  <NewsletterCard />
+                </div>
               </aside>
             </div>
           </motion.div>
