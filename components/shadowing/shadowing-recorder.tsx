@@ -52,8 +52,8 @@ export function ShadowingRecorder({
   };
 
   return (
-    <div className="flex flex-col gap-6 h-full">
-      <div className="flex-1 bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-xl min-h-[400px] transition-all">
+    <div className="flex flex-col gap-4 h-full">
+      <div className="flex-1 bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-xl min-h-[280px] transition-all">
         {/* Status Indicator */}
         <div className="absolute top-6 left-0 w-full text-center">
           <span
@@ -75,7 +75,7 @@ export function ShadowingRecorder({
         </div>
 
         {/* Mic Button */}
-        <div className="relative z-10 mb-8 mt-4 group">
+        <div className="relative z-10 mb-8 mt-8 group">
           <AnimatePresence>
             {isRecording && (
               <motion.span
@@ -91,18 +91,18 @@ export function ShadowingRecorder({
             onClick={onRecord}
             disabled={isChecking || !speechSupported}
             className={cn(
-              "w-36 h-36 rounded-full transition-all duration-500 flex flex-col items-center justify-center border-[6px] shadow-2xl",
+              "w-24 h-24 rounded-full transition-all duration-500 flex flex-col items-center justify-center border-4 shadow-2xl",
               isRecording
-                ? "bg-red-500 text-white border-red-200 dark:border-red-900/50 scale-105 shadow-[0_0_40px_rgba(239,68,68,0.4)]"
-                : "bg-white dark:bg-[#18181b] text-blue-600 border-gray-50 dark:border-white/5 hover:border-blue-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]",
+                ? "bg-red-500 text-white border-red-200 dark:border-red-900/50 scale-105 shadow-[0_0_25px_rgba(239,68,68,0.4)]"
+                : "bg-white dark:bg-[#18181b] text-blue-600 border-gray-50 dark:border-white/5 hover:border-blue-500 hover:scale-105 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]",
             )}
           >
             {isChecking ? (
-              <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
             ) : isRecording ? (
-              <MicOff className="h-12 w-12" />
+              <MicOff className="h-8 w-8" />
             ) : (
-              <Mic className="h-12 w-12 group-hover:animate-bounce" />
+              <Mic className="h-8 w-8 group-hover:animate-bounce" />
             )}
           </Button>
         </div>
@@ -148,7 +148,7 @@ export function ShadowingRecorder({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden"
+            className="bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden"
           >
             <div className="flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-widest text-blue-500">
               <Sparkles className="h-4 w-4" />
@@ -156,16 +156,16 @@ export function ShadowingRecorder({
             </div>
 
             {/* Accuracy score */}
-            <div className="flex items-baseline justify-center gap-2 mb-8">
+            <div className="flex items-baseline justify-center gap-2 mb-6">
               <span
                 className={cn(
-                  "text-6xl font-black tracking-tighter",
+                  "text-5xl font-black tracking-tighter",
                   getAccuracyColor(accuracy),
                 )}
               >
                 {accuracy.toFixed(0)}
               </span>
-              <span className="text-2xl font-bold text-gray-400 dark:text-zinc-600">
+              <span className="text-xl font-bold text-gray-400 dark:text-zinc-600">
                 %
               </span>
             </div>

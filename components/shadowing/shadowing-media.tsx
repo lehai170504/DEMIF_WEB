@@ -81,14 +81,6 @@ export function ShadowingMedia({
           )}
         </div>
       )}
-      <div className="px-5 py-3 border-t border-gray-100 dark:border-white/5 flex items-center gap-3 bg-gray-50 dark:bg-white/[0.02]">
-        <Badge className={cn("text-[10px] font-black", levelColor)}>
-          {levelLabel}
-        </Badge>
-        <span className="text-xs text-gray-500 dark:text-zinc-500 flex-1 line-clamp-1 font-bold">
-          {lesson.title}
-        </span>
-      </div>
     </div>
   );
 }

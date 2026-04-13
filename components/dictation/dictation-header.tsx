@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Trophy, Video, Volume2, Layout, Mic } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
+import { ChevronDown, Clock, CheckCircle2, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LessonDto } from "@/types/lesson.type";
 import { usePathname } from "next/navigation";
@@ -9,9 +15,11 @@ import { usePathname } from "next/navigation";
 interface DictationHeaderProps {
   lesson: LessonDto;
   level: string;
+  onSelectLevel: (lvl: string) => void;
+  progress: number;
 }
 
-export function DictationHeader({ lesson, level }: DictationHeaderProps) {
+export function DictationHeader({ lesson, level, onSelectLevel, progress }: DictationHeaderProps) {
   const pathname = usePathname();
 
   const getLevelColor = (lvl: string) => {
@@ -24,43 +32,74 @@ export function DictationHeader({ lesson, level }: DictationHeaderProps) {
     return colors[lvl] || colors.Beginner;
   };
 
+  const levels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050505]/90 backdrop-blur-xl">
-      <div className="container mx-auto max-w-[1600px] h-14 flex items-center justify-between px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-background/80 backdrop-blur-xl">
+      <div className="container mx-auto max-w-[1700px] h-14 flex items-center justify-between px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4 flex-1">
           <Button
             variant="ghost"
             size="icon"
             asChild
-            className="rounded-full h-8 w-8 hover:bg-white/5"
+            className="rounded-full h-8 w-8 hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-zinc-400"
           >
             <Link href="/dictation">
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div className="flex items-center gap-3">
-            <Badge
-              className={cn("text-[9px] px-2 py-0 h-4 border-none font-black uppercase tracking-tighter", getLevelColor(level))}
-            >
-              {level.charAt(0)}
-            </Badge>
-            <h1 className="text-sm font-bold tracking-tight text-white line-clamp-1 max-w-[300px]">
-              {lesson.title}
-            </h1>
+             <h1 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[250px]">
+               {lesson.title}
+             </h1>
           </div>
         </div>
 
+        {/* Center Section: Progress & Level Selector (RESTRUCTURED) */}
+        <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
+            {/* Level Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn("h-8 px-3 rounded-full font-black text-[10px] uppercase tracking-widest gap-2", getLevelColor(level))}
+                >
+                  {level}
+                  <ChevronDown className="h-3 w-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-40 rounded-xl">
+                {levels.map((l) => (
+                  <DropdownMenuItem 
+                    key={l}
+                    onClick={() => onSelectLevel(l)}
+                    className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest cursor-pointer",
+                      level === l ? "text-orange-500 bg-orange-500/5" : "text-muted-foreground"
+                    )}
+                  >
+                    {l}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Compact Progress */}
+            <div className="flex items-center gap-3 min-w-[200px]">
+              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden border border-gray-200/50 dark:border-white/5">
+                <Progress value={progress} className="h-full bg-orange-500" />
+              </div>
+              <span className="text-[10px] font-black text-gray-500 dark:text-zinc-400 tabular-nums w-8">
+                {progress.toFixed(0)}%
+              </span>
+            </div>
+        </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-4 flex-1 justify-end">
-          
-          <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 rounded-lg border border-amber-500/20">
-            <Trophy className="h-3.5 w-3.5 text-amber-500" />
-            <span className="text-[10px] font-black text-amber-500 tracking-tighter">
-              {lesson.avgScore?.toFixed(0) || 0}
-            </span>
-          </div>
+           {/* Space for future items? */}
         </div>
       </div>
     </header>

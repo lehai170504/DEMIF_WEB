@@ -27,7 +27,7 @@ export function DictationMedia({
   thumbnailUrl,
 }: DictationMediaProps) {
   return (
-    <div className="rounded-[2.5rem] bg-black border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl relative">
+    <div className="rounded-[2.5rem] bg-white dark:bg-card border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl relative">
       {youtubeUrl ? (
         <div className="w-full aspect-video">
           <iframe
@@ -49,13 +49,13 @@ export function DictationMedia({
           poster={thumbnailUrl || undefined}
         />
       ) : (
-        <div className="p-12 flex flex-col items-center gap-6 bg-gradient-to-b from-zinc-900 to-black">
+        <div className="p-12 flex flex-col items-center gap-6 bg-gray-50 dark:bg-gradient-to-b dark:from-zinc-900 dark:to-black transition-colors rounded-t-[2.5rem]">
           <div className="inline-flex p-6 rounded-full bg-orange-500/20 text-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.3)]">
             <Volume2 className="h-12 w-12" />
           </div>
-          <div className="text-center text-white">
-            <h2 className="text-2xl font-black mb-1">Nghe & Chép lại</h2>
-            <p className="text-xs text-zinc-400">
+          <div className="text-center">
+            <h2 className="text-2xl font-black mb-1 text-gray-900 dark:text-white">Nghe & Chép lại</h2>
+            <p className="text-xs text-gray-400 dark:text-zinc-400">
               Lắng nghe kỹ và điền vào chỗ trống.
             </p>
           </div>
@@ -75,21 +75,6 @@ export function DictationMedia({
         </div>
       )}
 
-      {/* Minimal Footer for Controls Toggle */}
-      <div className="px-6 py-3 border-t border-white/5 flex items-center justify-between bg-[#0a0a0a]">
-        <div className="flex items-center gap-2">
-           <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Live Feedback</span>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleHints}
-          className="rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 h-8 px-4 transition-all"
-        >
-          {showHints ? "Ẩn gợi ý" : "Hiện gợi ý"}
-        </Button>
-      </div>
     </div>
   );
 }

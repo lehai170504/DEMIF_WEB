@@ -58,17 +58,29 @@ export default function ShadowingPracticePage({
   // Ref giữ segments mới nhất (tránh stale closure)
   const segmentsRef = useRef<any[]>([]);
 
-  // Auto-sync: khi YouTube gửi currentTime qua infoDelivery
-  const handleYouTubeTimeUpdate = useCallback((time: number) => {
+  // Auto-sync: khi YouTube gửi currentTime qua infoDelivery + Auto-pause
+  function handleYouTubeTimeUpdate(time: number) {
     const segs = segmentsRef.current;
     if (!segs.length) return;
+    
+    const currentSeg = segs[currentIdx];
+
+    // logic: Nếu đang ở cuối câu hiện tại (+ grace period), thì dừng và KHÔNG nhảy sang câu tiếp theo
+    if (currentSeg && time >= currentSeg.endTime) {
+       if (time >= currentSeg.endTime + 0.3) {
+          ytPause();
+          setIsPlaying(false);
+       }
+       return; 
+    }
+
     const segIdx = segs.findIndex(
       (seg: any) => time >= seg.startTime && time < seg.endTime,
     );
     if (segIdx !== -1) {
       setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
     }
-  }, []);
+  }
 
   // YouTube IFrame API (pure postMessage)
   const { setIframeRef, seekAndPlay: ytSeekAndPlay, pauseVideo: ytPause } = useYoutubePlayer(
@@ -127,16 +139,26 @@ export default function ShadowingPracticePage({
     setUserText("");
   }, [currentIdx, levelConfig]);
 
-  // Auto-sync playlist theo audio/video currentTime (không phải YouTube)
+  // Auto-sync playlist theo audio/video currentTime (không phải YouTube) + Auto-pause
   useEffect(() => {
     if (lesson?.mediaType === "youtube") return;
     const interval = setInterval(() => {
       const media = mediaRef.current as HTMLMediaElement | null;
       if (!media || media.paused) return;
-      // Sync isPlaying state
-      setIsPlaying(!media.paused);
+      
       const t = media.currentTime;
       const segs = segmentsRef.current;
+      const currentSeg = segs[currentIdx];
+
+      // logic: Dừng ở cuối câu hiện tại
+      if (currentSeg && t >= currentSeg.endTime) {
+        if (t >= currentSeg.endTime + 0.3) {
+          media.pause();
+          setIsPlaying(false);
+        }
+        return;
+      }
+
       const segIdx = segs.findIndex(
         (seg: any) => t >= seg.startTime && t < seg.endTime,
       );
@@ -145,7 +167,7 @@ export default function ShadowingPracticePage({
       }
     }, 300);
     return () => clearInterval(interval);
-  }, [lesson?.mediaType]);
+  }, [lesson?.mediaType, currentIdx]);
 
 
   // --- Media Control ---
@@ -274,11 +296,11 @@ export default function ShadowingPracticePage({
 
   const handleNext = useCallback(() => {
     if (currentIdx < segments.length - 1) {
-      setCurrentIdx((i) => i + 1);
+      handleSelectSegment(currentIdx + 1);
     } else {
       setIsCompleted(true);
     }
-  }, [currentIdx, segments.length]);
+  }, [currentIdx, segments.length, handleSelectSegment]);
 
   const handleRestart = () => {
     setCurrentIdx(0);
@@ -338,96 +360,91 @@ export default function ShadowingPracticePage({
     checkVoiceMutation.isPending || checkSegmentMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30">
+    <div className="h-screen flex flex-col bg-white dark:bg-[#050505] font-sans text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 overflow-hidden">
       <ShadowingHeader
         title={lesson.title}
         current={currentIdx + 1}
         total={segments.length || 1}
         progress={progress}
+        level={level}
+        onSelectLevel={setLevel}
       />
 
-      <main className="container mx-auto px-4 py-8 max-w-[1400px]">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          {/* LEFT PANEL */}
-          <div className="xl:col-span-5 space-y-6">
-            <ShadowingMedia
-              lesson={lesson}
-              currentSegment={currentSegment}
-              mediaRef={mediaRef}
-              iframeRef={lesson.mediaType === "youtube" ? setIframeRef : undefined}
-              levelLabel={LEVEL_LABELS[level]}
-              levelColor={LEVEL_COLORS[level]}
-            />
+      <main className="flex-1 flex flex-col lg:flex-row min-h-0">
+        {/* LEFT COLUMN: Media & Practice */}
+        <div className="flex-1 min-w-0 flex flex-col h-full border-r border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/[0.01]">
+          {/* Top: Fixed Media Card */}
+          <div className="shrink-0 p-4 border-b border-gray-100 dark:border-white/5">
+            <div className="max-w-[440px] mx-auto">
+              <ShadowingMedia
+                lesson={lesson}
+                currentSegment={currentSegment}
+                mediaRef={mediaRef}
+                iframeRef={lesson.mediaType === "youtube" ? setIframeRef : undefined}
+                levelLabel={LEVEL_LABELS[level]}
+                levelColor={LEVEL_COLORS[level]}
+              />
+            </div>
+          </div>
 
-            <ShadowingLevelSelector level={level} onSelectLevel={setLevel} />
+          {/* Bottom: Scrollable Practice Area */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+            <div className="max-w-4xl mx-auto space-y-8 pb-12">
+              <div className="space-y-8">
+                {segmentsLoading ? (
+                  <div className="flex items-center justify-center py-32">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                  </div>
+                ) : segments.length === 0 ? (
+                  <div className="flex items-center justify-center py-32 text-gray-500 text-sm italic">
+                    Bài học chưa có dữ liệu cho cấp độ này.
+                  </div>
+                ) : (
+                  <>
+                    <ShadowingRecorder
+                      isRecording={isRecording}
+                      onRecord={isRecording ? handleStopRecording : handleRecord}
+                      checkResult={checkResults[currentIdx] ?? null}
+                      isChecking={isChecking}
+                      onNext={handleNext}
+                      onRetry={() => {
+                        setUserText("");
+                        setCheckResults((prev) => {
+                          const next = { ...prev };
+                          delete next[currentIdx];
+                          return next;
+                        });
+                      }}
+                      speechSupported={speechSupported}
+                    />
 
+                    <AnimatePresence>
+                      {!checkResults[currentIdx] && !isRecording && (
+                        <ShadowingTextFallback
+                          userText={userText}
+                          isChecking={isChecking}
+                          onUserTextChange={setUserText}
+                          onCheckText={handleCheckText}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Sidebar (Playlist) */}
+        <div className="w-full lg:w-[500px] shrink-0 bg-white dark:bg-[#050505] flex flex-col h-full shadow-2xl">
             <ShadowingPlaylist
               segments={segments}
               currentIdx={currentIdx}
               checkResults={checkResults}
               onSelectSegment={handleSelectSegment}
+              isPlaying={isPlaying}
+              onPlayPause={isPlaying ? handleStopPlayback : handlePlaySegment}
             />
-          </div>
-
-          {/* RIGHT PANEL: Practice Area */}
-          <div className="xl:col-span-7 space-y-6">
-            {segmentsLoading ? (
-              <div className="flex items-center justify-center py-32">
-                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-              </div>
-            ) : segments.length === 0 ? (
-              <div className="flex items-center justify-center py-32 text-gray-500 text-sm">
-                Bài học chưa có dữ liệu cho cấp độ này.
-              </div>
-            ) : (
-              <>
-                <ShadowingPlayer
-                  isPlaying={isPlaying}
-                  onPlayPause={
-                    isPlaying ? handleStopPlayback : handlePlaySegment
-                  }
-                  onNext={handleNext}
-                  onPrev={() => setCurrentIdx((i) => Math.max(0, i - 1))}
-                  canNext={currentIdx < segments.length - 1}
-                  canPrev={currentIdx > 0}
-                  segment={currentSegment}
-                  showTranscript={showTranscript}
-                  onToggleTranscript={() => setShowTranscript((v) => !v)}
-                  replayCount={replayCount}
-                  maxReplays={levelConfig?.maxReplays ?? -1}
-                />
-
-                <ShadowingRecorder
-                  isRecording={isRecording}
-                  onRecord={isRecording ? handleStopRecording : handleRecord}
-                  checkResult={checkResults[currentIdx] ?? null}
-                  isChecking={isChecking}
-                  onNext={handleNext}
-                  onRetry={() => {
-                    setUserText("");
-                    setCheckResults((prev) => {
-                      const next = { ...prev };
-                      delete next[currentIdx];
-                      return next;
-                    });
-                  }}
-                  speechSupported={speechSupported}
-                />
-
-                {/* TEXT FALLBACK COMPONENT */}
-                <AnimatePresence>
-                  {!checkResults[currentIdx] && !isRecording && (
-                    <ShadowingTextFallback
-                      userText={userText}
-                      isChecking={isChecking}
-                      onUserTextChange={setUserText}
-                      onCheckText={handleCheckText}
-                    />
-                  )}
-                </AnimatePresence>
-              </>
-            )}
-          </div>
         </div>
       </main>
     </div>

@@ -7,6 +7,7 @@ import {
   SpellCheck,
   CheckCircle2,
   ListTodo,
+  Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -93,22 +94,50 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   // Sync segments ref
   useEffect(() => { segmentsRef.current = segments; }, [segments]);
 
-  // Callback nhận currentTime từ YouTube (infoDelivery) → auto-sync playlist
-  const handleYouTubeTimeUpdate = useCallback((time: number) => {
+  // YouTube IFrame API (pure postMessage)
+  const { setIframeRef, seekAndPlay, pauseVideo } = useYoutubePlayer(
+    youtubeUrl ? handleYouTubeTimeUpdate : undefined,
+  );
+
+  // Auto-focus the first blank in the current segment
+  useEffect(() => {
+    if (!currentSegment || isCompleted) return;
+    
+    const timer = setTimeout(() => {
+      const blanks = currentSegment.words.filter((w: any) => w.isBlank);
+      if (blanks.length > 0) {
+        const firstBlankPosition = blanks[0].position;
+        const key = `${currentIdx}-${firstBlankPosition}`;
+        inputRefs.current[key]?.focus();
+      }
+    }, 150);
+    
+    return () => clearTimeout(timer);
+  }, [currentIdx, currentSegment, isCompleted]);
+
+  // Callback nhận currentTime từ YouTube (infoDelivery) → auto-sync playlist + auto-pause
+  function handleYouTubeTimeUpdate(time: number) {
     const segs = segmentsRef.current;
     if (!segs.length) return;
+    
+    const currentSeg = segs[currentIdx];
+
+    // logic: Nếu đang ở cuối câu hiện tại (+ grace period), thì dừng và KHÔNG nhảy sang câu tiếp theo
+    if (currentSeg && time >= currentSeg.endTime) {
+       if (time >= currentSeg.endTime + 0.3) {
+          pauseVideo();
+       }
+       return; // Quan trọng: Không cho phép tự động chuyển sang câu tiếp theo khi đang play
+    }
+
+    // Chỉ sync index nếu không phải trường hợp đang chờ pause ở cuối câu
     const segIdx = segs.findIndex(
       (seg: any) => time >= seg.startTime && time < seg.endTime,
     );
     if (segIdx !== -1) {
       setCurrentIdx((prev) => (prev === segIdx ? prev : segIdx));
     }
-  }, []);
-
-  // YouTube IFrame API (pure postMessage)
-  const { setIframeRef, seekAndPlay } = useYoutubePlayer(
-    youtubeUrl ? handleYouTubeTimeUpdate : undefined,
-  );
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setTimeSpent((t) => t + 1), 1000);
@@ -123,15 +152,27 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     setIsCompleted(false);
   }, [level]);
 
-  // Auto-sync playlist theo audio/video currentTime (nếu không phải YouTube)
+  // Auto-sync playlist theo audio/video currentTime (nếu không phải YouTube) + Auto-pause
   useEffect(() => {
-    if (youtubeUrl) return; // YouTube được sync qua handleYouTubeTimeUpdate
+    if (youtubeUrl) return; 
     const interval = setInterval(() => {
       const media =
         (audioRef.current ?? videoRef.current) as HTMLMediaElement | null;
       if (!media || media.paused) return;
+      
       const t = media.currentTime;
       const segs = segmentsRef.current;
+      const currentSeg = segs[currentIdx];
+
+      // logic: Nếu đang ở cuối câu hiện tại (+ grace period), thì dừng và KHÔNG nhảy sang câu tiếp theo
+      if (currentSeg && t >= currentSeg.endTime) {
+        if (t >= currentSeg.endTime + 0.3) {
+          media.pause();
+        }
+        return;
+      }
+
+      // 1. Sync index
       const segIdx = segs.findIndex(
         (seg: any) => t >= seg.startTime && t < seg.endTime,
       );
@@ -140,7 +181,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       }
     }, 300);
     return () => clearInterval(interval);
-  }, [youtubeUrl]);
+  }, [youtubeUrl, currentIdx]);
 
   // Sync Progress to Backend whenever index changes
   useEffect(() => {
@@ -155,21 +196,20 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   }, [currentIdx, lesson.id, isCompleted]);
 
 
-  // Seek + play media đến đầu segment — không tự dừng
+  // Seek + play media đến đầu segment
   const seekAndPlaySegment = useCallback(
     (segIndex: number) => {
       const seg = segments[segIndex];
       if (!seg) return;
 
       if (youtubeUrl) {
-        seekAndPlay(seg.startTime); // không truyền endTime → không tự pause
+        seekAndPlay(seg.startTime); 
       } else {
         const media =
           audioRef.current ?? (videoRef.current as HTMLMediaElement | null);
         if (!media) return;
         media.currentTime = seg.startTime;
         media.play().catch(() => {});
-        // Không setTimeout pause → cứ tiếp tục phát
       }
     },
     [segments, youtubeUrl, seekAndPlay],
@@ -248,7 +288,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
         onSuccess: (data) => {
           setSegmentResults((prev) => ({ ...prev, [segIndex]: data }));
           if (autoNext && segIndex < segments.length - 1) {
-            setTimeout(() => setCurrentIdx(segIndex + 1), 1000); // Tự sang câu tiếp theo
+            setTimeout(() => handleSelectSegment(segIndex + 1), 1000); // Tự sang câu tiếp theo và play
           }
         },
       },
@@ -281,12 +321,6 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     setIsCompleted(true);
   };
 
-  const handleRevealWord = (position: number) => {
-      // Mock logic for Hint (Xem từ) / since backend hides full text,
-      // The frontend must get expected answer somehow, 
-      // but without it, we can't reveal! 
-      // Typically, Senglish has the hint in the API. We'll leave it as a visual button that triggers a toast or mock reveal.
-  }
 
 
   const { totalBlanks, filledBlanks, progress } = useMemo(() => {
@@ -300,17 +334,27 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   }, [exercise, answers]);
 
   return (
-    <div className="min-h-screen font-sans text-zinc-100 bg-[#050505] selection:bg-orange-500/30">
-      <DictationHeader lesson={lesson} level={level} />
+    <div className="min-h-screen font-sans text-gray-900 dark:text-zinc-100 bg-white dark:bg-background selection:bg-orange-500/30">
+      <DictationHeader 
+        lesson={lesson} 
+        level={level} 
+        onSelectLevel={(l) => {
+          setLevel(l);
+          setAnswers({});
+          setSegmentResults({});
+          submitMutation.reset();
+        }}
+        progress={progress}
+      />
 
-      <main className="container mx-auto max-w-[1700px] px-4 py-6">
+      <main className="container mx-auto max-w-[1700px] px-4 py-4">
         <div className="flex flex-col xl:flex-row gap-6 items-start h-[calc(100vh-120px)]">
           
-          {/* LEFT AREA: Media + Workout (70%) */}
-          <div className="flex-1 w-full xl:w-[70%] flex flex-col gap-6 h-full overflow-y-auto no-scrollbar pb-10">
+          {/* LEFT AREA: Media + Workout (60%) */}
+          <div className="flex-1 w-full xl:w-[60%] flex flex-col h-full overflow-hidden">
             
-            {/* Media Card */}
-            <div className="w-full shrink-0">
+            {/* Media Card - Fixed at top */}
+            <div className="shrink-0 w-full max-w-[440px] mx-auto p-4 border-b border-gray-100 dark:border-white/5">
                <DictationMedia
                  lessonTitle={lesson.title}
                  youtubeUrl={youtubeUrl}
@@ -325,8 +369,10 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                />
             </div>
 
-            {/* Workout Area (Focused) */}
-            <div className="flex-1 flex flex-col min-h-[400px]">
+
+            {/* Workout Area - Scrollable */}
+            <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar p-2 pb-10 min-h-0">
+               <div className="flex-1 flex flex-col min-h-[250px]">
               {isLoading ? (
                 <div className="flex-1 flex items-center justify-center">
                   <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
@@ -358,21 +404,21 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                   key={currentIdx}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex-1 flex flex-col bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden relative"
+                  className="flex-1 flex flex-col bg-white dark:bg-card border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-6 pb-8 shadow-xl relative transition-all"
                 >
                   {/* Watermark/Progress Indicator */}
-                  <div className="absolute top-0 left-0 p-8 flex items-center gap-3 opacity-20">
-                     <span className="text-4xl font-black text-white">#{currentIdx + 1}</span>
-                     <div className="h-1 w-20 bg-white/20 rounded-full overflow-hidden">
+                  <div className="absolute top-0 left-0 p-8 flex items-center gap-3 opacity-10">
+                     <span className="text-4xl font-black text-gray-900 dark:text-white">#{currentIdx + 1}</span>
+                     <div className="h-1 w-20 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-white transition-all duration-500" 
+                          className="h-full bg-gray-900 dark:bg-white transition-all duration-500" 
                           style={{ width: `${((currentIdx + 1) / segments.length) * 100}%` }}
                         />
                      </div>
                   </div>
 
                   {/* Header metadata */}
-                  <div className="flex flex-col items-center mb-10 text-center">
+                  <div className="flex flex-col items-center mb-4 text-center">
                      <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500 mb-2">
                         Đang lắng nghe
                      </h3>
@@ -382,12 +428,12 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                   </div>
 
                   {/* Inputs Section (Centered) */}
-                  <div className="flex-1 flex items-center justify-center py-6">
-                    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-8 leading-[1.8] text-3xl font-bold max-w-4xl">
+                  <div className="flex flex-col items-center justify-center py-4">
+                    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-6 leading-[1.6] text-lg font-black max-w-4xl">
                       {currentSegment.words.map((word: any, wordIndex: number) => {
                         if (!word.isBlank) {
                           return (
-                            <span key={wordIndex} className="text-white/40 mb-1">
+                            <span key={wordIndex} className="text-gray-900/40 dark:text-white/40 mb-1">
                               {word.text}{word.punctuation}
                             </span>
                           );
@@ -409,15 +455,15 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                               onKeyDown={(e) => handleKeyDown(e, `${currentIdx}-${word.position}`)}
                               onChange={(e) => handleInputChange(currentIdx, word.position, e.target.value)}
                               className={cn(
-                                "px-0 py-2 border-b-4 bg-transparent outline-none transition-all text-white font-black text-center tracking-widest",
+                                "px-0 pt-2 pb-3 border-b-4 bg-transparent outline-none transition-all text-gray-900 dark:text-white font-black text-center tracking-widest",
                                 answers[`${currentIdx}-${word.position}`] 
                                   ? "border-orange-500/50 focus:border-orange-500" 
-                                  : "border-white/10 focus:border-white/30"
+                                  : "border-gray-200 dark:border-white/10 focus:border-gray-300 dark:focus:border-white/30"
                               )}
                               style={{ width: `${Math.max(dotsCount, 3) * 22}px` }}
                             />
                             {/* Length Indicator */}
-                            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-white/20 tracking-widest pointer-events-none group-hover:text-orange-500/40 transition-colors uppercase">
+                            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-gray-400 dark:text-white/20 tracking-widest pointer-events-none group-hover:text-orange-500/40 transition-colors uppercase">
                               {dotsCount} ký tự
                             </span>
                           </div>
@@ -427,29 +473,29 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                   </div>
 
                   {/* Action Bar */}
-                  <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
                     {/* Shortcuts info */}
                     <div className="flex items-center gap-6">
-                       <div className="flex items-center gap-2 text-zinc-500">
-                          <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-sans">Enter</kbd>
+                       <div className="flex items-center gap-2 text-gray-400 dark:text-zinc-500">
+                          <kbd className="px-1.5 py-0.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded text-[9px] font-sans">Enter</kbd>
                           <span className="text-[9px] font-bold uppercase tracking-widest">Tiếp theo</span>
                        </div>
-                       <div className="flex items-center gap-2 text-zinc-500">
-                          <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-sans">Ctrl</kbd>
+                       <div className="flex items-center gap-2 text-gray-400 dark:text-zinc-500">
+                          <kbd className="px-1.5 py-0.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded text-[9px] font-sans">Ctrl</kbd>
                           <span className="text-[9px] font-bold uppercase tracking-widest">Nghe lại</span>
                        </div>
                     </div>
 
                     {/* Hint Buttons */}
                     <div className="flex items-center gap-3">
-                       <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleRevealWord(0)}
-                          className="h-10 px-6 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest"
-                       >
-                          Xem từ
-                       </Button>
+                        <Button 
+                           variant="ghost" 
+                           size="sm" 
+                           onClick={() => setShowHints(!showHints)}
+                           className="h-10 px-4 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-zinc-400 text-[10px] font-black uppercase tracking-widest"
+                        >
+                           {showHints ? "Ẩn gợi ý" : "Hiện gợi ý"}
+                        </Button>
                        <Button 
                           onClick={() => handleCheckSegment(currentIdx)}
                           disabled={checkSegmentMutation.isPending}
@@ -460,93 +506,68 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
                        </Button>
                     </div>
                   </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                     <Button
+                         variant="ghost"
+                         onClick={() => handleSelectSegment(Math.max(0, currentIdx - 1))}
+                         disabled={currentIdx === 0}
+                         className="px-4 h-10 rounded-xl text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 font-black uppercase text-[10px] tracking-widest transition-all"
+                     >
+                         ← Câu trước
+                     </Button>
+
+                     {currentIdx < segments.length - 1 ? (
+                         <Button
+                             onClick={() => handleSelectSegment(currentIdx + 1)}
+                             className="px-8 h-10 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 font-black uppercase text-[10px] tracking-widest transition-all shadow-xl"
+                         >
+                             Câu tiếp theo →
+                         </Button>
+                     ) : (
+                         <Button
+                             onClick={handleSubmit}
+                             disabled={submitMutation.isPending || filledBlanks === 0}
+                             className="px-8 h-10 rounded-xl bg-orange-600 text-white hover:bg-orange-500 font-black uppercase text-[10px] tracking-widest transition-all shadow-xl shadow-orange-500/20"
+                         >
+                             {submitMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <ListTodo className="w-3 h-3 mr-2" />}
+                             Nộp bài
+                         </Button>
+                     )}
+                  </div>
                 </motion.div>
               )}
             </div>
-
-            {/* Navigation (Prev/Next/Submit) */}
-            {!isLoading && exercise && currentSegment && !isCompleted && (
-               <div className="flex items-center justify-between py-2">
-                  <Button
-                      variant="ghost"
-                      onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
-                      disabled={currentIdx === 0}
-                      className="px-6 h-12 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest transition-all"
-                  >
-                      ← Câu trước
-                  </Button>
-
-                  {currentIdx < segments.length - 1 ? (
-                      <Button
-                          onClick={() => setCurrentIdx(currentIdx + 1)}
-                          className="px-10 h-12 rounded-2xl bg-white text-black hover:bg-zinc-200 font-black uppercase text-[10px] tracking-widest transition-all shadow-xl"
-                      >
-                          Câu tiếp theo →
-                      </Button>
-                  ) : (
-                      <Button
-                          onClick={handleSubmit}
-                          disabled={submitMutation.isPending || filledBlanks === 0}
-                          className="px-10 h-12 rounded-2xl bg-orange-600 text-white hover:bg-orange-500 font-black uppercase text-[10px] tracking-widest transition-all shadow-xl shadow-orange-500/20"
-                      >
-                          {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ListTodo className="w-4 h-4 mr-2" />}
-                          TỔNG KẾT BÀI HỌC
-                      </Button>
-                  )}
-               </div>
-            )}
           </div>
+        </div>
 
-          {/* RIGHT SIDEBAR: Stats + Playlist (30%) */}
-          <aside className="w-full xl:w-[30%] flex flex-col gap-6 h-full sticky top-0 overflow-hidden">
-            
-            {/* Level & Progress Sidebar Card */}
-            <div className="shrink-0 rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-8 flex flex-col gap-6">
-               <div className="flex items-center justify-between">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Tiến độ bài học</h3>
-                  <span className="text-xl font-black text-white">{progress.toFixed(0)}%</span>
-               </div>
-               
-               <Progress value={progress} className="h-2 bg-white/5" />
-
-               <div className="grid grid-cols-2 gap-2 mt-2">
-                  {["Beginner", "Intermediate", "Advanced", "Expert"].map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => {
-                        setLevel(l);
-                        setAnswers({});
-                        setSegmentResults({});
-                        submitMutation.reset();
-                      }}
-                      className={cn(
-                        "h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border",
-                        level === l
-                          ? "bg-white text-black border-white shadow-xl"
-                          : "bg-transparent text-zinc-600 border-white/5 hover:border-white/10 hover:text-zinc-400"
-                      )}
-                    >
-                      {l}
-                    </button>
-                  ))}
-               </div>
-
-               <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex flex-col">
-                     <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Thời gian luyện tập</span>
-                     <span className="text-xs font-black text-orange-500">
-                        ⏱️ {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
-                     </span>
-                  </div>
-                  <div className="flex flex-col items-end">
-                     <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Số từ hoàn thành</span>
-                     <span className="text-xs font-black text-white">{filledBlanks} / {totalBlanks}</span>
-                  </div>
-               </div>
+          {/* RIGHT SIDEBAR: Stats + Playlist (40%) */}
+          <aside className="w-full xl:w-[40%] flex flex-col gap-4 h-full sticky top-0 overflow-hidden">
+            {/* Stats Sidebar Card [NEW] */}
+            <div className="shrink-0 rounded-[2rem] bg-white dark:bg-card border border-gray-200 dark:border-white/10 p-4 shadow-sm">
+                <div className="flex items-center justify-around">
+                    <div className="flex flex-col items-center">
+                       <span className="text-[8px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Thời gian</span>
+                       <div className="flex items-center gap-2">
+                          <Clock className="w-3 h-3 text-orange-500" />
+                          <span className="text-sm font-black text-gray-900 dark:text-white">
+                             {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
+                          </span>
+                       </div>
+                    </div>
+                    <div className="w-px h-8 bg-gray-100 dark:bg-white/5" />
+                    <div className="flex flex-col items-center">
+                       <span className="text-[8px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Hoàn thành</span>
+                       <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          <span className="text-sm font-black text-gray-900 dark:text-white">{filledBlanks} / {totalBlanks}</span>
+                       </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Playlist Sidebar Card */}
-            <div className="flex-1 rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 overflow-hidden shadow-2xl min-h-0">
+            {/* Playlist Sidebar Card [PRIORITIZED AT TOP] */}
+            <div className="flex-1 rounded-[2.5rem] bg-white dark:bg-card border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl min-h-0 transition-all">
                <DictationPlaylist 
                    segments={segments}
                    currentIdx={currentIdx}

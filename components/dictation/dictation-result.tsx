@@ -20,8 +20,8 @@ export function DictationResult({ data, onRetry }: DictationResultProps) {
       className={cn(
         "rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden",
         isPerfect
-          ? "bg-gradient-to-br from-amber-950 via-zinc-900 to-zinc-900"
-          : "bg-zinc-900",
+          ? "bg-gradient-to-br from-amber-500/10 via-background to-background"
+          : "bg-card border border-border/50",
       )}
     >
       <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -49,7 +49,7 @@ export function DictationResult({ data, onRetry }: DictationResultProps) {
           </h3>
           <div className={cn(
             "text-6xl font-black",
-            isPerfect ? "text-amber-400" : "text-white",
+            isPerfect ? "text-amber-500" : "text-foreground",
           )}>
             {data.score?.toFixed(0) ?? 0}
           </div>
@@ -62,17 +62,17 @@ export function DictationResult({ data, onRetry }: DictationResultProps) {
 
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <div className="text-emerald-400 font-black text-lg">{data.correctCount ?? 0}</div>
-            <div className="text-[9px] uppercase text-zinc-500 font-bold tracking-widest">Đúng</div>
+          <div className="p-3 rounded-2xl bg-muted border border-border/50">
+            <div className="text-emerald-500 font-black text-lg">{data.correctCount ?? 0}</div>
+            <div className="text-[9px] uppercase text-muted-foreground font-bold tracking-widest">Đúng</div>
           </div>
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <div className="text-rose-400 font-black text-lg">{data.incorrectCount ?? 0}</div>
-            <div className="text-[9px] uppercase text-zinc-500 font-bold tracking-widest">Sai</div>
+          <div className="p-3 rounded-2xl bg-muted border border-border/50">
+            <div className="text-rose-500 font-black text-lg">{data.incorrectCount ?? 0}</div>
+            <div className="text-[9px] uppercase text-muted-foreground font-bold tracking-widest">Sai</div>
           </div>
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <div className="text-zinc-400 font-black text-lg">{data.skippedCount ?? 0}</div>
-            <div className="text-[9px] uppercase text-zinc-500 font-bold tracking-widest">Bỏ qua</div>
+          <div className="p-3 rounded-2xl bg-muted border border-border/50">
+            <div className="text-muted-foreground font-black text-lg">{data.skippedCount ?? 0}</div>
+            <div className="text-[9px] uppercase text-muted-foreground font-bold tracking-widest">Bỏ qua</div>
           </div>
         </div>
 
@@ -126,7 +126,7 @@ export function DictationResult({ data, onRetry }: DictationResultProps) {
                   ) : (
                     <XCircle className="h-5 w-5 text-rose-500 shrink-0" />
                   )}
-                  <span className="font-bold text-white">
+                  <span className="font-bold text-foreground">
                     {result.userInput || "___"}
                   </span>
                 </div>
@@ -144,13 +144,13 @@ export function DictationResult({ data, onRetry }: DictationResultProps) {
           <Button
             onClick={onRetry}
             variant="outline"
-            className="h-12 px-8 rounded-xl border-white/10 hover:bg-white/5 text-white font-bold bg-transparent"
+            className="h-12 px-8 rounded-xl border-border hover:bg-muted text-foreground font-bold bg-transparent"
           >
             <RotateCcw className="mr-2 h-4 w-4" /> Làm lại
           </Button>
           <Button
             asChild
-            className="h-12 px-8 rounded-xl bg-white text-black hover:bg-gray-200 font-black uppercase text-[10px] tracking-widest"
+            className="h-12 px-8 rounded-xl bg-foreground text-background hover:bg-foreground/90 font-black uppercase text-[10px] tracking-widest"
           >
             <Link href="/dictation">Bài học khác</Link>
           </Button>
