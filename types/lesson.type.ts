@@ -229,6 +229,15 @@ export interface UpdateDictationTemplatesRequest {
   dictationTemplatesJson: string;
 }
 
+export interface UploadAudioResponse {
+  mediaUrl: string;
+  audioUrl: string;
+  mediaType: string;
+  folderName: string;
+  fileName: string;
+  fileSize: number;
+}
+
 // ============ USER API TYPES ============
 
 // GET /api/lessons (Public)

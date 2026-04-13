@@ -20,10 +20,12 @@ import { ServerStatus } from "../navbar/server-status";
 import { UserAccountNav } from "../navbar/user-account-nav";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AdminBroadcastForm } from "@/components/notifications/admin-broadcast-form";
+import { useState } from "react";
 
 export default function AdminNavbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
   useKeyboardShortcuts([
     {
       key: "p",
@@ -52,10 +54,10 @@ export default function AdminNavbar() {
             <ServerStatus />
             <ThemeToggle />
 
-            <Dialog>
+            <Dialog open={isBroadcastOpen} onOpenChange={setIsBroadcastOpen}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <DialogTrigger asChild>
+                  <DialogTrigger asChild> 
                     <Button
                       variant="ghost"
                       size="icon"
@@ -74,10 +76,11 @@ export default function AdminNavbar() {
               </Tooltip>
 
               <DialogContent className="sm:max-w-[500px] p-0 bg-transparent border-none shadow-none">
-                <AdminBroadcastForm />
+                <AdminBroadcastForm
+                  onSuccess={() => setIsBroadcastOpen(false)}
+                />
               </DialogContent>
             </Dialog>
-            {/* <NotificationButton /> */}
           </div>
         </TooltipProvider>
 

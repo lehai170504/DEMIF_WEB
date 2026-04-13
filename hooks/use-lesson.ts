@@ -274,6 +274,12 @@ export const useYoutubeTranscript = (params: GetYoutubeTranscriptParams) => {
   });
 };
 
+export const useUploadAudio = () => {
+  return useMutation({
+    mutationFn: (file: File) => lessonService.uploadAudio(file),
+  });
+};
+
 // ============ USER HOOKS ============
 
 // Lấy bài học cho User học tập
