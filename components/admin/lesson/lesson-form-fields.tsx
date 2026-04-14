@@ -75,6 +75,7 @@ export function LessonFormFields({
           )}
         />
 
+        {/* Hàng 1: Loại bài học & Cấp độ (Level) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -112,6 +113,58 @@ export function LessonFormFields({
 
           <FormField
             control={form.control}
+            name="level"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Cấp độ (Level) <span className="text-red-500">*</span>
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={String(field.value ?? "Beginner")}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-orange-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="rounded-xl font-bold">
+                    <SelectItem
+                      value="Beginner"
+                      className="text-xs uppercase tracking-wider"
+                    >
+                      Cơ bản (Beginner)
+                    </SelectItem>
+                    <SelectItem
+                      value="Intermediate"
+                      className="text-xs uppercase tracking-wider"
+                    >
+                      Trung bình (Intermediate)
+                    </SelectItem>
+                    <SelectItem
+                      value="Advanced"
+                      className="text-xs uppercase tracking-wider"
+                    >
+                      Nâng cao (Advanced)
+                    </SelectItem>
+                    <SelectItem
+                      value="Expert"
+                      className="text-xs uppercase tracking-wider"
+                    >
+                      Chuyên gia (Expert)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-[10px] uppercase font-bold" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Hàng 2: Danh mục & Tags */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
             name="category"
             render={({ field }) => (
               <FormItem>
@@ -122,6 +175,27 @@ export function LessonFormFields({
                   <Input
                     className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 dark:text-white font-bold text-sm shadow-inner transition-all"
                     placeholder="Ví dụ: Giao tiếp, IT..."
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px] uppercase font-bold" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Từ khóa (Tags)
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 dark:text-white font-bold text-sm shadow-inner transition-all"
+                    placeholder="Cách nhau bởi dấu phẩy (travel, daily...)"
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -144,27 +218,6 @@ export function LessonFormFields({
                 <Textarea
                   className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 min-h-[100px] rounded-2xl resize-none text-slate-700 dark:text-slate-300 font-medium leading-relaxed focus:border-orange-500 focus:ring-1 focus:ring-orange-500 shadow-inner p-4"
                   placeholder="Mô tả nội dung bài học..."
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage className="text-[10px] uppercase font-bold" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                Từ khóa (Tags)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-slate-900 dark:text-white font-bold text-sm shadow-inner transition-all"
-                  placeholder="Cách nhau bởi dấu phẩy (travel, daily...)"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -305,7 +358,6 @@ export function LessonFormFields({
                       value={field.value || ""}
                       onChange={(e) => {
                         const val = parseInt(e.target.value);
-                        // Ép lỗi: Nếu không nhập hoặc nhập <= 0 thì set là 1
                         field.onChange(isNaN(val) || val <= 0 ? 1 : val);
                       }}
                     />
@@ -471,7 +523,6 @@ export function LessonFormFields({
                     value={field.value ?? 0}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
-                      // Nếu nhập số âm thì tự động đưa về 0
                       field.onChange(isNaN(val) || val < 0 ? 0 : val);
                     }}
                   />

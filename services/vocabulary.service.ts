@@ -1,6 +1,13 @@
 import axiosClient from "@/lib/axios-client";
 import Cookies from "js-cookie";
-import { CreateVocabularyPayload, GetVocabularyParams, PagedVocabularyResult, VocabularyItemDto, VocabularyOverviewResponse, VocabularySuggestionsResponse } from "@/types/vocabulary.type";
+import {
+  CreateVocabularyPayload,
+  GetVocabularyParams,
+  PagedVocabularyResult,
+  VocabularyItemDto,
+  VocabularyOverviewResponse,
+  VocabularySuggestionsResponse,
+} from "@/types/vocabulary.type";
 
 const getAuthHeaders = () => {
   const token = Cookies.get("accessToken");
@@ -9,10 +16,10 @@ const getAuthHeaders = () => {
 
 export const vocabularyService = {
   getMyVocabulary: async (
-    params: GetVocabularyParams
+    params: GetVocabularyParams,
   ): Promise<PagedVocabularyResult> => {
     const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, v]) => v !== undefined && v !== "")
+      Object.entries(params).filter(([_, v]) => v !== undefined && v !== ""),
     );
 
     const response = await axiosClient.get("/me/vocabulary", {
@@ -38,7 +45,10 @@ export const vocabularyService = {
   },
 
   // Lấy gợi ý từ vựng từ bài học
-  getSuggestions: async (lessonId: string, limit: number = 20): Promise<VocabularySuggestionsResponse> => {
+  getSuggestions: async (
+    lessonId: string,
+    limit: number = 20,
+  ): Promise<VocabularySuggestionsResponse> => {
     const response = await axiosClient.get("/me/vocabulary/suggestions", {
       params: { lessonId, limit },
       headers: getAuthHeaders(),
@@ -47,10 +57,17 @@ export const vocabularyService = {
   },
 
   // Ghi nhận một lần ôn tập
-  reviewWord: async (id: string, isCorrect: boolean): Promise<VocabularyItemDto> => {
-    const response = await axiosClient.post(`/me/vocabulary/${id}/review`, { isCorrect }, {
-      headers: getAuthHeaders(),
-    });
+  reviewWord: async (
+    id: string,
+    isCorrect: boolean,
+  ): Promise<VocabularyItemDto> => {
+    const response = await axiosClient.post(
+      `/me/vocabulary/${id}/review`,
+      { isCorrect },
+      {
+        headers: getAuthHeaders(),
+      },
+    );
     return response as unknown as VocabularyItemDto;
   },
 
@@ -61,12 +78,13 @@ export const vocabularyService = {
     });
   },
 
-  getDueVocabulary: async (params: GetVocabularyParams): Promise<PagedVocabularyResult> => {
+  getDueVocabulary: async (
+    params: GetVocabularyParams,
+  ): Promise<PagedVocabularyResult> => {
     const response = await axiosClient.get("/me/vocabulary/due", {
       params,
       headers: getAuthHeaders(),
     });
     return response as unknown as PagedVocabularyResult;
   },
-  
 };

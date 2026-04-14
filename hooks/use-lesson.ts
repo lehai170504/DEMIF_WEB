@@ -274,12 +274,6 @@ export const useYoutubeTranscript = (params: GetYoutubeTranscriptParams) => {
   });
 };
 
-export const useUploadAudio = () => {
-  return useMutation({
-    mutationFn: (file: File) => lessonService.uploadAudio(file),
-  });
-};
-
 // ============ USER HOOKS ============
 
 // Lấy bài học cho User học tập
@@ -341,12 +335,14 @@ export const useSubmitDictation = () => {
         });
       } else if (!result.isSubmissionComplete) {
         // Chưa điền đủ — cảnh báo nhẹ nhàng
-        const missing = (result.totalBlanks ?? 0) - (result.answeredBlanks ?? 0);
+        const missing =
+          (result.totalBlanks ?? 0) - (result.answeredBlanks ?? 0);
         toast.warning("Chưa điền đủ bài", {
           description: `Còn ${missing} ô bị bỏ qua. Độ chính xác (phần đã điền): ${result.answeredAccuracy?.toFixed(0) ?? 0}%.`,
         });
       } else {
-        const correctPercentage = (result.correctCount / result.totalBlanks) * 100;
+        const correctPercentage =
+          (result.correctCount / result.totalBlanks) * 100;
         if (correctPercentage >= 80) {
           toast.success("Kết quả xuất sắc!", {
             description: `Bạn đạt ${result.score?.toFixed(0)} điểm — ${result.answeredAccuracy?.toFixed(0)}% chính xác trên phần đã điền!`,
@@ -375,7 +371,6 @@ export const useSubmitDictation = () => {
     },
   });
 };
-
 
 // Kiểm tra Shadowing qua text input
 export const useCheckShadowingSegment = () => {
