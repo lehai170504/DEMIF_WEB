@@ -8,7 +8,6 @@ export { BlogPagination } from "./BlogPagination";
 export { EmptyState } from "./EmptyState";
 export { PopularPosts } from "./PopularPosts";
 export { TagsCloud } from "./TagsCloud";
-export { NewsletterCard } from "./NewsletterCard";
 
 // Blog detail components
 export { BlogDetailHero } from "./BlogDetailHero";
