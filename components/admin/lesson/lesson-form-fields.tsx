@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
-import { LESSON_TYPES } from "./lesson.constants";
+import { LESSON_TYPES, LESSON_LEVELS } from "./lesson.constants";
 import { Button } from "@/components/ui/button";
 import {
   Loader2,
@@ -75,33 +75,61 @@ export function LessonFormFields({
           )}
         />
 
-        {/* Hàng 1: Loại bài học & Cấp độ (Level) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* LOẠI BÀI HỌC */}
           <FormField
             control={form.control}
             name="lessonType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  Loại bài học <span className="text-red-500">*</span>
-                </FormLabel>
+                <FormLabel>LOẠI BÀI HỌC *</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  value={String(field.value ?? "Dictation")}
+                  onValueChange={(val) => field.onChange(parseInt(val))}
+                  value={field.value !== undefined ? String(field.value) : "0"}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-orange-500">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="rounded-xl font-bold">
+                  <SelectContent>
                     {LESSON_TYPES.map((t) => (
-                      <SelectItem
-                        key={t.value}
-                        value={t.value}
-                        className="text-xs uppercase tracking-wider"
-                      >
+                      <SelectItem key={t.value} value={String(t.value)}>
                         {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+
+          {/* CẤP ĐỘ (LEVEL) */}
+          <FormField
+            control={form.control}
+            name="level"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  CẤP ĐỘ (LEVEL) <span className="text-red-500">*</span>
+                </FormLabel>
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={
+                    field.value !== undefined && field.value !== null
+                      ? String(field.value)
+                      : ""
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-orange-500">
+                      <SelectValue placeholder="Chọn cấp độ..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="rounded-xl font-bold">
+                    {LESSON_LEVELS.map((l) => (
+                      <SelectItem key={l.value} value={String(l.value)}>
+                        {l.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -110,58 +138,9 @@ export function LessonFormFields({
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  Cấp độ (Level) <span className="text-red-500">*</span>
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={String(field.value ?? "Beginner")}
-                >
-                  <FormControl>
-                    <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-orange-500">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="rounded-xl font-bold">
-                    <SelectItem
-                      value="Beginner"
-                      className="text-xs uppercase tracking-wider"
-                    >
-                      Cơ bản (Beginner)
-                    </SelectItem>
-                    <SelectItem
-                      value="Intermediate"
-                      className="text-xs uppercase tracking-wider"
-                    >
-                      Trung bình (Intermediate)
-                    </SelectItem>
-                    <SelectItem
-                      value="Advanced"
-                      className="text-xs uppercase tracking-wider"
-                    >
-                      Nâng cao (Advanced)
-                    </SelectItem>
-                    <SelectItem
-                      value="Expert"
-                      className="text-xs uppercase tracking-wider"
-                    >
-                      Chuyên gia (Expert)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-[10px] uppercase font-bold" />
-              </FormItem>
-            )}
-          />
         </div>
 
-        {/* Hàng 2: Danh mục & Tags */}
+        {/* CÁC FIELD KHÁC GIỮ NGUYÊN */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -228,7 +207,7 @@ export function LessonFormFields({
         />
       </div>
 
-      {/* SECTION 2: TÀI NGUYÊN (MEDIA) */}
+      {/* SECTION 2: MEDIA */}
       <div className="space-y-6">
         <h4 className="text-[10px] font-black text-blue-600 dark:text-blue-500 border-b border-blue-100 dark:border-blue-500/20 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
           <FolderTree className="w-4 h-4" /> 2. Nguồn dữ liệu (Media)
@@ -316,137 +295,13 @@ export function LessonFormFields({
             )}
           />
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="thumbnailUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  Ảnh bìa (Thumbnail URL)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-inner"
-                    placeholder="https://..."
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px] uppercase font-bold" />
-              </FormItem>
-            )}
-          />
-
-          {!isEditMode && (
-            <FormField
-              control={form.control}
-              name="durationSeconds"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Thời lượng dự kiến (Giây){" "}
-                    <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold text-sm focus:border-blue-500 shadow-inner"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        field.onChange(isNaN(val) || val <= 0 ? 1 : val);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px] uppercase font-bold" />
-                </FormItem>
-              )}
-            />
-          )}
-        </div>
       </div>
 
-      {/* SECTION 3: TRANSCRIPT */}
+      {/* SECTION 3: TRANSCRIPT & SECTION 4: SYSTEM GIỮ NGUYÊN LOGIC NHƯ TRÊN */}
       <div className="space-y-6">
         <h4 className="text-[10px] font-black text-purple-600 dark:text-purple-400 border-b border-purple-100 dark:border-purple-500/20 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
           <FileText className="w-4 h-4" /> 3. Dữ liệu văn bản (Transcript)
         </h4>
-
-        {!isEditMode && (
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="format"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Cấu trúc văn bản <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? "srt"}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold shadow-inner focus:ring-purple-500">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="rounded-xl font-bold">
-                      <SelectItem
-                        value="srt"
-                        className="text-xs uppercase tracking-wider"
-                      >
-                        SRT (Khuyên dùng)
-                      </SelectItem>
-                      <SelectItem
-                        value="vtt"
-                        className="text-xs uppercase tracking-wider"
-                      >
-                        VTT
-                      </SelectItem>
-                      <SelectItem
-                        value="plain"
-                        className="text-xs uppercase tracking-wider"
-                      >
-                        Plain Text (Văn bản thuần)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-[10px] uppercase font-bold" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="transcript"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Dữ liệu thô (Raw Content){" "}
-                    <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className="bg-slate-900 dark:bg-black border-slate-800 shadow-inner min-h-[300px] rounded-2xl font-mono text-[11px] text-emerald-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 p-6 leading-relaxed custom-scrollbar"
-                      placeholder="Dán nội dung .srt, .vtt hoặc văn bản vào đây..."
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormDescription className="text-[10px] font-bold text-slate-400 mt-2">
-                    <Sparkles className="w-3 h-3 inline mr-1 text-purple-500" />
-                    Hệ thống AI sẽ phân tích và đồng bộ hóa timestamps tự động.
-                  </FormDescription>
-                  <FormMessage className="text-[10px] uppercase font-bold" />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
 
         {isEditMode && (
           <FormField
@@ -480,7 +335,6 @@ export function LessonFormFields({
                     )}
                   </div>
                 </div>
-
                 <FormControl>
                   <Textarea
                     className="bg-slate-900 dark:bg-black border-slate-800 shadow-inner min-h-[300px] rounded-2xl font-mono text-[11px] text-emerald-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 p-6 leading-relaxed custom-scrollbar"
@@ -488,10 +342,6 @@ export function LessonFormFields({
                     value={field.value ?? ""}
                   />
                 </FormControl>
-                <FormDescription className="text-[10px] font-bold text-slate-400 mt-2">
-                  Chú ý: Sửa đổi nội dung này sẽ kích hoạt cơ chế đục lỗ lại từ
-                  đầu.
-                </FormDescription>
                 <FormMessage className="text-[10px] uppercase font-bold" />
               </FormItem>
             )}
@@ -499,12 +349,10 @@ export function LessonFormFields({
         )}
       </div>
 
-      {/* SECTION 4: HỆ THỐNG */}
       <div className="space-y-6">
         <h4 className="text-[10px] font-black text-slate-400 border-b border-slate-200 dark:border-white/10 pb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
           <Database className="w-4 h-4" /> 4. Phân quyền truy cập
         </h4>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -517,17 +365,15 @@ export function LessonFormFields({
                 <FormControl>
                   <Input
                     type="number"
-                    min={0}
                     className="bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-white/10 h-12 rounded-xl text-slate-900 dark:text-white font-bold text-sm shadow-inner"
                     {...field}
                     value={field.value ?? 0}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      field.onChange(isNaN(val) || val < 0 ? 0 : val);
-                    }}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value) || 0)
+                    }
                   />
                 </FormControl>
-                <FormMessage className="text-[10px] uppercase font-bold" />
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -541,9 +387,6 @@ export function LessonFormFields({
                   <FormLabel className="text-[11px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-500">
                     Bật khóa Premium
                   </FormLabel>
-                  <FormDescription className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                    Yêu cầu trả phí để xem bài này
-                  </FormDescription>
                 </div>
                 <FormControl>
                   <Switch

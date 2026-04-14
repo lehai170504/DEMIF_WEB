@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, BookPlus, Youtube, Mic } from "lucide-react"; 
+import { Plus, BookPlus, Youtube } from "lucide-react";
 
 import { YoutubeAutoTab } from "./youtube-auto-tab";
 import { QuickCreateTab } from "./quick-create-tab";
@@ -71,7 +71,7 @@ export default function CreateLessonDialog({
                   value="audio"
                   className="rounded-xl font-black text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-[#FF7A00] transition-all"
                 >
-                  <Mic className="w-3.5 h-3.5 mr-2" /> Upload Audio
+                  <Plus className="w-3.5 h-3.5 mr-2" /> Tạo thủ công
                 </TabsTrigger>
               </TabsList>
 

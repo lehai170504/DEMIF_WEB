@@ -6,36 +6,32 @@ import { z } from "zod";
 const BaseLessonSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
   description: z.string().min(1, "Mô tả không được để trống"),
-  lessonType: z.string().min(1, "Vui lòng chọn loại bài học (VD: Dictation)"),
-  level: z.string().min(1, "Vui lòng chọn cấp độ (VD: Beginner)"),
-  category: z.string().min(1, "Danh mục không được để trống"),
 
-  // Bắt buộc nhập, và phải là đường dẫn hợp lệ (http/https)
+  // Chuyển sang number để khớp value của Select và BE
+  lessonType: z.coerce.number({
+    errorMap: () => ({ message: "Vui lòng chọn loại bài học" }),
+  }),
+
+  level: z.coerce.number({
+    errorMap: () => ({ message: "Vui lòng chọn cấp độ" }),
+  }),
+
+  category: z.string().min(1, "Danh mục không được để trống"),
   mediaUrl: z
     .string()
     .min(1, "Media URL không được để trống")
-    .url("Đường dẫn Media không hợp lệ (Cần bắt đầu bằng http/https)"),
+    .url("URL không hợp lệ"),
+  mediaType: z.string().min(1).default("audio"),
 
-  mediaType: z.string().min(1, "Vui lòng chọn loại media").default("audio"),
-
-  // Ảnh bìa: Không bắt buộc. Nhưng nếu có nhập thì phải là URL hợp lệ
   thumbnailUrl: z
-    .union([z.string().url("Đường dẫn ảnh bìa không hợp lệ"), z.literal("")])
+    .union([z.string().url("URL không hợp lệ"), z.literal("")])
     .nullable()
     .optional(),
 
   tags: z.string().nullable().optional(),
-
-  // Thứ tự hiển thị: Từ 0 trở lên và phải là số nguyên (không có vụ thứ tự 1.5)
-  displayOrder: z.coerce
-    .number({ invalid_type_error: "Thứ tự hiển thị phải là số" })
-    .int("Thứ tự hiển thị phải là số nguyên")
-    .min(0, "Thứ tự hiển thị không được là số âm")
-    .default(0),
-
+  displayOrder: z.coerce.number().int().min(0).default(0),
   isPremiumOnly: z.boolean().default(false),
 });
-
 // ==========================================
 // 2. SCHEMA CHO FORM TẠO MỚI (POST /quick-create)
 // ==========================================
@@ -53,12 +49,10 @@ export const CreateLessonSchema = BaseLessonSchema.extend({
 // 3. SCHEMA CHO FORM CẬP NHẬT (PUT /{id})
 // ==========================================
 export const UpdateLessonSchema = BaseLessonSchema.extend({
-  // Audio phụ: Không bắt buộc, nhưng nếu nhập phải chuẩn URL
   audioUrl: z
-    .union([z.string().url("Đường dẫn Audio không hợp lệ"), z.literal("")])
+    .union([z.string().url(), z.literal("")])
     .nullable()
     .optional(),
-
   fullTranscript: z.string().optional(),
 });
 

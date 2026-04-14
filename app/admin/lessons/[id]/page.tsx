@@ -8,7 +8,7 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader2,
   Save,
@@ -37,7 +37,7 @@ import {
 } from "@/components/admin/lesson/lesson.constants";
 import { cn } from "@/lib/utils";
 
-// Helpers giữ nguyên logic
+// Helpers
 const parseTagsForInput = (tagsRaw?: string | null) => {
   if (!tagsRaw) return "";
   try {
@@ -48,31 +48,37 @@ const parseTagsForInput = (tagsRaw?: string | null) => {
   }
 };
 
-const normalizeSelectValue = (
+const mapStringToNumber = (
   value: string | number | null | undefined,
-  options: { value: string; label: string }[],
-  defaultValue: string,
+  options: { value: number; label: string }[],
+  defaultValue: number,
 ) => {
-  if (!value) return defaultValue;
-  const strValue = String(value).toLowerCase();
-  const match = options.find(
-    (opt) => String(opt.value).toLowerCase() === strValue,
+  // 1. Nếu rỗng thì trả về mặc định
+  if (value === null || value === undefined || value === "")
+    return defaultValue;
+
+  // 2. Nếu đã là số thì dùng luôn
+  if (typeof value === "number") return value;
+
+  // 3. Chuẩn hóa chuỗi từ BE (xóa khoảng trắng, đưa về chữ thường)
+  const incomingStr = String(value).trim().toLowerCase();
+
+  // 4. Tìm theo Label (vd: "advanced")
+  const matchByLabel = options.find(
+    (opt) => opt.label.toLowerCase() === incomingStr,
   );
-  return match ? match.value : defaultValue;
+  if (matchByLabel !== undefined) return matchByLabel.value;
+
+  // 5. Dự phòng: Tìm theo chính giá trị (vd: "2")
+  const matchByValue = options.find((opt) => String(opt.value) === incomingStr);
+
+  return matchByValue !== undefined ? matchByValue.value : defaultValue;
 };
 
 const tabVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    transition: { duration: 0.2, ease: "easeIn" },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  exit: { opacity: 0, y: -10, transition: { duration: 0.2, ease: "easeIn" } },
 };
 
 export default function LessonDetailPage() {
@@ -84,7 +90,6 @@ export default function LessonDetailPage() {
   const [activeTab, setActiveTab] = React.useState<string>("overview");
 
   const { data: lesson, isLoading: isFetching } = useLesson(lessonId);
-  // TRÍCH XUẤT THÊM updateStatus TỪ HOOK
   const { updateLesson, updateStatus, isUpdating } = useLessonActions();
 
   const form = useForm<UpdateLessonFormValues>({
@@ -92,8 +97,8 @@ export default function LessonDetailPage() {
     defaultValues: {
       title: "",
       description: "",
-      lessonType: "Dictation",
-      level: "Beginner",
+      lessonType: 0,
+      level: 0,
       category: "",
       isPremiumOnly: false,
       displayOrder: 0,
@@ -113,12 +118,8 @@ export default function LessonDetailPage() {
       form.reset({
         title: lesson.title || "",
         description: lesson.description || "",
-        lessonType: normalizeSelectValue(
-          lesson.lessonType,
-          LESSON_TYPES,
-          "Dictation",
-        ),
-        level: normalizeSelectValue(lesson.level, LESSON_LEVELS, "Beginner"),
+        lessonType: mapStringToNumber(lesson.lessonType, LESSON_TYPES, 0),
+        level: mapStringToNumber(lesson.level, LESSON_LEVELS, 0),
         category: lesson.category || "",
         isPremiumOnly: !!lesson.isPremiumOnly,
         displayOrder: Number(lesson.displayOrder) || 0,
@@ -134,13 +135,13 @@ export default function LessonDetailPage() {
 
   const onSubmit = (values: UpdateLessonFormValues) => {
     if (!lesson) return;
-    const formattedTags =
-      values.tags && values.tags.trim() !== "" ? values.tags.trim() : null;
+
+    const formattedTags = values.tags?.trim() || null;
+
     const payload: UpdateLessonRequest = {
       ...values,
-      displayOrder: Number(values.displayOrder),
       tags: formattedTags,
-      fullTranscript: values.fullTranscript ? values.fullTranscript : undefined,
+      fullTranscript: values.fullTranscript || undefined,
     };
 
     updateLesson({ id: lesson.id, data: payload });
@@ -182,7 +183,6 @@ export default function LessonDetailPage() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-[1400px] mx-auto space-y-6 pb-12 font-mono px-4 lg:px-12 transition-colors duration-300"
     >
-      {/* NÚT QUAY LẠI */}
       <button
         onClick={() => router.push("/admin/lessons")}
         className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all mb-2 mt-6 group"
@@ -191,7 +191,7 @@ export default function LessonDetailPage() {
         Quay lại danh sách
       </button>
 
-      {/* HEADER CHI TIẾT BÀI HỌC */}
+      {/* Header section */}
       <div className="bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-white/5 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl border border-orange-100 dark:border-orange-500/20">
@@ -223,7 +223,6 @@ export default function LessonDetailPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* --- NÚT ĐĂNG / GỠ BÀI --- */}
           <Button
             variant="outline"
             className={cn(
@@ -249,7 +248,6 @@ export default function LessonDetailPage() {
             {isPublished ? "Gỡ bài (Draft)" : "Đăng bài (Publish)"}
           </Button>
 
-          {/* NÚT XÓA */}
           <Button
             variant="outline"
             className="h-12 px-6 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
@@ -259,7 +257,6 @@ export default function LessonDetailPage() {
             <Trash2 className="h-4 w-4 mr-2" /> Xóa bài
           </Button>
 
-          {/* NÚT LƯU THAY ĐỔI (Chỉ hiện ở tab Edit) */}
           <AnimatePresence mode="wait">
             {activeTab === "edit" && (
               <motion.div
@@ -287,7 +284,7 @@ export default function LessonDetailPage() {
         </div>
       </div>
 
-      {/* NỘI DUNG TABS */}
+      {/* Tabs section */}
       <div className="bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-white/5 rounded-[3rem] p-4 shadow-sm min-h-[600px]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full bg-slate-100/50 dark:bg-white/5 p-2 rounded-[2rem] mb-8 grid grid-cols-3 h-16">
@@ -339,8 +336,7 @@ export default function LessonDetailPage() {
                       onSubmit={form.handleSubmit(onSubmit)}
                     >
                       <LessonFormFields form={form as any} isEditMode={true} />
-
-                      {/* Error Summary */}
+                      {/* Errors list logic */}
                       <AnimatePresence>
                         {Object.keys(formErrors).length > 0 && (
                           <motion.div
