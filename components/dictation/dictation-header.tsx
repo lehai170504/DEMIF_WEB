@@ -50,56 +50,57 @@ export function DictationHeader({ lesson, level, onSelectLevel, progress }: Dict
             </Link>
           </Button>
           <div className="flex items-center gap-3">
-             <h1 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[250px]">
-               {lesson.title}
-             </h1>
+            <h1 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[250px]">
+              {lesson.title}
+            </h1>
           </div>
         </div>
 
         {/* Center Section: Progress & Level Selector (RESTRUCTURED) */}
         <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
-            {/* Level Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn("h-8 px-3 rounded-full font-black text-[10px] uppercase tracking-widest gap-2", getLevelColor(level))}
+          {/* Level Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("h-8 px-3 rounded-full font-black text-[10px] uppercase tracking-widest gap-2", getLevelColor(level))}
+              >
+                {level}
+                <ChevronDown className="h-3 w-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-40 rounded-xl">
+              {levels.map((l) => (
+                <DropdownMenuItem
+                  key={l}
+                  onSelect={() => onSelectLevel(l)}
+                  onClick={() => onSelectLevel(l)}
+                  className={cn(
+                    "text-[10px] font-bold uppercase tracking-widest cursor-pointer",
+                    level === l ? "text-orange-500 bg-orange-500/5" : "text-muted-foreground"
+                  )}
                 >
-                  {level}
-                  <ChevronDown className="h-3 w-3 opacity-50" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-40 rounded-xl">
-                {levels.map((l) => (
-                  <DropdownMenuItem 
-                    key={l}
-                    onClick={() => onSelectLevel(l)}
-                    className={cn(
-                      "text-[10px] font-bold uppercase tracking-widest cursor-pointer",
-                      level === l ? "text-orange-500 bg-orange-500/5" : "text-muted-foreground"
-                    )}
-                  >
-                    {l}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {l}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            {/* Compact Progress */}
-            <div className="flex items-center gap-3 min-w-[200px]">
-              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden border border-gray-200/50 dark:border-white/5">
-                <Progress value={progress} className="h-full bg-orange-500" />
-              </div>
-              <span className="text-[10px] font-black text-gray-500 dark:text-zinc-400 tabular-nums w-8">
-                {progress.toFixed(0)}%
-              </span>
+          {/* Compact Progress */}
+          <div className="flex items-center gap-3 min-w-[200px]">
+            <div className="flex-1 h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden border border-gray-200/50 dark:border-white/5">
+              <Progress value={progress} className="h-full bg-orange-500" />
             </div>
+            <span className="text-[10px] font-black text-gray-500 dark:text-zinc-400 tabular-nums w-8">
+              {progress.toFixed(0)}%
+            </span>
+          </div>
         </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-4 flex-1 justify-end">
-           {/* Space for future items? */}
+          {/* Space for future items? */}
         </div>
       </div>
     </header>

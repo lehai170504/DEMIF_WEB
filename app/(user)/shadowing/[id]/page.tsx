@@ -368,6 +368,7 @@ export default function ShadowingPracticePage({
             onSelectSegment={handleSelectSegment}
             isPlaying={isPlaying}
             onPlayPause={isPlaying ? handleStopPlayback : handlePlaySegment}
+            onAddVocab={handleOpenVocabDialog}
           />
         </div>
       </main>

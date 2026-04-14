@@ -66,34 +66,6 @@ export function ShadowingHeader({
         </div>
 
         <div className="flex items-center gap-6">
-          {/* Level Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={cn("h-8 px-3 rounded-full font-black text-[10px] uppercase tracking-widest gap-2", getLevelColor(level))}
-              >
-                {level}
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40 rounded-xl">
-              {levels.map((l) => (
-                <DropdownMenuItem 
-                  key={l}
-                  onClick={() => onSelectLevel(l)}
-                  className={cn(
-                    "text-[10px] font-bold uppercase tracking-widest cursor-pointer",
-                    level === l ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground"
-                  )}
-                >
-                  {l}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <div className="flex flex-col items-end gap-1">
             <span className="text-[10px] font-black text-gray-500 dark:text-zinc-500 tabular-nums">
               PHẦN {current}{" "}

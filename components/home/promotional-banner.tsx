@@ -2,9 +2,16 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, PenTool, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Banner {
   id: string;
@@ -22,8 +29,8 @@ const banners: Banner[] = [
     title: "Giải mọi bài tập",
     subtitle: "Nhanh chóng và chính xác nhất với trợ lý AI thế hệ mới",
     image: "/promo-banner-1.jpg",
-    cta: "Hỏi ngay",
-    link: "/ai-assistant",
+    cta: "Thực hành ngay",
+    link: "dropdown",
     color: "from-blue-600/20 via-indigo-600/20 to-violet-600/20",
   },
   {
@@ -32,7 +39,7 @@ const banners: Banner[] = [
     subtitle: "Khám phá lộ trình học thông minh từ các thủ khoa",
     image: "/promo-banner-2.jpg",
     cta: "Khám phá",
-    link: "/blog/study-tips",
+    link: "/blog",
     color: "from-emerald-600/20 via-teal-600/20 to-cyan-600/20",
   },
 ];
@@ -131,10 +138,47 @@ export function PromotionalBanner() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <Button className="h-12 rounded-xl bg-white text-black font-black uppercase tracking-widest text-xs px-8 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 hover:bg-slate-200">
-                {banners[currentIndex].cta}{" "}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              {banners[currentIndex].link === "dropdown" ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="h-12 rounded-xl bg-white text-black font-black uppercase tracking-widest text-xs px-8 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 hover:bg-slate-200 group">
+                      {banners[currentIndex].cta}{" "}
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 z-[100] border-gray-200 dark:border-white/10 shadow-xl">
+                    <DropdownMenuItem asChild className="p-3 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                      <Link href="/dictation" className="flex items-center gap-4 w-full outline-none">
+                        <div className="bg-orange-500/10 p-2.5 rounded-xl shrink-0">
+                          <PenTool className="h-5 w-5 text-orange-500" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider">Chính tả</span>
+                          <span className="text-[10px] text-gray-500 uppercase tracking-widest">Luyện nghe và chép lại</span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="p-3 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors mt-1">
+                      <Link href="/shadowing" className="flex items-center gap-4 w-full outline-none">
+                        <div className="bg-blue-500/10 p-2.5 rounded-xl shrink-0">
+                          <Headphones className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider">Shadowing</span>
+                          <span className="text-[10px] text-gray-500 uppercase tracking-widest">Luyện nói nhại âm</span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button asChild className="h-12 rounded-xl bg-white text-black font-black uppercase tracking-widest text-xs px-8 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:scale-105 hover:bg-slate-200 group">
+                  <Link href={banners[currentIndex].link}>
+                    {banners[currentIndex].cta}{" "}
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              )}
             </motion.div>
           </div>
 

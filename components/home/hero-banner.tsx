@@ -1,8 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Clock, ArrowRight, Sparkles, Zap, Trophy } from "lucide-react";
+import { Users, Clock, ArrowRight, Sparkles, Zap, Trophy, PenTool, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 interface HeroBannerProps {
   title: string;
@@ -74,10 +81,38 @@ export function HeroBanner({
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-start"
           >
-            <Button className="h-14 px-8 rounded-2xl bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all duration-300">
-              Tham gia ngay
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="h-14 px-8 rounded-2xl bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all duration-300 group">
+                  Khám phá ngay
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 z-[100] border-gray-200 dark:border-white/10 shadow-xl">
+                <DropdownMenuItem asChild className="p-3 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                  <Link href="/dictation" className="flex items-center gap-4 w-full outline-none">
+                    <div className="bg-orange-500/10 p-2.5 rounded-xl shrink-0">
+                      <PenTool className="h-5 w-5 text-orange-500" />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider">Chính tả</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-widest">Luyện nghe và chép lại</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="p-3 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors mt-1">
+                  <Link href="/shadowing" className="flex items-center gap-4 w-full outline-none">
+                    <div className="bg-blue-500/10 p-2.5 rounded-xl shrink-0">
+                      <Headphones className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider">Shadowing</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-widest">Luyện nói nhại âm</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <div className="flex items-center gap-6 text-sm font-medium">
               <div className="flex items-center gap-2 text-gray-600 dark:text-zinc-300">
