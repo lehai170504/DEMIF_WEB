@@ -1,9 +1,8 @@
 "use client";
 
 import { YoutubePreviewResponse } from "@/types/lesson.type";
-import { Clock, Globe, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Globe, AlertCircle, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 
 export function YoutubePreviewCard({ data }: { data: YoutubePreviewResponse }) {
   return (
