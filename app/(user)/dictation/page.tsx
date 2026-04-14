@@ -44,13 +44,6 @@ export default function DictationPage() {
     category: category || undefined,
   });
 
-  // Query riêng để lấy danh sách Tags (không bị ảnh hưởng bởi filter category hiện tại)
-  const { data: tagData } = useUserLessons({
-    page: 1,
-    pageSize: 50,
-    type: "Dictation",
-  });
-
   const { data: lessonHistoryData } = useLessonHistory({ pageSize: 1000 });
   const historyMap = useMemo(() => {
     const map = new Map<string, any>();
@@ -78,14 +71,13 @@ export default function DictationPage() {
   }, [data?.items, debouncedSearch]);
 
   const dynamicTags = useMemo(() => {
-    const sourceData = tagData?.items || data?.items || [];
-    if (sourceData.length === 0) return [];
+    if (!data?.items) return [];
     const tags = new Set<string>();
-    sourceData.forEach(i => {
+    data.items.forEach(i => {
       if (i.category) tags.add(i.category.toLowerCase());
     });
     return Array.from(tags).map(t => ({ val: t, label: t }));
-  }, [tagData?.items, data?.items]);
+  }, [data?.items]);
 
   return (
     <div className="w-full font-mono pb-20 selection:bg-orange-500/30">
