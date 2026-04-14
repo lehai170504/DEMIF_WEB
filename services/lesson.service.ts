@@ -29,6 +29,8 @@ import {
   CheckDictationSegmentRequest,
   CheckDictationSegmentResponse,
   UploadAudioResponse,
+  MyProgressResponse,
+  LessonHistoryResponse,
 } from "@/types/lesson.type";
 
 export const lessonService = {
@@ -177,6 +179,18 @@ export const lessonService = {
   // GET /api/lessons/{id} - Lấy chi tiết lesson
   getUserLessonById: async (id: string): Promise<LessonDto> => {
     const response = await axiosClient.get(`/lessons/${id}`);
+    return (response as any).data ?? response;
+  },
+
+  // GET /api/lessons/{id}/my-progress - Lấy TIẾN ĐỘ chi tiết trong 1 bài học
+  getMyProgress: async (id: string): Promise<MyProgressResponse> => {
+    const response = await axiosClient.get(`/lessons/${id}/my-progress`);
+    return (response as any).data ?? response;
+  },
+
+  // GET /api/me/lesson-history - Lấy LỊCH SỬ học tập
+  getLessonHistory: async (params?: { page?: number; pageSize?: number; status?: string }): Promise<LessonHistoryResponse> => {
+    const response = await axiosClient.get(`/me/lesson-history`, { params });
     return (response as any).data ?? response;
   },
 

@@ -13,6 +13,7 @@ interface ShadowingPlaylistProps {
   isPlaying: boolean;
   onPlayPause: () => void;
   onAddVocab?: (word: string) => void;
+  myProgress?: any;
 }
 
 export function ShadowingPlaylist({
@@ -23,6 +24,7 @@ export function ShadowingPlaylist({
   isPlaying,
   onPlayPause,
   onAddVocab,
+  myProgress,
 }: ShadowingPlaylistProps) {
   const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
 
@@ -69,7 +71,10 @@ export function ShadowingPlaylist({
             const isRevealed = revealedIndices.includes(i);
             const runTimeAcc =
               checkResults[i]?.accuracyScore ?? checkResults[i]?.accuracy;
-            const finalAcc = runTimeAcc ?? seg.bestScore;
+            const historyAcc = myProgress?.completedSegments?.find(
+              (s: any) => s.segmentIndex === i
+            )?.bestScore;
+            const finalAcc = runTimeAcc ?? historyAcc ?? seg.bestScore;
 
             return (
               <div

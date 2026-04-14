@@ -300,6 +300,23 @@ export const useUserLessonDetail = (id: string) => {
   });
 };
 
+// Lấy lịch sử bài học của User
+export const useLessonHistory = (params?: { page?: number; pageSize?: number; status?: string }) => {
+  return useQuery({
+    queryKey: ["lesson-history", params],
+    queryFn: () => lessonService.getLessonHistory(params),
+  });
+};
+
+// Lấy tiến độ chi tiết của User trong 1 bài học
+export const useMyProgress = (id: string) => {
+  return useQuery({
+    queryKey: ["my-progress", id],
+    queryFn: () => lessonService.getMyProgress(id),
+    enabled: !!id,
+  });
+};
+
 // Lấy danh sách câu cho Shadowing
 export const useSegments = (id: string, level: string) => {
   return useQuery({
@@ -345,6 +362,8 @@ export const useSubmitDictation = () => {
         }
       }
       queryClient.invalidateQueries({ queryKey: ["user-lesson"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["stats-summary"] });
     },
     onError: (error: any) => {
       toast.error("Lỗi nộp bài", {
@@ -360,6 +379,7 @@ export const useSubmitDictation = () => {
 
 // Kiểm tra Shadowing qua text input
 export const useCheckShadowingSegment = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       id,
@@ -385,6 +405,8 @@ export const useCheckShadowingSegment = () => {
           description: `Độ chính xác: ${accuracy.toFixed(0)}%. Hãy lắng nghe kỹ hơn.`,
         });
       }
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["stats-summary"] });
     },
     onError: (error: any) => {
       toast.error("Lỗi kiểm tra", {
@@ -399,6 +421,7 @@ export const useCheckShadowingSegment = () => {
 
 // Kiểm tra Dictation từng đoạn
 export const useCheckDictationSegment = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       id,
@@ -420,6 +443,8 @@ export const useCheckDictationSegment = () => {
           description: `Đạt ${accuracy.toFixed(0)}%. Có một vài lỗi chính tả nhỏ.`,
         });
       }
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["stats-summary"] });
     },
     onError: (error: any) => {
       toast.error("Lỗi phân tích", {
@@ -434,6 +459,7 @@ export const useCheckDictationSegment = () => {
 
 // Kiểm tra phát âm qua Voice (Speech to Text)
 export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CheckVoiceRequest) =>
       lessonService.checkVoice(lessonId, segmentIndex, data),
@@ -452,6 +478,8 @@ export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
           description: `Đạt ${accuracy.toFixed(0)}%. Bạn cần luyện tập mở khẩu hình và bật hơi thêm.`,
         });
       }
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["stats-summary"] });
     },
     onError: (error: any) => {
       toast.error("Lỗi nhận diện", {

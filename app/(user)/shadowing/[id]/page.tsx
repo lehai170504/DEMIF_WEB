@@ -11,6 +11,7 @@ import {
   useSegments,
   useCheckVoice,
   useCheckShadowingSegment,
+  useMyProgress,
 } from "@/hooks/use-lesson";
 import { useYoutubePlayer } from "@/hooks/use-youtube-player";
 import { useAddVocabulary } from "@/hooks/use-vocabulary";
@@ -65,6 +66,7 @@ export default function ShadowingPracticePage({
     id,
     level,
   );
+  const { data: myProgress } = useMyProgress(id);
 
   const checkVoiceMutation = useCheckVoice(id, currentIdx);
   const checkSegmentMutation = useCheckShadowingSegment();
@@ -115,11 +117,11 @@ export default function ShadowingPracticePage({
 
   // --- Progress Calculations ---
   const progress = useMemo(() => {
-    const serverProgress = segmentsData?.progressPercent ?? 0;
+    const serverProgress = myProgress?.progressPercent ?? segmentsData?.progressPercent ?? 0;
     const localProgress =
       segments.length > 0 ? (currentIdx / segments.length) * 100 : 0;
     return Math.max(serverProgress, localProgress);
-  }, [segmentsData, segments.length, currentIdx]);
+  }, [segmentsData, myProgress, segments.length, currentIdx]);
 
   // --- Browser Support Check ---
   useEffect(() => {
@@ -365,6 +367,7 @@ export default function ShadowingPracticePage({
             segments={segments}
             currentIdx={currentIdx}
             checkResults={checkResults}
+            myProgress={myProgress}
             onSelectSegment={handleSelectSegment}
             isPlaying={isPlaying}
             onPlayPause={isPlaying ? handleStopPlayback : handlePlaySegment}

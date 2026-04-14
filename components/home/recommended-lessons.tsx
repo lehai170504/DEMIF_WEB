@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Star, Sparkles, ArrowUpRight } from "lucide-react";
+import { Clock, Star, Sparkles, ArrowUpRight, Lock } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +16,7 @@ interface Lesson {
   level: string;
   category: string;
   rating?: number;
+  isPremiumOnly?: boolean;
 }
 
 interface RecommendedLessonsProps {
@@ -23,11 +26,14 @@ interface RecommendedLessonsProps {
     intermediate: Lesson[];
     advanced: Lesson[];
   };
+  isPremiumUser: boolean;
 }
 
 export function RecommendedLessons({
   lessonsByCategory,
+  isPremiumUser,
 }: RecommendedLessonsProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<
     "all" | "beginner" | "intermediate" | "advanced"
   >("all");
@@ -80,7 +86,10 @@ export function RecommendedLessons({
       {/* GRID LAYOUT */}
       <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AnimatePresence mode="popLayout">
-          {currentLessons.slice(0, 6).map((lesson, index) => (
+          {currentLessons.slice(0, 6).map((lesson, index) => {
+            const isLocked = lesson.isPremiumOnly && !isPremiumUser;
+            
+            return (
             <motion.div
               key={lesson.lessonId}
               layout
@@ -89,9 +98,16 @@ export function RecommendedLessons({
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index * 0.05, duration: 0.3 }}
             >
-              <Link
-                href={`/dictation/${lesson.lessonId}`}
-                className="group block h-full"
+              <div
+                onClick={() => {
+                  if (isLocked) {
+                    toast.error("Nội dung Premium", { description: "Vui lòng nâng cấp tài khoản để học bài này." });
+                    router.push("/subscription");
+                  } else {
+                    router.push(`/dictation/${lesson.lessonId}`);
+                  }
+                }}
+                className="group block h-full cursor-pointer"
               >
                 <div className="relative flex flex-col justify-between h-full border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] p-6 transition-all duration-500 rounded-[2rem] overflow-hidden group-hover:border-orange-500/30 group-hover:bg-gray-50 dark:group-hover:bg-[#202023]">
                   {/* Hover Glow */}
@@ -129,14 +145,23 @@ export function RecommendedLessons({
                       <span>{lesson.duration} phút</span>
                     </div>
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 group-hover:bg-orange-500 group-hover:shadow-lg">
-                      <ArrowUpRight className="h-4 w-4" />
+                    <div className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-hover:shadow-lg",
+                      isLocked
+                        ? "bg-red-500/10 text-red-500"
+                        : "bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white group-hover:bg-orange-500 group-hover:text-white"
+                    )}>
+                      {isLocked ? (
+                        <Lock className="h-4 w-4" />
+                      ) : (
+                        <ArrowUpRight className="h-4 w-4" />
+                      )}
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             </motion.div>
-          ))}
+          )})}
         </AnimatePresence>
       </motion.div>
 

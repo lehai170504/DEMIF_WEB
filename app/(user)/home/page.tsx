@@ -15,11 +15,19 @@ import { useQuery } from "@tanstack/react-query";
 import { statsService } from "@/services/stats.service";
 import { blogService } from "@/services/blog.service";
 import { lessonService } from "@/services/lesson.service";
+import { useLessonHistory } from "@/hooks/use-lesson";
+import { useMySubscription } from "@/hooks/use-subscription";
 import { vocabularyService } from "@/services/vocabulary.service";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomePage() {
   const { user } = useAuth();
+  
+  const { data: mySubscription } = useMySubscription();
+  const isPremiumUser =
+    mySubscription?.status === "Active" &&
+    mySubscription?.tier &&
+    mySubscription.tier !== "Free";
   
   // Leaderboard
   const { data: leaderboardData, isLoading: isLoadingLeaderboard } = useQuery({
@@ -61,6 +69,9 @@ export default function HomePage() {
     queryFn: () => statsService.getDailyPractice(1),
   });
 
+  // Recent History
+  const { data: lessonHistory, isLoading: isLoadingHistory } = useLessonHistory({ pageSize: 5 });
+
   // Mapping dynamic data
   const leaderboardItems = leaderboardData?.data || leaderboardData;
   const leaderboard = Array.isArray(leaderboardItems)
@@ -95,6 +106,7 @@ export default function HomePage() {
     duration: Math.floor(lesson.durationSeconds / 60) || 0,
     category: lesson.category || "General",
     rating: lesson.avgScore || 4.5,
+    isPremiumOnly: lesson.isPremiumOnly || false,
   });
 
   // Continue Learning (Latest 4)
@@ -119,10 +131,10 @@ export default function HomePage() {
   };
 
   const recentLessonsFormatted =
-    lessonsData?.items?.slice(0, 2).map((lesson: any) => ({
-      lessonId: lesson.id,
+    lessonHistory?.items?.slice(0, 4).map((lesson: any) => ({
+      lessonId: lesson.lessonId,
       title: lesson.title,
-      code: lesson.id.substring(0, 8).toUpperCase(),
+      code: lesson.lessonId.substring(0, 8).toUpperCase(),
     })) || [];
 
   // 1. Container variants: Điều phối các phần tử con xuất hiện lần lượt
@@ -203,7 +215,7 @@ export default function HomePage() {
               <span className="w-1.5 h-6 bg-orange-500 rounded-full inline-block shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
               Tiếp tục học
             </h2>
-            <ContinueLearning lessons={continueLearning} />
+            <ContinueLearning lessons={continueLearning} isPremiumUser={isPremiumUser} />
           </motion.section>
 
           {/* Banner quảng cáo */}
@@ -219,6 +231,7 @@ export default function HomePage() {
             </h2>
             <RecommendedLessons
               lessonsByCategory={recommendedByCategory}
+              isPremiumUser={isPremiumUser}
             />
           </motion.section>
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, TrendingUp, PlayCircle, ChevronRight, Zap } from "lucide-react";
+import { Clock, TrendingUp, PlayCircle, ChevronRight, Zap, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -12,13 +14,16 @@ interface Lesson {
   level: string;
   duration: number;
   category: string;
+  isPremiumOnly?: boolean;
 }
 
 interface ContinueLearningProps {
   lessons: Lesson[];
+  isPremiumUser: boolean;
 }
 
-export function ContinueLearning({ lessons }: ContinueLearningProps) {
+export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningProps) {
+  const router = useRouter();
   // Style cho badge level - Dark mode neon style
   const levelStyles = {
     beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -45,7 +50,10 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
         className="flex gap-5 overflow-x-auto pb-8 pt-2 px-1 no-scrollbar 
         cursor-grab active:cursor-grabbing scroll-smooth snap-x snap-mandatory"
       >
-        {lessons.map((lesson, index) => (
+        {lessons.map((lesson, index) => {
+          const isLocked = lesson.isPremiumOnly && !isPremiumUser;
+          
+          return (
           <motion.div
             key={lesson.lessonId}
             initial={{ opacity: 0, x: 20 }}
@@ -54,7 +62,17 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
             transition={{ delay: index * 0.1 }}
             className="snap-start"
           >
-            <Link href={`/dictation/${lesson.lessonId}`}>
+            <div
+              onClick={() => {
+                if (isLocked) {
+                  toast.error("Nội dung Premium", { description: "Vui lòng nâng cấp tài khoản." });
+                  router.push("/subscription");
+                } else {
+                  router.push(`/dictation/${lesson.lessonId}`);
+                }
+              }}
+              className="cursor-pointer"
+            >
               {/* 3D Glass Card */}
               <motion.div
                 whileHover={{ y: -6, scale: 1.02 }}
@@ -126,16 +144,25 @@ export function ContinueLearning({ lessons }: ContinueLearningProps) {
                       </div>
                     </div>
 
-                    {/* Play Button - Glowing on Hover */}
-                    <div className="rounded-full bg-gray-100 dark:bg-white/5 p-1.5 text-gray-600 dark:text-zinc-300 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,122,0,0.5)]">
-                      <PlayCircle className="h-4 w-4 fill-current" />
+                    {/* Play Button or Lock - Glowing on Hover */}
+                    <div className={cn(
+                      "rounded-full p-1.5 transition-all duration-300",
+                      isLocked
+                        ? "bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:bg-red-500/10 group-hover:text-red-500"
+                        : "bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-300 group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,122,0,0.5)]"
+                    )}>
+                      {isLocked ? (
+                        <Lock className="h-4 w-4" />
+                      ) : (
+                        <PlayCircle className="h-4 w-4 fill-current" />
+                      )}
                     </div>
                   </div>
                 </div>
               </motion.div>
-            </Link>
+            </div>
           </motion.div>
-        ))}
+        )})}
       </div>
     </div>
   );
