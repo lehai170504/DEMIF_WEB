@@ -1,4 +1,5 @@
 import axiosClient from "@/lib/axios-client";
+import { AdminSubscriptionPayload } from "@/types/subscription.type";
 import {
   CancelSubscriptionDto,
   ExtendSubscriptionDto,
@@ -40,5 +41,32 @@ export const userSubscriptionService = {
       data,
     );
     return response;
+  },
+
+  createSubscription: async (data: AdminSubscriptionPayload) => {
+    try {
+      const response = await axiosClient.post(
+        "/admin/user-subscriptions",
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error createSubscription:", error);
+      throw error;
+    }
+  },
+
+  // 2. Cập nhật gói thuê bao (PUT)
+  updateSubscription: async (id: string, data: AdminSubscriptionPayload) => {
+    try {
+      const response = await axiosClient.put(
+        `/admin/user-subscriptions/${id}`,
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updateSubscription:", error);
+      throw error;
+    }
   },
 };

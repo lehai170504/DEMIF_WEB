@@ -58,30 +58,29 @@ export interface GetLessonsResponse {
 export interface CreateLessonRequest {
   title: string;
   description: string;
-  transcript: string; // Chỉ có ở POST
-  format: string; // Chỉ có ở POST (ví dụ: "srt", "vtt", "plain")
+  transcript: string;
+  format: string;
   mediaUrl: string;
   mediaType: string;
-  durationSeconds: number; // Chỉ có ở POST
-  level: string; // Ví dụ: "Beginner"
-  lessonType: string; // Ví dụ: "Dictation"
+  durationSeconds: number;
+  level: number;
+  lessonType: number;
   category: string;
   isPremiumOnly: boolean;
   displayOrder: number;
   tags?: string | null;
   thumbnailUrl?: string | null;
 }
-
 // ==========================================
 // Dùng cho PUT /api/admin/lessons/{id}
 // ==========================================
 export interface UpdateLessonRequest {
   title?: string;
   description?: string;
-  lessonType?: string;
-  level?: string;
+  lessonType?: number;
+  level?: number;
   category?: string;
-  audioUrl?: string | null; // Chỉ có ở PUT
+  audioUrl?: string | null;
   mediaUrl?: string | null;
   mediaType?: string | null;
   thumbnailUrl?: string | null;
@@ -173,19 +172,18 @@ export interface UpdateTranscriptResponse {
 // --- 6. Interface cho API tạo bài học từ YouTube ---
 export interface CreateLessonFromYoutubeRequest {
   youTubeUrl: string;
-  captionLanguage: string; // Ví dụ: "en", "vi"
-  lessonType: string; // "Dictation" | "Shadowing"
-  level: string; // "Beginner" | "Intermediate" | "Advanced"
-  category: string; // Ví dụ: "Music", "Movie", "TED"
-  isPremiumOnly: boolean; // true | false
-  displayOrder: number; // Thứ tự hiển thị
-  status: string; // "draft" | "published" | "archived"
-
-  // Các trường có thể để trống hoặc null
+  captionLanguage: string;
+  lessonType: number;
+  level: number;
+  category: string;
+  isPremiumOnly: boolean;
+  displayOrder: number;
+  status: string;
   tags?: string | null;
   titleOverride?: string | null;
   descriptionOverride?: string | null;
 }
+
 export interface CreateLessonFromYoutubeResponse {
   lessonId: string;
   title: string;
@@ -227,15 +225,6 @@ export interface YoutubeTranscriptResponse {
 
 export interface UpdateDictationTemplatesRequest {
   dictationTemplatesJson: string;
-}
-
-export interface UploadAudioResponse {
-  mediaUrl: string;
-  audioUrl: string;
-  mediaType: string;
-  folderName: string;
-  fileName: string;
-  fileSize: number;
 }
 
 // ============ USER API TYPES ============
@@ -334,9 +323,9 @@ export interface SubmitDictationResponse {
   results: DictationResult[];
   feedback?: string;
   // Fields mới từ backend (LESSON_DICTATION_SUBMIT_FE_NOTES.md)
-  answeredAccuracy: number;      // % đúng trên số blank user đã submit
+  answeredAccuracy: number; // % đúng trên số blank user đã submit
   isSubmissionComplete: boolean; // true khi user đã điền đủ toàn bộ blank
-  isFullyCorrect: boolean;       // true khi toàn bộ blank của bài đều đúng
+  isFullyCorrect: boolean; // true khi toàn bộ blank của bài đều đúng
 }
 
 export interface TimedSegment {

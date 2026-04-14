@@ -49,13 +49,13 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
       {
         youTubeUrl: ytUrl,
         captionLanguage: ytLang,
-        lessonType: "Dictation",
-        level: "Beginner",
+        lessonType: 0, // 0: Dictation
+        level: 0, // 0: Beginner
         category: preview.suggestedCategory || "YouTube Import",
         isPremiumOnly: false,
         displayOrder: 0,
         status: "draft",
-        tags: null,
+        tags: "", // BE nhận chuỗi
         titleOverride: null,
         descriptionOverride: null,
       },
@@ -70,7 +70,6 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
 
   return (
     <div className="space-y-8 font-mono">
-      {/* INPUT AREA */}
       <div className="space-y-3">
         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-2">
           Đường dẫn Video YouTube
@@ -99,10 +98,8 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            {/* CARD PREVIEW */}
             <YoutubePreviewCard data={preview} />
 
-            {/* TRANSCRIPT AREA */}
             {transcript && (
               <div className="p-6 bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-white/5 rounded-[2rem] relative overflow-hidden shadow-inner group transition-colors">
                 <div className="flex items-center justify-between mb-4">
@@ -138,12 +135,10 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
                     "Không có nội dung văn bản. Vui lòng kiểm tra lại Video."}
                 </div>
 
-                {/* Fade out effect at bottom */}
                 <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-slate-50 dark:from-zinc-900/80 to-transparent pointer-events-none" />
               </div>
             )}
 
-            {/* SUBMIT BUTTON */}
             <Button
               disabled={isYoutubePending || !preview?.hasCaptions || !ytUrl}
               onClick={handleYoutubeSubmit}
@@ -160,7 +155,6 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
         )}
       </AnimatePresence>
 
-      {/* ERROR MESSAGE */}
       {isPreviewError && (
         <div className="p-4 bg-red-50 dark:bg-red-500/10 rounded-2xl border border-red-100 dark:border-red-500/20 flex items-center gap-3 text-red-600 dark:text-red-400">
           <AlertCircle className="w-5 h-5 shrink-0" />
