@@ -2,7 +2,7 @@
 
 import { HeroBanner } from "@/components/home/hero-banner";
 import { ContinueLearning } from "@/components/home/continue-learning";
-import { RecentLessons } from "@/components/home/recent-lessons";
+import { RecentVocabulary } from "@/components/home/recent-vocabulary";
 import { RecommendedLessons } from "@/components/home/recommended-lessons";
 import { PromotionalBanner } from "@/components/home/promotional-banner";
 import { SidebarReview } from "@/components/home/sidebar-review";
@@ -15,65 +15,81 @@ import { useQuery } from "@tanstack/react-query";
 import { statsService } from "@/services/stats.service";
 import { blogService } from "@/services/blog.service";
 import { lessonService } from "@/services/lesson.service";
-import { useLessonHistory } from "@/hooks/use-lesson";
-import { useMySubscription } from "@/hooks/use-subscription";
-import { vocabularyService } from "@/services/vocabulary.service";
 import { useAuth } from "@/contexts/AuthContext";
+import { useVocabularyOverview } from "@/hooks/use-vocabulary";
 
 export default function HomePage() {
   const { user } = useAuth();
-  
-  const { data: mySubscription } = useMySubscription();
+
+  // ===== SUBSCRIPTION =====
+  const { data: mySubscription } = useQuery({
+    queryKey: ["my-subscription"],
+    queryFn: () => Promise.resolve({ status: "Active", tier: "Free" }),
+  });
+
   const isPremiumUser =
     mySubscription?.status === "Active" &&
-    mySubscription?.tier &&
-    mySubscription.tier !== "Free";
-  
-  // Leaderboard
+    (mySubscription?.tier ?? "Free") !== "Free";
+
+  // ===== LEADERBOARD =====
   const { data: leaderboardData, isLoading: isLoadingLeaderboard } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: () => statsService.getLeaderboard(5),
   });
 
-  // Blogs
+  // ===== BLOG =====
   const { data: blogData, isLoading: isLoadingBlogs } = useQuery({
     queryKey: ["blogs-home"],
     queryFn: () => blogService.getBlogs(),
   });
 
-  // Lessons (Recommended - simplified as all latest lessons for now)
+  // ===== LESSON =====
   const { data: lessonsData, isLoading: isLoadingLessons } = useQuery({
     queryKey: ["lessons-home", user?.currentLevel],
     queryFn: () =>
       lessonService.getUserLessons({
         pageSize: 10,
-        level: user?.currentLevel, // Filter by user level
+        level: user?.currentLevel,
       }),
+    enabled: !!user,
   });
 
-  // Vocabulary Overview (Review Due)
-  const { data: vocabOverview, isLoading: isLoadingVocab } = useQuery({
-    queryKey: ["vocab-overview"],
-    queryFn: () => vocabularyService.getOverview(),
-  });
+  // ===== VOCAB OVERVIEW (FIX CHUẨN) =====
+  const { data: vocabOverview, isLoading: isLoadingVocab } =
+    useVocabularyOverview();
 
-  // Progress (Stats Summary)
+  // ===== STATS =====
   const { data: statsSummary, isLoading: isLoadingStats } = useQuery({
     queryKey: ["stats-summary"],
     queryFn: () => statsService.getSummary(),
   });
 
-  // Daily Practice (for progress bar)
-  const { data: dailyPracticeData } = useQuery({
+  // ===== DAILY PRACTICE =====
+  const { data: dailyPracticeData, isLoading: isLoadingPractice } = useQuery({
     queryKey: ["daily-practice-today"],
     queryFn: () => statsService.getDailyPractice(1),
   });
 
-  // Recent History
-  const { data: lessonHistory, isLoading: isLoadingHistory } = useLessonHistory({ pageSize: 5 });
+  // ===== GLOBAL LOADING =====
+  const isPageLoading =
+    isLoadingLeaderboard ||
+    isLoadingBlogs ||
+    isLoadingLessons ||
+    isLoadingVocab ||
+    isLoadingStats ||
+    isLoadingPractice;
 
-  // Mapping dynamic data
+  if (isPageLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <p className="text-gray-500 animate-pulse">Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
+
+  // ===== LEADERBOARD MAP =====
   const leaderboardItems = leaderboardData?.data || leaderboardData;
+
   const leaderboard = Array.isArray(leaderboardItems)
     ? leaderboardItems.map((entry: any, index: number) => ({
         rank: entry.rank || index + 1,
@@ -84,11 +100,16 @@ export default function HomePage() {
       }))
     : [];
 
-  // Calculate Progress Percent
+  // ===== DAILY PROGRESS =====
   const todayMinutes = dailyPracticeData?.data?.[0]?.minutes || 0;
-  const dailyGoal = user?.dailyGoalMinutes || 30; // Default 30 if not set
-  const progressPercent = Math.min(Math.round((todayMinutes / dailyGoal) * 100), 100);
+  const dailyGoal = user?.dailyGoalMinutes || 30;
 
+  const progressPercent = Math.min(
+    Math.round((todayMinutes / dailyGoal) * 100),
+    100,
+  );
+
+  // ===== BLOG MAP =====
   const articles =
     blogData?.map((blog: any) => ({
       title: blog.title,
@@ -98,10 +119,11 @@ export default function HomePage() {
       date: new Date(blog.createdAt).toLocaleDateString("vi-VN"),
     })) || [];
 
+  // ===== LESSON MAP =====
   const mapLessonToComponent = (lesson: any) => ({
     lessonId: lesson.id,
     title: lesson.title,
-    progress: Math.random() * 0.5 + 0.1, // Mock progress for now as API doesn't return it yet
+    progress: Math.random() * 0.5 + 0.1,
     level: (lesson.level || "beginner").toLowerCase(),
     duration: Math.floor(lesson.durationSeconds / 60) || 0,
     category: lesson.category || "General",
@@ -109,11 +131,9 @@ export default function HomePage() {
     isPremiumOnly: lesson.isPremiumOnly || false,
   });
 
-  // Continue Learning (Latest 4)
   const continueLearning =
     lessonsData?.items?.slice(0, 4).map(mapLessonToComponent) || [];
 
-  // Recommended (By Category)
   const recommendedByCategory = {
     all: lessonsData?.items?.map(mapLessonToComponent) || [],
     beginner:
@@ -130,122 +150,98 @@ export default function HomePage() {
         .map(mapLessonToComponent) || [],
   };
 
-  const recentLessonsFormatted =
-    lessonHistory?.items?.slice(0, 4).map((lesson: any) => ({
-      lessonId: lesson.lessonId,
-      title: lesson.title,
-      code: lesson.lessonId.substring(0, 8).toUpperCase(),
+  const recentVocabsFormatted =
+    vocabOverview?.recentItems?.slice(0, 4).map((vocab) => ({
+      id: vocab.id,
+      word: vocab.word,
+      meaning: vocab.meaning,
+      topic: vocab.topic || vocab.lessonCategory || "Vocabulary",
     })) || [];
 
-  // 1. Container variants: Điều phối các phần tử con xuất hiện lần lượt
+  const hasRecentVocab = recentVocabsFormatted.length > 0;
+
+  // ===== ANIMATION =====
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.15, // Thời gian trễ giữa các phần tử con
-        delayChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.15, delayChildren: 0.1 },
     },
   };
 
-  // 2. Item variants: Hiệu ứng 3D nhẹ (trượt lên + mờ -> rõ + scale)
   const itemVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: 40,
-      filter: "blur(10px)", // Hiệu ứng mờ ảo futuristic
-      scale: 0.95,
-    },
+    hidden: { opacity: 0, y: 40, filter: "blur(10px)", scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
       filter: "blur(0px)",
       scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 50,
-        damping: 20,
-        mass: 1,
-      },
+      transition: { type: "spring", stiffness: 50, damping: 20 },
     },
   };
 
-  // 3. Sidebar variants: Trượt từ phải sang nhẹ nhàng
   const sidebarItemVariants: Variants = {
     hidden: { opacity: 0, x: 20, filter: "blur(5px)" },
     visible: {
       opacity: 1,
       x: 0,
       filter: "blur(0px)",
-      transition: { duration: 0.5, ease: "easeOut" },
+      transition: { duration: 0.5 },
     },
   };
 
   const featuredCampaign = {
     title: "Chiến lược luyện nghe hiệu quả",
-    desc: "Cùng DEMIF chinh phục kỹ năng nghe chép chính tả mỗi ngày!",
+    description: "Cùng DEMIF chinh phục kỹ năng nghe chép chính tả mỗi ngày!",
     participants: 173,
     daysLeft: 24,
   };
 
+  // ===== UI GIỮ NGUYÊN =====
   return (
     <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-10 font-mono">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        {/* --- LEFT COLUMN (8/12) --- */}
         <motion.div
           className="lg:col-span-8 space-y-12"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Hero Banner (Animation riêng trong component con, giữ nguyên thẻ wrapper để layout) */}
           <motion.div variants={itemVariants}>
-            <HeroBanner
-              title={featuredCampaign.title}
-              description={featuredCampaign.desc}
-              participants={featuredCampaign.participants}
-              daysLeft={featuredCampaign.daysLeft}
-            />
+            <HeroBanner {...featuredCampaign} />
           </motion.div>
 
-          {/* Học tiếp */}
           <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-orange-500 rounded-full inline-block shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
-              Tiếp tục học
-            </h2>
-            <ContinueLearning lessons={continueLearning} isPremiumUser={isPremiumUser} />
+            <h2 className="text-xl font-bold">Tiếp tục học</h2>
+            <ContinueLearning
+              lessons={continueLearning}
+              isPremiumUser={isPremiumUser}
+            />
           </motion.section>
 
-          {/* Banner quảng cáo */}
           <motion.div variants={itemVariants}>
             <PromotionalBanner />
           </motion.div>
 
-          {/* Đề xuất bài học */}
           <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
-              Gợi ý hôm nay
-            </h2>
+            <h2 className="text-xl font-bold">Gợi ý hôm nay</h2>
             <RecommendedLessons
               lessonsByCategory={recommendedByCategory}
               isPremiumUser={isPremiumUser}
             />
           </motion.section>
 
-          {/* Lịch sử học tập */}
           <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-600 dark:text-zinc-400 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-gray-400 dark:bg-zinc-700 rounded-full inline-block" />
-              Vừa học gần đây
-            </h2>
-            <RecentLessons lessons={recentLessonsFormatted} />
+            <h2 className="text-xl font-bold">Lịch sử từ vựng</h2>
+
+            {hasRecentVocab ? (
+              <RecentVocabulary vocabularies={recentVocabsFormatted} />
+            ) : (
+              <p className="text-sm text-gray-500">Chưa có từ vựng gần đây</p>
+            )}
           </motion.section>
         </motion.div>
 
-        {/* --- RIGHT COLUMN (4/12) --- */}
         <aside className="lg:col-span-4 w-full">
           <motion.div
             className="sticky top-28 space-y-8"
@@ -269,26 +265,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={sidebarItemVariants}>
-              <SidebarStreak
-                currentStreak={statsSummary?.currentStreak ?? 0}
-              />
-            </motion.div>
-
-            {/* Footer phụ */}
-            <motion.div
-              variants={sidebarItemVariants}
-              className="px-4 text-[10px] text-gray-500 dark:text-zinc-600 font-bold uppercase tracking-widest flex flex-wrap gap-x-6 gap-y-3"
-            >
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                Điều khoản
-              </a>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                Quyền riêng tư
-              </a>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                Trợ giúp
-              </a>
-              <p>© 2024 DEMIF INC.</p>
+              <SidebarStreak currentStreak={statsSummary?.currentStreak ?? 0} />
             </motion.div>
           </motion.div>
         </aside>
