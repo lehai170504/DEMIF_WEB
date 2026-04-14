@@ -12,9 +12,9 @@ interface Lesson {
   title: string;
   progress: number;
   level: string;
-  duration: number;
   category: string;
   isPremiumOnly?: boolean;
+  thumbnailUrl?: string; // New field for thumbnails
 }
 
 interface ContinueLearningProps {
@@ -73,44 +73,53 @@ export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningPro
               }}
               className="cursor-pointer"
             >
-              {/* 3D Glass Card */}
-              <motion.div
-                whileHover={{ y: -6, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="group relative w-[280px] flex-shrink-0 overflow-hidden rounded-[1.5rem] bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 p-5 shadow-xl transition-all hover:shadow-[0_15px_30px_-10px_rgba(255,122,0,0.15)] hover:border-orange-500/30"
+              <div
+                className={cn(
+                  "relative w-[280px] h-[260px] flex flex-col rounded-3xl bg-white dark:bg-[#111113] border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
+                  isLocked
+                    ? "border-gray-200 dark:border-zinc-800"
+                    : "border-gray-100 dark:border-white/5 hover:border-orange-500/30",
+                )}
               >
-                {/* Background Glow Effect */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[50px] rounded-full -mr-12 -mt-12 pointer-events-none group-hover:bg-orange-500/10 transition-colors duration-500" />
-
-                <div className="relative z-10 space-y-4">
-                  {/* Top Section: Category & Level */}
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-orange-500">
-                        {lesson.category}
-                      </span>
-                      <h4 className="line-clamp-2 font-bold text-base text-gray-900 dark:text-white leading-snug group-hover:text-orange-500 dark:group-hover:text-orange-100 transition-colors">
-                        {lesson.title}
-                      </h4>
+                {/* Image Section */}
+                <div className="relative w-full aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-900 border-b border-gray-100 dark:border-white/5 shrink-0">
+                  <img src={lesson.thumbnailUrl || "/video-placeholder.png"} alt={lesson.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  
+                  {/* Overlay / Lock */}
+                  {isLocked && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                      <div className="bg-white dark:bg-zinc-900 flex items-center justify-center rounded-full p-3 shadow-lg shadow-black/50">
+                        <Lock className="h-5 w-5 text-orange-500" />
+                      </div>
                     </div>
+                  )}
+                  
+                  {/* Pro Badge */}
+                  {lesson.isPremiumOnly && (
+                    <div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-orange-400 border border-orange-500/30">
+                      PRO
+                    </div>
+                  )}
 
-                    {/* Level Badge */}
-                    <span
-                      className={cn(
-                        "rounded-md border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider backdrop-blur-md flex-shrink-0 ml-2",
-                        levelStyles[lesson.level as keyof typeof levelStyles],
-                      )}
-                    >
-                      {lesson.level}
-                    </span>
+                  {/* Category Badge */}
+                  {lesson.category && (
+                    <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white max-w-[80%] truncate">
+                      {lesson.category.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+
+                {/* Content Section */}
+                <div className="flex-1 flex flex-col p-4 justify-between">
+                  <div>
+                    <h4 className="text-[13px] font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-orange-500 transition-colors mb-2">
+                      {lesson.title}
+                    </h4>
                   </div>
-
-                  {/* Progress Bar - Neon Style */}
-                  <div className="space-y-1.5">
+                  
+                  <div className="space-y-1.5 mt-2">
                     <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider">
-                      <span className="text-gray-500 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-zinc-400 transition-colors">
-                        Tiến độ
-                      </span>
+                      <span className="text-gray-500 dark:text-zinc-500">Tiến độ</span>
                       <span className="font-bold text-gray-900 dark:text-white">
                         {Math.round(lesson.progress * 100)}%
                       </span>
@@ -119,47 +128,13 @@ export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningPro
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${lesson.progress * 100}%` }}
-                        transition={{
-                          duration: 1,
-                          ease: "easeOut",
-                          delay: 0.2,
-                        }}
+                        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
                         className="h-full bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] shadow-[0_0_8px_rgba(255,122,0,0.6)]"
                       />
                     </div>
                   </div>
-
-                  {/* Footer Info */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-white/5">
-                    <div className="flex items-center gap-3 text-[10px] font-medium text-gray-600 dark:text-zinc-400">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 text-gray-500 dark:text-zinc-500" />
-                        <span>{lesson.duration}p</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Zap className="h-3 w-3 text-orange-500 fill-orange-500/20" />
-                        <span className="text-gray-700 dark:text-zinc-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                          +{Math.round(lesson.progress * 100)} XP
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Play Button or Lock - Glowing on Hover */}
-                    <div className={cn(
-                      "rounded-full p-1.5 transition-all duration-300",
-                      isLocked
-                        ? "bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:bg-red-500/10 group-hover:text-red-500"
-                        : "bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-300 group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(255,122,0,0.5)]"
-                    )}>
-                      {isLocked ? (
-                        <Lock className="h-4 w-4" />
-                      ) : (
-                        <PlayCircle className="h-4 w-4 fill-current" />
-                      )}
-                    </div>
-                  </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )})}

@@ -15,36 +15,20 @@ interface Lesson {
   duration: number;
   level: string;
   category: string;
-  rating?: number;
   isPremiumOnly?: boolean;
+  thumbnailUrl?: string; // New field for thumbnails
 }
 
 interface RecommendedLessonsProps {
-  lessonsByCategory: {
-    all: Lesson[];
-    beginner: Lesson[];
-    intermediate: Lesson[];
-    advanced: Lesson[];
-  };
+  lessons: Lesson[];
   isPremiumUser: boolean;
 }
 
 export function RecommendedLessons({
-  lessonsByCategory,
+  lessons,
   isPremiumUser,
 }: RecommendedLessonsProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<
-    "all" | "beginner" | "intermediate" | "advanced"
-  >("all");
-
-  const levelStyles = {
-    beginner: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    intermediate: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-    advanced: "text-rose-400 bg-rose-500/10 border-rose-500/20",
-  };
-
-  const currentLessons = lessonsByCategory[activeTab];
 
   return (
     <div className="space-y-8">
@@ -61,32 +45,12 @@ export function RecommendedLessons({
             Dành riêng cho bạn
           </h3>
         </div>
-
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as any)}
-          className="w-full md:w-auto"
-        >
-          <TabsList className="grid w-full grid-cols-4 h-10 bg-gray-100 dark:bg-white/5 p-1 rounded-full border border-gray-200 dark:border-white/10">
-            {["all", "beginner", "intermediate", "advanced"].map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className="rounded-full text-[10px] font-bold uppercase tracking-wider transition-all 
-                data-[state=active]:bg-[#FF7A00] data-[state=active]:text-white data-[state=active]:shadow-lg
-                text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
-              >
-                {tab === "all" ? "Tất cả" : tab}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
       </div>
 
       {/* GRID LAYOUT */}
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <AnimatePresence mode="popLayout">
-          {currentLessons.slice(0, 6).map((lesson, index) => {
+          {lessons.slice(0, 8).map((lesson, index) => {
             const isLocked = lesson.isPremiumOnly && !isPremiumUser;
             
             return (
@@ -109,53 +73,53 @@ export function RecommendedLessons({
                 }}
                 className="group block h-full cursor-pointer"
               >
-                <div className="relative flex flex-col justify-between h-full border border-gray-200 dark:border-white/5 bg-white dark:bg-[#18181b] p-6 transition-all duration-500 rounded-[2rem] overflow-hidden group-hover:border-orange-500/30 group-hover:bg-gray-50 dark:group-hover:bg-[#202023]">
-                  {/* Hover Glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  <div className="relative z-10 space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div
-                        className={cn(
-                          "rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-wider border backdrop-blur-md",
-                          levelStyles[lesson.level as keyof typeof levelStyles],
-                        )}
-                      >
-                        {lesson.level}
-                      </div>
-
-                      {lesson.rating && (
-                        <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-full px-2 py-1 border border-gray-200 dark:border-white/5">
-                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                          <span className="text-[10px] font-bold text-gray-900 dark:text-white">
-                            {lesson.rating.toFixed(1)}
-                          </span>
+                <div
+                  className={cn(
+                    "relative h-full flex flex-col rounded-3xl bg-white dark:bg-[#111113] border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
+                    isLocked
+                      ? "border-gray-200 dark:border-zinc-800"
+                      : "border-gray-100 dark:border-white/5 hover:border-orange-500/30",
+                  )}
+                >
+                  {/* Image Section */}
+                  <div className="relative w-full aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-900 border-b border-gray-100 dark:border-white/5">
+                    <img src={lesson.thumbnailUrl || "/video-placeholder.png"} alt={lesson.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    
+                    {/* Overlay / Lock */}
+                    {isLocked && (
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                        <div className="bg-white dark:bg-zinc-900 flex items-center justify-center rounded-full p-3 shadow-lg shadow-black/50">
+                          <Lock className="h-5 w-5 text-orange-500" />
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
+                    
+                    {/* Pro Badge */}
+                    {lesson.isPremiumOnly && (
+                      <div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-orange-400 border border-orange-500/30">
+                        PRO
+                      </div>
+                    )}
 
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 leading-snug group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors line-clamp-2">
-                      {lesson.title}
-                    </h4>
+                    {/* Category Badge */}
+                    {lesson.category && (
+                      <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white max-w-[80%] truncate">
+                        {lesson.category.toUpperCase()}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-white/5">
-                    <div className="flex items-center gap-2 text-gray-600 dark:text-zinc-500 font-medium text-xs group-hover:text-gray-700 dark:group-hover:text-zinc-400">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>{lesson.duration} phút</span>
-                    </div>
-
-                    <div className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-hover:shadow-lg",
-                      isLocked
-                        ? "bg-red-500/10 text-red-500"
-                        : "bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white group-hover:bg-orange-500 group-hover:text-white"
-                    )}>
-                      {isLocked ? (
-                        <Lock className="h-4 w-4" />
-                      ) : (
-                        <ArrowUpRight className="h-4 w-4" />
-                      )}
+                  {/* Content Section */}
+                  <div className="flex-1 flex flex-col p-4">
+                    <h4 className="text-[13px] font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-orange-500 transition-colors mb-2">
+                      {lesson.title}
+                    </h4>
+                    
+                    <div className="mt-auto flex items-center text-[11px] font-medium text-gray-500 dark:text-zinc-400">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {lesson.duration}m
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -166,7 +130,7 @@ export function RecommendedLessons({
       </motion.div>
 
       {/* EMPTY STATE */}
-      {currentLessons.length === 0 && (
+      {lessons.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -176,7 +140,7 @@ export function RecommendedLessons({
             <Clock className="h-8 w-8 text-zinc-600" />
           </div>
           <p className="text-zinc-400 font-bold">
-            Chưa có bài học cho cấp độ này
+            Chưa có bài học đề xuất mới
           </p>
         </motion.div>
       )}

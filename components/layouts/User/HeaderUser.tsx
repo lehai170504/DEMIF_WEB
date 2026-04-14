@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   LogOut,
-  Settings,
   User,
   Menu,
   ChevronDown,
@@ -243,11 +242,6 @@ export function HeaderUser() {
                       icon: CreditCard,
                       label: "Gói dịch vụ",
                       href: "/profile/edit?tab=billing",
-                    },
-                    {
-                      icon: Settings,
-                      label: "Cài đặt",
-                      href: "/profile/settings",
                     },
                   ].map((item) => (
                     <DropdownMenuItem

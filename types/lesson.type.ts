@@ -470,6 +470,7 @@ export interface LessonHistoryItem {
   avgScore: number;
   bestScore: number;
   startedAt: string;
+  progressPercent?: number;
   isPremiumOnly?: boolean;
 }
 
