@@ -85,6 +85,37 @@ export default function ShadowingPracticePage({
   useEffect(() => {
     segmentsRef.current = segments;
   }, [segments]);
+  
+  const isProgressRestored = useRef(false);
+
+  useEffect(() => {
+    if (segments.length > 0 && myProgress && !isProgressRestored.current) {
+        if (myProgress.completedSegments && myProgress.completedSegments.length > 0) {
+           const restoredResults: Record<number, any> = {};
+           
+           myProgress.completedSegments.forEach((cs: any) => {
+              restoredResults[cs.segmentIndex] = {
+                 score: cs.bestScore,
+                 passed: true
+              };
+           });
+           
+           setCheckResults(restoredResults);
+           
+           // Restore progress pointer
+           if (myProgress.completedSegments.length < segments.length) {
+              let initialIdx = myProgress.lastSegmentIndex;
+              if (initialIdx >= segments.length) {
+                  initialIdx = segments.length - 1;
+              }
+              setCurrentIdx(initialIdx);
+           } else {
+              setIsCompleted(true);
+           }
+        }
+        isProgressRestored.current = true;
+    }
+  }, [segments, myProgress]);
 
   // --- logic: Xử lý YouTube Sync ---
   function handleYouTubeTimeUpdate(time: number) {
@@ -138,6 +169,7 @@ export default function ShadowingPracticePage({
     setReplayCount(0);
     setIsPlaying(false);
     setUserText("");
+    isProgressRestored.current = false;
   }, [level]);
 
   // --- Media Control ---
