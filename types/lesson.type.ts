@@ -439,3 +439,44 @@ export interface CheckDictationSegmentResponse {
   accuracy: number;
   feedback?: string;
 }
+
+// ==========================================
+// AUDIO & GAMIFICATION INTEGRATION
+// ==========================================
+export interface CompletedSegment {
+  segmentIndex: number;
+  bestScore: number;
+  attempts: number;
+}
+
+export interface MyProgressResponse {
+  lessonId: string;
+  lessonTitle: string;
+  totalSegments: number;
+  completedCount: number;
+  progressPercent: number;
+  status: string; // "NotStarted" | "InProgress" | "Completed"
+  lastSegmentIndex: number;
+  completedAt: string | null;
+  completedSegments: CompletedSegment[];
+}
+
+export interface LessonHistoryItem {
+  lessonId: string;
+  title: string;
+  level: string;
+  status: string;
+  completedSegments: number;
+  avgScore: number;
+  bestScore: number;
+  startedAt: string;
+  isPremiumOnly?: boolean;
+}
+
+export interface LessonHistoryResponse {
+  items: LessonHistoryItem[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}

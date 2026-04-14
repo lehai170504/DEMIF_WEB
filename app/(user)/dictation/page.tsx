@@ -9,23 +9,22 @@ import {
   ChevronRight,
   Search,
   Play,
-  Star,
   GraduationCap,
   Loader2,
   Lock,
-  Tag,
-  Layers,
+  CheckCircle2,
+  Timer,
+  CircleDashed,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useUserLessons } from "@/hooks/use-lesson";
+import { useUserLessons, useLessonHistory } from "@/hooks/use-lesson";
 import { useMySubscription } from "@/hooks/use-subscription";
 import { cn } from "@/lib/utils";
 
 export default function DictationPage() {
   const [page, setPage] = useState(1);
-  const [level, setLevel] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -41,41 +40,24 @@ export default function DictationPage() {
   const { data, isLoading, error } = useUserLessons({
     page,
     pageSize: 10,
-    level: level || undefined,
     type: "Dictation",
     category: category || undefined,
   });
 
+  const { data: lessonHistoryData } = useLessonHistory({ pageSize: 1000 });
+  const historyMap = useMemo(() => {
+    const map = new Map<string, string>();
+    lessonHistoryData?.items?.forEach(h => {
+      map.set(h.lessonId, h.status);
+    });
+    return map;
+  }, [lessonHistoryData]);
+
   useEffect(() => {
     setPage(1);
-  }, [level, category, debouncedSearch]);
+  }, [category, debouncedSearch]);
 
-  const getLevelInfo = (lvl: string) => {
-    const currentLvl = lvl === "0" ? "Beginner" : lvl;
-    const map: Record<string, { label: string; color: string }> = {
-      Beginner: {
-        label: "Beginner",
-        color:
-          "text-emerald-600 bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
-      },
-      Intermediate: {
-        label: "Intermediate",
-        color:
-          "text-amber-600 bg-amber-100 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
-      },
-      Advanced: {
-        label: "Advanced",
-        color:
-          "text-blue-600 bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/20",
-      },
-      Expert: {
-        label: "Expert",
-        color:
-          "text-rose-600 bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-500/20",
-      },
-    };
-    return map[currentLvl] || map.Beginner;
-  };
+
 
   const displayItems = useMemo(() => {
     return (data?.items ?? []).filter(
@@ -84,6 +66,15 @@ export default function DictationPage() {
         item.title.toLowerCase().includes(debouncedSearch.toLowerCase()),
     );
   }, [data?.items, debouncedSearch]);
+
+  const dynamicTags = useMemo(() => {
+    if (!data?.items) return [];
+    const tags = new Set<string>();
+    data.items.forEach(i => {
+      if (i.category) tags.add(i.category.toLowerCase());
+    });
+    return Array.from(tags).map(t => ({ val: t, label: t }));
+  }, [data?.items]);
 
   return (
     <div className="w-full font-mono pb-20 selection:bg-orange-500/30">
@@ -104,87 +95,50 @@ export default function DictationPage() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          <aside className="lg:col-span-3 space-y-6 sticky top-28">
-            <div className="p-7 rounded-[2rem] bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 shadow-2xl space-y-10">
-              <div>
-                <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 mb-4">
-                  <Search className="h-3.5 w-3.5 mr-2" /> Tìm kiếm bài học
-                </h4>
-                <div className="relative group">
-                  <Input
-                    placeholder="Nhập tên bài học..."
-                    className="rounded-xl bg-gray-50 dark:bg-white/[0.03] border-gray-200 dark:border-white/10 h-12 focus-visible:ring-orange-500 transition-all"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                </div>
+        <div className="flex flex-col gap-8 items-start">
+          <div className="w-full relative z-30">
+            <div className="p-4 rounded-3xl bg-white dark:bg-[#111113] border border-gray-200 dark:border-white/5 shadow-xl flex flex-col md:flex-row gap-4 items-center">
+              <div className="relative w-full md:w-96 flex-shrink-0 group">
+                <Input
+                  placeholder="Nhập tên bài học..."
+                  className="rounded-xl bg-gray-50 dark:bg-white/[0.03] border-gray-200 dark:border-white/10 h-11 focus-visible:ring-orange-500 transition-all font-medium text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
               </div>
 
-              <div>
-                <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 mb-4">
-                  <Layers className="h-3.5 w-3.5 mr-2" /> Chọn trình độ
-                </h4>
-                <div className="flex flex-col gap-2">
-                  {[
-                    { val: "", label: "Tất cả trình độ" },
-                    { val: "Beginner", label: "Beginner" },
-                    { val: "Intermediate", label: "Intermediate" },
-                    { val: "Advanced", label: "Advanced" },
-                    { val: "Expert", label: "Expert" },
-                  ].map((item) => (
-                    <button
-                      key={item.val}
-                      onClick={() => setLevel(item.val)}
-                      className={cn(
-                        "text-left px-4 py-3 rounded-xl text-xs font-bold transition-all border flex justify-between items-center",
-                        level === item.val
-                          ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
-                          : "hover:bg-orange-500/5 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400 border-transparent hover:text-orange-500",
-                      )}
-                    >
-                      {item.label}
-                      {level === item.val && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h4 className="flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 mb-4">
-                  <Tag className="h-3.5 w-3.5 mr-2" /> Theo chủ đề
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { label: "Tất cả", val: "" },
-                    { label: "Hội thoại", val: "conversation" },
-                    { label: "Hằng ngày", val: "daily" },
-                    { label: "Học thuật", val: "academic" },
-                    { label: "Giáo dục", val: "education" },
-                    { label: "Công nghệ", val: "Technology" },
-                  ].map((cat) => (
-                    <button
-                      key={cat.val}
-                      onClick={() => setCategory(cat.val)}
-                      className={cn(
-                        "px-3 py-2 rounded-lg text-[10px] font-bold uppercase border transition-all",
-                        category === cat.val
-                          ? "bg-zinc-900 dark:bg-orange-500 text-white border-transparent shadow-md"
-                          : "border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500 hover:text-orange-500",
-                      )}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex-1 flex overflow-x-auto no-scrollbar items-center gap-2 px-1 w-full">
+                <button
+                  onClick={() => setCategory("")}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-[11px] font-bold uppercase transition-all flex-shrink-0 border",
+                    category === ""
+                      ? "bg-zinc-900 dark:bg-orange-500 text-white border-transparent shadow-md"
+                      : "border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500 hover:text-orange-500",
+                  )}
+                >
+                  Tất cả
+                </button>
+                {dynamicTags.map((cat) => (
+                  <button
+                    key={cat.val}
+                    onClick={() => setCategory(cat.val)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg text-[11px] font-bold uppercase transition-all flex-shrink-0 border",
+                      category === cat.val
+                        ? "bg-zinc-900 dark:bg-orange-500 text-white border-transparent shadow-md"
+                        : "border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500 hover:text-orange-500",
+                    )}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
               </div>
             </div>
-          </aside>
+          </div>
 
-          <div className="lg:col-span-9 space-y-8">
+          <div className="w-full space-y-8">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-40 gap-6">
                 <div className="relative">
@@ -216,10 +170,9 @@ export default function DictationPage() {
                           : "Thử thay đổi bộ lọc hoặc quay lại sau nhé!"}
                       </p>
                     </div>
-                    {(level || category || debouncedSearch) && (
+                    {(category || debouncedSearch) && (
                       <button
                         onClick={() => {
-                          setLevel("");
                           setCategory("");
                           setSearchQuery("");
                         }}
@@ -232,11 +185,16 @@ export default function DictationPage() {
                 )}
 
                 <AnimatePresence mode="popLayout">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {displayItems.map((lesson, index) => {
-                      const levelInfo = getLevelInfo(lesson.level);
                       const isLocked =
                         lesson.isPremiumOnly && !hasPremiumAccess;
+                      
+                      const thumbnail = lesson.thumbnailUrl || (lesson.videoId ? `https://i.ytimg.com/vi/${lesson.videoId}/hqdefault.jpg` : "/video-placeholder.png");
+                      
+                      const historyStatus = historyMap.get(lesson.id);
+                      const isCompleted = historyStatus === "Completed";
+                      const isInProgress = historyStatus && historyStatus !== "Completed";
 
                       return (
                         <motion.div
@@ -245,6 +203,7 @@ export default function DictationPage() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
                           layout
+                          className="h-full"
                         >
                           <Link
                             href={
@@ -254,73 +213,64 @@ export default function DictationPage() {
                           >
                             <div
                               className={cn(
-                                "relative h-full flex flex-col p-8 rounded-[2.5rem] bg-white dark:bg-[#111113] border transition-all duration-500 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2",
+                                "relative h-full flex flex-col rounded-3xl bg-white dark:bg-[#111113] border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
                                 isLocked
-                                  ? "border-gray-200 dark:border-white/5"
-                                  : "border-gray-100 dark:border-white/5 hover:border-orange-500/50",
+                                  ? "border-gray-200 dark:border-zinc-800"
+                                  : "border-gray-100 dark:border-white/5 hover:border-orange-500/30",
                               )}
                             >
-                              {isLocked && (
-                                <div className="absolute inset-0 z-20 flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm">
-                                  <div className="bg-white dark:bg-zinc-900 px-6 py-4 rounded-[2rem] flex items-center gap-4 shadow-2xl border border-orange-500/30 scale-110">
-                                    <div className="p-2 bg-orange-500 rounded-full text-white shadow-lg shadow-orange-500/40">
-                                      <Lock className="h-5 w-5" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                      <span className="text-[12px] font-black uppercase tracking-widest text-gray-900 dark:text-white">
-                                        Premium Only
-                                      </span>
-                                      <span className="text-[9px] font-bold text-orange-500">
-                                        Nâng cấp để học bài này
-                                      </span>
+                              {/* Image Section */}
+                              <div className="relative w-full aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-900 border-b border-gray-100 dark:border-white/5">
+                                <img src={thumbnail} alt={lesson.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                
+                                {/* Overlay / Lock */}
+                                {isLocked && (
+                                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                                    <div className="bg-white dark:bg-zinc-900 flex items-center justify-center rounded-full p-3 shadow-lg shadow-black/50">
+                                      <Lock className="h-5 w-5 text-orange-500" />
                                     </div>
                                   </div>
+                                )}
+                                
+                                {/* Progress Badge */}
+                                <div className={cn(
+                                  "absolute top-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold shadow-sm border",
+                                  isCompleted ? "bg-emerald-500/90 text-white border-emerald-400" :
+                                  isInProgress ? "bg-orange-500/90 text-white border-orange-400" :
+                                  "bg-zinc-800/80 text-zinc-300 border-zinc-600"
+                                )}>
+                                  {isCompleted ? <CheckCircle2 className="h-3 w-3" /> :
+                                   isInProgress ? <Timer className="h-3 w-3" /> :
+                                   <CircleDashed className="h-3 w-3" />}
+                                  {isCompleted ? "Đã học" : isInProgress ? "Đang học" : "Chưa học"}
                                 </div>
-                              )}
 
-                              <div className="flex justify-between items-start mb-8 relative z-10">
-                                <div className="p-4 rounded-2xl bg-orange-500/5 dark:bg-white/5 text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all duration-500 shadow-inner group-hover:shadow-orange-500/40">
-                                  <BookOpen className="h-7 w-7" />
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                  <Badge
-                                    className={cn(
-                                      "px-4 py-1.5 text-[10px] font-black border uppercase rounded-full shadow-sm",
-                                      levelInfo.color,
-                                    )}
-                                  >
-                                    {levelInfo.label}
-                                  </Badge>
-                                  {lesson.isPremiumOnly && (
-                                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-600 text-white border-none text-[9px] font-black px-3 py-1 rounded-lg shadow-md">
-                                      PRO
-                                    </Badge>
-                                  )}
-                                </div>
+                                {/* Pro Badge */}
+                                {lesson.isPremiumOnly && (
+                                  <div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-orange-400 border border-orange-500/30">
+                                    PRO
+                                  </div>
+                                )}
+
+                                {/* Category Badge */}
+                                {lesson.category && (
+                                  <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white max-w-[80%] truncate">
+                                    {lesson.category.toUpperCase()}
+                                  </div>
+                                )}
                               </div>
 
-                              <div className="flex-1 space-y-4 mb-8 relative z-10">
-                                <h4 className="text-xl font-black line-clamp-1 group-hover:text-orange-500 transition-colors leading-tight text-gray-900 dark:text-white">
+                              {/* Content Section */}
+                              <div className="flex-1 flex flex-col p-4">
+                                <h4 className="text-[13px] font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-orange-500 transition-colors mb-2">
                                   {lesson.title}
                                 </h4>
-                                <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-medium">
-                                  {lesson.description}
-                                </p>
-                              </div>
-
-                              <div className="flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/5 relative z-10">
-                                <div className="flex items-center gap-6 text-[11px] font-black text-gray-400 uppercase tracking-widest">
-                                  <span className="flex items-center gap-2 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-                                    <Clock className="h-4 w-4 text-orange-400" />
+                                
+                                <div className="mt-auto flex items-center text-[11px] font-medium text-gray-500 dark:text-zinc-400">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
                                     {Math.floor(lesson.durationSeconds / 60)}m
                                   </span>
-                                  <span className="flex items-center gap-2 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-                                    <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                    {lesson.avgScore.toFixed(0)}
-                                  </span>
-                                </div>
-                                <div className="h-12 w-12 rounded-full bg-orange-500/10 dark:bg-white/5 flex items-center justify-center opacity-0 translate-x-6 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 group-hover:bg-orange-500 text-white shadow-xl shadow-orange-500/30">
-                                  <Play className="h-5 w-5 fill-current ml-0.5" />
                                 </div>
                               </div>
                             </div>

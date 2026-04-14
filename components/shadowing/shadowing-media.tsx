@@ -87,49 +87,6 @@ export function ShadowingMedia({
           )}
         </div>
       )}
-
-      {/* 2. KHU VỰC HIỂN THỊ CÂU MẪU (TRANSCRIPT) - ĐÃ FIX LỖI SPLIT NULL */}
-      {currentSegment && currentSegment.text && (
-        <div className="p-6 pt-2 border-t border-gray-100 dark:border-white/5 bg-white dark:bg-zinc-900/50">
-          <div className="flex flex-wrap gap-x-2 gap-y-3 items-center justify-center text-lg font-black font-mono leading-relaxed text-center text-gray-900 dark:text-white">
-            {/* Sử dụng ?. để cực kỳ an toàn */}
-            {currentSegment?.text?.split(" ").map((word: string, i: number) => (
-              <span
-                key={i}
-                className="group relative inline-block cursor-help hover:text-orange-500 transition-colors"
-              >
-                {word}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const cleanWord = word.replace(
-                      /[.,/#!$%^&*;:{}=\-_`~()]/g,
-                      "",
-                    );
-                    onAddVocab?.(cleanWord);
-                  }}
-                  className="absolute -top-5 -right-1 opacity-0 group-hover:opacity-100 text-[#FF7A00] hover:scale-125 transition-all bg-white dark:bg-zinc-800 rounded-full shadow-md p-[2px] z-20 border border-orange-500/20"
-                  title="Lưu vào từ vựng"
-                >
-                  <BookmarkPlus size={12} />
-                </button>
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-4 flex justify-center">
-            <Badge
-              className={cn(
-                "uppercase text-[9px] font-black tracking-widest px-3 py-0.5",
-                levelColor,
-              )}
-            >
-              {levelLabel}
-            </Badge>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

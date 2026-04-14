@@ -7,6 +7,7 @@ import {
   useSubmitDictation,
   useCheckDictationSegment,
   useSyncLessonProgress,
+  useMyProgress,
 } from "@/hooks/use-lesson";
 import { useQuery } from "@tanstack/react-query";
 import { lessonService } from "@/services/lesson.service";
@@ -68,6 +69,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   const submitMutation = useSubmitDictation();
   const checkSegmentMutation = useCheckDictationSegment();
   const syncProgressMutation = useSyncLessonProgress();
+  const { data: myProgress } = useMyProgress(lesson.id);
 
   // KHỞI TẠO HOOK LƯU TỪ VỰNG
   const addVocabMutation = useAddVocabulary();
@@ -95,6 +97,49 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   useEffect(() => {
     segmentsRef.current = segments;
   }, [segments]);
+
+  const isProgressRestored = useRef(false);
+
+  useEffect(() => {
+    if (exercise && myProgress && !isProgressRestored.current) {
+      if (myProgress.completedSegments && myProgress.completedSegments.length > 0) {
+        const restoredAnswers: Record<string, string> = {};
+        const restoredResults: Record<number, any> = {};
+
+        myProgress.completedSegments.forEach((cs: any) => {
+          const seg = exercise.template.segments[cs.segmentIndex];
+          if (!seg) return;
+          
+          seg.words.forEach((w: any) => {
+            if (w.isBlank) restoredAnswers[`${cs.segmentIndex}-${w.position}`] = w.text;
+          });
+          
+          restoredResults[cs.segmentIndex] = {
+            segmentIndex: cs.segmentIndex,
+            transcript: seg.words.map((w:any) => w.text + (w.punctuation||'')).join(' '),
+            userText: seg.words.map((w:any) => w.text + (w.punctuation||'')).join(' '),
+            words: seg.words.map((w:any) => ({ text: w.text, isCorrect: true, isBlank: w.isBlank })),
+            accuracy: 100
+          };
+        });
+
+        setAnswers(restoredAnswers);
+        setSegmentResults(restoredResults);
+        
+        // Restore progress pointer
+        if (myProgress.completedSegments.length < exercise.template.segments.length) {
+           let initialIdx = myProgress.lastSegmentIndex;
+           if (initialIdx >= exercise.template.segments.length) {
+              initialIdx = exercise.template.segments.length - 1;
+           }
+           setCurrentIdx(initialIdx);
+        } else {
+           setIsCompleted(true);
+        }
+      }
+      isProgressRestored.current = true;
+    }
+  }, [exercise, myProgress]);
 
   const { setIframeRef, seekAndPlay, pauseVideo } = useYoutubePlayer(
     youtubeUrl ? handleYouTubeTimeUpdate : undefined,
@@ -142,6 +187,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     setSegmentResults({});
     setCurrentIdx(0);
     setIsCompleted(false);
+    isProgressRestored.current = false;
   }, [level]);
 
   useEffect(() => {

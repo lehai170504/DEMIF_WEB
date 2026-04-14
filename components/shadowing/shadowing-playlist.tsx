@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Play, Pause, Eye, EyeOff, RotateCcw } from "lucide-react";
+import { Play, Pause, Eye, EyeOff, RotateCcw, BookmarkPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ShadowingPlaylistProps {
@@ -12,6 +12,8 @@ interface ShadowingPlaylistProps {
   onSelectSegment: (idx: number) => void;
   isPlaying: boolean;
   onPlayPause: () => void;
+  onAddVocab?: (word: string) => void;
+  myProgress?: any;
 }
 
 export function ShadowingPlaylist({
@@ -21,6 +23,8 @@ export function ShadowingPlaylist({
   onSelectSegment,
   isPlaying,
   onPlayPause,
+  onAddVocab,
+  myProgress,
 }: ShadowingPlaylistProps) {
   const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
 
@@ -67,7 +71,10 @@ export function ShadowingPlaylist({
             const isRevealed = revealedIndices.includes(i);
             const runTimeAcc =
               checkResults[i]?.accuracyScore ?? checkResults[i]?.accuracy;
-            const finalAcc = runTimeAcc ?? seg.bestScore;
+            const historyAcc = myProgress?.completedSegments?.find(
+              (s: any) => s.segmentIndex === i
+            )?.bestScore;
+            const finalAcc = runTimeAcc ?? historyAcc ?? seg.bestScore;
 
             return (
               <div
@@ -111,9 +118,35 @@ export function ShadowingPlaylist({
                             : "text-gray-500 dark:text-zinc-400 font-medium",
                         )}
                       >
-                        {isRevealed
-                          ? seg.text
-                          : "••••••••••••••••••••••••••••••••"}
+                        {isRevealed ? (
+                          <div className="flex flex-wrap gap-x-1.5 gap-y-1">
+                            {seg.text?.split(" ").map((word: string, wIdx: number) => (
+                              <span
+                                key={wIdx}
+                                className="group/word relative inline-block cursor-help hover:text-orange-500 transition-colors"
+                              >
+                                {word}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const cleanWord = word.replace(
+                                      /[.,/#!$%^&*;:{}=\-_`~()]/g,
+                                      "",
+                                    );
+                                    onAddVocab?.(cleanWord);
+                                  }}
+                                  className="absolute -top-4 -right-1 opacity-0 group-hover/word:opacity-100 text-[#FF7A00] hover:scale-125 transition-all bg-white dark:bg-zinc-800 rounded-full shadow-md p-[2px] z-20 border border-orange-500/20"
+                                  title="Lưu vào sổ tay"
+                                >
+                                  <BookmarkPlus size={10} />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          "••••••••••••••••••••••••••••••••"
+                        )}
                       </div>
                     </div>
                   </div>
