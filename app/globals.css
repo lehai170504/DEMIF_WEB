@@ -3,9 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* --- 1. DEFINITIONS: VARIABLES --- */
+/* =========================================
+   1. DEFINITIONS: VARIABLES (COLOR PALETTE)
+   ========================================= */
 :root {
-  /* Warm beige/cream backgrounds instead of pure white */
+  /* ... Giữ nguyên y chang code cũ của ông ở phần này ... */
   --background: oklch(0.98 0.01 60);
   --foreground: oklch(0.25 0.01 60);
   --card: oklch(0.99 0.005 60);
@@ -13,31 +15,25 @@
   --popover: oklch(0.99 0.005 60);
   --popover-foreground: oklch(0.25 0.01 60);
 
-  /* Orange primary color #FF7A00 */
   --primary: oklch(0.68 0.2 45);
   --primary-foreground: oklch(1 0 0);
 
-  /* Soft orange secondary */
   --secondary: oklch(0.96 0.02 50);
   --secondary-foreground: oklch(0.25 0.01 60);
 
-  /* Muted warm tones */
   --muted: oklch(0.95 0.015 55);
   --muted-foreground: oklch(0.5 0.01 60);
 
-  /* Orange accent */
   --accent: oklch(0.72 0.18 48);
   --accent-foreground: oklch(1 0 0);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
 
-  /* Warm borders */
   --border: oklch(0.92 0.015 55);
   --input: oklch(0.92 0.015 55);
   --ring: oklch(0.68 0.2 45);
 
-  /* Chart colors with orange theme */
   --chart-1: oklch(0.68 0.2 45);
   --chart-2: oklch(0.72 0.16 55);
   --chart-3: oklch(0.65 0.14 65);
@@ -46,7 +42,6 @@
 
   --radius: 1rem;
 
-  /* Sidebar warm tones */
   --sidebar: oklch(0.99 0.005 60);
   --sidebar-foreground: oklch(0.25 0.01 60);
   --sidebar-primary: oklch(0.68 0.2 45);
@@ -58,6 +53,7 @@
 }
 
 .dark {
+  /* ... Giữ nguyên y chang code cũ của ông ở phần này ... */
   --background: oklch(0.08 0 0);
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.12 0 0);
@@ -92,10 +88,13 @@
   --sidebar-ring: oklch(0.72 0.19 45);
 }
 
-/* --- 2. THEME CONFIG --- */
+/* =========================================
+   2. THEME CONFIGURATION
+   ========================================= */
 @theme inline {
   --font-sans: var(--font-poppins);
   --font-mono: var(--font-inter);
+  /* ... Giữ nguyên các biến color ... */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -132,10 +131,43 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Định nghĩa Animation nâng cấp */
+  --animate-shimmer: shimmer 2.5s infinite; /* Tăng thời gian chạy cho mượt */
+  --animate-spin-slow-neon: spin-slow-neon 12s linear infinite;
+  --animate-gradient-x: gradient-x 5s ease infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* --- 3. UTILITIES --- */
+/* =========================================
+   3. BASE STYLES
+   ========================================= */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html, body {
+    scroll-behavior: smooth;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+
+  html::-webkit-scrollbar, 
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* =========================================
+   4. UTILITIES & ANIMATIONS (NÂNG CẤP)
+   ========================================= */
 @layer utilities {
+  /* --- Scrollbar --- */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -144,77 +176,55 @@
     scrollbar-width: none;
   }
   
-  /* Class này dùng thủ công nếu cần 3D, KHÔNG dùng toàn body */
+  /* --- 3D Effects --- */
   .perspective-1000 {
     perspective: 1000px;
   }
   
   .hover-3d {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
   }
   
   .hover-3d:hover {
-    transform: translateY(-2px) rotateX(4deg) rotateY(-2px);
-    box-shadow: 0 10px 20px rgba(255, 122, 0, 0.2);
+    transform: translateY(-4px) rotateX(2deg) rotateY(-2deg);
+    box-shadow: 0 15px 30px rgba(255, 122, 0, 0.15);
   }
 
+  /* --- Glassmorphism Tiện Ích --- */
+  .glass-card {
+    @apply bg-white/70 dark:bg-black/30 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-xl;
+  }
+
+  .glass-header {
+    background: rgba(var(--background), 0.7);
+    backdrop-filter: blur(16px); /* Tăng độ mờ */
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* --- Glow Effects --- */
   .logo-glow {
     filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.4));
     animation: pulse-glow 3s infinite ease-in-out;
   }
 
-  .glass-header {
-    background: rgba(var(--background), 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
-
-/* --- 4. BASE STYLES --- */
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  
-  html {
-    scroll-behavior: smooth;
+  /* --- Chữ Gradient Mượt Mà --- */
+  .text-gradient-orange {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500;
   }
 
-  body {
-    /* QUAN TRỌNG: Xóa perspective toàn cục để fix lỗi fixed position */
-    @apply bg-background text-foreground antialiased;
+  /* --- Keyframes --- */
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 122, 0, 0.3)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.6)); }
   }
-}
 
-/* --- 5. KEYFRAMES --- */
-@keyframes pulse-glow {
-  0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 122, 0, 0.3)); }
-  50% { filter: drop-shadow(0 0 15px rgba(255, 122, 0, 0.6)); }
-}
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 
-@keyframes shimmer {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-}
-
-@theme {
-  --animate-shimmer: shimmer 2s linear infinite;
-}
-
-
-/* Ẩn thanh cuộn cho toàn bộ trang web nhưng vẫn cho phép cuộn bằng chuột/cảm ứng */
-html, body {
-  scroll-behavior: smooth;
-  -ms-overflow-style: none; /* Dành cho IE và Edge */
-  scrollbar-width: none;    /* Dành cho Firefox */
-}
-
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none; /* Dành cho Chrome, Safari, Opera */
-}
-
-@layer utilities {
-  /* Animation cho CPU hoặc các Icon AI xoay chậm */
   @keyframes spin-slow-neon {
     from {
       transform: rotate(0deg);
@@ -229,30 +239,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     }
   }
 
-  .animate-spin-slow-neon {
-    animation: spin-slow-neon 12s linear infinite;
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
   }
 
-  /* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 5s ease infinite;
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-}
-
-@keyframes gradient-x {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-.animate-gradient-x {
-  background-size: 200% 200%;
-  animation: gradient-x 5s ease infinite;
 }

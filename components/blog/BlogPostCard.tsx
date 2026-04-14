@@ -98,13 +98,7 @@ export function BlogPostCard({ post }: { post: BlogPost }) {
         {/* Footer: Author & Action */}
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-black text-xs shadow-lg uppercase">
-              {post.authorId ? post.authorId.charAt(0) : "A"}
-            </div>
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-gray-900 dark:text-white leading-none mb-1 uppercase truncate max-w-[100px]">
-                {post.authorId || "Quản trị viên"}
-              </span>
               <span className="text-[10px] text-zinc-500 font-medium">
                 {formatDate(post.createdAt)}
               </span>

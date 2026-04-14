@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles, Newspaper } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 interface Article {
   title: string;
@@ -21,36 +22,48 @@ interface SidebarArticlesProps {
 export function SidebarArticles({ articles }: SidebarArticlesProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6 }}
-      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="relative p-6 md:p-8 bg-white dark:bg-[#0D0D0D] border border-gray-100 dark:border-white/5 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-black/20"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-black uppercase tracking-widest text-gray-600 dark:text-zinc-400 flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-orange-500" />
-          Bài viết hay
-        </h3>
+      {/* ── Background Decor ── */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[50px] rounded-full pointer-events-none" />
+
+      {/* ── HEADER ── */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-white/5 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-orange-500/10 rounded-xl text-orange-500 border border-orange-500/20">
+            <BookOpen className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white leading-tight">
+              Bài viết hay
+            </h3>
+            <p className="text-[9px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
+              Kiến thức mỗi ngày
+            </p>
+          </div>
+        </div>
         <Link
           href="/blog"
-          className="text-[10px] font-bold text-orange-500 hover:text-orange-400 transition-colors uppercase tracking-wider"
+          className="group h-8 w-8 flex items-center justify-center rounded-full bg-gray-50 dark:bg-white/[0.02] text-gray-400 dark:text-zinc-500 hover:bg-orange-500 hover:text-white transition-all border border-gray-200 dark:border-white/5 shadow-sm"
         >
-          Tất cả
+          <ArrowRight className="h-4 w-4 group-hover:-rotate-45 transition-transform" />
         </Link>
       </div>
 
-      {/* Article List */}
-      <div className="space-y-4">
+      {/* ── ARTICLE LIST ── */}
+      <div className="space-y-4 relative z-10">
         {articles.slice(0, 4).map((article, index) => (
           <motion.div
             key={article.link}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
           >
             <Link href={article.link} className="group block">
-              <div className="flex gap-4 items-start p-3 rounded-2xl transition-all duration-300 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/5">
+              <div className="flex gap-4 items-center p-3 rounded-2xl transition-all duration-300 bg-gray-50 dark:bg-white/[0.02] hover:bg-white dark:hover:bg-white/[0.05] border border-gray-100 dark:border-white/5 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5">
                 {/* Image Thumbnail */}
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 group-hover:border-orange-500/30 transition-colors">
                   <Image
@@ -59,38 +72,49 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                 </div>
 
-                <div className="flex-1 min-w-0 space-y-1">
+                {/* Content */}
+                <div className="flex-1 min-w-0 py-1">
                   {article.date && (
-                    <span className="text-[9px] font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest block mb-1">
+                    <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest block mb-1">
                       {article.date}
                     </span>
                   )}
-                  <h4 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900 dark:text-zinc-300 group-hover:text-orange-600 dark:group-hover:text-white transition-colors">
+                  <h4 className="line-clamp-2 text-xs md:text-sm font-bold leading-snug text-gray-700 dark:text-zinc-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {article.title}
                   </h4>
-
-                  {/* Read More Link (Hidden by default) */}
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-orange-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                    <span>Đọc ngay</span>
-                    <ArrowRight className="h-3 w-3" />
-                  </div>
                 </div>
               </div>
             </Link>
           </motion.div>
         ))}
 
+        {/* ── EMPTY STATE ── */}
         {articles.length === 0 && (
-          <div className="text-center py-8 rounded-2xl border border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-            <p className="text-xs text-gray-500 dark:text-zinc-500 font-medium">
-              Đang cập nhật bài viết mới...
+          <div className="flex flex-col items-center justify-center py-10 text-center gap-3 opacity-60">
+            <div className="p-4 bg-gray-100 dark:bg-white/5 rounded-full border border-gray-200 dark:border-white/5">
+              <Newspaper className="w-6 h-6 text-gray-400 dark:text-zinc-500" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
+              Đang cập nhật bài viết...
             </p>
           </div>
         )}
       </div>
 
+      {/* ── VIEW ALL BUTTON ── */}
+      {articles.length > 0 && (
+        <div className="mt-6 pt-2">
+          <Link href="/blog" className="block w-full">
+            <Button className="w-full h-12 gap-2">
+              Xem tất cả
+              <Sparkles className="h-3 w-3 group-hover:text-white transition-colors duration-300" />
+            </Button>
+          </Link>
+        </div>
+      )}
     </motion.div>
   );
 }

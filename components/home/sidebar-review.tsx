@@ -87,7 +87,9 @@ export function SidebarReview({
           <div className="space-y-1.5">
             <div className="flex justify-between text-[9px] font-black text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
               <span>Tiến độ ngày</span>
-              <span className="text-gray-900 dark:text-white">{progressPercent}%</span>
+              <span className="text-gray-900 dark:text-white">
+                {progressPercent}%
+              </span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden">
               <motion.div
@@ -101,7 +103,7 @@ export function SidebarReview({
 
           {/* Action Button */}
           <Link href="/review" className="block">
-            <Button className="group w-full h-12 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] hover:from-orange-600 hover:to-orange-600 font-black text-white text-[10px] uppercase tracking-widest shadow-lg shadow-orange-900/20 border border-white/10 transition-all active:scale-95">
+            <Button className="w-full h-12 ">
               <BookOpen className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12" />
               Học ngay thôi
               <ArrowRight className="ml-auto h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />

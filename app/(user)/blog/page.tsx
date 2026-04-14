@@ -16,7 +16,6 @@ import { BlogPagination } from "@/components/blog/BlogPagination";
 import { EmptyState } from "@/components/blog/EmptyState";
 import { PopularPosts } from "@/components/blog/PopularPosts";
 import { TagsCloud } from "@/components/blog/TagsCloud";
-import { NewsletterCard } from "@/components/blog/NewsletterCard";
 
 const POSTS_PER_PAGE = 6;
 
@@ -304,11 +303,6 @@ export default function BlogPage() {
                       window.scrollTo({ top: 400, behavior: "smooth" });
                     }}
                   />
-                </div>
-
-                {/* Newsletter */}
-                <div className="hidden lg:block">
-                  <NewsletterCard />
                 </div>
               </aside>
             </div>

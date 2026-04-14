@@ -16,19 +16,22 @@ const buttonVariants = cva(
           "bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700",
 
         outline:
-          "border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md hover:bg-slate-100 dark:hover:bg-white/10 text-slate-900 dark:text-slate-100 shadow-sm",
+          "border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 text-gray-900 dark:text-white shadow-sm",
 
         secondary:
-          "bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-zinc-700 border border-transparent dark:border-white/5",
+          "bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent dark:border-white/5 shadow-sm",
 
         ghost:
-          "hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white",
+          "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white",
 
         link: "text-[#FF7A00] underline-offset-8 hover:underline font-black",
+
+        glass:
+          "border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md hover:bg-white/80 dark:hover:bg-white/10 text-gray-900 dark:text-white shadow-sm",
       },
       size: {
         default: "h-11 px-6 py-2",
-        sm: "h-9 rounded-lg gap-1.5 px-4",
+        sm: "h-9 rounded-lg gap-1.5 px-4 text-xs",
         lg: "h-14 rounded-2xl px-8 text-base shadow-xl shadow-orange-500/10",
         icon: "size-11 rounded-xl",
         "icon-sm": "size-9 rounded-lg",

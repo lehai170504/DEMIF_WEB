@@ -9,9 +9,7 @@ interface SidebarStreakProps {
   currentStreak: number;
 }
 
-export function SidebarStreak({
-  currentStreak,
-}: SidebarStreakProps) {
+export function SidebarStreak({ currentStreak }: SidebarStreakProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,9 +48,7 @@ export function SidebarStreak({
 
           {/* CTA Button */}
           <Link href="/dashboard" className="block">
-            <Button className="w-full h-11 bg-gray-900 dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-[0_0_20px_rgba(255,122,0,0.1)] hover:shadow-orange-500/40">
-              Xem chi tiết tiến độ
-            </Button>
+            <Button className="w-full h-11">Xem chi tiết tiến độ</Button>
           </Link>
         </div>
 

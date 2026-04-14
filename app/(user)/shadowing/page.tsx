@@ -202,6 +202,40 @@ export default function ShadowingPage() {
               </div>
             ) : (
               <>
+                {displayItems.length === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center justify-center py-40 gap-6 text-center"
+                  >
+                    <div className="p-6 rounded-[2rem] bg-orange-500/5 border border-orange-500/10">
+                      <Mic2 className="h-12 w-12 text-orange-400 opacity-50" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-base font-black text-gray-700 dark:text-zinc-300 uppercase tracking-widest">
+                        Chưa có bài học nào
+                      </p>
+                      <p className="text-sm text-gray-400 dark:text-zinc-500 font-medium">
+                        {debouncedSearch
+                          ? `Không tìm thấy kết quả cho "${debouncedSearch}"`
+                          : "Thử thay đổi bộ lọc hoặc quay lại sau nhé!"}
+                      </p>
+                    </div>
+                    {(level || category || debouncedSearch) && (
+                      <button
+                        onClick={() => {
+                          setLevel("");
+                          setCategory("");
+                          setSearchQuery("");
+                        }}
+                        className="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-orange-500/30 text-orange-500 hover:bg-orange-500/10 transition-all"
+                      >
+                        Xóa bộ lọc
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+
                 <AnimatePresence mode="popLayout">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {displayItems.map((lesson, index) => {

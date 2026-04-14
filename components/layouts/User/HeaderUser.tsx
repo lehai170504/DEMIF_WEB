@@ -145,7 +145,7 @@ export function HeaderUser() {
                   >
                     <Sparkles className="w-4 h-4" />
                   </motion.div>
-                  Upgrade_Pro
+                  Upgrade Pro
                 </Link>
               </Button>
             </motion.div>
