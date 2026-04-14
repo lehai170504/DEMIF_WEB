@@ -17,6 +17,7 @@ import { blogService } from "@/services/blog.service";
 import { lessonService } from "@/services/lesson.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useVocabularyOverview } from "@/hooks/use-vocabulary";
+import { useLessonHistory } from "@/hooks/use-lesson";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -48,7 +49,7 @@ export default function HomePage() {
     queryKey: ["lessons-home", user?.currentLevel],
     queryFn: () =>
       lessonService.getUserLessons({
-        pageSize: 10,
+        pageSize: 15,
         level: user?.currentLevel,
       }),
     enabled: !!user,
@@ -70,6 +71,9 @@ export default function HomePage() {
     queryFn: () => statsService.getDailyPractice(1),
   });
 
+  // ===== HISTORY =====
+  const { data: lessonHistory, isLoading: isLoadingHistory } = useLessonHistory({ pageSize: 15 });
+
   // ===== GLOBAL LOADING =====
   const isPageLoading =
     isLoadingLeaderboard ||
@@ -77,7 +81,8 @@ export default function HomePage() {
     isLoadingLessons ||
     isLoadingVocab ||
     isLoadingStats ||
-    isLoadingPractice;
+    isLoadingPractice ||
+    isLoadingHistory;
 
   if (isPageLoading) {
     return (
@@ -120,38 +125,46 @@ export default function HomePage() {
     })) || [];
 
   // ===== LESSON MAP =====
-  const mapLessonToComponent = (lesson: any) => ({
+  const mapLessonToComponent = (lesson: any, progressPercent?: number) => ({
     lessonId: lesson.id,
     title: lesson.title,
-    progress: Math.random() * 0.5 + 0.1,
+    progress: progressPercent !== undefined ? progressPercent : 0, 
     level: (lesson.level || "beginner").toLowerCase(),
     duration: Math.floor(lesson.durationSeconds / 60) || 0,
     category: lesson.category || "General",
     rating: lesson.avgScore || 4.5,
     isPremiumOnly: lesson.isPremiumOnly || false,
+    thumbnailUrl: lesson.thumbnailUrl || (lesson.videoId ? `https://i.ytimg.com/vi/${lesson.videoId}/hqdefault.jpg` : "/video-placeholder.png"),
   });
 
-  const continueLearning =
-    lessonsData?.items?.slice(0, 4).map(mapLessonToComponent) || [];
+  const historyMap = new Map();
+  if (lessonHistory?.items) {
+    lessonHistory.items.forEach((h: any) => {
+      historyMap.set(h.lessonId, {
+        status: h.status,
+        progressPercent: h.progressPercent ?? (h.status === "Completed" ? 1 : 0.5)
+      });
+    });
+  }
 
-  const recommendedByCategory = {
-    all: lessonsData?.items?.map(mapLessonToComponent) || [],
-    beginner:
-      lessonsData?.items
-        ?.filter((l: any) => l.level === "Beginner")
-        .map(mapLessonToComponent) || [],
-    intermediate:
-      lessonsData?.items
-        ?.filter((l: any) => l.level === "Intermediate")
-        .map(mapLessonToComponent) || [],
-    advanced:
-      lessonsData?.items
-        ?.filter((l: any) => l.level === "Advanced")
-        .map(mapLessonToComponent) || [],
-  };
+  // Continue Learning: map history with lesson data
+  const continueLearning =
+    lessonsData?.items
+      ?.filter((lesson: any) => historyMap.has(lesson.id))
+      .map((lesson: any) => {
+        const historyData = historyMap.get(lesson.id);
+        return mapLessonToComponent(lesson, historyData.progressPercent);
+      })
+      .slice(0, 4) || [];
+
+  // Recommended: ONLY lessons NOT in history
+  const recommendedLessons =
+    lessonsData?.items
+      ?.filter((lesson: any) => !historyMap.has(lesson.id))
+      .map((lesson: any) => mapLessonToComponent(lesson)) || [];
 
   const recentVocabsFormatted =
-    vocabOverview?.recentItems?.slice(0, 4).map((vocab) => ({
+    vocabOverview?.recentItems?.slice(0, 4).map((vocab: any) => ({
       id: vocab.id,
       word: vocab.word,
       meaning: vocab.meaning,
@@ -197,7 +210,7 @@ export default function HomePage() {
     daysLeft: 24,
   };
 
-  // ===== UI GIỮ NGUYÊN =====
+  // ===== UI =====
   return (
     <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-10 font-mono">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -223,10 +236,11 @@ export default function HomePage() {
             <PromotionalBanner />
           </motion.div>
 
+          {/* Đề xuất bài học (Chưa học) */}
           <motion.section variants={itemVariants} className="space-y-6">
             <h2 className="text-xl font-bold">Gợi ý hôm nay</h2>
             <RecommendedLessons
-              lessonsByCategory={recommendedByCategory}
+              lessons={recommendedLessons}
               isPremiumUser={isPremiumUser}
             />
           </motion.section>
