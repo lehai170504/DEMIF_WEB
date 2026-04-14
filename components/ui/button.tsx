@@ -10,25 +10,26 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] text-white shadow-lg shadow-[#FF7A00]/25 hover:shadow-[#FF7A00]/40 hover:brightness-110 border-none",
+          "bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] text-white shadow-lg shadow-[#FF7A00]/25 hover:shadow-[#FF7A00]/40 hover:brightness-110",
 
         destructive:
-          "bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700",
+          "bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600",
 
         outline:
-          "border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 text-gray-900 dark:text-white shadow-sm",
+          "border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5",
 
         secondary:
-          "bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent dark:border-white/5 shadow-sm",
+          "bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10",
 
         ghost:
-          "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white",
+          "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-zinc-400",
 
-        link: "text-[#FF7A00] underline-offset-8 hover:underline font-black",
+        link: "text-[#FF7A00] underline-offset-8 hover:underline",
 
         glass:
-          "border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md hover:bg-white/80 dark:hover:bg-white/10 text-gray-900 dark:text-white shadow-sm",
+          "border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md hover:bg-white/80 dark:hover:bg-white/10",
       },
+
       size: {
         default: "h-11 px-6 py-2",
         sm: "h-9 rounded-lg gap-1.5 px-4 text-xs",
@@ -38,6 +39,7 @@ const buttonVariants = cva(
         "icon-lg": "size-14 rounded-2xl",
       },
     },
+
     defaultVariants: {
       variant: "default",
       size: "default",

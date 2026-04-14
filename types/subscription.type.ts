@@ -58,3 +58,12 @@ export interface CreatePlanRequest {
   badgeColor: string | null;
   isActive: boolean;
 }
+
+export interface AdminSubscriptionPayload {
+  userId?: string;
+  planId: string;
+  startDate: string;
+  endDate: string;
+  status: "Active" | "Expired" | "Cancelled" | "PendingPayment";
+  autoRenew: boolean;
+}

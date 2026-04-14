@@ -28,7 +28,6 @@ import {
   CheckShadowingSegmentResponse,
   CheckDictationSegmentRequest,
   CheckDictationSegmentResponse,
-  UploadAudioResponse,
 } from "@/types/lesson.type";
 
 export const lessonService = {
@@ -147,23 +146,6 @@ export const lessonService = {
     return (response as any).data ?? response;
   },
 
-  uploadAudio: async (file: File): Promise<UploadAudioResponse> => {
-  const formData = new FormData();
-  formData.append("AudioFile", file);
-  formData.append("FolderName", "demif-lessons/audio");
-
-  const response = await axiosClient.post(
-    "/admin/lessons/audio/upload", 
-    formData, 
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-  return response as unknown as UploadAudioResponse;
-},
-
   // ============ USER ENDPOINTS ============
 
   // GET /api/lessons - Lấy danh sách lessons (public + premium)
@@ -257,7 +239,10 @@ export const lessonService = {
     id: string,
     data: { segmentIndex: number; isCompleted: boolean },
   ): Promise<any> => {
-    const response = await axiosClient.post(`/lessons/${id}/sync-progress`, data);
+    const response = await axiosClient.post(
+      `/lessons/${id}/sync-progress`,
+      data,
+    );
     return (response as any).data ?? response;
   },
 };
