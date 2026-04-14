@@ -28,7 +28,6 @@ import {
   CheckShadowingSegmentResponse,
   CheckDictationSegmentRequest,
   CheckDictationSegmentResponse,
-  UploadAudioResponse,
   MyProgressResponse,
   LessonHistoryResponse,
 } from "@/types/lesson.type";
@@ -172,7 +171,11 @@ export const lessonService = {
   },
 
   // GET /api/me/lesson-history - Lấy LỊCH SỬ học tập
-  getLessonHistory: async (params?: { page?: number; pageSize?: number; status?: string }): Promise<LessonHistoryResponse> => {
+  getLessonHistory: async (params?: {
+    page?: number;
+    pageSize?: number;
+    status?: string;
+  }): Promise<LessonHistoryResponse> => {
     const response = await axiosClient.get(`/me/lesson-history`, { params });
     return (response as any).data ?? response;
   },
