@@ -27,16 +27,16 @@ export const useActivePlans = () => {
 };
 
 // Get current user's active subscription (Requires authentication)
-export const useMySubscription = () => {
+export const useMySubscription = (isAuthenticated: boolean = true) => {
   // Chỉ fetch khi có accessToken
   const hasToken = typeof window !== "undefined" ? !!Cookies.get("accessToken") : false;
 
   return useQuery({
-    queryKey: ["my-subscription"],
+    queryKey: ["my-subscription", hasToken],
     queryFn: () => subscriptionService.getMySubscription(),
     staleTime: 1000 * 60 * 2, // Cache 2 phút
     retry: 0, // Không retry để tránh trigger logout nhiều lần
-    enabled: hasToken, // Chỉ fetch khi user đã login
-    refetchOnWindowFocus: false, // Không tự động refetch khi focus window
+    enabled: hasToken && isAuthenticated, // Chỉ fetch khi user đã login
+    refetchOnWindowFocus: true, // Cho phép refetch khi quay lại tab để cập nhật gói mới nhất
   });
 };

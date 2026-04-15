@@ -147,10 +147,13 @@ export default function HomePage() {
     });
   }
 
-  // Continue Learning: map history with lesson data
+  // Continue Learning: map history with lesson data (ONLY lessons in progress)
   const continueLearning =
     lessonsData?.items
-      ?.filter((lesson: any) => historyMap.has(lesson.id))
+      ?.filter((lesson: any) => {
+        const historyData = historyMap.get(lesson.id);
+        return historyData && historyData.status !== "Completed" && historyData.progressPercent < 1;
+      })
       .map((lesson: any) => {
         const historyData = historyMap.get(lesson.id);
         return mapLessonToComponent(lesson, historyData.progressPercent);

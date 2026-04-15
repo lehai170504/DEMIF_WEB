@@ -136,55 +136,58 @@ export default function AdminPaymentsPage() {
 
               {/* FLOATING PAGINATION ISLAND */}
               {data && data.totalPages > 1 && (
-                <div className="flex justify-center pt-4">
-                  <div className="inline-flex items-center p-2 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[2rem] shadow-2xl shadow-slate-200/50 dark:shadow-none animate-in zoom-in-95 duration-500">
-                    <Pagination>
-                      <PaginationContent className="gap-2">
+                <div className="flex justify-center pt-6 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="inline-flex items-center p-1.5 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl border border-slate-200/60 dark:border-white/10 rounded-[1.75rem] shadow-xl shadow-slate-200/40 dark:shadow-none">
+                    <Pagination className="w-auto mx-0">
+                      <PaginationContent className="gap-2 sm:gap-3">
+                        {/* NÚT TRƯỚC */}
                         <PaginationItem>
                           <PaginationPrevious
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               if (page > 1) setPage((p) => p - 1);
                             }}
+                            disabled={page <= 1}
                             className={cn(
-                              "h-11 px-5 rounded-[1.25rem] transition-all text-[10px] font-black uppercase tracking-widest border-none",
+                              "h-10 sm:h-11 px-4 sm:px-5 rounded-2xl transition-all text-[10px] font-black uppercase tracking-[0.15em] border-none active:scale-95",
                               page <= 1
                                 ? "opacity-20 pointer-events-none text-slate-400"
-                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
+                                : "text-slate-600 dark:text-slate-400 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 shadow-sm",
                             )}
                           />
                         </PaginationItem>
 
+                        {/* HIỂN THỊ TRẠNG THÁI TRANG */}
                         <PaginationItem>
-                          <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-100/50 dark:bg-white/5 rounded-[1.25rem] border border-slate-200 dark:border-white/5">
-                            <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
-                              Page
+                          <div className="flex items-center gap-2.5 px-4 sm:px-6 py-2 bg-white/80 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 shadow-inner">
+                            <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest hidden xs:inline">
+                              Trang
                             </span>
-                            <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                              {page}
-                            </span>
-                            <span className="text-slate-300 dark:text-zinc-700">
-                              /
-                            </span>
-                            <span className="text-sm font-black text-slate-500 dark:text-slate-400">
-                              {data.totalPages}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-black text-orange-500 drop-shadow-sm">
+                                {page}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-300 dark:text-zinc-700">
+                                /
+                              </span>
+                              <span className="text-sm font-black text-slate-500 dark:text-slate-400">
+                                {data.totalPages}
+                              </span>
+                            </div>
                           </div>
                         </PaginationItem>
 
+                        {/* NÚT SAU */}
                         <PaginationItem>
                           <PaginationNext
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               if (page < data.totalPages) setPage((p) => p + 1);
                             }}
+                            disabled={page >= data.totalPages}
                             className={cn(
-                              "h-11 px-5 rounded-[1.25rem] transition-all text-[10px] font-black uppercase tracking-widest border-none",
+                              "h-10 sm:h-11 px-4 sm:px-5 rounded-2xl transition-all text-[10px] font-black uppercase tracking-[0.15em] border-none active:scale-95",
                               page >= data.totalPages
                                 ? "opacity-20 pointer-events-none text-slate-400"
-                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
+                                : "text-slate-600 dark:text-slate-400 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 shadow-sm",
                             )}
                           />
                         </PaginationItem>

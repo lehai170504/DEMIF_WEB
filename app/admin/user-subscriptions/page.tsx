@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
@@ -219,36 +220,66 @@ export default function UserSubscriptionsPage() {
             </div>
 
             <Pagination className="w-auto mx-0">
-              <PaginationContent className="gap-3">
+              <PaginationContent className="gap-2 sm:gap-3 p-1 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-slate-200 dark:border-white/5 rounded-[1.5rem] shadow-sm">
+                {/* NÚT BACK */}
                 <PaginationItem>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="h-12 w-12 rounded-2xl border-slate-200 dark:border-white/10 hover:bg-orange-500 hover:text-white transition-all disabled:opacity-30"
+                    className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl text-slate-500 hover:bg-orange-500 hover:text-white transition-all disabled:opacity-20"
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-4 w-4 stroke-[3px]" />
                   </Button>
                 </PaginationItem>
 
-                <div className="flex gap-2">
+                {/* CỤM SỐ TRANG */}
+                <div className="flex items-center gap-1 sm:gap-1.5">
                   {[...Array(data.totalPages)].map((_, i) => {
                     const pageNum = i + 1;
-                    if (
+
+                    // Logic hiển thị: Trang đầu, trang cuối, và các trang quanh trang hiện tại
+                    const isVisible =
                       pageNum === 1 ||
                       pageNum === data.totalPages ||
-                      (pageNum >= page - 1 && pageNum <= page + 1)
-                    ) {
+                      (pageNum >= page - 1 && pageNum <= page + 1);
+
+                    // Hiển thị dấu ba chấm nếu cần thiết
+                    const showEllipsisBefore = pageNum === 2 && page > 3;
+                    const showEllipsisAfter =
+                      pageNum === data.totalPages - 1 &&
+                      page < data.totalPages - 2;
+
+                    if (showEllipsisBefore) {
+                      return (
+                        <PaginationEllipsis
+                          key="ellipsis-before"
+                          className="size-8 sm:size-10 opacity-50"
+                        />
+                      );
+                    }
+
+                    if (showEllipsisAfter) {
+                      return (
+                        <PaginationEllipsis
+                          key="ellipsis-after"
+                          className="size-8 sm:size-10 opacity-50"
+                        />
+                      );
+                    }
+
+                    if (isVisible) {
                       return (
                         <PaginationItem key={pageNum}>
                           <Button
+                            variant={page === pageNum ? "default" : "ghost"}
                             onClick={() => setPage(pageNum)}
                             className={cn(
-                              "h-12 w-12 rounded-2xl font-black text-xs transition-all",
+                              "h-10 w-10 sm:h-11 sm:w-11 rounded-xl font-black text-[11px] transition-all duration-300",
                               page === pageNum
-                                ? "bg-[#FF7A00] text-white shadow-lg scale-110"
-                                : "bg-transparent text-slate-400 hover:text-slate-900 dark:hover:text-white",
+                                ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30 scale-105"
+                                : "bg-transparent text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
                             )}
                           >
                             {pageNum}
@@ -260,17 +291,18 @@ export default function UserSubscriptionsPage() {
                   })}
                 </div>
 
+                {/* NÚT NEXT */}
                 <PaginationItem>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
                     onClick={() =>
                       setPage((p) => Math.min(data.totalPages, p + 1))
                     }
                     disabled={page === data.totalPages}
-                    className="h-12 w-12 rounded-2xl border-slate-200 dark:border-white/10 hover:bg-orange-500 hover:text-white transition-all disabled:opacity-30"
+                    className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl text-slate-500 hover:bg-orange-500 hover:text-white transition-all disabled:opacity-20"
                   >
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 stroke-[3px]" />
                   </Button>
                 </PaginationItem>
               </PaginationContent>

@@ -60,12 +60,6 @@ axiosClient.interceptors.response.use(
     const status = error.response?.status;
     const url = originalRequest?.url || "";
 
-    // Bỏ qua logic refresh token nếu là API check subscription (chưa có gói hoặc chưa đăng nhập)
-    const isSubscriptionCheck = url.includes("/subscription-plans/my-subscription");
-    if (isSubscriptionCheck && (status === 404 || status === 401)) {
-      return Promise.reject(error);
-    }
-
     // Xử lý khi Token hết hạn (401)
     if (status === 401 && originalRequest && !originalRequest._retry && url !== REFRESH_TOKEN_URL) {
       
