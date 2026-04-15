@@ -75,7 +75,6 @@ export function DictationHeader({ lesson, level, onSelectLevel, progress }: Dict
                 <DropdownMenuItem
                   key={l}
                   onSelect={() => onSelectLevel(l)}
-                  onClick={() => onSelectLevel(l)}
                   className={cn(
                     "text-[10px] font-bold uppercase tracking-widest cursor-pointer",
                     level === l ? "text-orange-500 bg-orange-500/5" : "text-muted-foreground"

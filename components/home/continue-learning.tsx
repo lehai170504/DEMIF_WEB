@@ -31,6 +31,39 @@ export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningPro
     advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   };
 
+  if (lessons.length === 0) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative group h-[260px] flex flex-col items-center justify-center rounded-[2.5rem] border-[3px] border-dashed border-gray-200/50 dark:border-white/10 bg-gray-50/30 dark:bg-white/[0.01] hover:bg-gray-100/50 dark:hover:bg-white/[0.04] transition-all duration-500 shadow-sm hover:shadow-xl"
+      >
+        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] opacity-20 group-hover:opacity-30 transition-opacity">
+          <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-500/20 blur-[80px]" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-600/20 blur-[80px]" />
+        </div>
+
+        <div className="flex flex-col items-center gap-4 relative z-10 px-6 text-center">
+          <div className="p-4 rounded-full bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
+            <PlayCircle className="w-8 h-8 text-orange-500 animate-pulse" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-gray-900 dark:text-white">Chưa có bài học nào đang dang dở</p>
+            <p className="text-xs text-gray-500 dark:text-zinc-500 max-w-[280px]">Hãy khám phá kho bài học và bắt đầu hành trình chinh phục tiếng Anh ngay hôm nay!</p>
+          </div>
+          
+          <Link 
+            href="/dictation"
+            className="mt-2 flex items-center gap-2 px-5 py-2.5 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/10 dark:shadow-white/5"
+          >
+            Bắt đầu học ngay
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header section - Minimal & Functional */}
