@@ -53,6 +53,7 @@ export default function UpgradePage() {
   // Chỉ coi là có gói hoạt động nếu status là Active hoặc Trialing (đã confirm)
   const hasAnyActiveSub =
     !!mySubscription &&
+    (!!mySubscription.planName || !!mySubscription.planId) &&
     ["Active", "active", "trialing", "Trialing"].includes(
       mySubscription.status,
     );

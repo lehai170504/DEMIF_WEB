@@ -58,7 +58,7 @@ export default function DictationPage() {
       map.set(h.lessonId, {
         status: h.status,
         progressPercent:
-          h.progressPercent ?? (h.status === "Completed" ? 1 : 0.5),
+          h.progressPercent ?? (h.status === "Completed" ? 1 : 0),
       });
     });
     return map;

@@ -102,44 +102,45 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
 
   useEffect(() => {
     if (exercise && myProgress && !isProgressRestored.current) {
-      if (myProgress.completedSegments && myProgress.completedSegments.length > 0) {
-        const restoredAnswers: Record<string, string> = {};
-        const restoredResults: Record<number, any> = {};
-
-        myProgress.completedSegments.forEach((cs: any) => {
+      setAnswers(prev => {
+        const restored = { ...prev };
+        myProgress.completedSegments?.forEach((cs: any) => {
           const seg = exercise.template.segments[cs.segmentIndex];
           if (!seg) return;
-          
           seg.words.forEach((w: any) => {
-            if (w.isBlank) restoredAnswers[`${cs.segmentIndex}-${w.position}`] = w.text;
+            if (w.isBlank) restored[`${cs.segmentIndex}-${w.position}`] = w.text;
           });
-          
-          restoredResults[cs.segmentIndex] = {
+        });
+        return restored;
+      });
+
+      setSegmentResults(prev => {
+        const restored = { ...prev };
+        myProgress.completedSegments?.forEach((cs: any) => {
+          const seg = exercise.template.segments[cs.segmentIndex];
+          if (!seg) return;
+          restored[cs.segmentIndex] = {
             segmentIndex: cs.segmentIndex,
             transcript: seg.words.map((w:any) => w.text + (w.punctuation||'')).join(' '),
             userText: seg.words.map((w:any) => w.text + (w.punctuation||'')).join(' '),
             words: seg.words.map((w:any) => ({ text: w.text, isCorrect: true, isBlank: w.isBlank })),
-            accuracy: 100
+            accuracy: 100,
+            isCorrect: true
           };
         });
-
-        setAnswers(restoredAnswers);
-        setSegmentResults(restoredResults);
-        
-        // Restore progress pointer
-        if (myProgress.completedSegments.length < exercise.template.segments.length) {
-           let initialIdx = myProgress.lastSegmentIndex;
-           if (initialIdx >= exercise.template.segments.length) {
-              initialIdx = exercise.template.segments.length - 1;
-           }
-           setCurrentIdx(initialIdx);
-        } else {
-           setIsCompleted(true);
-        }
+        return restored;
+      });
+      
+      // Restore progress pointer
+      if (myProgress.completedSegments && myProgress.completedSegments.length < exercise.template.segments.length) {
+         const nextIdx = myProgress.lastSegmentIndex ?? 0;
+         setCurrentIdx(nextIdx >= exercise.template.segments.length ? 0 : nextIdx);
+      } else if (myProgress.completedSegments && myProgress.completedSegments.length > 0) {
+         setIsCompleted(true);
       }
       isProgressRestored.current = true;
     }
-  }, [exercise, myProgress]);
+  }, [exercise, myProgress, level]);
 
   const { setIframeRef, seekAndPlay, pauseVideo } = useYoutubePlayer(
     youtubeUrl ? handleYouTubeTimeUpdate : undefined,
@@ -238,7 +239,10 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
 
     syncMutate({
       id: lesson.id,
-      data: { segmentIndex: idx, isCompleted: isFinished },
+      data: { 
+        segmentIndex: idx, 
+        isCompleted: isFinished // isCompleted ở đây nên là trạng thái TỔNG THỂ của lesson
+      },
     });
     lastSyncedIdx.current = idx;
   }, [lesson.id, syncMutate]);
@@ -251,14 +255,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     
     syncTimeoutRef.current = setTimeout(() => {
       if (currentIdx !== lastSyncedIdx.current) {
-        // Nếu đã có kết quả (đã Check) cho đoạn trước đó, đánh dấu là hoàn thành
-        const prevIdx = lastSyncedIdx.current;
-        const hasResult = segmentResults[prevIdx];
-        const isActuallyFinished = hasResult && (hasResult.accuracy >= 80 || hasResult.isCorrect);
-        
-        triggerSync(prevIdx, isActuallyFinished);
-        
-        // Cũng sync vị trí mới
+        // Luôn gửi isCompleted: false khi đang học dở các đoạn
         triggerSync(currentIdx, false);
       }
     }, 5000);
@@ -274,7 +271,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     if (!media) return;
 
     const onPause = () => {
-       if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+       if (!isCompletedRef.current) triggerSync(currentIdxRef.current, false);
     };
     media.addEventListener("pause", onPause);
     return () => media.removeEventListener("pause", onPause);
@@ -283,7 +280,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   // 3. Sync khi Exit (Page Unload / Unmount)
   useEffect(() => {
     const onExit = () => {
-      if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+      if (!isCompletedRef.current) triggerSync(currentIdxRef.current, false);
     };
 
     window.addEventListener("beforeunload", onExit);
@@ -375,9 +372,9 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
         onSuccess: (data) => {
           setSegmentResults((prev) => ({ ...prev, [segIndex]: data }));
           
-          // Gõ hoàn thành đúng 1 câu -> Sync ngay lập tức với isCompleted = true
+          // Gõ đúng -> Sync vị trí mới nhưng chưa hoàn thành bài
           if (data.accuracy === 100) {
-            triggerSync(segIndex, true);
+            triggerSync(segIndex, false);
           }
 
           if (autoNext && segIndex < segments.length - 1) {
@@ -407,6 +404,7 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       data: { level, answers: formattedAnswers, timeSpentSeconds: timeSpent },
     });
 
+    // Chỉ khi nộp bài cuối cùng mới đánh dấu isCompleted: true
     syncProgressMutation.mutate({
       id: lesson.id,
       data: { segmentIndex: currentIdx, isCompleted: true },

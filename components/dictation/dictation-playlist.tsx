@@ -48,12 +48,19 @@ export function DictationPlaylist({
                   </span>
                 );
               }
+              
+              const isFilled = result && result.accuracy >= 80;
+              const displayWord = isFilled ? w.text : "•".repeat(w.length || 4);
+
               return (
                 <span
                   key={index}
-                  className="text-orange-500/60 font-bold tracking-normal"
+                  className={cn(
+                    "font-bold tracking-normal transition-colors",
+                    isFilled ? "text-emerald-500" : "text-orange-500/60"
+                  )}
                 >
-                  {"•".repeat(w.length || 4)}
+                  {displayWord}
                 </span>
               );
             });
