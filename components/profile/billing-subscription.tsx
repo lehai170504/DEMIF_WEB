@@ -15,10 +15,12 @@ import {
 import { useMySubscription, useActivePlans } from "@/hooks/use-subscription";
 import { usePaymentHistory } from "@/hooks/use-payment";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function BillingSubscription() {
   const router = useRouter();
-  const { data: mySubscription, isLoading } = useMySubscription();
+  const { isAuthenticated } = useAuth();
+  const { data: mySubscription, isLoading } = useMySubscription(isAuthenticated);
   const { data: activePlans } = useActivePlans();
   const { data: paymentHistory, isLoading: isLoadingHistory } = usePaymentHistory();
 

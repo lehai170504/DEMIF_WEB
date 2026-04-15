@@ -26,6 +26,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { useMySubscription } from "@/hooks/use-subscription";
+import { Badge } from "@/components/ui/badge";
 
 const navLinks = [
   { name: "Trang chủ", href: "/home" },
@@ -38,7 +40,8 @@ const navLinks = [
 
 export function HeaderUser() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { data: subscription } = useMySubscription(isAuthenticated);
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -125,29 +128,38 @@ export function HeaderUser() {
 
           {/* --- RIGHT: ACTIONS SECTION --- */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* A. Upgrade PRO Button */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden md:flex h-11 px-6 rounded-xl border-[#FF7A00]/50 bg-[#FF7A00]/10 text-[#FF7A00] font-black text-[10px] uppercase tracking-widest hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] hover:shadow-[0_0_20px_rgba(255,122,0,0.4)] transition-all duration-300 gap-2"
-                asChild
-              >
-                <Link href="/upgrade">
-                  <motion.div
-                    animate={{ rotate: [0, 15, -15, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 2,
-                      repeatDelay: 3,
-                    }}
+            {/* A. Upgrade PRO Button / Pro Badge */}
+            {isMounted && (
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                {subscription?.status === "Active" || subscription?.status === "Trialing" ? (
+                  <Badge className="h-11 px-5 rounded-xl border-emerald-500/20 bg-emerald-500/10 text-emerald-500 font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                    <Sparkles className="w-3.5 h-3.5 fill-emerald-500" />
+                    Premium
+                  </Badge>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex h-11 px-6 rounded-xl border-[#FF7A00]/50 bg-[#FF7A00]/10 text-[#FF7A00] font-black text-[10px] uppercase tracking-widest hover:bg-[#FF7A00] hover:text-white hover:border-[#FF7A00] hover:shadow-[0_0_20px_rgba(255,122,0,0.4)] transition-all duration-300 gap-2"
+                    asChild
                   >
-                    <Sparkles className="w-4 h-4" />
-                  </motion.div>
-                  Upgrade Pro
-                </Link>
-              </Button>
-            </motion.div>
+                    <Link href="/upgrade">
+                      <motion.div
+                        animate={{ rotate: [0, 15, -15, 0] }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 2,
+                          repeatDelay: 3,
+                        }}
+                      >
+                        <Sparkles className="w-4 h-4" />
+                      </motion.div>
+                      Upgrade Pro
+                    </Link>
+                  </Button>
+                )}
+              </motion.div>
+            )}
 
             {/* Theme Toggle Button */}
             <ThemeToggle />

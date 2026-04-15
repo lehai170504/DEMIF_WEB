@@ -21,6 +21,7 @@ export interface LessonDto {
   avgScore: number;
   tags: string;
   createdAt: string;
+  videoId?: string;
   status?: string;
 }
 
