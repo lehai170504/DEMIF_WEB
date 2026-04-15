@@ -43,7 +43,7 @@ const features_vi = [
   {
     id: 1,
     icon: Headphones,
-    title: "Dictation AI",
+    title: "Dictation",
     desc: "Nghe chép chính tả với độ chính xác tuyệt đối.",
     tags: ["Real-time feedback"],
   },
@@ -215,8 +215,8 @@ export function CinematicJourney() {
                 variants={itemVariants}
                 className="text-lg md:text-xl text-gray-600 dark:text-zinc-400 font-medium mb-10 max-w-lg leading-relaxed"
               >
-                Mô phỏng môi trường giao tiếp thực tế với AI Mentor. Luyện nghe
-                sâu, phản xạ nhanh và chuẩn hóa phát âm.
+                Mô phỏng môi trường giao tiếp thực tế. Luyện nghe sâu, phản xạ
+                nhanh và chuẩn hóa phát âm.
               </motion.p>
 
               <motion.div
@@ -458,7 +458,7 @@ export function CinematicJourney() {
               {
                 id: 3,
                 icon: CheckCircle2,
-                title: "AI Chấm điểm",
+                title: "Chấm điểm tự động",
                 status: "Feedback",
               },
             ].map((step) => (
@@ -562,14 +562,14 @@ export function CinematicJourney() {
                   ))}
                   {/* Cân đối lại kích thước thẻ +10k cho bằng với Avatar */}
                   <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-4 border-white dark:border-[#050505] bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] md:text-xs font-black text-gray-900 dark:text-white z-0 shadow-xl">
-                    +10k
+                    +1k
                   </div>
                 </div>
 
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center md:text-left leading-snug">
-                  Đã giúp{" "}
+                  Đã trợ giúp{" "}
                   <strong className="text-gray-900 dark:text-white">
-                    hàng ngàn học viên
+                    mọi người
                   </strong>
                   <br />
                   giao tiếp tự tin hơn mỗi ngày.
