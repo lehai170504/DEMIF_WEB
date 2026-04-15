@@ -12,6 +12,7 @@ import {
   useCheckVoice,
   useCheckShadowingSegment,
   useMyProgress,
+  useSyncLessonProgress,
 } from "@/hooks/use-lesson";
 import { useYoutubePlayer } from "@/hooks/use-youtube-player";
 import { useAddVocabulary } from "@/hooks/use-vocabulary";
@@ -70,6 +71,7 @@ export default function ShadowingPracticePage({
 
   const checkVoiceMutation = useCheckVoice(id, currentIdx);
   const checkSegmentMutation = useCheckShadowingSegment();
+  const syncProgressMutation = useSyncLessonProgress();
   const addVocabMutation = useAddVocabulary();
 
   const segments = segmentsData?.segments ?? [];
@@ -139,6 +141,82 @@ export default function ShadowingPracticePage({
       setCurrentIdx(segIdx);
     }
   }
+
+  // --- LESSON TRACKER (SYNC PROGRESS) ---
+  const lastSyncedIdx = useRef(currentIdx);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Refs for background values (avoiding effect re-triggers)
+  const currentIdxRef = useRef(currentIdx);
+  const isCompletedRef = useRef(isCompleted);
+  useEffect(() => { currentIdxRef.current = currentIdx; }, [currentIdx]);
+  useEffect(() => { isCompletedRef.current = isCompleted; }, [isCompleted]);
+
+  // Extract mutate to keep triggerSync stable
+  const { mutate: syncMutate } = syncProgressMutation;
+
+  const triggerSync = useCallback((idx: number, isFinished: boolean = false) => {
+    if (!id) return;
+    
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+
+    syncMutate({
+      id: id,
+      data: { segmentIndex: idx, isCompleted: isFinished },
+    });
+    lastSyncedIdx.current = idx;
+  }, [id, syncMutate]);
+
+  // 1. Sync khi đổi đoạn (Debounce 5s)
+  useEffect(() => {
+    if (isCompleted) return;
+    
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    
+    syncTimeoutRef.current = setTimeout(() => {
+      if (currentIdx !== lastSyncedIdx.current) {
+        // Nếu đã có kết quả (đã Check) cho đoạn trước đó, đánh dấu là hoàn thành
+        const prevIdx = lastSyncedIdx.current;
+        const hasResult = checkResults[prevIdx];
+        const isActuallyFinished = hasResult && (hasResult.accuracy >= 70 || hasResult.passed);
+        
+        triggerSync(prevIdx, isActuallyFinished);
+        
+        // Cũng sync vị trí mới
+        triggerSync(currentIdx, false);
+      }
+    }, 5000);
+
+    return () => {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    };
+  }, [currentIdx, isCompleted, triggerSync]);
+
+  // 2. Sync khi Pause
+  useEffect(() => {
+    const media = mediaRef.current;
+    if (!media) return;
+
+    const onPause = () => {
+       if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+    };
+    media.addEventListener("pause", onPause);
+    return () => media.removeEventListener("pause", onPause);
+  }, [triggerSync]);
+
+  // 3. Sync khi Exit (Page Unload / Unmount)
+  useEffect(() => {
+    const onExit = () => {
+      if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+    };
+
+    window.addEventListener("beforeunload", onExit);
+
+    return () => {
+      window.removeEventListener("beforeunload", onExit);
+      onExit(); 
+    };
+  }, [triggerSync]);
 
   const {
     setIframeRef,
@@ -242,8 +320,13 @@ export default function ShadowingPracticePage({
           timeSpentSeconds: 5,
         },
         {
-          onSuccess: (result) =>
-            setCheckResults((prev) => ({ ...prev, [currentIdx]: result })),
+          onSuccess: (result) => {
+            setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
+            // Nếu phát âm đúng (>80%) thì sync ngay với isCompleted = true
+            if (result.accuracy >= 80) {
+              triggerSync(currentIdx, true);
+            }
+          },
         },
       );
     };
@@ -268,16 +351,25 @@ export default function ShadowingPracticePage({
         data: { level, userText, timeSpentSeconds: 5 },
       },
       {
-        onSuccess: (result) =>
-          setCheckResults((prev) => ({ ...prev, [currentIdx]: result })),
+        onSuccess: (result) => {
+          setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
+          // Nếu gõ đúng (>90%) thì sync ngay với isCompleted = true
+          if (result.accuracy >= 90) {
+            triggerSync(currentIdx, true);
+          }
+        },
       },
     );
   };
 
   const handleNext = useCallback(() => {
-    if (currentIdx < segments.length - 1) handleSelectSegment(currentIdx + 1);
-    else setIsCompleted(true);
-  }, [currentIdx, segments.length, handleSelectSegment]);
+    if (currentIdx < segments.length - 1) {
+      handleSelectSegment(currentIdx + 1);
+    } else {
+      triggerSync(currentIdx, true); // Sync hoàn thành bài
+      setIsCompleted(true);
+    }
+  }, [currentIdx, segments.length, handleSelectSegment, triggerSync]);
 
   // --- Vocabulary Logic ---
   const handleOpenVocabDialog = useCallback((word: string) => {

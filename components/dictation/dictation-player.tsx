@@ -182,12 +182,14 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
   }, []);
 
   useEffect(() => {
-    if (audioRef.current) audioRef.current.pause();
-    if (videoRef.current) videoRef.current.pause();
-    setSegmentResults({});
-    setCurrentIdx(0);
-    setIsCompleted(false);
-    isProgressRestored.current = false;
+    if (level) {
+      if (audioRef.current) audioRef.current.pause();
+      if (videoRef.current) videoRef.current.pause();
+      setSegmentResults({});
+      setCurrentIdx(0);
+      setIsCompleted(false);
+      isProgressRestored.current = false;
+    }
   }, [level]);
 
   useEffect(() => {
@@ -216,16 +218,81 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
     return () => clearInterval(interval);
   }, [youtubeUrl, currentIdx]);
 
+  // --- LESSON TRACKER (SYNC PROGRESS) ---
+  const lastSyncedIdx = useRef(currentIdx);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Refs for background values (avoiding effect re-triggers)
+  const currentIdxRef = useRef(currentIdx);
+  const isCompletedRef = useRef(isCompleted);
+  useEffect(() => { currentIdxRef.current = currentIdx; }, [currentIdx]);
+  useEffect(() => { isCompletedRef.current = isCompleted; }, [isCompleted]);
+
+  // Extract mutate to keep triggerSync stable
+  const { mutate: syncMutate } = syncProgressMutation;
+
+  const triggerSync = useCallback((idx: number, isFinished: boolean = false) => {
+    if (!lesson.id) return;
+    
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+
+    syncMutate({
+      id: lesson.id,
+      data: { segmentIndex: idx, isCompleted: isFinished },
+    });
+    lastSyncedIdx.current = idx;
+  }, [lesson.id, syncMutate]);
+
+  // 1. Sync khi đổi đoạn (Debounce 5s)
   useEffect(() => {
-    if (!lesson.id || isCompleted) return;
-    const timer = setTimeout(() => {
-      syncProgressMutation.mutate({
-        id: lesson.id,
-        data: { segmentIndex: currentIdx, isCompleted: false },
-      });
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [currentIdx, lesson.id, isCompleted]);
+    if (isCompleted) return;
+    
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    
+    syncTimeoutRef.current = setTimeout(() => {
+      if (currentIdx !== lastSyncedIdx.current) {
+        // Nếu đã có kết quả (đã Check) cho đoạn trước đó, đánh dấu là hoàn thành
+        const prevIdx = lastSyncedIdx.current;
+        const hasResult = segmentResults[prevIdx];
+        const isActuallyFinished = hasResult && (hasResult.accuracy >= 80 || hasResult.isCorrect);
+        
+        triggerSync(prevIdx, isActuallyFinished);
+        
+        // Cũng sync vị trí mới
+        triggerSync(currentIdx, false);
+      }
+    }, 5000);
+
+    return () => {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    };
+  }, [currentIdx, isCompleted, triggerSync]);
+
+  // 2. Sync khi Pause
+  useEffect(() => {
+    const media = (audioRef.current ?? videoRef.current) as HTMLMediaElement | null;
+    if (!media) return;
+
+    const onPause = () => {
+       if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+    };
+    media.addEventListener("pause", onPause);
+    return () => media.removeEventListener("pause", onPause);
+  }, [triggerSync]);
+
+  // 3. Sync khi Exit (Page Unload / Unmount)
+  useEffect(() => {
+    const onExit = () => {
+      if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+    };
+
+    window.addEventListener("beforeunload", onExit);
+
+    return () => {
+      window.removeEventListener("beforeunload", onExit);
+      onExit(); 
+    };
+  }, [triggerSync]);
 
   const seekAndPlaySegment = useCallback(
     (segIndex: number) => {
@@ -307,6 +374,12 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
       {
         onSuccess: (data) => {
           setSegmentResults((prev) => ({ ...prev, [segIndex]: data }));
+          
+          // Gõ hoàn thành đúng 1 câu -> Sync ngay lập tức với isCompleted = true
+          if (data.accuracy === 100) {
+            triggerSync(segIndex, true);
+          }
+
           if (autoNext && segIndex < segments.length - 1) {
             setTimeout(() => handleSelectSegment(segIndex + 1), 1000);
           }

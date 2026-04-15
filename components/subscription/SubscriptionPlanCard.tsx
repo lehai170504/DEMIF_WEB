@@ -13,17 +13,22 @@ export function SubscriptionPlanCard({
   index,
   isPopular,
   isUserActive,
+  isPending,
+  pendingReference,
   hasAnyActiveSub,
+  hasAnyPendingSub,
   formatBillingCycle,
   animation,
 }: any) {
-  const isDisabled = hasAnyActiveSub && !isUserActive;
+  const isDisabled = ((hasAnyActiveSub || hasAnyPendingSub) && !isUserActive && !isPending);
 
   const buttonText = isUserActive
     ? "Đang sử dụng"
-    : isDisabled
-      ? "Đã có gói hoạt động"
-      : "Nâng cấp ngay";
+    : isPending
+      ? "Giao dịch đang chờ"
+      : (hasAnyActiveSub && !isUserActive)
+        ? "Đã có gói hoạt động"
+        : "Nâng cấp ngay";
 
   return (
     <motion.div
@@ -39,7 +44,7 @@ export function SubscriptionPlanCard({
       className={cn(
         "relative flex w-full h-full",
         isPopular ? "z-20" : "z-10",
-        isDisabled && "opacity-80", 
+        (isDisabled && !isPending) && "opacity-80", 
       )}
     >
       <Card
@@ -50,6 +55,8 @@ export function SubscriptionPlanCard({
             : "bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/5 shadow-xl",
           isUserActive &&
             "border-emerald-500 dark:border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.1)]",
+          isPending &&
+            "border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]",
         )}
       >
         <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
@@ -59,7 +66,7 @@ export function SubscriptionPlanCard({
         </div>
 
         {/* Badge cho gói Popular */}
-        {isPopular && !isUserActive && !isDisabled && (
+        {isPopular && !isUserActive && !isDisabled && !isPending && (
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
             <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-none px-4 py-1.5 shadow-lg rounded-full flex items-center gap-1.5 whitespace-nowrap">
               <Star className="w-3.5 h-3.5 fill-white" />
@@ -82,6 +89,18 @@ export function SubscriptionPlanCard({
           </div>
         )}
 
+        {/* Badge cho gói đang chờ */}
+        {isPending && (
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+            <Badge className="bg-amber-500 text-white border-none px-4 py-1.5 shadow-lg rounded-full flex items-center gap-1.5 whitespace-nowrap">
+              <Zap className="w-3.5 h-3.5 fill-white" />
+              <span className="font-black tracking-widest text-[10px] uppercase">
+                Chờ thanh toán
+              </span>
+            </Badge>
+          </div>
+        )}
+
         <div className="mb-8 mt-2 relative z-10">
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -94,6 +113,8 @@ export function SubscriptionPlanCard({
             </div>
             {isUserActive ? (
               <Zap className="w-6 h-6 text-emerald-500 fill-emerald-500" />
+            ) : isPending ? (
+              <Zap className="w-6 h-6 text-amber-500 fill-amber-500 animate-pulse" />
             ) : (
               isPopular && (
                 <Zap className="w-6 h-6 text-orange-500 fill-orange-500" />
@@ -117,7 +138,7 @@ export function SubscriptionPlanCard({
               <div
                 className={cn(
                   "mt-1 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
-                  isUserActive ? "bg-emerald-500" : "bg-orange-500",
+                  isUserActive ? "bg-emerald-500" : isPending ? "bg-amber-500" : "bg-orange-500",
                 )}
               >
                 <Check className="w-2.5 h-2.5 text-white" strokeWidth={4} />
@@ -141,19 +162,24 @@ export function SubscriptionPlanCard({
           ) : (
             <Button
               size="lg"
-              asChild={!isDisabled}
-              disabled={isDisabled}
+              asChild={!(isDisabled && !isPending)}
+              disabled={isDisabled && !isPending}
+              variant={isPending ? "secondary" : (isDisabled ? "secondary" : "default")}
               className={cn(
                 "w-full h-14 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 shadow-lg",
-                isDisabled
-                  ? "bg-gray-200 dark:bg-white/5 text-gray-400 dark:text-zinc-600 cursor-not-allowed border border-transparent shadow-none"
-                  : "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/25",
+                isDisabled && !isPending
+                  ? "bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-500 cursor-not-allowed border border-gray-200 dark:border-white/10 shadow-none"
+                  : isPending
+                    ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/25 border-none"
+                    : "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/25",
               )}
             >
-              {isDisabled ? (
+              {isDisabled && !isPending ? (
                 <span className="flex items-center gap-2">
                   <Lock className="w-4 h-4" /> {buttonText}
                 </span>
+              ) : isPending ? (
+                <Link href={`/payment?planId=${plan.id}&referenceCode=${pendingReference}`}>{buttonText}</Link>
               ) : (
                 <Link href={`/payment?planId=${plan.id}`}>{buttonText}</Link>
               )}
@@ -166,10 +192,22 @@ export function SubscriptionPlanCard({
             </p>
           )}
 
-          {isDisabled && (
-            <p className="text-[9px] text-center font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-tighter px-4">
+          {isPending && (
+            <p className="text-[9px] text-center font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tighter px-4">
+              Giao dịch của bạn đang chờ xử lý. Vui lòng hoàn tất thanh toán.
+            </p>
+          )}
+
+          {hasAnyActiveSub && !isUserActive && (
+            <p className="text-[9px] text-center font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-tighter px-4">
               Bạn đang sử dụng gói Premium khác. Vui lòng hủy gói cũ để thay
               đổi.
+            </p>
+          )}
+
+          {!hasAnyActiveSub && hasAnyPendingSub && !isPending && (
+            <p className="text-[9px] text-center font-bold text-amber-600 dark:text-amber-600/80 uppercase tracking-tighter px-4">
+              Vui lòng hoàn tất hoặc hủy giao dịch đang chờ để chọn gói khác.
             </p>
           )}
         </div>

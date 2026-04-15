@@ -50,9 +50,17 @@ export default function UpgradePage() {
     );
   };
 
+  // Chỉ coi là có gói hoạt động nếu status là Active hoặc Trialing (đã confirm)
   const hasAnyActiveSub =
     !!mySubscription &&
-    ["Active", "active", "trialing"].includes(mySubscription.status);
+    ["Active", "active", "trialing", "Trialing"].includes(
+      mySubscription.status,
+    );
+
+  // Kiểm tra xem có bất kỳ giao dịch nào đang chờ không
+  const hasAnyPendingSub = !!paymentHistory?.items?.some((tx: any) =>
+    ["Pending", "PendingPayment"].includes(tx.status),
+  );
 
   const handleActivateFreePlan = async (planId: string) => {
     try {
@@ -60,7 +68,7 @@ export default function UpgradePage() {
       const pendingTx = paymentHistory?.items?.find(
         (tx: any) =>
           tx.planId === planId &&
-          (tx.status === "Pending" || tx.status === "PendingPayment"),
+          ["Pending", "PendingPayment"].includes(tx.status),
       );
 
       if (pendingTx) {
@@ -145,6 +153,13 @@ export default function UpgradePage() {
                 plan.badgeText?.toLowerCase().includes("phổ biến") ||
                 plan.badgeText?.toLowerCase().includes("đề xuất");
 
+              // Tìm xem gói này có đang chờ thanh toán không (Match bằng name vì history item không có planId)
+              const pendingTx = paymentHistory?.items?.find(
+                (tx: any) =>
+                  tx.planName === plan.name &&
+                  ["Pending", "PendingPayment"].includes(tx.status),
+              );
+
               return (
                 <SubscriptionPlanCard
                   key={plan.id}
@@ -152,7 +167,10 @@ export default function UpgradePage() {
                   index={index}
                   isPopular={isPopular}
                   isUserActive={isCurrentPlan(plan)}
+                  isPending={!!pendingTx}
+                  pendingReference={pendingTx?.referenceCode}
                   hasAnyActiveSub={hasAnyActiveSub}
+                  hasAnyPendingSub={hasAnyPendingSub}
                   formatBillingCycle={formatBillingCycle}
                   animation={
                     index === 0
