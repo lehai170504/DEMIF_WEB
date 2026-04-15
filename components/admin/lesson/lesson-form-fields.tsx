@@ -84,14 +84,12 @@ export function LessonFormFields({
             name="lessonType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                  <Layout className="w-3 h-3" /> Loại bài học (lessonType)
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Loại bài học
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={
-                    field.value !== undefined ? String(field.value) : undefined
-                  }
+                  value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 shadow-inner font-bold">
@@ -102,7 +100,7 @@ export function LessonFormFields({
                     {LESSON_TYPES.map((t) => (
                       <SelectItem
                         key={t.value}
-                        value={String(t.value)}
+                        value={t.value}
                         className="text-xs font-bold uppercase"
                       >
                         {t.label}
@@ -110,6 +108,7 @@ export function LessonFormFields({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -124,9 +123,7 @@ export function LessonFormFields({
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={
-                    field.value !== undefined ? String(field.value) : undefined
-                  }
+                  value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 shadow-inner font-bold">
@@ -137,7 +134,7 @@ export function LessonFormFields({
                     {LESSON_LEVELS.map((l) => (
                       <SelectItem
                         key={l.value}
-                        value={String(l.value)}
+                        value={l.value}
                         className="text-xs font-bold uppercase"
                       >
                         {l.label}
@@ -145,6 +142,7 @@ export function LessonFormFields({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
               </FormItem>
             )}
           />

@@ -43,15 +43,13 @@ const formatDate = (dateString?: string | null) => {
 };
 
 export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
-  let displayTags: string[] = [];
-  if (lesson.tags) {
-    try {
-      const parsed = JSON.parse(lesson.tags);
-      displayTags = Array.isArray(parsed) ? parsed : lesson.tags.split(",");
-    } catch {
-      displayTags = lesson.tags.split(",");
-    }
-  }
+  // Tối ưu đoạn xử lý Tags: BE trả về chuỗi "a,b,c"
+  const displayTags = lesson.tags
+    ? lesson.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t !== "")
+    : [];
 
   return (
     <div className="space-y-6 font-mono transition-colors duration-300">
@@ -69,14 +67,14 @@ export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
             icon: BarChart,
             color: "text-blue-500",
             label: "Lượt hoàn thành",
-            value: lesson.completionsCount.toLocaleString("vi-VN"),
+            value: (lesson.completionsCount || 0).toLocaleString("vi-VN"),
             sub: "Học viên đã học",
           },
           {
             icon: Activity,
             color: "text-emerald-500",
             label: "Điểm trung bình",
-            value: `${lesson.avgScore.toFixed(1)} / 100`,
+            value: `${(lesson.avgScore || 0).toFixed(1)} / 100`,
             sub: "Hệ thống đánh giá",
           },
         ].map((stat, i) => (
@@ -137,52 +135,47 @@ export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
           </div>
 
           <div className="space-y-4 text-xs">
-            {[
-              { label: "Tiêu đề", value: lesson.title, isBold: true },
-              {
-                label: "Loại bài học",
-                value: lesson.lessonType,
-                isBadge: true,
-              },
-              { label: "Cấp độ", value: lesson.level, isBadge: true },
-              {
-                label: "Danh mục",
-                value: lesson.category || "Chưa phân loại",
-                isBox: true,
-              },
-              { label: "Thứ tự", value: lesson.displayOrder, isMono: true },
-            ].map((item, i) => (
-              <div key={i} className="flex justify-between items-center">
-                <span className="text-slate-500 dark:text-slate-400 font-bold">
-                  {item.label}:
-                </span>
-                {item.isBadge ? (
-                  <Badge
-                    variant="outline"
-                    className="bg-white dark:bg-zinc-800 dark:border-white/10 dark:text-slate-200 font-black text-[9px] uppercase tracking-widest"
-                  >
-                    {item.value}
-                  </Badge>
-                ) : item.isBox ? (
-                  <span className="font-black text-[10px] uppercase tracking-widest text-slate-800 dark:text-slate-200 bg-white dark:bg-zinc-800 px-2 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">
-                    {item.value}
-                  </span>
-                ) : item.isMono ? (
-                  <span className="font-mono bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded text-[10px] font-black">
-                    {item.value}
-                  </span>
-                ) : (
-                  <span
-                    className={cn(
-                      "font-bold text-slate-900 dark:text-slate-100 truncate max-w-[60%]",
-                      item.isBold && "font-black",
-                    )}
-                  >
-                    {item.value}
-                  </span>
-                )}
-              </div>
-            ))}
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 dark:text-slate-400 font-bold">
+                Tiêu đề:
+              </span>
+              <span className="font-black text-slate-900 dark:text-slate-100 truncate max-w-[60%] text-right">
+                {lesson.title}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 dark:text-slate-400 font-bold">
+                Loại bài học:
+              </span>
+              <Badge
+                variant="outline"
+                className="bg-white dark:bg-zinc-800 font-black text-[9px] uppercase tracking-widest"
+              >
+                {lesson.lessonType}
+              </Badge>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 dark:text-slate-400 font-bold">
+                Cấp độ chính:
+              </span>
+              <Badge
+                variant="outline"
+                className="bg-white dark:bg-zinc-800 font-black text-[9px] uppercase tracking-widest"
+              >
+                {lesson.level}
+              </Badge>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 dark:text-slate-400 font-bold">
+                Danh mục:
+              </span>
+              <span className="font-black text-[10px] uppercase tracking-widest text-slate-800 dark:text-slate-200 bg-white dark:bg-zinc-800 px-2 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">
+                {lesson.category || "General"}
+              </span>
+            </div>
 
             <div className="pt-2 border-t border-slate-200/60 dark:border-white/5">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-2">
@@ -192,13 +185,13 @@ export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {displayTags.length > 0 && displayTags[0] !== "" ? (
+                {displayTags.length > 0 ? (
                   displayTags.map((tag, idx) => (
                     <span
                       key={idx}
                       className="text-[9px] font-black uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-full border border-transparent dark:border-white/5"
                     >
-                      {tag.trim()}
+                      {tag}
                     </span>
                   ))
                 ) : (
@@ -223,10 +216,10 @@ export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
           <div className="space-y-4 text-xs">
             <div className="flex justify-between items-center">
               <span className="text-slate-500 dark:text-slate-400 font-bold">
-                Loại Media chính:
+                Loại Media:
               </span>
               <span className="font-black text-[10px] uppercase tracking-widest text-slate-800 dark:text-slate-200 bg-white dark:bg-zinc-800 px-2 py-1 rounded-md border border-slate-200 dark:border-white/10">
-                {lesson.mediaType || "Chưa xác định"}
+                {lesson.mediaType}
               </span>
             </div>
 
@@ -235,31 +228,46 @@ export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
                 <LinkIcon className="w-3.5 h-3.5" /> Media URL:
               </span>
               <a
-                href={lesson.mediaUrl || "#"}
+                href={lesson.mediaUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 truncate text-[10px] bg-white dark:bg-zinc-800 p-2 rounded-xl border border-slate-200 dark:border-white/10 transition-colors font-bold uppercase tracking-tighter"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 truncate text-[10px] bg-white dark:bg-zinc-800 p-2 rounded-xl border border-slate-200 dark:border-white/10 transition-colors font-bold"
               >
-                {lesson.mediaUrl || "Không có dữ liệu"}
+                {lesson.mediaUrl}
               </a>
             </div>
 
             <div className="flex justify-between items-center pt-2 border-t border-slate-200/60 dark:border-white/5">
               <span className="text-slate-500 dark:text-slate-400 font-bold flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5" /> Dictation Templates:
+                <FileText className="w-3.5 h-3.5" /> Dictation Exercise:
               </span>
               <span>
-                {lesson.hasDictationTemplates ? (
+                {lesson.hasDictationExercise ? (
                   <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-100 dark:border-emerald-500/20 font-black text-[9px] uppercase tracking-widest">
                     <CheckCircle className="w-3 h-3" /> Sẵn sàng
                   </span>
                 ) : (
                   <span className="text-rose-500 dark:text-rose-400 flex items-center gap-1 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-lg border border-rose-100 dark:border-rose-500/20 font-black text-[9px] uppercase tracking-widest">
-                    <XCircle className="w-3 h-3" /> Chưa tạo
+                    <XCircle className="w-3 h-3" /> Chưa có
                   </span>
                 )}
               </span>
             </div>
+
+            {/* Hiển thị các Level bài tập đang có */}
+            {lesson.availableDictationLevels &&
+              lesson.availableDictationLevels.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-slate-500 dark:text-slate-400 font-bold w-full mb-1">
+                    Cấp độ bài tập hiện có:
+                  </span>
+                  {lesson.availableDictationLevels.map((lvl) => (
+                    <Badge key={lvl} variant="secondary" className="text-[8px]">
+                      {lvl}
+                    </Badge>
+                  ))}
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -287,32 +295,26 @@ export function LessonOverviewTab({ lesson }: LessonOverviewTabProps) {
           </div>
 
           <div className="space-y-4">
-            {[
-              {
-                label: "Ngày khởi tạo",
-                value: formatDate(lesson.createdAt),
-                color: "text-emerald-400",
-              },
-              {
-                label: "Cập nhật lần cuối",
-                value: formatDate(lesson.updatedAt),
-                color: "text-blue-400",
-              },
-            ].map((log, i) => (
-              <div key={i} className="space-y-1.5">
+            <div className="space-y-1.5">
+              <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">
+                Ngày khởi tạo:
+              </span>
+              <span className="font-mono block bg-black/40 p-2.5 rounded-xl border border-white/5 text-[10px] font-black text-emerald-400">
+                {formatDate(lesson.createdAt)}
+              </span>
+            </div>
+
+            {/* Field status nếu có trong DTO phụ */}
+            {lesson.status && (
+              <div className="space-y-1.5">
                 <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">
-                  {log.label}:
+                  Trạng thái:
                 </span>
-                <span
-                  className={cn(
-                    "font-mono block bg-black/40 p-2.5 rounded-xl border border-white/5 text-[10px] font-black",
-                    log.color,
-                  )}
-                >
-                  {log.value}
+                <span className="font-mono block bg-black/40 p-2.5 rounded-xl border border-white/5 text-[10px] font-black text-blue-400 uppercase">
+                  {lesson.status}
                 </span>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

@@ -13,9 +13,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { extractErrorMessage } from "@/lib/error";
 
-// Import các component đã tách file
 import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
-import { FreePlanRow } from "@/components/subscription/FreePlanRow";
 
 export default function UpgradePage() {
   const {
@@ -88,7 +86,6 @@ export default function UpgradePage() {
     }
   };
 
-  // Phân loại data
   const paidPlans = plans
     ?.filter((p) => p.price > 0 && p.isActive !== false)
     .sort((a, b) => a.price - b.price);
@@ -116,11 +113,9 @@ export default function UpgradePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#050505] font-mono pb-24 relative overflow-x-hidden">
-      {/* Glow Effect nền */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-orange-500/5 blur-[120px] rounded-full -z-10" />
 
       <main className="container mx-auto px-4 pt-20">
-        {/* --- HEADER --- */}
         <div className="text-center mb-24 relative z-20">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -144,7 +139,7 @@ export default function UpgradePage() {
         </div>
 
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-32 items-stretch relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-24 items-stretch relative z-10">
             {paidPlans?.map((plan, index) => {
               const isPopular =
                 plan.badgeText?.toLowerCase().includes("phổ biến") ||
@@ -180,31 +175,6 @@ export default function UpgradePage() {
             })}
           </div>
 
-          {/* --- CÁC GÓI MIỄN PHÍ / DÙNG THỬ (HÀNG NGANG) --- */}
-          <div className="space-y-6 mb-24 relative z-0">
-            <div className="flex items-center gap-4 mb-10 px-4">
-              <div className="h-px flex-1 bg-gray-100 dark:bg-white/5" />
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 whitespace-nowrap">
-                Hoặc bắt đầu trải nghiệm
-              </span>
-              <div className="h-px flex-1 bg-gray-100 dark:bg-white/5" />
-            </div>
-
-            <div className="space-y-4">
-              {freePlans?.map((plan) => (
-                <FreePlanRow
-                  key={plan.id}
-                  plan={plan}
-                  isCurrent={isCurrentPlan(plan)}
-                  canPurchase={!hasAnyActiveSub}
-                  onActivate={handleActivateFreePlan}
-                  isPending={subscribeMutation.isPending}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* --- SECURITY FOOTER --- */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -218,9 +188,9 @@ export default function UpgradePage() {
                   Thanh toán an toàn & Bảo mật
                 </p>
                 <p className="text-gray-500 dark:text-zinc-500 text-sm font-medium leading-relaxed">
-                  Chúng tôi sử dụng cổng thanh toán VNPay/MoMo đạt chuẩn quốc
-                  tế. Cam kết hoàn tiền trong vòng 7 ngày nếu dịch vụ không đạt
-                  kỳ vọng của bạn.
+                  Chúng tôi sử dụng cổng thanh toán SEPay đạt chuẩn quốc tế. Cam
+                  kết hoàn tiền trong vòng 7 ngày nếu dịch vụ không đạt kỳ vọng
+                  của bạn.
                 </p>
               </div>
             </div>

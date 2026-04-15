@@ -26,7 +26,10 @@ import {
   useYoutubeTranscript,
 } from "@/hooks/use-lesson";
 import { YoutubePreviewCard } from "./youtube-preview-card";
-import { CreateLessonFromYoutubeResponse } from "@/types/lesson.type";
+import {
+  CreateLessonFromYoutubeRequest,
+  CreateLessonFromYoutubeResponse,
+} from "@/types/lesson.type";
 
 interface YoutubeAutoTabProps {
   onSuccess: (id?: string) => void;
@@ -36,8 +39,8 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
   const [ytUrl, setYtUrl] = React.useState("");
   const [ytLang, setYtLang] = React.useState("en");
 
-  const [lessonType, setLessonType] = React.useState("0");
-  const [level, setLevel] = React.useState("0");
+  const [lessonType, setLessonType] = React.useState("Dictation");
+  const [level, setLevel] = React.useState("Beginner");
 
   const { mutate: createFromYoutube, isPending: isYoutubePending } =
     useCreateFromYoutube();
@@ -63,27 +66,27 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
   const handleYoutubeSubmit = () => {
     if (!ytUrl) return;
 
-    createFromYoutube(
-      {
-        youTubeUrl: ytUrl,
-        captionLanguage: ytLang || "en",
-        lessonType: parseInt(lessonType, 10),
-        level: parseInt(level, 10),
-        category: preview?.suggestedCategory || "news",
-        isPremiumOnly: false,
-        displayOrder: 0,
-        tags: "youtube,transcript",
-        status: "draft",
-        titleOverride: null,
-        descriptionOverride: null,
+    // Payload đã được cập nhật gửi dạng String trực tiếp
+    const payload: CreateLessonFromYoutubeRequest = {
+      youTubeUrl: ytUrl,
+      captionLanguage: ytLang || "en",
+      lessonType: lessonType, // "Dictation" hoặc "Shadowing"
+      level: level, // "Beginner", "Intermediate", v.v.
+      category: preview?.suggestedCategory || "news",
+      isPremiumOnly: false,
+      displayOrder: 0,
+      tags: "youtube,transcript",
+      status: "draft",
+      titleOverride: null,
+      descriptionOverride: "Lesson import từ YouTube",
+    };
+
+    createFromYoutube(payload, {
+      onSuccess: (data: CreateLessonFromYoutubeResponse) => {
+        setYtUrl("");
+        onSuccess(data.lessonId);
       },
-      {
-        onSuccess: (data: CreateLessonFromYoutubeResponse) => {
-          setYtUrl("");
-          onSuccess(data.lessonId);
-        },
-      },
-    );
+    });
   };
 
   return (
@@ -118,7 +121,6 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
           >
             <YoutubePreviewCard data={preview} />
 
-            {/* Cảnh báo nếu video không có sub Manual */}
             {!preview.hasCaptions && (
               <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl flex items-center gap-3 text-orange-600 dark:text-orange-400">
                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -129,7 +131,6 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
               </div>
             )}
 
-            {/* --- KHU VỰC CHỌN THUỘC TÍNH BÀI HỌC --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2 ml-2">
@@ -141,18 +142,17 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 font-mono">
                     <SelectItem
-                      value="0"
+                      value="Dictation"
                       className="text-[11px] font-bold uppercase"
                     >
                       Dictation (Chép chính tả)
                     </SelectItem>
                     <SelectItem
-                      value="1"
+                      value="Shadowing"
                       className="text-[11px] font-bold uppercase"
                     >
                       Shadowing (Đuổi âm)
                     </SelectItem>
-                    {/* Thêm value="2" nếu sau này BE bổ sung Conversation */}
                   </SelectContent>
                 </Select>
               </div>
@@ -167,25 +167,25 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 font-mono">
                     <SelectItem
-                      value="0"
+                      value="Beginner"
                       className="text-[11px] font-bold uppercase"
                     >
                       Beginner (Cơ bản)
                     </SelectItem>
                     <SelectItem
-                      value="1"
+                      value="Intermediate"
                       className="text-[11px] font-bold uppercase"
                     >
                       Intermediate (Trung cấp)
                     </SelectItem>
                     <SelectItem
-                      value="2"
+                      value="Advanced"
                       className="text-[11px] font-bold uppercase"
                     >
                       Advanced (Nâng cao)
                     </SelectItem>
                     <SelectItem
-                      value="3"
+                      value="Expert"
                       className="text-[11px] font-bold uppercase"
                     >
                       Expert (Chuyên gia)
@@ -228,7 +228,6 @@ export function YoutubeAutoTab({ onSuccess }: YoutubeAutoTabProps) {
                     </Select>
                   </div>
                 </div>
-
                 <div className="max-h-32 overflow-y-auto pr-2 custom-scrollbar font-medium italic text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed text-left">
                   {transcript.fullText ||
                     "Không tìm thấy phụ đề bóc tách được từ video này."}

@@ -36,13 +36,9 @@ import {
 } from "@/components/ui/select";
 import { useLessonActions } from "@/hooks/use-lesson";
 import {
-  CreateLessonSchema,
   CreateLessonFormValues,
+  CreateLessonSchema,
 } from "@/schemas/lesson.schema";
-import {
-  LESSON_TYPES,
-  LESSON_LEVELS,
-} from "@/components/admin/lesson/lesson.constants";
 
 interface QuickCreateTabProps {
   onSuccess: (id?: string) => void;
@@ -57,34 +53,26 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
       title: "",
       description: "",
       transcript: "",
-      format: "srt", // Để mặc định là srt cho phổ biến
+      format: "auto", // Backend khuyến khích dùng auto
       mediaUrl: "",
-      level: "0",
-      lessonType: "0",
-      tags: "",
+      mediaType: "youtube",
+      durationSeconds: 0,
+      level: "Intermediate",
+      lessonType: "Dictation",
+      category: "academic",
+      tags: "youtube,transcript",
+      thumbnailUrl: "",
     },
   });
 
   const onSubmit = (values: CreateLessonFormValues) => {
-    const payload = {
-      title: values.title,
-      description: values.description,
-      transcript: values.transcript,
-      format: values.format,
-      mediaUrl: values.mediaUrl,
-      level: Number(values.level),
-      lessonType: Number(values.lessonType),
-      tags: values.tags?.trim() || "",
-    };
-
-    createLesson(payload, {
+    createLesson(values, {
       onSuccess: (data: any) => {
-        toast.success("Tạo bài học thành công!");
+        toast.success(data?.message || "Tạo bài học thành công!");
         form.reset();
         onSuccess(data?.lessonId);
       },
       onError: (err: any) => {
-        // Hiện lỗi chi tiết từ BE nếu có
         const errorMsg =
           err?.response?.data?.error || "Có lỗi xảy ra khi tạo bài học.";
         toast.error(errorMsg);
@@ -96,18 +84,18 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
     <div className="space-y-6 font-mono text-left">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-          {/* HÀNG 1: TIÊU ĐỀ */}
+          {/* TIÊU ĐỀ & MÔ TẢ GIỮ NGUYÊN */}
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
-              <FormItem className="space-y-2 text-left">
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
+              <FormItem className="space-y-2">
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
                   <Type className="w-3 h-3 text-orange-500" /> Tiêu đề bài học
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="VD: Daily Conversation - Ordering Coffee"
+                    placeholder="VD: Cassie School Starts Later"
                     className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs shadow-inner"
                     {...field}
                   />
@@ -117,18 +105,17 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
             )}
           />
 
-          {/* HÀNG 2: MÔ TẢ */}
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="space-y-2 text-left">
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
+              <FormItem className="space-y-2">
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
                   <FileText className="w-3 h-3 text-blue-500" /> Mô tả ngắn
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Nhập mô tả cho bài học này..."
+                    placeholder="Nhập mô tả..."
                     className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs shadow-inner"
                     {...field}
                   />
@@ -138,19 +125,19 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
             )}
           />
 
-          {/* HÀNG 3: MEDIA URL & TAGS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="mediaUrl"
               render={({ field }) => (
-                <FormItem className="space-y-2 text-left">
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
-                    <Globe className="w-3 h-3 text-emerald-500" /> Media URL
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
+                    <Globe className="w-3 h-3 text-emerald-500" /> URL
+                    (Youtube/Media)
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="https://storage.demif.com/audio.mp3"
+                      placeholder="https://www.youtube.com/watch?v=..."
                       className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs shadow-inner"
                       {...field}
                     />
@@ -161,17 +148,21 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
             />
             <FormField
               control={form.control}
-              name="tags"
+              name="durationSeconds"
               render={({ field }) => (
-                <FormItem className="space-y-2 text-left">
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
-                    <Hash className="w-3 h-3 text-purple-500" /> Thẻ (Tags)
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
+                    <Settings2 className="w-3 h-3 text-pink-500" /> Thời lượng
+                    (giây)
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="daily, conversation, news..."
+                      type="number"
                       className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs shadow-inner"
                       {...field}
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                 </FormItem>
@@ -179,35 +170,34 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
             />
           </div>
 
-          {/* HÀNG 4: TYPE & LEVEL */}
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="lessonType"
               render={({ field }) => (
-                <FormItem className="space-y-2 text-left">
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
-                    <Layers className="w-3 h-3 text-orange-500" /> Phân loại
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
+                    <Layers className="w-3 h-3 text-orange-500" /> Loại bài
                   </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs uppercase shadow-inner">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="font-mono">
-                      {LESSON_TYPES.map((type) => (
-                        <SelectItem
-                          key={type.value}
-                          value={String(type.value)}
-                          className="text-[11px] font-bold uppercase"
-                        >
-                          {type.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem
+                        value="Dictation"
+                        className="text-[11px] font-bold uppercase"
+                      >
+                        Dictation
+                      </SelectItem>
+                      <SelectItem
+                        value="Shadowing"
+                        className="text-[11px] font-bold uppercase"
+                      >
+                        Shadowing
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -217,29 +207,28 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
               control={form.control}
               name="level"
               render={({ field }) => (
-                <FormItem className="space-y-2 text-left">
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
                     <Signal className="w-3 h-3 text-emerald-500" /> Cấp độ
                   </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs uppercase shadow-inner">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="font-mono">
-                      {LESSON_LEVELS.map((lvl) => (
-                        <SelectItem
-                          key={lvl.value}
-                          value={String(lvl.value)}
-                          className="text-[11px] font-bold uppercase"
-                        >
-                          {lvl.label}
-                        </SelectItem>
-                      ))}
+                      {["Beginner", "Intermediate", "Advanced", "Expert"].map(
+                        (lvl) => (
+                          <SelectItem
+                            key={lvl}
+                            value={lvl}
+                            className="text-[11px] font-bold uppercase"
+                          >
+                            {lvl}
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -247,63 +236,84 @@ export function QuickCreateTab({ onSuccess }: QuickCreateTabProps) {
             />
           </div>
 
-          {/* HÀNG 5: FORMAT (MỚI THÊM) */}
-          <FormField
-            control={form.control}
-            name="format"
-            render={({ field }) => (
-              <FormItem className="space-y-2 text-left">
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
-                  <Settings2 className="w-3 h-3 text-pink-500" /> Định dạng
-                  Transcript
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="format"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
+                    <Settings2 className="w-3 h-3 text-pink-500" /> Định dạng
+                    Transcript
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs uppercase shadow-inner">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="font-mono">
+                      <SelectItem
+                        value="auto"
+                        className="text-[11px] font-bold uppercase"
+                      >
+                        Auto Detect (Recommend)
+                      </SelectItem>
+                      <SelectItem
+                        value="vtt"
+                        className="text-[11px] font-bold uppercase"
+                      >
+                        VTT (Tactiq/YouTube)
+                      </SelectItem>
+                      <SelectItem
+                        value="srt"
+                        className="text-[11px] font-bold uppercase"
+                      >
+                        SRT
+                      </SelectItem>
+                      <SelectItem
+                        value="plain"
+                        className="text-[11px] font-bold uppercase"
+                      >
+                        Plain Text
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
+                    <Hash className="w-3 h-3 text-purple-500" /> Thẻ (Tags)
+                  </FormLabel>
                   <FormControl>
-                    <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs uppercase shadow-inner">
-                      <SelectValue placeholder="Chọn định dạng" />
-                    </SelectTrigger>
+                    <Input
+                      placeholder="tag1, tag2..."
+                      className="h-12 rounded-xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs shadow-inner"
+                      {...field}
+                    />
                   </FormControl>
-                  <SelectContent className="font-mono">
-                    <SelectItem
-                      value="srt"
-                      className="text-[11px] font-bold uppercase"
-                    >
-                      SRT (Có thời gian)
-                    </SelectItem>
-                    <SelectItem
-                      value="vtt"
-                      className="text-[11px] font-bold uppercase"
-                    >
-                      VTT (YouTube format)
-                    </SelectItem>
-                    <SelectItem
-                      value="plain"
-                      className="text-[11px] font-bold uppercase"
-                    >
-                      PLAIN (Văn bản thuần)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          {/* HÀNG 6: TRANSCRIPT AREA */}
           <FormField
             control={form.control}
             name="transcript"
             render={({ field }) => (
-              <FormItem className="space-y-2 text-left">
-                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ml-1 text-slate-500">
+              <FormItem className="space-y-2">
+                <FormLabel className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-500">
                   <FileText className="w-3 h-3 text-pink-500" /> Nội dung
                   Transcript
                 </FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Dán nội dung transcript vào đây (Nhớ chọn đúng định dạng bên trên)..."
+                    placeholder="Dán nội dung từ Tactiq.io hoặc YouTube vào đây..."
                     className="min-h-[160px] rounded-2xl bg-slate-50 dark:bg-zinc-900 border-none font-bold text-xs p-4 leading-relaxed shadow-inner"
                     {...field}
                   />
