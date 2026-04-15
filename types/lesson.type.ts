@@ -7,27 +7,21 @@ export interface LessonDto {
   description: string;
   lessonType: string;
   level: string;
-
   category: string | null;
   audioUrl: string | null;
   mediaUrl: string | null;
   mediaType: string | null;
-
   videoId: string | null;
   embedUrl: string | null;
-
   thumbnailUrl: string | null;
-
   durationSeconds: number;
   fullTranscript: string;
   timedTranscript: string | null;
   hasDictationTemplates: boolean;
-
   isPremiumOnly: boolean;
   displayOrder: number;
   tags: string | null;
   status: string;
-
   completionsCount: number;
   avgScore: number;
   createdAt: string;
@@ -59,17 +53,11 @@ export interface CreateLessonRequest {
   title: string;
   description: string;
   transcript: string;
-  format: string;
+  format: string; // Thường gửi "auto"
   mediaUrl: string;
-  mediaType: string;
-  durationSeconds: number;
-  level: number;
-  lessonType: number;
-  category: string;
-  isPremiumOnly: boolean;
-  displayOrder: number;
-  tags?: string | null;
-  thumbnailUrl?: string | null;
+  level: number; // 0, 1, 2, 3
+  lessonType: number; // 0, 1
+  tags: string; // Chuỗi "tag1, tag2"
 }
 // ==========================================
 // Dùng cho PUT /api/admin/lessons/{id}
@@ -77,16 +65,16 @@ export interface CreateLessonRequest {
 export interface UpdateLessonRequest {
   title?: string;
   description?: string;
-  lessonType?: number;
-  level?: number;
+  level?: number; // 0, 1, 2, 3
+  tags?: string | null;
+  isPremiumOnly?: boolean;
+  displayOrder?: number;
+  lessonType?: number; // 0, 1
   category?: string;
   audioUrl?: string | null;
   mediaUrl?: string | null;
   mediaType?: string | null;
   thumbnailUrl?: string | null;
-  isPremiumOnly?: boolean;
-  displayOrder?: number;
-  tags?: string | null;
   fullTranscript?: string;
 }
 export interface DictationWord {

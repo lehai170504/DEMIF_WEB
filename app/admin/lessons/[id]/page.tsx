@@ -30,50 +30,7 @@ import { LessonFormFields } from "@/components/admin/lesson/lesson-form-fields";
 import { LessonOverviewTab } from "@/components/admin/lesson/lesson-overview-tab";
 import { DictationPreviewTab } from "@/components/admin/lesson/dictation-preview-tab";
 import { DeleteLessonDialog } from "@/components/admin/lesson/delete-lesson-dialog";
-
-import {
-  LESSON_TYPES,
-  LESSON_LEVELS,
-} from "@/components/admin/lesson/lesson.constants";
 import { cn } from "@/lib/utils";
-
-// Helpers
-const parseTagsForInput = (tagsRaw?: string | null) => {
-  if (!tagsRaw) return "";
-  try {
-    const parsed = JSON.parse(tagsRaw);
-    return Array.isArray(parsed) ? parsed.join(", ") : tagsRaw;
-  } catch {
-    return tagsRaw || "";
-  }
-};
-
-const mapStringToNumber = (
-  value: string | number | null | undefined,
-  options: { value: number; label: string }[],
-  defaultValue: number,
-) => {
-  // 1. Nếu rỗng thì trả về mặc định
-  if (value === null || value === undefined || value === "")
-    return defaultValue;
-
-  // 2. Nếu đã là số thì dùng luôn
-  if (typeof value === "number") return value;
-
-  // 3. Chuẩn hóa chuỗi từ BE (xóa khoảng trắng, đưa về chữ thường)
-  const incomingStr = String(value).trim().toLowerCase();
-
-  // 4. Tìm theo Label (vd: "advanced")
-  const matchByLabel = options.find(
-    (opt) => opt.label.toLowerCase() === incomingStr,
-  );
-  if (matchByLabel !== undefined) return matchByLabel.value;
-
-  // 5. Dự phòng: Tìm theo chính giá trị (vd: "2")
-  const matchByValue = options.find((opt) => String(opt.value) === incomingStr);
-
-  return matchByValue !== undefined ? matchByValue.value : defaultValue;
-};
 
 const tabVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
@@ -97,15 +54,14 @@ export default function LessonDetailPage() {
     defaultValues: {
       title: "",
       description: "",
-      lessonType: 0,
-      level: 0,
+      lessonType: "0",
+      level: "0",
       category: "",
       isPremiumOnly: false,
       displayOrder: 0,
       audioUrl: "",
       mediaUrl: "",
       mediaType: "audio",
-      thumbnailUrl: "",
       fullTranscript: "",
       tags: "",
     },
@@ -113,34 +69,47 @@ export default function LessonDetailPage() {
 
   const formErrors = form.formState.errors;
 
+  // 1. Định nghĩa bộ từ điển tra cứu (Mapper)
+  const DATA_MAPPER: Record<string, string> = {
+    // Map cho Lesson Type
+    Dictation: "0",
+    Shadowing: "1",
+
+    // Map cho Level
+    Beginner: "0",
+    Intermediate: "1",
+    Advanced: "2",
+    Expert: "3",
+  };
+
+  // 2. Cập nhật hàm Reset Form trong useEffect
   React.useEffect(() => {
     if (lesson) {
       form.reset({
-        title: lesson.title || "",
-        description: lesson.description || "",
-        lessonType: mapStringToNumber(lesson.lessonType, LESSON_TYPES, 0),
-        level: mapStringToNumber(lesson.level, LESSON_LEVELS, 0),
+        ...lesson,
+        lessonType: DATA_MAPPER[lesson.lessonType] || "0",
+        level: DATA_MAPPER[lesson.level] || "0",
         category: lesson.category || "",
-        isPremiumOnly: !!lesson.isPremiumOnly,
-        displayOrder: Number(lesson.displayOrder) || 0,
-        audioUrl: lesson.audioUrl || "",
+        tags: lesson.tags || "",
         mediaUrl: lesson.mediaUrl || "",
-        mediaType: lesson.mediaType || "audio",
+        audioUrl: lesson.audioUrl || "",
         thumbnailUrl: lesson.thumbnailUrl || "",
         fullTranscript: lesson.fullTranscript || "",
-        tags: parseTagsForInput(lesson.tags),
-      });
+        isPremiumOnly: !!lesson.isPremiumOnly,
+        displayOrder: Number(lesson.displayOrder) || 0,
+      } as any);
     }
   }, [lesson, form]);
 
   const onSubmit = (values: UpdateLessonFormValues) => {
     if (!lesson) return;
 
-    const formattedTags = values.tags?.trim() || null;
-
     const payload: UpdateLessonRequest = {
       ...values,
-      tags: formattedTags,
+      lessonType: Number(values.lessonType),
+      level: Number(values.level),
+      displayOrder: Number(values.displayOrder),
+      tags: values.tags?.trim() || null,
       fullTranscript: values.fullTranscript || undefined,
     };
 
@@ -152,7 +121,7 @@ export default function LessonDetailPage() {
       <div className="w-full h-[80vh] flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 font-mono animate-pulse">
         <Loader2 className="h-10 w-10 animate-spin text-orange-500 mb-4" />
         <p className="text-[10px] font-black uppercase tracking-[0.2em]">
-          Đang tải dữ liệu bài học...
+          Đang đồng bộ dữ liệu...
         </p>
       </div>
     );
@@ -167,7 +136,7 @@ export default function LessonDetailPage() {
         <Button
           variant="outline"
           onClick={() => router.push("/admin/lessons")}
-          className="rounded-xl border-slate-200 dark:border-white/10"
+          className="rounded-xl border-slate-200"
         >
           Quay lại danh sách
         </Button>
@@ -181,30 +150,29 @@ export default function LessonDetailPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-[1400px] mx-auto space-y-6 pb-12 font-mono px-4 lg:px-12 transition-colors duration-300"
+      className="w-full max-w-[1400px] mx-auto space-y-6 pb-12 font-mono px-4 lg:px-12 text-left"
     >
       <button
         onClick={() => router.push("/admin/lessons")}
-        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all mb-2 mt-6 group"
+        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all group"
       >
         <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-1" />{" "}
         Quay lại danh sách
       </button>
 
-      {/* Header section */}
       <div className="bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-white/5 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl border border-orange-100 dark:border-orange-500/20">
             <LayoutTemplate className="h-6 w-6 text-orange-600 dark:text-orange-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-              Biên tập bài học
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate max-w-[400px]">
+              {lesson.title || "Biên tập"}
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <Badge
                 variant="outline"
-                className="uppercase text-[9px] font-black tracking-widest border-orange-200 dark:border-orange-500/30 text-orange-600 dark:text-orange-400"
+                className="uppercase text-[9px] font-black tracking-widest border-orange-200 text-orange-600"
               >
                 ID: {lesson.id.split("-")[0]}
               </Badge>
@@ -212,8 +180,8 @@ export default function LessonDetailPage() {
                 className={cn(
                   "uppercase text-[9px] font-black tracking-widest",
                   isPublished
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                    : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400",
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-200 text-slate-600",
                 )}
               >
                 {lesson.status}
@@ -228,8 +196,8 @@ export default function LessonDetailPage() {
             className={cn(
               "h-12 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all",
               isPublished
-                ? "border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
-                : "border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10",
+                ? "border-amber-200 text-amber-600"
+                : "border-emerald-200 text-emerald-600",
             )}
             onClick={() =>
               updateStatus({
@@ -250,7 +218,7 @@ export default function LessonDetailPage() {
 
           <Button
             variant="outline"
-            className="h-12 px-6 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+            className="h-12 px-6 border-red-200 text-red-600 hover:bg-red-50 rounded-2xl font-black text-[10px] uppercase tracking-widest"
             onClick={() => setIsDeleteDialogOpen(true)}
             disabled={isUpdating}
           >
@@ -268,7 +236,7 @@ export default function LessonDetailPage() {
                 <Button
                   type="submit"
                   form="update-lesson-form"
-                  className="h-12 px-8 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95"
+                  className="h-12 px-8 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 text-[10px] uppercase tracking-[0.2em]"
                   disabled={isUpdating}
                 >
                   {isUpdating ? (
@@ -276,7 +244,7 @@ export default function LessonDetailPage() {
                   ) : (
                     <Save className="h-4 w-4 mr-2" />
                   )}
-                  Lưu thay đổi
+                  Lưu bài viết
                 </Button>
               </motion.div>
             )}
@@ -284,25 +252,24 @@ export default function LessonDetailPage() {
         </div>
       </div>
 
-      {/* Tabs section */}
       <div className="bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-white/5 rounded-[3rem] p-4 shadow-sm min-h-[600px]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full bg-slate-100/50 dark:bg-white/5 p-2 rounded-[2rem] mb-8 grid grid-cols-3 h-16">
             <TabsTrigger
               value="overview"
-              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-lg transition-all"
+              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-lg transition-all"
             >
               Tổng quan
             </TabsTrigger>
             <TabsTrigger
               value="edit"
-              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-lg transition-all"
+              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg transition-all"
             >
               Nội dung
             </TabsTrigger>
             <TabsTrigger
               value="preview"
-              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-purple-600 dark:data-[state=active]:text-purple-400 data-[state=active]:shadow-lg transition-all"
+              className="rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-lg transition-all"
             >
               Kiểm định
             </TabsTrigger>
@@ -336,35 +303,25 @@ export default function LessonDetailPage() {
                       onSubmit={form.handleSubmit(onSubmit)}
                     >
                       <LessonFormFields form={form as any} isEditMode={true} />
-                      {/* Errors list logic */}
-                      <AnimatePresence>
-                        {Object.keys(formErrors).length > 0 && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-8 p-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[2rem] overflow-hidden"
-                          >
-                            <p className="text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest mb-4">
-                              Lỗi nhập liệu:
-                            </p>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {Object.entries(formErrors).map(([key, err]) => (
-                                <li
-                                  key={key}
-                                  className="flex items-center gap-2 text-xs font-bold text-red-500/80"
-                                >
-                                  <span className="h-1 w-1 rounded-full bg-red-500 shrink-0" />
-                                  <span className="opacity-60 uppercase text-[9px]">
-                                    {key}:
-                                  </span>{" "}
-                                  {err?.message as string}
-                                </li>
-                              ))}
-                            </ul>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+
+                      {Object.keys(formErrors).length > 0 && (
+                        <div className="mt-8 p-6 bg-red-50 border border-red-100 rounded-[2rem] text-left">
+                          <p className="text-red-600 text-[10px] font-black uppercase tracking-widest mb-4">
+                            Lỗi nhập liệu:
+                          </p>
+                          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {Object.entries(formErrors).map(([key, err]) => (
+                              <li
+                                key={key}
+                                className="text-[11px] font-bold text-red-500 uppercase flex items-center gap-2"
+                              >
+                                <span className="h-1 w-1 bg-red-500 rounded-full" />{" "}
+                                {key}: {err?.message as string}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </form>
                   </Form>
                 </motion.div>
