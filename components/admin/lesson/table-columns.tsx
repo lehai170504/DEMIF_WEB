@@ -34,30 +34,12 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 // --- HELPERS ---
-export const normalizeStatus = (status?: string | null) => {
-  if (!status) return "draft";
-  const s = status.toLowerCase();
-  if (s === "published") return "published";
-  if (s === "archived") return "archived";
-  if (s === "review") return "review";
-  return "draft";
-};
-
-export const normalizeType = (type?: string | number | null) => {
-  const t = String(type).toLowerCase();
-  if (t === "0" || t === "dictation") return "Dictation";
-  if (t === "1" || t === "shadowing") return "Shadowing";
-  return "Dictation";
-};
-
-export const normalizeLevel = (level?: string | number | null) => {
-  const l = String(level).toLowerCase();
-  if (l === "0" || l === "beginner") return "Beginner";
-  if (l === "1" || l === "intermediate") return "Intermediate";
-  if (l === "2" || l === "advanced") return "Advanced";
-  if (l === "3" || l === "expert") return "Expert";
-  return "Beginner";
-};
+export const normalizeStatus = (status?: string | null) =>
+  status?.toLowerCase() || "draft";
+export const normalizeType = (type?: string | number | null) =>
+  String(type || "Dictation");
+export const normalizeLevel = (level?: string | number | null) =>
+  String(level || "Beginner");
 
 const formatDuration = (seconds: number) => {
   const m = Math.floor(seconds / 60);
@@ -117,18 +99,12 @@ export const columns: ColumnDef<LessonDto>[] = [
   },
   {
     accessorKey: "displayOrder",
-    header: ({ column }) => (
-      <div className="flex items-center gap-1">
-        <IconHash className="size-3 text-orange-500" />
-        <span>Ưu tiên</span>
-      </div>
-    ),
+    header: "Ưu tiên",
     cell: ({ row }) => (
-      <div className="font-mono text-[10px] font-black text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 w-7 h-7 flex items-center justify-center rounded-lg">
-        {row.getValue("displayOrder")}
+      <div className="font-mono text-[10px] font-black text-slate-400 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 w-7 h-7 flex items-center justify-center rounded-lg">
+        {row.getValue("displayOrder") ?? 0}
       </div>
     ),
-    enableSorting: true,
   },
   {
     accessorKey: "title",
@@ -137,20 +113,15 @@ export const columns: ColumnDef<LessonDto>[] = [
       const lesson = row.original;
       return (
         <div className="flex flex-col gap-1 min-w-[200px]">
-          <span
-            className={cn(
-              "font-bold truncate max-w-[300px] text-slate-900 dark:text-slate-100",
-              !lesson.title && "text-slate-400 italic",
-            )}
-          >
+          <span className="font-bold truncate max-w-[300px] text-slate-900 dark:text-slate-100">
             {lesson.title || "Chưa có tiêu đề"}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-black">
-              {lesson.category || "Chưa phân loại"}
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-black">
+              {lesson.category || "General"}
             </span>
             {lesson.isPremiumOnly && (
-              <IconCrown className="size-3 text-amber-500 shadow-sm" />
+              <IconCrown className="size-3 text-amber-500" />
             )}
           </div>
         </div>
@@ -163,22 +134,23 @@ export const columns: ColumnDef<LessonDto>[] = [
     cell: ({ row }) => {
       const type = normalizeType(row.original.lessonType);
       const isVideo =
-        row.original.mediaType?.toLowerCase() === "video" ||
-        !!row.original.videoId;
+        row.original.mediaType?.toLowerCase() === "youtube" ||
+        row.original.mediaType?.toLowerCase() === "video";
+
       return (
         <div className="flex items-center gap-2">
           {isVideo ? (
-            <IconVideo className="size-4 text-blue-500 dark:text-blue-400" />
+            <IconVideo className="size-4 text-blue-500" />
           ) : (
-            <IconHeadphones className="size-4 text-purple-500 dark:text-purple-400" />
+            <IconHeadphones className="size-4 text-purple-500" />
           )}
           <Badge
             variant="outline"
             className={cn(
-              "px-2 py-0.5 text-[9px] font-black uppercase transition-colors",
+              "px-2 py-0.5 text-[9px] font-black uppercase",
               type === "Dictation"
-                ? "border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10"
-                : "border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-500/10",
+                ? "border-blue-200 text-blue-600 bg-blue-50/50"
+                : "border-purple-200 text-purple-600 bg-purple-50/50",
             )}
           >
             {type}
@@ -194,22 +166,21 @@ export const columns: ColumnDef<LessonDto>[] = [
       const level = normalizeLevel(row.original.level);
       const colors: Record<string, string> = {
         Expert:
-          "text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/10",
+          "text-purple-600 border-purple-200 bg-purple-50 dark:bg-purple-500/10",
         Advanced:
-          "text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10",
+          "text-rose-600 border-rose-200 bg-rose-50 dark:bg-rose-500/10",
         Intermediate:
-          "text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10",
+          "text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-500/10",
         Beginner:
-          "text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10",
+          "text-emerald-600 border-emerald-200 bg-emerald-50 dark:bg-emerald-500/10",
       };
 
       return (
         <Badge
           variant="secondary"
           className={cn(
-            "border transition-all duration-300 font-black px-2.5 py-0.5 rounded-full uppercase text-[9px] tracking-widest whitespace-nowrap",
-            colors[level] ||
-              "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-white/5",
+            "border font-black px-2.5 py-0.5 rounded-full uppercase text-[9px] tracking-widest",
+            colors[level] || "text-slate-600 bg-slate-50",
           )}
         >
           {level}
@@ -221,11 +192,9 @@ export const columns: ColumnDef<LessonDto>[] = [
     accessorKey: "durationSeconds",
     header: "Thời lượng",
     cell: ({ row }) => (
-      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-bold font-mono">
+      <div className="flex items-center gap-1.5 text-slate-500 font-bold font-mono text-[11px]">
         <IconClock className="size-3.5" />
-        <span className="text-[11px]">
-          {formatDuration(row.original.durationSeconds || 0)}
-        </span>
+        {formatDuration(row.original.durationSeconds || 0)}
       </div>
     ),
   },
@@ -236,32 +205,19 @@ export const columns: ColumnDef<LessonDto>[] = [
       const status = normalizeStatus(row.original.status);
       const statusConfig: Record<string, any> = {
         published: {
-          icon: (
-            <IconCircleCheckFilled className="size-4 text-emerald-500 dark:text-emerald-400" />
-          ),
-          color: "text-emerald-600 dark:text-emerald-400",
+          icon: <IconCircleCheckFilled className="size-4 text-emerald-500" />,
+          color: "text-emerald-600",
           label: "Published",
         },
         draft: {
-          icon: (
-            <div className="size-2 rounded-full bg-slate-400 dark:bg-slate-600 mx-1" />
-          ),
-          color: "text-slate-500 dark:text-slate-500",
+          icon: <div className="size-2 rounded-full bg-slate-400 mx-1" />,
+          color: "text-slate-500",
           label: "Draft",
         },
         archived: {
-          icon: (
-            <IconArchive className="size-4 text-slate-400 dark:text-slate-600" />
-          ),
-          color: "text-slate-400 dark:text-slate-600 italic line-through",
+          icon: <IconArchive className="size-4 text-slate-400" />,
+          color: "text-slate-400 italic line-through",
           label: "Archived",
-        },
-        review: {
-          icon: (
-            <IconAlertCircle className="size-4 text-amber-500 dark:text-amber-400" />
-          ),
-          color: "text-amber-600 dark:text-amber-400",
-          label: "Review",
         },
       };
       const config = statusConfig[status] || statusConfig.draft;
