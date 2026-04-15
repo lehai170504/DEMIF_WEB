@@ -44,13 +44,21 @@ export default function DictationPage() {
     category: category || undefined,
   });
 
+  // Query riêng để lấy danh sách Tags (không bị ảnh hưởng bởi filter category hiện tại)
+  const { data: tagData } = useUserLessons({
+    page: 1,
+    pageSize: 50,
+    type: "Dictation",
+  });
+
   const { data: lessonHistoryData } = useLessonHistory({ pageSize: 1000 });
   const historyMap = useMemo(() => {
     const map = new Map<string, any>();
-    lessonHistoryData?.items?.forEach(h => {
+    lessonHistoryData?.items?.forEach((h) => {
       map.set(h.lessonId, {
         status: h.status,
-        progressPercent: h.progressPercent ?? (h.status === "Completed" ? 1 : 0.5)
+        progressPercent:
+          h.progressPercent ?? (h.status === "Completed" ? 1 : 0.5),
       });
     });
     return map;
@@ -59,8 +67,6 @@ export default function DictationPage() {
   useEffect(() => {
     setPage(1);
   }, [category, debouncedSearch]);
-
-
 
   const displayItems = useMemo(() => {
     return (data?.items ?? []).filter(
@@ -71,13 +77,14 @@ export default function DictationPage() {
   }, [data?.items, debouncedSearch]);
 
   const dynamicTags = useMemo(() => {
-    if (!data?.items) return [];
+    const sourceData = tagData?.items || data?.items || [];
+    if (sourceData.length === 0) return [];
     const tags = new Set<string>();
-    data.items.forEach(i => {
+    sourceData.forEach((i) => {
       if (i.category) tags.add(i.category.toLowerCase());
     });
-    return Array.from(tags).map(t => ({ val: t, label: t }));
-  }, [data?.items]);
+    return Array.from(tags).map((t) => ({ val: t, label: t }));
+  }, [tagData?.items, data?.items]);
 
   return (
     <div className="w-full font-mono pb-20 selection:bg-orange-500/30">
@@ -192,12 +199,18 @@ export default function DictationPage() {
                     {displayItems.map((lesson, index) => {
                       const isLocked =
                         lesson.isPremiumOnly && !hasPremiumAccess;
-                      
-                      const thumbnail = lesson.thumbnailUrl || (lesson.videoId ? `https://i.ytimg.com/vi/${lesson.videoId}/hqdefault.jpg` : "/video-placeholder.png");
-                      
+
+                      const thumbnail =
+                        lesson.thumbnailUrl ||
+                        (lesson.videoId
+                          ? `https://i.ytimg.com/vi/${lesson.videoId}/hqdefault.jpg`
+                          : "/video-placeholder.png");
+
                       const historyData = historyMap.get(lesson.id);
                       const isCompleted = historyData?.status === "Completed";
-                      const isInProgress = historyData?.status && historyData?.status !== "Completed";
+                      const isInProgress =
+                        historyData?.status &&
+                        historyData?.status !== "Completed";
 
                       return (
                         <motion.div
@@ -224,8 +237,12 @@ export default function DictationPage() {
                             >
                               {/* Image Section */}
                               <div className="relative w-full aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-900 border-b border-gray-100 dark:border-white/5 shrink-0">
-                                <img src={thumbnail} alt={lesson.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                
+                                <img
+                                  src={thumbnail}
+                                  alt={lesson.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+
                                 {/* Overlay / Lock */}
                                 {isLocked && (
                                   <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
@@ -234,14 +251,22 @@ export default function DictationPage() {
                                     </div>
                                   </div>
                                 )}
-                                
+
                                 {/* Progress Badge */}
                                 {(isCompleted || isInProgress) && (
-                                  <div className={cn(
-                                    "absolute top-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold shadow-sm border text-white",
-                                    isCompleted ? "bg-emerald-500/90 border-emerald-400" : "bg-orange-500/90 border-orange-400"
-                                  )}>
-                                    {isCompleted ? <CheckCircle2 className="h-3 w-3" /> : <Timer className="h-3 w-3" />}
+                                  <div
+                                    className={cn(
+                                      "absolute top-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold shadow-sm border text-white",
+                                      isCompleted
+                                        ? "bg-emerald-500/90 border-emerald-400"
+                                        : "bg-orange-500/90 border-orange-400",
+                                    )}
+                                  >
+                                    {isCompleted ? (
+                                      <CheckCircle2 className="h-3 w-3" />
+                                    ) : (
+                                      <Timer className="h-3 w-3" />
+                                    )}
                                     {isCompleted ? "Đã học" : "Đang học"}
                                   </div>
                                 )}
@@ -268,20 +293,31 @@ export default function DictationPage() {
                                     {lesson.title}
                                   </h4>
                                 </div>
-                                
+
                                 {historyData ? (
                                   <div className="space-y-1.5 mt-2">
                                     <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider">
-                                      <span className="text-gray-500 dark:text-zinc-500">Tiến độ</span>
+                                      <span className="text-gray-500 dark:text-zinc-500">
+                                        Tiến độ
+                                      </span>
                                       <span className="font-bold text-gray-900 dark:text-white">
-                                        {Math.round(historyData.progressPercent * 100)}%
+                                        {Math.round(
+                                          historyData.progressPercent * 100,
+                                        )}
+                                        %
                                       </span>
                                     </div>
                                     <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
                                       <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${historyData.progressPercent * 100}%` }}
-                                        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                                        animate={{
+                                          width: `${historyData.progressPercent * 100}%`,
+                                        }}
+                                        transition={{
+                                          duration: 1,
+                                          ease: "easeOut",
+                                          delay: 0.2,
+                                        }}
                                         className="h-full bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] shadow-[0_0_8px_rgba(255,122,0,0.6)]"
                                       />
                                     </div>
