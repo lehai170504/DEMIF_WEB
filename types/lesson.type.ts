@@ -459,6 +459,7 @@ export interface MyProgressResponse {
   progressPercent: number;
   status: string; // "NotStarted" | "InProgress" | "Completed"
   lastSegmentIndex: number;
+  level?: string;
   completedAt: string | null;
   completedSegments: CompletedSegment[];
 }

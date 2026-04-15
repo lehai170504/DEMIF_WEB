@@ -45,19 +45,19 @@ export default function LeaderboardPage() {
   }
 
   // Map API data
-  const mappedData = (leaderboardData || []).map(
+  const mappedData = (leaderboardData?.data || leaderboardData || []).map(
     (entry: any, index: number) => ({
       userId: entry.userId,
-      rank: index + 1,
-      username: entry.username || "Unknown",
+      rank: entry.rank || index + 1,
+      username: entry.username || entry.userName || entry.fullName || "Unknown",
       avatar: entry.avatarUrl,
-      country: entry.level || "Beginner",
-      totalScore: entry.totalPoints || 0,
+      level: entry.level || "Beginner",
+      totalScore: entry.totalPoints || entry.totalXp || 0,
       currentStreak: entry.currentStreak || 0,
-      dictationAccuracy: 0,
-      shadowingMatchRate: 0,
-      avgFeedbackScore: 0,
-      completedLessons: 0,
+      dictationAccuracy: entry.avgDictationScore ?? entry.dictationAccuracy ?? entry.avgAccuracy ?? 0,
+      shadowingMatchRate: entry.avgShadowingScore ?? entry.shadowingMatchRate ?? 0,
+      avgFeedbackScore: entry.avgShadowingScore ?? entry.avgFeedbackScore ?? 0,
+      completedLessons: entry.lessonsCompleted ?? entry.totalLessonsCompleted ?? entry.completedLessonsCount ?? 0,
     }),
   );
 

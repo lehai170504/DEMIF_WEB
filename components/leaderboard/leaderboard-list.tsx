@@ -10,7 +10,7 @@ interface LeaderboardEntry {
   rank: number;
   username: string;
   avatar?: string;
-  country: string;
+  level: string;
   totalScore: number;
 }
 
@@ -116,7 +116,7 @@ export function LeaderboardList({
                 )}
               </div>
               <p className="text-[11px] md:text-xs text-gray-500 dark:text-zinc-500 font-medium truncate mt-0.5">
-                Cấp độ: {entry.country}
+                Cấp độ: {entry.level}
               </p>
             </div>
 

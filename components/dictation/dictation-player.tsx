@@ -100,6 +100,13 @@ export function DictationPlayer({ lesson }: DictationPlayerProps) {
 
   const isProgressRestored = useRef(false);
 
+  // Sync initial level from myProgress if available
+  useEffect(() => {
+    if (myProgress?.level && !isProgressRestored.current) {
+      setLevel(myProgress.level);
+    }
+  }, [myProgress]);
+
   useEffect(() => {
     if (exercise && myProgress && !isProgressRestored.current) {
       setAnswers(prev => {
