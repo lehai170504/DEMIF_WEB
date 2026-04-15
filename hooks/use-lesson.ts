@@ -135,6 +135,7 @@ export const useLessonActions = () => {
     createLesson: createMutation.mutate,
     updateLesson: updateMutation.mutate,
     deleteLesson: deleteMutation.mutate,
+    deleteLessonAsync: deleteMutation.mutateAsync,
     updateStatus: updateStatusMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
@@ -295,7 +296,11 @@ export const useUserLessonDetail = (id: string) => {
 };
 
 // Lấy lịch sử bài học của User
-export const useLessonHistory = (params?: { page?: number; pageSize?: number; status?: string }) => {
+export const useLessonHistory = (params?: {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+}) => {
   return useQuery({
     queryKey: ["lesson-history", params],
     queryFn: () => lessonService.getLessonHistory(params),

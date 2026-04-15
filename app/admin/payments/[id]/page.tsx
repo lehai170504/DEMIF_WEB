@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 import {
   ArrowLeft,
   Loader2,
@@ -22,16 +21,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { usePaymentDetail, useRefundPayment } from "@/hooks/use-admin-payments";
 import { cn } from "@/lib/utils";
 import { RefundDialog } from "@/components/admin/payments/refund-dialog";

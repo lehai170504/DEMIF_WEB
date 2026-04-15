@@ -5,7 +5,6 @@ import {
   IconCircleCheckFilled,
   IconGripVertical,
   IconDotsVertical,
-  IconAlertCircle,
   IconTrash,
   IconEdit,
   IconStar,
@@ -14,7 +13,6 @@ import {
   IconCrown,
   IconArchive,
   IconClock,
-  IconHash,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,8 +28,9 @@ import { useSortable } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { LessonDto } from "@/types/lesson.type";
 import { useLessonActions } from "@/hooks/use-lesson";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { DeleteLessonModal } from "@/components/modals/delete-lesson-modal";
+import { useState } from "react";
 
 // --- HELPERS ---
 export const normalizeStatus = (status?: string | null) =>
@@ -67,7 +66,12 @@ export const columns: ColumnDef<LessonDto>[] = [
   {
     id: "drag",
     header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
+    // Ẩn nút kéo trên mobile để tránh vướng khi scroll
+    cell: ({ row }) => (
+      <div className="hidden sm:block">
+        <DragHandle id={row.original.id} />
+      </div>
+    ),
     enableSorting: false,
     enableHiding: false,
   },
@@ -99,9 +103,9 @@ export const columns: ColumnDef<LessonDto>[] = [
   },
   {
     accessorKey: "displayOrder",
-    header: "Ưu tiên",
+    header: () => <span className="hidden md:inline">Ưu tiên</span>,
     cell: ({ row }) => (
-      <div className="font-mono text-[10px] font-black text-slate-400 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 w-7 h-7 flex items-center justify-center rounded-lg">
+      <div className="hidden md:flex font-mono text-[10px] font-black text-slate-400 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 w-7 h-7 items-center justify-center rounded-lg">
         {row.getValue("displayOrder") ?? 0}
       </div>
     ),
@@ -112,17 +116,21 @@ export const columns: ColumnDef<LessonDto>[] = [
     cell: ({ row }) => {
       const lesson = row.original;
       return (
-        <div className="flex flex-col gap-1 min-w-[200px]">
-          <span className="font-bold truncate max-w-[300px] text-slate-900 dark:text-slate-100">
+        <div className="flex flex-col gap-0.5 min-w-[120px] max-w-[180px] sm:max-w-[300px]">
+          <span className="font-bold truncate text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
             {lesson.title || "Chưa có tiêu đề"}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-black">
+            <span className="text-[9px] text-slate-500 uppercase tracking-wider font-black truncate">
               {lesson.category || "General"}
             </span>
             {lesson.isPremiumOnly && (
-              <IconCrown className="size-3 text-amber-500" />
+              <IconCrown className="size-3 text-amber-500 flex-shrink-0" />
             )}
+            {/* Trên Mobile: Hiển thị Level ngay dưới Title cho gọn */}
+            <span className="md:hidden text-[9px] text-blue-600 font-bold uppercase">
+              • {normalizeLevel(lesson.level)}
+            </span>
           </div>
         </div>
       );
@@ -130,7 +138,7 @@ export const columns: ColumnDef<LessonDto>[] = [
   },
   {
     accessorKey: "lessonType",
-    header: "Loại bài",
+    header: () => <span className="hidden lg:inline">Loại bài</span>,
     cell: ({ row }) => {
       const type = normalizeType(row.original.lessonType);
       const isVideo =
@@ -138,7 +146,7 @@ export const columns: ColumnDef<LessonDto>[] = [
         row.original.mediaType?.toLowerCase() === "video";
 
       return (
-        <div className="flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2">
           {isVideo ? (
             <IconVideo className="size-4 text-blue-500" />
           ) : (
@@ -161,7 +169,7 @@ export const columns: ColumnDef<LessonDto>[] = [
   },
   {
     accessorKey: "level",
-    header: "Cấp độ",
+    header: () => <span className="hidden md:inline">Cấp độ</span>,
     cell: ({ row }) => {
       const level = normalizeLevel(row.original.level);
       const colors: Record<string, string> = {
@@ -176,23 +184,25 @@ export const columns: ColumnDef<LessonDto>[] = [
       };
 
       return (
-        <Badge
-          variant="secondary"
-          className={cn(
-            "border font-black px-2.5 py-0.5 rounded-full uppercase text-[9px] tracking-widest",
-            colors[level] || "text-slate-600 bg-slate-50",
-          )}
-        >
-          {level}
-        </Badge>
+        <div className="hidden md:block">
+          <Badge
+            variant="secondary"
+            className={cn(
+              "border font-black px-2.5 py-0.5 rounded-full uppercase text-[9px] tracking-widest",
+              colors[level] || "text-slate-600 bg-slate-50",
+            )}
+          >
+            {level}
+          </Badge>
+        </div>
       );
     },
   },
   {
     accessorKey: "durationSeconds",
-    header: "Thời lượng",
+    header: () => <span className="hidden sm:inline">Thời lượng</span>,
     cell: ({ row }) => (
-      <div className="flex items-center gap-1.5 text-slate-500 font-bold font-mono text-[11px]">
+      <div className="hidden sm:flex items-center gap-1.5 text-slate-500 font-bold font-mono text-[11px]">
         <IconClock className="size-3.5" />
         {formatDuration(row.original.durationSeconds || 0)}
       </div>
@@ -207,26 +217,26 @@ export const columns: ColumnDef<LessonDto>[] = [
         published: {
           icon: <IconCircleCheckFilled className="size-4 text-emerald-500" />,
           color: "text-emerald-600",
-          label: "Published",
+          label: "Đã đăng bài",
         },
         draft: {
           icon: <div className="size-2 rounded-full bg-slate-400 mx-1" />,
           color: "text-slate-500",
-          label: "Draft",
+          label: "Bản nháp",
         },
         archived: {
           icon: <IconArchive className="size-4 text-slate-400" />,
           color: "text-slate-400 italic line-through",
-          label: "Archived",
+          label: "Lưu trữ",
         },
       };
       const config = statusConfig[status] || statusConfig.draft;
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {config.icon}
           <span
             className={cn(
-              "text-[10px] font-black uppercase tracking-widest",
+              "text-[9px] font-black uppercase tracking-tight sm:tracking-widest hidden sm:inline",
               config.color,
             )}
           >
@@ -241,17 +251,19 @@ export const columns: ColumnDef<LessonDto>[] = [
     cell: ({ row }) => {
       const lesson = row.original;
       const router = useRouter();
-      const { updateStatus, deleteLesson, isDeleting } = useLessonActions();
+      const { updateStatus, deleteLessonAsync, isDeleting } =
+        useLessonActions();
+      const [showDeleteModal, setShowDeleteModal] = useState(false);
       const currentStatus = normalizeStatus(lesson.status);
 
       return (
-        <div className="flex justify-end pr-2">
+        <div className="flex justify-end pr-1 sm:pr-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors"
+                className="h-8 w-8 text-slate-500 hover:text-slate-900 rounded-full"
               >
                 <IconDotsVertical className="size-4" />
               </Button>
@@ -262,10 +274,11 @@ export const columns: ColumnDef<LessonDto>[] = [
             >
               <DropdownMenuItem
                 onClick={() => router.push(`/admin/lessons/${lesson.id}`)}
-                className="cursor-pointer py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wide focus:bg-slate-100 dark:focus:bg-white/5"
+                className="cursor-pointer py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wide"
               >
                 <IconEdit className="mr-2 h-4 w-4 text-slate-400" /> Chỉnh sửa
               </DropdownMenuItem>
+
               <DropdownMenuItem
                 onClick={() =>
                   updateStatus({
@@ -274,7 +287,7 @@ export const columns: ColumnDef<LessonDto>[] = [
                       currentStatus === "published" ? "draft" : "published",
                   })
                 }
-                className="cursor-pointer py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wide focus:bg-slate-100 dark:focus:bg-white/5"
+                className="cursor-pointer py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wide"
               >
                 <IconStar
                   className={cn(
@@ -284,28 +297,31 @@ export const columns: ColumnDef<LessonDto>[] = [
                       : "text-slate-400",
                   )}
                 />
-                {currentStatus === "published"
-                  ? "Gỡ bài (Draft)"
-                  : "Đăng bài (Publish)"}
+                {currentStatus === "published" ? "Gỡ bài" : "Đăng bài"}
               </DropdownMenuItem>
+
               <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/5" />
+
               <DropdownMenuItem
-                onClick={() =>
-                  toast("Xác nhận xóa bài học này?", {
-                    description: "Hành động này không thể hoàn tác.",
-                    action: {
-                      label: "Xóa ngay",
-                      onClick: () => deleteLesson(lesson.id),
-                    },
-                  })
-                }
-                disabled={isDeleting}
-                className="text-red-600 dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-500/10 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wide"
+                onClick={() => setShowDeleteModal(true)}
+                className="text-red-600 dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-500/10 py-2.5 rounded-xl font-bold text-[11px] uppercase"
               >
-                <IconTrash className="mr-2 h-4 w-4" /> Xóa bài học
+                <IconTrash className="mr-2 h-4 w-4" /> Xóa bài
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Modal xóa bài học nằm đây */}
+          <DeleteLessonModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={async () => {
+              await deleteLessonAsync(lesson.id);
+              setShowDeleteModal(false);
+            }}
+            loading={isDeleting}
+            lessonTitle={lesson.title}
+          />
         </div>
       );
     },
