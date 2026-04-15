@@ -90,6 +90,13 @@ export default function ShadowingPracticePage({
   
   const isProgressRestored = useRef(false);
 
+  // Sync initial level from myProgress if available
+  useEffect(() => {
+    if (myProgress?.level && !isProgressRestored.current) {
+      setLevel(myProgress.level as Level);
+    }
+  }, [myProgress]);
+
   useEffect(() => {
     if (segments.length > 0 && myProgress && !isProgressRestored.current) {
         setCheckResults(prev => {

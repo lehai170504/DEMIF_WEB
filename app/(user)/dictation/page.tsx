@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useUserLessons, useLessonHistory } from "@/hooks/use-lesson";
 import { useMySubscription } from "@/hooks/use-subscription";
+import { normalizeProgress } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
 export default function DictationPage() {
@@ -55,11 +56,16 @@ export default function DictationPage() {
   const historyMap = useMemo(() => {
     const map = new Map<string, any>();
     lessonHistoryData?.items?.forEach((h) => {
-      map.set(h.lessonId, {
-        status: h.status,
-        progressPercent:
-          h.progressPercent ?? (h.status === "Completed" ? 1 : 0),
-      });
+      const existing = map.get(h.lessonId);
+      const currentProgress = normalizeProgress(h.progressPercent, h.status);
+      
+      if (!existing || currentProgress > existing.progressPercent) {
+        map.set(h.lessonId, {
+          status: h.status,
+          progressPercent: currentProgress,
+          level: h.level
+        });
+      }
     });
     return map;
   }, [lessonHistoryData]);

@@ -18,6 +18,7 @@ import { lessonService } from "@/services/lesson.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useVocabularyOverview } from "@/hooks/use-vocabulary";
 import { useLessonHistory } from "@/hooks/use-lesson";
+import { normalizeProgress } from "@/lib/progress";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -142,7 +143,7 @@ export default function HomePage() {
     lessonHistory.items.forEach((h: any) => {
       historyMap.set(h.lessonId, {
         status: h.status,
-        progressPercent: h.progressPercent ?? (h.status === "Completed" ? 1 : 0)
+        progressPercent: normalizeProgress(h.progressPercent, h.status)
       });
     });
   }
