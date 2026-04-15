@@ -92,32 +92,28 @@ export default function ShadowingPracticePage({
 
   useEffect(() => {
     if (segments.length > 0 && myProgress && !isProgressRestored.current) {
-        if (myProgress.completedSegments && myProgress.completedSegments.length > 0) {
-           const restoredResults: Record<number, any> = {};
-           
-           myProgress.completedSegments.forEach((cs: any) => {
-              restoredResults[cs.segmentIndex] = {
+        setCheckResults(prev => {
+           const restored = { ...prev };
+           myProgress.completedSegments?.forEach((cs: any) => {
+              restored[cs.segmentIndex] = {
                  score: cs.bestScore,
+                 accuracy: cs.bestScore,
                  passed: true
               };
            });
-           
-           setCheckResults(restoredResults);
-           
-           // Restore progress pointer
-           if (myProgress.completedSegments.length < segments.length) {
-              let initialIdx = myProgress.lastSegmentIndex;
-              if (initialIdx >= segments.length) {
-                  initialIdx = segments.length - 1;
-              }
-              setCurrentIdx(initialIdx);
-           } else {
-              setIsCompleted(true);
-           }
+           return restored;
+        });
+        
+        // Restore progress pointer
+        if (myProgress.completedSegments && myProgress.completedSegments.length < segments.length) {
+           const nextIdx = myProgress.lastSegmentIndex ?? 0;
+           setCurrentIdx(nextIdx >= segments.length ? 0 : nextIdx);
+        } else if (myProgress.completedSegments && myProgress.completedSegments.length > 0) {
+           setIsCompleted(true);
         }
         isProgressRestored.current = true;
     }
-  }, [segments, myProgress]);
+  }, [segments, myProgress, level]);
 
   // --- logic: Xử lý YouTube Sync ---
   function handleYouTubeTimeUpdate(time: number) {
@@ -162,7 +158,10 @@ export default function ShadowingPracticePage({
 
     syncMutate({
       id: id,
-      data: { segmentIndex: idx, isCompleted: isFinished },
+      data: { 
+        segmentIndex: idx, 
+        isCompleted: isFinished // isCompleted ở đây nên là trạng thái TỔNG THỂ của bài
+      },
     });
     lastSyncedIdx.current = idx;
   }, [id, syncMutate]);
@@ -175,14 +174,7 @@ export default function ShadowingPracticePage({
     
     syncTimeoutRef.current = setTimeout(() => {
       if (currentIdx !== lastSyncedIdx.current) {
-        // Nếu đã có kết quả (đã Check) cho đoạn trước đó, đánh dấu là hoàn thành
-        const prevIdx = lastSyncedIdx.current;
-        const hasResult = checkResults[prevIdx];
-        const isActuallyFinished = hasResult && (hasResult.accuracy >= 70 || hasResult.passed);
-        
-        triggerSync(prevIdx, isActuallyFinished);
-        
-        // Cũng sync vị trí mới
+        // Luôn gửi isCompleted: false khi đang học dở
         triggerSync(currentIdx, false);
       }
     }, 5000);
@@ -198,7 +190,7 @@ export default function ShadowingPracticePage({
     if (!media) return;
 
     const onPause = () => {
-       if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+       if (!isCompletedRef.current) triggerSync(currentIdxRef.current, false);
     };
     media.addEventListener("pause", onPause);
     return () => media.removeEventListener("pause", onPause);
@@ -207,7 +199,7 @@ export default function ShadowingPracticePage({
   // 3. Sync khi Exit (Page Unload / Unmount)
   useEffect(() => {
     const onExit = () => {
-      if (!isCompletedRef.current) triggerSync(currentIdxRef.current);
+      if (!isCompletedRef.current) triggerSync(currentIdxRef.current, false);
     };
 
     window.addEventListener("beforeunload", onExit);
@@ -322,10 +314,8 @@ export default function ShadowingPracticePage({
         {
           onSuccess: (result) => {
             setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
-            // Nếu phát âm đúng (>80%) thì sync ngay với isCompleted = true
-            if (result.accuracy >= 80) {
-              triggerSync(currentIdx, true);
-            }
+            // Chỉ gửi isCompleted: false để lưu progress segment
+            triggerSync(currentIdx, false);
           },
         },
       );
@@ -335,7 +325,7 @@ export default function ShadowingPracticePage({
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
-  }, [speechSupported, lesson, currentIdx, level, checkVoiceMutation]);
+  }, [speechSupported, lesson, currentIdx, level, checkVoiceMutation, triggerSync]);
 
   const handleStopRecording = useCallback(() => {
     recognitionRef.current?.stop();
@@ -353,10 +343,8 @@ export default function ShadowingPracticePage({
       {
         onSuccess: (result) => {
           setCheckResults((prev) => ({ ...prev, [currentIdx]: result }));
-          // Nếu gõ đúng (>90%) thì sync ngay với isCompleted = true
-          if (result.accuracy >= 90) {
-            triggerSync(currentIdx, true);
-          }
+          // Chỉ gửi isCompleted: false để lưu progress segment
+          triggerSync(currentIdx, false);
         },
       },
     );
@@ -366,7 +354,8 @@ export default function ShadowingPracticePage({
     if (currentIdx < segments.length - 1) {
       handleSelectSegment(currentIdx + 1);
     } else {
-      triggerSync(currentIdx, true); // Sync hoàn thành bài
+      // Chỉ đoạn cuối cùng mới gửi true
+      triggerSync(currentIdx, true); 
       setIsCompleted(true);
     }
   }, [currentIdx, segments.length, handleSelectSegment, triggerSync]);

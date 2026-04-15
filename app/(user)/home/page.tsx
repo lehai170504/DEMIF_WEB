@@ -142,7 +142,7 @@ export default function HomePage() {
     lessonHistory.items.forEach((h: any) => {
       historyMap.set(h.lessonId, {
         status: h.status,
-        progressPercent: h.progressPercent ?? (h.status === "Completed" ? 1 : 0.5)
+        progressPercent: h.progressPercent ?? (h.status === "Completed" ? 1 : 0)
       });
     });
   }

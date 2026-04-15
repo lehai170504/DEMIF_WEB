@@ -50,10 +50,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     Cookies.set("accessToken", tokens.accessToken, { path: "/" });
     Cookies.set("refreshToken", tokens.refreshToken, { path: "/" });
 
-    // 2. Xóa cache cũ để tránh dính data của user trước
-    queryClient.removeQueries({ queryKey: ["userProfile"] });
+    // 2. Xóa TOÀN BỘ cache cũ để tránh dính data của user trước (Quan trọng!)
+    queryClient.clear();
 
     // 3. Gọi API lấy profile mới nhất với token vừa set
+    // Đợi một chút để cookie kịp set (nếu cần)
     const result = await refetch();
 
     return result.data;
