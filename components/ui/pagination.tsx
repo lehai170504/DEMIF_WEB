@@ -40,7 +40,7 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 type PaginationLinkProps = {
   isActive?: boolean;
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">;
+  React.ComponentProps<"button">; // Đổi "a" thành "button"
 
 function PaginationLink({
   className,
@@ -49,22 +49,24 @@ function PaginationLink({
   ...props
 }: PaginationLinkProps) {
   return (
-    <a
+    <button
+      type="button"
       aria-current={isActive ? "page" : undefined}
-      data-slot="pagination-link"
-      data-active={isActive}
       className={cn(
         buttonVariants({
-          variant: isActive ? "outline" : "ghost",
+          variant: isActive ? "default" : "ghost",
           size,
         }),
+        "rounded-xl transition-all duration-300 font-bold text-[11px]",
+        isActive &&
+          "bg-orange-500 text-white shadow-lg shadow-orange-500/20 scale-105 hover:bg-orange-600",
+        !isActive && "text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5",
         className,
       )}
       {...props}
     />
   );
 }
-
 function PaginationPrevious({
   className,
   ...props

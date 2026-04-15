@@ -40,9 +40,9 @@ export default function AdminLessonsPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-500 font-mono animate-pulse">
-        <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-        <p className="text-[11px] font-black uppercase tracking-widest mt-2">
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 text-slate-500 font-mono">
+        <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-orange-500" />
+        <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest mt-2 animate-pulse">
           Đang đồng bộ dữ liệu hệ thống...
         </p>
       </div>
@@ -51,15 +51,15 @@ export default function AdminLessonsPage() {
 
   if (isError) {
     return (
-      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 font-mono">
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-4 font-mono px-6 text-center">
         <AlertCircle className="h-10 w-10 text-red-500 mb-2" />
-        <p className="text-[11px] font-black uppercase tracking-widest text-slate-600 mb-4">
+        <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 mb-4">
           Lỗi truy xuất dữ liệu từ máy chủ.
         </p>
         <Button
           variant="outline"
           onClick={() => refetch()}
-          className="rounded-xl font-bold uppercase text-[10px]"
+          className="rounded-xl font-bold uppercase text-[10px] active:scale-95 transition-transform"
         >
           Thử lại
         </Button>
@@ -68,13 +68,10 @@ export default function AdminLessonsPage() {
   }
 
   return (
-    <div className="w-full space-y-8 pb-10 font-mono text-slate-900 dark:text-white bg-slate-50/50 dark:bg-black min-h-screen transition-colors duration-300 text-left">
-      <div className="relative z-10 space-y-8 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10">
+    <div className="w-full space-y-4 sm:space-y-8 pb-10 font-mono text-slate-900 dark:text-white bg-slate-50/50 dark:bg-black min-h-screen transition-colors duration-300 text-left">
+      <div className="relative z-10 space-y-6 sm:space-y-8 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-10">
         <LessonHeader />
-
-        {/* 3. Truyền state params và hàm setParams vào thanh lọc */}
         <LessonFilterBar params={params} setParams={setParams} />
-
         <LessonTableWrapper
           data={lessons}
           pageIndex={(params.page || 1) - 1}

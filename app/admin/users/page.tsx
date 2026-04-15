@@ -95,53 +95,52 @@ export default function AdminUsersPage() {
               {totalPages > 1 && (
                 <div className="flex justify-center pt-4">
                   <div className="inline-flex items-center p-2 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none animate-in zoom-in-95 duration-500">
-                    <Pagination>
-                      <PaginationContent className="gap-2">
+                    <Pagination className="w-auto mx-0">
+                      <PaginationContent className="gap-2 sm:gap-3 p-1 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-slate-200 dark:border-white/5 rounded-[1.5rem] shadow-sm">
                         <PaginationItem>
                           <PaginationPrevious
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               if (page > 1) setPage(page - 1);
                             }}
+                            disabled={page <= 1}
                             className={cn(
-                              "h-11 px-5 rounded-[1.25rem] transition-all text-[10px] font-black uppercase tracking-widest border-none",
-                              page <= 1
-                                ? "opacity-20 pointer-events-none text-slate-400"
-                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
+                              "h-11 px-5 rounded-xl transition-all",
+                              page <= 1 && "opacity-20 pointer-events-none",
                             )}
                           />
                         </PaginationItem>
 
                         <PaginationItem>
-                          <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-100/50 dark:bg-white/5 rounded-[1.25rem] border border-slate-200 dark:border-white/5">
-                            <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
-                              Page
+                          <div className="flex items-center gap-2.5 px-4 sm:px-6 py-2 bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 shadow-inner">
+                            <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest hidden xs:inline">
+                              Trang
                             </span>
-                            <span className="text-sm font-black text-[#FF7A00]">
-                              {page}
-                            </span>
-                            <span className="text-slate-300 dark:text-zinc-700">
-                              /
-                            </span>
-                            <span className="text-sm font-black text-slate-500 dark:text-slate-400">
-                              {totalPages}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-black text-orange-500 drop-shadow-sm">
+                                {page}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-300 dark:text-zinc-700">
+                                /
+                              </span>
+                              <span className="text-sm font-black text-slate-500 dark:text-slate-400">
+                                {totalPages}
+                              </span>
+                            </div>
                           </div>
                         </PaginationItem>
 
+                        {/* NÚT SAU (NEXT) */}
                         <PaginationItem>
                           <PaginationNext
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               if (page < totalPages) setPage(page + 1);
                             }}
+                            disabled={page >= totalPages}
                             className={cn(
-                              "h-11 px-5 rounded-[1.25rem] transition-all text-[10px] font-black uppercase tracking-widest border-none",
+                              "h-10 sm:h-11 px-4 sm:px-5 rounded-xl transition-all text-[10px] font-black uppercase tracking-[0.15em] border-none active:scale-95",
                               page >= totalPages
                                 ? "opacity-20 pointer-events-none text-slate-400"
-                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5",
+                                : "text-slate-600 dark:text-slate-400 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 shadow-sm",
                             )}
                           />
                         </PaginationItem>
