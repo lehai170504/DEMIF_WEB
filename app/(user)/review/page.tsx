@@ -137,7 +137,6 @@ export default function ReviewPage() {
           setFilter={setFilter}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          dueCount={overview?.dueCount || 0}
           selectedTopic={selectedTopic}
           setSelectedTopic={setSelectedTopic}
           selectedLesson={selectedLesson}

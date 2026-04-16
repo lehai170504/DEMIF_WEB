@@ -114,28 +114,8 @@ export default function BlogPage() {
         <BlogHero />
 
         <main className="container mx-auto px-4 lg:px-6 pt-4 max-w-7xl">
-          {/* SEARCH BAR CHUYỂN LÊN ĐẦU CHO THUẬN MẮT */}
           <div className="max-w-2xl mx-auto mb-16 relative group">
             <div className="absolute inset-0 bg-orange-500/20 blur-2xl group-focus-within:bg-orange-500/30 transition-all rounded-full" />
-            <div className="relative flex items-center bg-white dark:bg-white/5 border border-white/10 rounded-full px-6 py-2 shadow-2xl backdrop-blur-md">
-              <Search className="w-5 h-5 text-gray-400 mr-4" />
-              <input
-                type="text"
-                placeholder="Khám phá kiến thức Demif..."
-                className="bg-transparent border-none outline-none w-full h-12 font-bold text-white placeholder:text-gray-500"
-                value={params.search}
-                onChange={(e) =>
-                  setParams((p) => ({ ...p, search: e.target.value, page: 1 }))
-                }
-              />
-              {params.search && (
-                <button
-                  onClick={() => setParams((p) => ({ ...p, search: "" }))}
-                >
-                  <X className="w-4 h-4 text-gray-400 hover:text-white" />
-                </button>
-              )}
-            </div>
           </div>
 
           <motion.div

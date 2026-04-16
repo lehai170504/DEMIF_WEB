@@ -22,7 +22,7 @@ interface ReviewFilterProps {
   setFilter: (filter: FilterType) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  dueCount: number;
+  // Đã xóa dueCount khỏi props vì đã lấy từ Hook
   selectedTopic: string;
   setSelectedTopic: (topic: string) => void;
   selectedLesson: string;
@@ -34,7 +34,6 @@ export function ReviewFilter({
   setFilter,
   searchQuery,
   setSearchQuery,
-  dueCount,
   selectedTopic,
   setSelectedTopic,
   selectedLesson,
@@ -42,16 +41,19 @@ export function ReviewFilter({
 }: ReviewFilterProps) {
   const { data: overview } = useVocabularyOverview();
 
+  // Tối ưu Memo Chủ đề
   const uniqueTopics = useMemo(() => {
+    // Lưu ý: Đảm bảo recentItems chứa đủ data, nếu không nên dùng overview.allTopics từ BE (nếu có)
     if (!overview?.recentItems || overview.recentItems.length === 0) {
       return ["academic", "business", "daily", "technology"];
     }
     const topics = overview.recentItems
       .map((item: any) => item.topic)
-      .filter(Boolean);
+      .filter(Boolean); // Lọc bỏ null/undefined/""
     return Array.from(new Set(topics));
   }, [overview]);
 
+  // Tối ưu Memo Bài học
   const uniqueLessons = useMemo(() => {
     if (!overview?.recentItems) return [];
     const lessonsMap = new Map();
@@ -119,7 +121,10 @@ export function ReviewFilter({
         {/* Cột Phải: Bộ lọc chi tiết */}
         <div className="flex flex-wrap md:flex-nowrap w-full xl:w-auto gap-2 items-center">
           {/* Lọc theo Chủ đề */}
-          <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+          <Select
+            value={selectedTopic || "all"}
+            onValueChange={setSelectedTopic}
+          >
             <SelectTrigger className="w-full md:w-[150px] h-10 rounded-xl bg-gray-50 dark:bg-white/5 border-none text-[10px] font-black uppercase text-gray-900 dark:text-white truncate">
               <Hash className="w-3.5 h-3.5 mr-2 text-orange-500 shrink-0" />
               <SelectValue placeholder="CHỦ ĐỀ" />
@@ -144,7 +149,10 @@ export function ReviewFilter({
           </Select>
 
           {/* Lọc theo Bài học */}
-          <Select value={selectedLesson} onValueChange={setSelectedLesson}>
+          <Select
+            value={selectedLesson || "all"}
+            onValueChange={setSelectedLesson}
+          >
             <SelectTrigger className="w-full md:w-[180px] h-10 rounded-xl bg-gray-50 dark:bg-white/5 border-none text-[10px] font-black uppercase text-gray-900 dark:text-white truncate">
               <BookOpen className="w-3.5 h-3.5 mr-2 text-emerald-500 shrink-0" />
               <SelectValue placeholder="BÀI HỌC" />
