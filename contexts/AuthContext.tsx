@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useUserProfile } from "@/hooks/use-user";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -61,6 +62,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
+    // 1. Hiện thông báo "đang xử lý" nếu muốn (Optional)
+    const toastId = toast.loading("Đang đăng xuất...");
+
     try {
       const rt = Cookies.get("refreshToken");
       if (rt) {
@@ -68,18 +72,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error) {
       console.error("Logout API error:", error);
+      // Không cần hiện toast error ở đây vì mình vẫn cho user out ở client
     } finally {
-      // Xóa Cookie và Cache
+      // 2. Xóa Cookie và Cache dữ liệu cũ
       Cookies.remove("accessToken", { path: "/" });
       Cookies.remove("refreshToken", { path: "/" });
       queryClient.clear();
 
-      // Đánh dấu event logout để các tab khác tự out theo
+      // 3. Đồng bộ logout giữa các Tabs
       if (typeof window !== "undefined") {
         localStorage.setItem("logout-event", Date.now().toString());
       }
 
-      router.push("/login");
+      // 4. Thông báo thành công bằng Sonner
+      toast.success("Đăng xuất thành công", {
+        id: toastId, // Ghi đè lên cái loading lúc nãy
+        description: "Hẹn gặp lại bạn sớm nhé!",
+        duration: 2000,
+      });
+
+      // 5. Chuyển trang (Sử dụng setTimeout nhẹ để user kịp thấy toast)
+      setTimeout(() => {
+        router.push("/login");
+      }, 800);
     }
   };
 
