@@ -16,9 +16,16 @@ export default function LeaderboardPage() {
     data: leaderboardData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
-    queryKey: ["leaderboard"],
+    queryKey: ["leaderboard", user?.id],
+
     queryFn: () => statsService.getLeaderboard(20),
+    retry: 2,
+    retryDelay: 1000,
+
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 
   if (isLoading) {
@@ -54,10 +61,19 @@ export default function LeaderboardPage() {
       level: entry.level || "Beginner",
       totalScore: entry.totalPoints || entry.totalXp || 0,
       currentStreak: entry.currentStreak || 0,
-      dictationAccuracy: entry.avgDictationScore ?? entry.dictationAccuracy ?? entry.avgAccuracy ?? 0,
-      shadowingMatchRate: entry.avgShadowingScore ?? entry.shadowingMatchRate ?? 0,
+      dictationAccuracy:
+        entry.avgDictationScore ??
+        entry.dictationAccuracy ??
+        entry.avgAccuracy ??
+        0,
+      shadowingMatchRate:
+        entry.avgShadowingScore ?? entry.shadowingMatchRate ?? 0,
       avgFeedbackScore: entry.avgShadowingScore ?? entry.avgFeedbackScore ?? 0,
-      completedLessons: entry.lessonsCompleted ?? entry.totalLessonsCompleted ?? entry.completedLessonsCount ?? 0,
+      completedLessons:
+        entry.lessonsCompleted ??
+        entry.totalLessonsCompleted ??
+        entry.completedLessonsCount ??
+        0,
     }),
   );
 
