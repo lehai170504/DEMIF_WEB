@@ -9,6 +9,7 @@ interface MetricProps {
   subText?: string;
   color?: string;
   isLoading?: boolean;
+  isCurrency?: boolean;
 }
 
 export function MiniMetricCard({
@@ -18,6 +19,7 @@ export function MiniMetricCard({
   subText,
   color = "text-slate-500 dark:text-zinc-400",
   isLoading,
+  isCurrency,
 }: MetricProps) {
   return (
     <div className="bg-white dark:bg-[#0A0A0A]/80 border border-slate-200 dark:border-white/5 rounded-3xl p-5 shadow-sm flex flex-col gap-3">
@@ -33,6 +35,7 @@ export function MiniMetricCard({
         <div>
           <p className="text-2xl font-black text-slate-900 dark:text-white">
             {value?.toLocaleString("vi-VN") || "0"}
+            {isCurrency && <span className="ml-1 text-sm font-bold">₫</span>}
           </p>
           {subText && (
             <p className="text-[10px] text-slate-400 mt-1">{subText}</p>
