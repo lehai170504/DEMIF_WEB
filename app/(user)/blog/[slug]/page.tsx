@@ -2,8 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
-import { useBlogDetail } from "@/hooks/use-manage-blog";
-import { useBlogs } from "@/hooks/use-blogs";
+import { useBlogDetail, usePublicBlogs } from "@/hooks/use-blog";
 import {
   BlogDetailHero,
   BlogCoverImage,
@@ -25,18 +24,30 @@ export default function BlogDetailPage() {
     { id: string; title: string }[]
   >([]);
 
-  const postId = useMemo(() => {
-    const rawId = params?.id;
-    return Array.isArray(rawId) ? rawId[0] : rawId;
-  }, [params?.id]);
+  // 1. LẤY SLUG TỪ URL (Note 5.2)
+  const slug = useMemo(() => {
+    const rawSlug = params?.slug || params?.id;
+    return Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+  }, [params]);
 
-  const { data: rawBlog, isLoading, isError } = useBlogDetail(postId as string);
-  const { data: allBlogs = [] } = useBlogs();
+  // 2. FETCH CHI TIẾT QUA SLUG
+  const {
+    data: rawBlog,
+    isLoading,
+    isError,
+  } = useBlogDetail(slug as string, "slug");
+
+  // 3. FETCH BÀI VIẾT LIÊN QUAN (Lấy trang 1, cùng category)
+  const { data: relatedData } = usePublicBlogs({
+    category: rawBlog?.category || undefined,
+    pageSize: 4,
+  });
 
   useEffect(() => {
     setCurrentUrl(window.location.href);
   }, []);
 
+  // 4. GENERATE TABLE OF CONTENTS (Tự động từ content HTML)
   useEffect(() => {
     if (rawBlog?.content) {
       const parser = new DOMParser();
@@ -45,6 +56,7 @@ export default function BlogDetailPage() {
 
       const sections = Array.from(headings).map((heading, index) => {
         const title = heading.textContent || "";
+        // Tạo ID giả lập nếu BE chưa có logic gán ID vào tag H2/H3
         const id = `heading-${index}`;
         return { id, title };
       });
@@ -59,22 +71,19 @@ export default function BlogDetailPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // 5. CHUẨN HÓA DỮ LIỆU HIỂN THỊ
   const post = useMemo(() => {
     if (!rawBlog) return null;
 
-    const tagsArray =
-      rawBlog.tags && rawBlog.tags !== "string"
-        ? rawBlog.tags.split(",").map((t) => t.trim())
-        : ["Kiến thức chung"];
-
     return {
       ...rawBlog,
-      category: tagsArray[0],
-      tags: tagsArray,
-      excerpt:
-        rawBlog.summary && rawBlog.summary !== "string"
-          ? rawBlog.summary
-          : null,
+      // Ưu tiên category từ field riêng của BE (Note 5.4)
+      displayCategory: rawBlog.category || "Kiến thức",
+      tags:
+        rawBlog.tags
+          ?.split(",")
+          .map((t) => t.trim())
+          .filter(Boolean) || [],
       thumbnailUrl:
         rawBlog.thumbnailUrl && rawBlog.thumbnailUrl !== "string"
           ? rawBlog.thumbnailUrl
@@ -82,38 +91,18 @@ export default function BlogDetailPage() {
     };
   }, [rawBlog]);
 
+  // 6. LỌC BÀI VIẾT LIÊN QUAN (Loại trừ bài đang xem)
   const relatedPosts = useMemo(() => {
-    if (!post || allBlogs.length === 0) return [];
-
-    return allBlogs
-      .filter((b) => b.status === "Published" && b.id !== post.id)
-      .map((b) => {
-        const tArray =
-          b.tags && b.tags !== "string"
-            ? b.tags.split(",").map((t) => t.trim())
-            : ["Kiến thức"];
-        return {
-          id: b.id,
-          title: b.title,
-          category: tArray[0],
-          excerpt: b.summary && b.summary !== "string" ? b.summary : null,
-          viewCount: b.viewCount || 0,
-          thumbnailUrl:
-            b.thumbnailUrl && b.thumbnailUrl !== "string"
-              ? b.thumbnailUrl
-              : undefined,
-        };
-      })
-      .filter((p) => p.category === post.category)
-      .slice(0, 3);
-  }, [allBlogs, post]);
+    if (!relatedData?.items || !post) return [];
+    return relatedData.items.filter((b) => b.id !== post.id).slice(0, 3);
+  }, [relatedData, post]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-[#050505] flex flex-col items-center justify-center font-mono gap-4">
         <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
-        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest animate-pulse">
-          Đang tải nội dung...
+        <p className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] animate-pulse">
+          Đang giải mã nội dung...
         </p>
       </div>
     );
@@ -123,48 +112,63 @@ export default function BlogDetailPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#050505] font-mono text-gray-900 dark:text-zinc-100 selection:bg-orange-500/30 relative overflow-x-hidden">
+      {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full opacity-60" />
-        <div className="absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] bg-orange-500/5 blur-[120px] rounded-full opacity-60" />
+        <div className="absolute top-[10%] right-[-5%] w-[600px] h-[600px] bg-blue-600/[0.03] blur-[120px] rounded-full" />
+        <div className="absolute bottom-[5%] left-[-5%] w-[500px] h-[500px] bg-orange-500/[0.03] blur-[120px] rounded-full" />
       </div>
 
       <div className="relative z-10">
+        {/* Pass dữ liệu đã chuẩn hóa vào Hero */}
         <BlogDetailHero post={post} />
 
-        <div className="container mx-auto px-4 py-12 lg:py-16">
+        <div className="container mx-auto px-4 py-12 lg:py-20">
           <div className="max-w-[1400px] mx-auto">
-            <div className="grid lg:grid-cols-12 gap-10 items-start">
+            <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+              {/* LEFT COLUMN: NỘI DUNG CHÍNH */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="lg:col-span-8 space-y-10"
+                transition={{ duration: 0.6 }}
+                className="lg:col-span-8 space-y-12"
               >
                 <BlogCoverImage
-                  category={post.category}
+                  category={post.displayCategory}
                   thumbnailUrl={post.thumbnailUrl}
+                  isFeatured={post.isFeatured}
                 />
 
-                <div className="sticky top-20 z-20 md:static md:z-auto">
+                <div className="sticky top-24 z-20 md:static md:z-auto">
                   <BlogActionButtons
                     copied={copied}
                     onCopyLink={handleCopyLink}
+                    totalViews={post.viewCount}
                   />
                 </div>
 
                 <BlogArticleContent content={post.content} tags={post.tags} />
 
-                <RelatedPosts posts={relatedPosts} />
+                {relatedPosts.length > 0 && (
+                  <RelatedPosts posts={relatedPosts} />
+                )}
               </motion.div>
 
+              {/* RIGHT COLUMN: SIDEBAR */}
               <motion.aside
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="lg:col-span-4 space-y-8 sticky top-24"
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="lg:col-span-4 space-y-10 sticky top-28"
               >
-                <TableOfContents sections={tocSections} />
-                <ShareSidebar title={post.title} postUrl={currentUrl} />
+                {tocSections.length > 0 && (
+                  <TableOfContents sections={tocSections} />
+                )}
+
+                <ShareSidebar
+                  title={post.title}
+                  postUrl={currentUrl}
+                  authorName={post.authorName}
+                />
               </motion.aside>
             </div>
           </div>

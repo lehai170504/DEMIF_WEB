@@ -12,7 +12,6 @@ import {
   PaymentDetailDto,
   PaymentStatsResponse,
 } from "@/types/payment.type";
-import { AdminAnalyticsResponse } from "@/types/analytics.type";
 
 const getAuthHeaders = () => {
   const token = Cookies.get("accessToken");
@@ -119,11 +118,4 @@ export const getAdminPaymentStats = async (): Promise<PaymentStatsResponse> => {
     headers: getAuthHeaders(),
   });
   return response as unknown as PaymentStatsResponse;
-};
-
-export const getAdminAnalytics = async (): Promise<AdminAnalyticsResponse> => {
-  const response = await axiosClient.get("/admin/analytics", {
-    headers: getAuthHeaders(),
-  });
-  return response as unknown as AdminAnalyticsResponse;
 };

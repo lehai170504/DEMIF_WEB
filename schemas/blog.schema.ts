@@ -1,13 +1,28 @@
 import { z } from "zod";
 
 export const BlogSchema = z.object({
-  Title: z.string().min(1, "Tiêu đề không được để trống"),
-  Content: z.string().min(1, "Nội dung không được để trống"),
-  Summary: z.string().optional().nullable(),
-  Tags: z.string().optional().nullable(),
-  Status: z.string().default("Published"),
+  title: z.string().min(1, "Tiêu đề không được để trống"),
 
-  ThumbnailFile: z
+  content: z.string().min(1, "Nội dung bài viết không được để trống"),
+
+  slug: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => (val === "" ? null : val)),
+
+  category: z.string().optional().nullable(),
+
+  summary: z.string().optional().nullable(),
+
+  tags: z.string().optional().nullable(),
+
+  status: z.enum(["published", "draft", "archived"]).default("published"),
+
+  isFeatured: z.boolean().default(false),
+
+  // Xử lý File ảnh
+  thumbnailFile: z
     .any()
     .optional()
     .refine(

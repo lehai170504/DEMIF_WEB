@@ -18,6 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Loader2,
   Plus,
@@ -38,10 +40,15 @@ import {
   Globe,
   Lock,
   Tags as TagsIcon,
+  Link as LinkIcon,
+  Bookmark,
+  Star,
+  Layout,
 } from "lucide-react";
-import { useManageBlog } from "@/hooks/use-manage-blog";
+import { useManageBlog } from "@/hooks/use-blog";
 import { BlogSchema, BlogFormValues } from "@/schemas/blog.schema";
 import { CreateBlogRequest } from "@/types/blog.type";
+import { cn } from "@/lib/utils";
 
 export function CreateBlogDialog() {
   const [open, setOpen] = React.useState(false);
@@ -51,12 +58,14 @@ export function CreateBlogDialog() {
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(BlogSchema),
     defaultValues: {
-      Title: "",
-      Content: "",
-      Summary: "",
-      Tags: "",
-      Status: "Published",
-      ThumbnailFile: undefined,
+      title: "",
+      content: "",
+      slug: "",
+      category: "",
+      summary: "",
+      tags: "",
+      status: "published",
+      isFeatured: false,
     },
   });
 
@@ -72,20 +81,17 @@ export function CreateBlogDialog() {
     }
   };
 
-  React.useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
   const onSubmit = (values: BlogFormValues) => {
     const payload: CreateBlogRequest = {
-      Title: values.Title,
-      Content: values.Content,
-      Summary: values.Summary || "",
-      Tags: values.Tags || "",
-      Status: values.Status || "Published",
-      ThumbnailFile: values.ThumbnailFile,
+      title: values.title,
+      content: values.content,
+      slug: values.slug || undefined,
+      category: values.category || undefined,
+      summary: values.summary || undefined,
+      tags: values.tags || undefined,
+      status: values.status || "published",
+      isFeatured: values.isFeatured,
+      thumbnailFile: values.thumbnailFile,
     };
 
     createBlog(payload, {
@@ -100,134 +106,142 @@ export function CreateBlogDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="h-12 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-500 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 px-8 text-[11px] uppercase tracking-widest flex items-center transition-all active:scale-95 border-b-4 border-orange-700 dark:border-orange-800">
+        <Button className="h-12 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-500 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 px-8 text-[11px] uppercase tracking-widest flex items-center transition-all active:scale-95 border-b-4 border-orange-700">
           <Plus className="w-4 h-4 mr-2 stroke-[3px]" /> Viết bài mới
         </Button>
       </DialogTrigger>
 
-      {/* Cấu trúc flex-col và h-[90vh] để cố định Header */}
-      <DialogContent className="sm:max-w-[850px] bg-white dark:bg-zinc-950 rounded-[2.5rem] font-mono p-0 overflow-hidden border-none shadow-2xl transition-colors duration-300 h-[90vh] flex flex-col">
-        {/* Header Cố định (shrink-0) */}
-        <DialogHeader className="p-10 bg-gray-50/50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-white/5 text-left shrink-0">
+      <DialogContent className="sm:max-w-[900px] bg-white dark:bg-zinc-950 rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl h-[92vh] flex flex-col font-mono">
+        {/* HEADER CÂN ĐỐI */}
+        <DialogHeader className="p-8 bg-gray-50/50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-white/5 shrink-0">
           <DialogTitle className="text-2xl font-black flex items-center gap-4 text-gray-900 dark:text-white uppercase tracking-tighter">
             <div className="p-2.5 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/20">
-              <Send className="w-6 h-6 text-white" />
+              <Layout className="w-6 h-6 text-white" />
             </div>
-            Biên tập bài viết
+            Biên tập nội dung hệ thống
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar p-10 bg-white dark:bg-zinc-950">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-8 bg-white dark:bg-zinc-950">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-8 font-mono"
-            >
-              {previewUrl && (
-                <div className="relative aspect-[21/9] w-full rounded-[2.5rem] overflow-hidden border-2 border-orange-100 dark:border-orange-500/20 mb-4 shadow-inner bg-gray-50 dark:bg-zinc-900 group">
-                  <Image
-                    src={previewUrl}
-                    alt="Preview"
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full border border-white/10">
-                    Xem trước ảnh bìa
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* PHẦN ẢNH BÌA & THÔNG TIN CƠ BẢN */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Cột trái: Thumbnail Preview */}
+                <div className="lg:col-span-5 space-y-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+                    Hình ảnh đại diện
+                  </FormLabel>
+                  <div className="relative aspect-[4/3] w-full rounded-[2rem] overflow-hidden border-2 border-dashed border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-900 group transition-all hover:border-orange-500/50">
+                    {previewUrl ? (
+                      <Image
+                        src={previewUrl}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-slate-400">
+                        <ImageIcon className="w-10 h-10 opacity-20" />
+                        <span className="text-[9px] font-black uppercase tracking-tighter">
+                          Chưa có ảnh
+                        </span>
+                      </div>
+                    )}
+                    <FormField
+                      control={form.control}
+                      name="thumbnailFile"
+                      render={({ field: { value, onChange } }) => (
+                        <div className="absolute inset-0 opacity-0 cursor-pointer z-10">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="w-full h-full cursor-pointer"
+                            onChange={(e) => handleFileChange(e, onChange)}
+                          />
+                        </div>
+                      )}
+                    />
+                    <div className="absolute bottom-4 inset-x-4">
+                      <Button
+                        type="button"
+                        className="w-full h-10 bg-slate-900/80 backdrop-blur-md text-white rounded-xl text-[9px] font-black uppercase border border-white/10 pointer-events-none"
+                      >
+                        Thay đổi ảnh bìa
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              )}
 
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-2">
+                {/* Cột phải: Tiêu đề & Slug */}
+                <div className="lg:col-span-7 space-y-6">
                   <FormField
                     control={form.control}
-                    name="Title"
+                    name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                           Tiêu đề bài viết
                         </FormLabel>
                         <FormControl>
                           <Input
-                            className="h-14 bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-bold rounded-xl focus:ring-orange-500 dark:text-white font-mono text-sm shadow-sm transition-all"
-                            placeholder="Nhập tiêu đề hấp dẫn..."
+                            className="h-14 bg-gray-50 dark:bg-zinc-900 border-none font-bold rounded-2xl text-sm focus:ring-2 focus:ring-orange-500/20"
+                            placeholder="VD: Cách học tiếng Anh hiệu quả..."
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px] font-bold text-red-500" />
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <div className="col-span-1">
                   <FormField
                     control={form.control}
-                    name="Status"
+                    name="slug"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-                          Trạng thái
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          Đường dẫn tĩnh (Slug)
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-14 bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-black rounded-xl font-mono text-[10px] uppercase tracking-widest shadow-sm dark:text-slate-200">
-                              <SelectValue placeholder="Chọn" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="font-mono bg-white dark:bg-zinc-900 border-white/10">
-                            <SelectItem
-                              value="Published"
-                              className="focus:bg-emerald-50 dark:focus:bg-emerald-500/10"
-                            >
-                              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase">
-                                <Globe className="w-3.5 h-3.5" /> Xuất bản
-                              </div>
-                            </SelectItem>
-                            <SelectItem
-                              value="Draft"
-                              className="focus:bg-orange-50 dark:focus:bg-orange-500/10"
-                            >
-                              <div className="flex items-center gap-2 text-orange-500 font-bold text-[10px] uppercase">
-                                <Lock className="w-3.5 h-3.5" /> Bản nháp
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              className="h-14 bg-gray-50 dark:bg-zinc-900 border-none font-bold rounded-2xl pl-12 text-sm"
+                              placeholder="url-bai-viet-tu-dong"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
+                          </div>
+                        </FormControl>
+                        <FormDescription className="text-[9px] text-slate-400">
+                          Để trống để hệ thống tự tạo Slug chuẩn SEO
+                        </FormDescription>
                       </FormItem>
                     )}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              {/* HÀNG BỘ LỌC CÂN ĐỐI (3 CỘT) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
-                  name="ThumbnailFile"
-                  render={({ field: { value, onChange, ...field } }) => (
+                  name="category"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-                        Ảnh bìa
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        Phân loại
                       </FormLabel>
                       <FormControl>
-                        <div className="relative h-14 group">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                            onChange={(e) => handleFileChange(e, onChange)}
+                        <div className="relative">
+                          <Input
+                            className="h-14 bg-gray-50 dark:bg-zinc-900 border-none font-bold rounded-2xl pl-12 text-sm"
+                            placeholder="VD: Grammar, Tips..."
+                            {...field}
+                            value={field.value ?? ""}
                           />
-                          <div className="h-full bg-slate-900 dark:bg-zinc-800 border-slate-800 dark:border-white/5 border rounded-xl flex items-center px-5 gap-3 text-white font-black text-[10px] uppercase tracking-widest shadow-lg transition-all group-hover:bg-orange-600">
-                            <ImageIcon className="w-4 h-4 text-orange-400" />
-                            <span className="truncate">
-                              {value instanceof File
-                                ? value.name
-                                : "Chọn ảnh bìa..."}
-                            </span>
-                          </div>
+                          <Bookmark className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
                         </div>
                       </FormControl>
                     </FormItem>
@@ -236,21 +250,107 @@ export function CreateBlogDialog() {
 
                 <FormField
                   control={form.control}
-                  name="Tags"
+                  name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        Chế độ hiển thị
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-14 bg-gray-50 dark:bg-zinc-900 border-none font-black rounded-2xl uppercase tracking-widest text-[10px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="font-mono">
+                          <SelectItem
+                            value="published"
+                            className="text-emerald-500 font-black"
+                          >
+                            Xuất bản ngay
+                          </SelectItem>
+                          <SelectItem
+                            value="draft"
+                            className="text-orange-500 font-black"
+                          >
+                            Lưu nháp
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isFeatured"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-[1.25rem] bg-orange-500/5 dark:bg-orange-500/10 px-5 h-14 border border-orange-500/10 self-end">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2 m-0">
+                        <Star
+                          className={cn(
+                            "w-4 h-4",
+                            field.value && "fill-orange-500",
+                          )}
+                        />{" "}
+                        Tin nổi bật
+                      </FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* TAGS & SUMMARY */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                         Từ khóa (Tags)
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
-                            placeholder="Tips, Grammar..."
-                            className="h-14 bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-bold rounded-xl focus:ring-orange-500 font-mono text-sm pl-10 shadow-sm dark:text-white"
+                            className="h-14 bg-gray-50 dark:bg-zinc-900 border-none font-bold rounded-2xl pl-12 text-sm"
+                            placeholder="Speaking, IELTS, Tips..."
                             {...field}
                             value={field.value ?? ""}
                           />
-                          <TagsIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-zinc-600" />
+                          <TagsIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="summary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        Tóm tắt ngắn
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            className="h-14 bg-gray-50 dark:bg-zinc-900 border-none font-bold rounded-2xl pl-12 text-sm"
+                            placeholder="Mô tả ngắn gọn nội dung..."
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                          <AlignLeft className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
                         </div>
                       </FormControl>
                     </FormItem>
@@ -258,56 +358,38 @@ export function CreateBlogDialog() {
                 />
               </div>
 
+              {/* NỘI DUNG CHÍNH (FULL WIDTH) */}
               <FormField
                 control={form.control}
-                name="Summary"
+                name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1 flex items-center gap-2">
-                      <AlignLeft className="w-3 h-3" /> Tóm tắt bài viết
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+                      Nội dung chi tiết
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Mô tả ngắn gọn nội dung..."
-                        className="min-h-[100px] bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-mono p-5 rounded-2xl resize-none font-bold text-sm shadow-sm focus:ring-orange-500 dark:text-slate-200 no-scrollbar"
+                        className="min-h-[250px] bg-gray-50 dark:bg-zinc-900 border-none rounded-[2rem] p-6 leading-relaxed font-bold text-sm no-scrollbar focus:ring-2 focus:ring-orange-500/20"
+                        placeholder="Bắt đầu biên tập nội dung tại đây..."
                         {...field}
-                        value={field.value ?? ""}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="Content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-                      Nội dung bài viết
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Bắt đầu viết tại đây..."
-                        className="min-h-[350px] bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-white/5 font-mono p-6 rounded-[2.5rem] leading-relaxed font-bold text-sm shadow-sm focus:ring-orange-500 dark:text-slate-200 no-scrollbar"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[10px] font-bold text-red-500" />
-                  </FormItem>
-                )}
-              />
-
+              {/* ACTION BUTTON */}
               <Button
                 disabled={isCreating}
-                className="w-full h-16 bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-500 text-white font-black rounded-[1.5rem] shadow-xl shadow-orange-600/20 transition-all active:scale-[0.98] text-[11px] uppercase tracking-[0.3em] font-mono"
+                className="w-full h-16 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-3xl shadow-xl shadow-orange-600/20 text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98]"
               >
                 {isCreating ? (
                   <Loader2 className="animate-spin mr-3 h-5 w-5" />
                 ) : (
                   <Send className="w-5 h-5 mr-3" />
                 )}
-                {isCreating ? "Đang xử lý..." : "Xuất bản bài viết"}
+                {isCreating ? "Đang đồng bộ..." : "Hoàn tất & Xuất bản"}
               </Button>
             </form>
           </Form>

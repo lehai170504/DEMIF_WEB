@@ -11,7 +11,6 @@ export function ResultsInfo({
   searchQuery,
   selectedCategory,
 }: ResultsInfoProps) {
-  // Ẩn thanh thông báo nếu không search gì và đang ở tab "Tất cả"
   if (!searchQuery && selectedCategory === "all") return null;
 
   return (

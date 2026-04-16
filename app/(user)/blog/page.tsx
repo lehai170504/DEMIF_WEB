@@ -2,307 +2,273 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { useBlogs } from "@/hooks/use-blogs";
-import { BlogDto } from "@/types/blog.type";
-import { Loader2, RefreshCw, Search } from "lucide-react";
+import { usePublicBlogs } from "@/hooks/use-blog";
+import { GetBlogsParams } from "@/types/blog.type";
+import { Loader2, Search, Hash, LayoutGrid, X } from "lucide-react";
 
-// Import các component UI
 import { BlogHero } from "@/components/blog/BlogHero";
 import { FeaturedPosts } from "@/components/blog/FeaturedPosts";
-import { CategoryFilter } from "@/components/blog/CategoryFilter";
 import { ResultsInfo } from "@/components/blog/ResultsInfo";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { BlogPagination } from "@/components/blog/BlogPagination";
 import { EmptyState } from "@/components/blog/EmptyState";
 import { PopularPosts } from "@/components/blog/PopularPosts";
 import { TagsCloud } from "@/components/blog/TagsCloud";
+import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
 const POSTS_PER_PAGE = 6;
 
 export default function BlogPage() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useState<
+    GetBlogsParams & { selectedTag: string }
+  >({
+    page: 1,
+    pageSize: POSTS_PER_PAGE,
+    search: "",
+    tag: undefined, // Lọc theo tag
+    sortBy: "publishedAt",
+    sortDirection: "desc",
+    selectedTag: "all",
+  });
 
-  // 1. FETCH DỮ LIỆU TỪ API
-  const { data: rawBlogs = [], isLoading, isError, refetch } = useBlogs();
+  const debouncedSearch = useDebounce(params.search, 500);
 
-  // 2. CHUẨN HÓA DỮ LIỆU
-  const publishedBlogs = useMemo(() => {
-    return rawBlogs
-      .filter((b: BlogDto) => b.status === "Published")
-      .map((b) => {
-        const tagsArray =
-          b.tags && b.tags !== "string"
-            ? b.tags.split(",").map((t) => t.trim())
-            : [];
-        return {
-          id: b.id,
-          title: b.title,
-          excerpt: b.summary && b.summary !== "string" ? b.summary : null,
-          category: tagsArray.length > 0 ? tagsArray[0] : "Kiến thức chung",
-          viewCount: b.viewCount || 0,
-          createdAt: b.createdAt,
-          authorId: b.authorId || "Quản trị viên",
-          thumbnailUrl:
-            b.thumbnailUrl && b.thumbnailUrl !== "string"
-              ? b.thumbnailUrl
-              : undefined,
-          _internalTagsArray: tagsArray,
-        };
-      });
-  }, [rawBlogs]);
+  // 1. FETCH DỮ LIỆU
+  const { data, isLoading } = usePublicBlogs({
+    ...params,
+    search: debouncedSearch,
+    page: params.page,
+  });
 
-  // 3. TÌM KIẾM & LỌC
-  const filteredPosts = useMemo(() => {
-    return publishedBlogs.filter((post) => {
-      const matchesCategory =
-        selectedCategory === "all" || post.category === selectedCategory;
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        searchQuery === "" ||
-        post.title.toLowerCase().includes(searchLower) ||
-        (post.excerpt || "").toLowerCase().includes(searchLower);
-      return matchesCategory && matchesSearch;
+  const blogs = data?.items || [];
+  const totalPages = data?.totalPages || 1;
+  const totalCount = data?.totalCount || 0;
+
+  // 2. LOGIC TRÍCH XUẤT TAGS TỪ DATA (Lấy những tag đang hiện diện)
+  const dynamicTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    blogs.forEach((blog) => {
+      if (blog.tags) {
+        blog.tags.split(",").forEach((t) => tagsSet.add(t.trim()));
+      }
     });
-  }, [publishedBlogs, selectedCategory, searchQuery]);
+    return Array.from(tagsSet).slice(0, 10); // Lấy top 10 tag để tránh tràn UI
+  }, [blogs]);
 
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const endIndex = startIndex + POSTS_PER_PAGE;
-
-  // 4. CÁC BIẾN PHỤ TRỢ
-  const blogCategories = useMemo(() => {
-    const uniqueCategories = Array.from(
-      new Set(publishedBlogs.map((b) => b.category)),
-    );
-    return [
-      { id: "all", name: "Tất cả", count: publishedBlogs.length },
-      ...uniqueCategories.map((cat) => ({
-        id: cat,
-        name: cat,
-        count: publishedBlogs.filter((b) => b.category === cat).length,
-      })),
-    ];
-  }, [publishedBlogs]);
-
+  // 3. LOGIC TIÊU ĐIỂM
   const featuredPosts = useMemo(
-    () =>
-      [...publishedBlogs]
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
-        .slice(0, 3),
-    [publishedBlogs],
+    () => blogs.filter((b) => b.isFeatured).slice(0, 3),
+    [blogs],
   );
 
   const popularPosts = useMemo(
-    () =>
-      [...publishedBlogs].sort((a, b) => b.viewCount - a.viewCount).slice(0, 4),
-    [publishedBlogs],
-  );
-
-  const allTags = useMemo(
-    () =>
-      Array.from(
-        new Set(publishedBlogs.flatMap((p) => p._internalTagsArray || [])),
-      ),
-    [publishedBlogs],
+    () => [...blogs].sort((a, b) => b.viewCount - a.viewCount).slice(0, 4),
+    [blogs],
   );
 
   // Handlers
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-    window.scrollTo({ top: 400, behavior: "smooth" }); // Scroll nhẹ xuống danh sách
+  const handleTagChange = (tag: string) => {
+    setParams((prev) => ({
+      ...prev,
+      tag: tag === "all" ? undefined : tag,
+      selectedTag: tag,
+      page: 1,
+    }));
+  };
+
+  const updatePage = (newPage: number) => {
+    setParams((prev) => ({ ...prev, page: newPage }));
+    window.scrollTo({ top: 600, behavior: "smooth" });
   };
 
   const handleReset = () => {
-    setSearchQuery("");
-    setSelectedCategory("all");
+    setParams({
+      page: 1,
+      pageSize: POSTS_PER_PAGE,
+      search: "",
+      tag: undefined,
+      selectedTag: "all",
+    });
   };
 
-  // --- Animation Variants ---
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 100, damping: 15 },
-    },
-  };
-
   if (isLoading)
     return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-[#050505]">
+      <div className="w-full min-h-screen flex items-center justify-center bg-[#050505]">
         <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
       </div>
     );
 
   return (
     <div className="w-full min-h-screen bg-gray-50 dark:bg-[#050505] font-mono pb-24 relative overflow-x-hidden">
-      {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-orange-500/5 blur-[120px] rounded-full" />
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.02] z-0" />
       </div>
 
       <div className="relative z-10">
-        {/* BlogHero */}
         <BlogHero />
 
         <main className="container mx-auto px-4 lg:px-6 pt-4 max-w-7xl">
+          {/* SEARCH BAR CHUYỂN LÊN ĐẦU CHO THUẬN MẮT */}
+          <div className="max-w-2xl mx-auto mb-16 relative group">
+            <div className="absolute inset-0 bg-orange-500/20 blur-2xl group-focus-within:bg-orange-500/30 transition-all rounded-full" />
+            <div className="relative flex items-center bg-white dark:bg-white/5 border border-white/10 rounded-full px-6 py-2 shadow-2xl backdrop-blur-md">
+              <Search className="w-5 h-5 text-gray-400 mr-4" />
+              <input
+                type="text"
+                placeholder="Khám phá kiến thức Demif..."
+                className="bg-transparent border-none outline-none w-full h-12 font-bold text-white placeholder:text-gray-500"
+                value={params.search}
+                onChange={(e) =>
+                  setParams((p) => ({ ...p, search: e.target.value, page: 1 }))
+                }
+              />
+              {params.search && (
+                <button
+                  onClick={() => setParams((p) => ({ ...p, search: "" }))}
+                >
+                  <X className="w-4 h-4 text-gray-400 hover:text-white" />
+                </button>
+              )}
+            </div>
+          </div>
+
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-12 lg:space-y-16"
+            className="space-y-16"
           >
-            {/* Featured Posts Section */}
+            {/* FEATURED SECTION */}
             {featuredPosts.length > 0 &&
-              selectedCategory === "all" &&
-              searchQuery === "" && (
-                <motion.section
-                  variants={itemVariants}
-                  className="pt-4 lg:pt-8"
-                >
-                  <div className="mb-6 md:mb-8 flex items-center gap-3 px-2">
-                    <div className="h-8 w-1.5 bg-gradient-to-b from-orange-500 to-red-500 rounded-full" />
-                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                      Tiêu điểm tuần
+              params.selectedTag === "all" &&
+              !params.search && (
+                <section className="space-y-8">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-500 rounded-xl shadow-lg shadow-orange-500/20">
+                      <LayoutGrid className="w-5 h-5 text-white" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-black text-neutral-800 uppercase tracking-tighter">
+                      Tiêu điểm
                     </h2>
                   </div>
                   <FeaturedPosts posts={featuredPosts} />
-                </motion.section>
+                </section>
               )}
 
-            {/* --- MAIN GRID LAYOUT --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-              {/* LEFT COLUMN: DANH SÁCH BÀI VIẾT (8/12) */}
-              <div className="lg:col-span-8 flex flex-col gap-8 min-w-0">
-                {/* Thanh Lọc & Kết quả */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <CategoryFilter
-                    categories={blogCategories}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={handleCategoryChange}
-                  />
-                  <ResultsInfo
-                    totalResults={filteredPosts.length}
-                    searchQuery={searchQuery}
-                    selectedCategory={selectedCategory}
-                  />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+              <div className="lg:col-span-8 space-y-10">
+                {/* DYNAMIC TAG FILTER */}
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                      <Hash className="w-4 h-4 text-orange-500" /> Chủ đề đang
+                      nóng
+                    </div>
+                    <ResultsInfo
+                      totalResults={totalCount}
+                      searchQuery={params.search || ""}
+                      selectedCategory={params.selectedTag}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleTagChange("all")}
+                      className={cn(
+                        "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
+                        params.selectedTag === "all"
+                          ? "bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-white/5 border-white/5 text-gray-400 hover:border-orange-500/50",
+                      )}
+                    >
+                      Tất cả
+                    </button>
+                    {dynamicTags.map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => handleTagChange(tag)}
+                        className={cn(
+                          "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
+                          params.selectedTag === tag
+                            ? "bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20"
+                            : "bg-white/5 border-white/5 text-gray-400 hover:border-orange-500/50",
+                        )}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* BLOG LIST */}
                 <AnimatePresence mode="wait">
-                  {filteredPosts.length === 0 ? (
-                    <motion.div
-                      key="empty"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <EmptyState onReset={handleReset} />
-                    </motion.div>
+                  {blogs.length === 0 ? (
+                    <EmptyState onReset={handleReset} />
                   ) : (
                     <motion.div
-                      key={selectedCategory + searchQuery}
-                      variants={containerVariants}
-                      initial="hidden"
-                      animate="visible"
+                      key={params.selectedTag + debouncedSearch + params.page}
                       className="space-y-12"
                     >
-                      <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-                        {filteredPosts
-                          .slice(
-                            (currentPage - 1) * POSTS_PER_PAGE,
-                            currentPage * POSTS_PER_PAGE,
-                          )
-                          .map((post) => (
-                            <motion.div
-                              key={post.id}
-                              variants={itemVariants}
-                              className="h-full"
-                            >
-                              <BlogPostCard post={post} />
-                            </motion.div>
-                          ))}
+                      <div className="grid md:grid-cols-2 gap-8">
+                        {blogs.map((post) => (
+                          <BlogPostCard key={post.id} post={post} />
+                        ))}
                       </div>
 
-                      {filteredPosts.length > POSTS_PER_PAGE && (
-                        <div className="pt-8 flex justify-center">
-                          <BlogPagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={(page) => {
-                              setCurrentPage(page);
-                              window.scrollTo({ top: 400, behavior: "smooth" });
-                            }}
-                            startIndex={startIndex}
-                            endIndex={endIndex}
-                            totalPosts={filteredPosts.length}
-                          />
-                        </div>
+                      {totalPages > 1 && (
+                        <BlogPagination
+                          currentPage={params.page || 1}
+                          totalPages={totalPages}
+                          onPageChange={updatePage}
+                          startIndex={
+                            ((params.page || 1) - 1) * POSTS_PER_PAGE + 1
+                          }
+                          endIndex={Math.min(
+                            (params.page || 1) * POSTS_PER_PAGE,
+                            totalCount,
+                          )}
+                          totalPosts={totalCount}
+                        />
                       )}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* RIGHT COLUMN: SIDEBAR (4/12) */}
-              <aside className="lg:col-span-4 flex flex-col gap-8 sticky top-28">
-                {/* THANH SEARCH ĐÃ CHUYỂN VÀO ĐÂY */}
-                <div className="p-1 bg-gradient-to-br from-gray-200 dark:from-white/10 to-transparent rounded-[2.5rem] shadow-xl overflow-hidden">
-                  <div className="p-6 bg-white dark:bg-[#0a0a0a] rounded-[2.4rem] h-full">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-2">
-                      Tìm kiếm bài viết
-                    </h3>
-                    <div className="relative group">
-                      <input
-                        type="text"
-                        placeholder="Nhập từ khóa..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="w-full h-14 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 focus:border-orange-500/50 focus:bg-white dark:focus:bg-white/10 rounded-[1.5rem] outline-none transition-all font-bold text-sm text-gray-900 dark:text-white"
-                      />
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Popular Posts */}
-                {popularPosts.length > 0 && (
-                  <div className="p-6 lg:p-8 rounded-[2.5rem] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl">
+              {/* SIDEBAR */}
+              <aside className="lg:col-span-4 space-y-10 sticky top-28">
+                <div className="p-8 rounded-[2.5rem] bg-[#0a0a0a] border border-white/10 shadow-2xl space-y-12">
+                  <section>
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />{" "}
                       Đang thịnh hành
                     </h3>
                     <PopularPosts posts={popularPosts} />
-                  </div>
-                )}
+                  </section>
 
-                {/* Tags Cloud */}
-                <div className="p-6 lg:p-8 rounded-[2.5rem] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl">
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" /> Chủ đề
-                  </h3>
-                  <TagsCloud
-                    tags={allTags}
-                    onTagClick={(tag) => {
-                      setSearchQuery(tag);
-                      setCurrentPage(1);
-                      window.scrollTo({ top: 400, behavior: "smooth" });
-                    }}
-                  />
+                  <section>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-500" /> Tất
+                      cả từ khóa
+                    </h3>
+                    <TagsCloud
+                      tags={[
+                        "IELTS",
+                        "Tips",
+                        "Grammar",
+                        "Speaking",
+                        "Listening",
+                        "Vocabulary",
+                      ]}
+                      onTagClick={handleTagChange}
+                    />
+                  </section>
                 </div>
               </aside>
             </div>

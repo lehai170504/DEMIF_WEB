@@ -17,6 +17,7 @@ const routeMap: Record<string, string> = {
   subscriptions: "Gói dịch vụ",
   "user-subscriptions": "Quản lý đăng ký",
   payments: "Giao dịch",
+  analytics: "Phân tích",
 };
 
 export function Breadcrumbs({ pathname }: { pathname: string }) {

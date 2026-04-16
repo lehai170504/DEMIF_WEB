@@ -1,79 +1,145 @@
 import axiosClient from "@/lib/axios-client";
-import { BlogDto, CreateBlogRequest } from "@/types/blog.type";
+import {
+  BlogDto,
+  CreateBlogRequest,
+  UpdateBlogRequest,
+  PagedBlogResponse,
+  GetBlogsParams,
+} from "@/types/blog.type";
 
 export const blogService = {
-  // 1. Lấy toàn bộ bài viết
-  getBlogs: async (): Promise<BlogDto[]> => {
-    try {
-      const response = await axiosClient.get("/blogs");
-      const data = response?.data !== undefined ? response.data : response;
+  // ===================== ADMIN APIS =====================
 
-      return Array.isArray(data) ? data : [];
-    } catch (error) {
-      console.error("Critical API Error:", error);
-      return [];
-    }
-  },
-
-  // 2. Lấy chi tiết bài viết
-  getBlogById: async (id: string): Promise<BlogDto> => {
+  // 1. Lấy danh sách bài viết cho CMS
+  getAdminBlogs: async (
+    params?: GetBlogsParams,
+  ): Promise<PagedBlogResponse> => {
     try {
-      const response = await axiosClient.get(`/blogs/${id}`);
-      return response as unknown as BlogDto;
+      const response = await axiosClient.get("/admin/blogs", { params });
+      // FIX: Ép kiểu as PagedBlogResponse
+      return (
+        response.data !== undefined ? response.data : response
+      ) as PagedBlogResponse;
     } catch (error) {
-      console.error("Lỗi API getBlogById:", error);
+      console.error("Lỗi API getAdminBlogs:", error);
       throw error;
     }
   },
-  // 3. Tạo mới bài viết
-  createBlog: async (data: CreateBlogRequest): Promise<BlogDto> => {
+
+  // 2. Tạo mới bài viết
+  createBlog: async (
+    data: CreateBlogRequest,
+  ): Promise<{ message: string; blogId: string }> => {
     const formData = new FormData();
-    formData.append("Title", data.Title);
-    ``;
-    formData.append("Content", data.Content);
-    if (data.Summary) formData.append("Summary", data.Summary);
-    if (data.Tags) formData.append("Tags", data.Tags);
-    if (data.Status) formData.append("Status", data.Status);
-    if (data.ThumbnailFile)
-      formData.append("ThumbnailFile", data.ThumbnailFile);
+    // Bắt buộc
+    formData.append("title", data.title);
+    formData.append("content", data.content);
+
+    // Optional
+    if (data.slug) formData.append("slug", data.slug);
+    if (data.category) formData.append("category", data.category);
+    if (data.summary) formData.append("summary", data.summary);
+    if (data.tags) formData.append("tags", data.tags);
+    if (data.status) formData.append("status", data.status);
+    if (data.isFeatured !== undefined)
+      formData.append("isFeatured", String(data.isFeatured));
+
+    // File ảnh
+    if (data.thumbnailFile instanceof File) {
+      formData.append("thumbnailFile", data.thumbnailFile);
+    }
 
     const response = await axiosClient.post("/admin/blogs", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    return response.data;
+    // FIX: Ép kiểu Response
+    return (response.data !== undefined ? response.data : response) as {
+      message: string;
+      blogId: string;
+    };
   },
 
-  // 4. Cập nhật bài viết (Sửa từ updateStatus thành updateBlog)
-  updateBlog: async (id: string, data: CreateBlogRequest): Promise<BlogDto> => {
+  // 3. Cập nhật bài viết
+  updateBlog: async (
+    id: string,
+    data: UpdateBlogRequest,
+  ): Promise<{ message: string }> => {
     const formData = new FormData();
-    formData.append("Title", data.Title);
-    formData.append("Content", data.Content);
+    formData.append("title", data.title);
+    formData.append("content", data.content);
 
-    // Chỉ append nếu có giá trị để tránh gửi chuỗi "null" hoặc "undefined" sang BE
-    if (data.Summary !== undefined && data.Summary !== null) {
-      formData.append("Summary", data.Summary);
-    }
-    if (data.Tags !== undefined && data.Tags !== null) {
-      formData.append("Tags", data.Tags);
-    }
-    if (data.Status) {
-      formData.append("Status", data.Status);
-    }
+    if (data.slug) formData.append("slug", data.slug);
+    if (data.category) formData.append("category", data.category);
+    if (data.summary !== undefined && data.summary !== null)
+      formData.append("summary", data.summary);
+    if (data.tags !== undefined && data.tags !== null)
+      formData.append("tags", data.tags);
+    if (data.status) formData.append("status", data.status);
+    if (data.isFeatured !== undefined)
+      formData.append("isFeatured", String(data.isFeatured));
 
-    // Quan trọng: Chỉ append ThumbnailFile nếu người dùng chọn ảnh mới (là kiểu File)
-    // Nếu data.ThumbnailFile là link URL (ảnh cũ), ta không append để BE giữ nguyên ảnh cũ
-    if (data.ThumbnailFile instanceof File) {
-      formData.append("ThumbnailFile", data.ThumbnailFile);
+    if (data.thumbnailFile instanceof File) {
+      formData.append("thumbnailFile", data.thumbnailFile);
     }
 
     const response = await axiosClient.put(`/admin/blogs/${id}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    return response.data;
+    // FIX: Ép kiểu Response
+    return (response.data !== undefined ? response.data : response) as {
+      message: string;
+    };
   },
 
-  // 5. Xóa bài viết
-  deleteBlog: async (id: string): Promise<void> => {
-    await axiosClient.delete(`/admin/blogs/${id}`);
+  // 4. Xóa bài viết
+  deleteBlog: async (id: string): Promise<{ message: string }> => {
+    const response = await axiosClient.delete(`/admin/blogs/${id}`);
+    // FIX: Ép kiểu Response
+    return (response.data !== undefined ? response.data : response) as {
+      message: string;
+    };
+  },
+
+  // ===================== PUBLIC APIS =====================
+
+  // 5. Lấy danh sách Public
+  getPublicBlogs: async (
+    params?: GetBlogsParams,
+  ): Promise<PagedBlogResponse> => {
+    try {
+      const response = await axiosClient.get("/blogs", { params });
+      return (
+        response.data !== undefined ? response.data : response
+      ) as PagedBlogResponse;
+    } catch (error) {
+      console.error("Lỗi API getPublicBlogs:", error);
+      throw error;
+    }
+  },
+
+  // 6. Lấy chi tiết ưu tiên qua slug
+  getBlogBySlug: async (slug: string): Promise<BlogDto> => {
+    try {
+      const response = await axiosClient.get(`/blogs/slug/${slug}`);
+      return (
+        response.data !== undefined ? response.data : response
+      ) as BlogDto;
+    } catch (error) {
+      console.error("Lỗi API getBlogBySlug:", error);
+      throw error;
+    }
+  },
+
+  // 7. Fallback: Lấy chi tiết qua ID
+  getBlogById: async (id: string): Promise<BlogDto> => {
+    try {
+      const response = await axiosClient.get(`/blogs/${id}`);
+      return (
+        response.data !== undefined ? response.data : response
+      ) as BlogDto;
+    } catch (error) {
+      console.error("Lỗi API getBlogById:", error);
+      throw error;
+    }
   },
 };
