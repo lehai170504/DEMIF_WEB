@@ -14,7 +14,6 @@ export { BlogDetailHero } from "./BlogDetailHero";
 export { BlogCoverImage } from "./BlogCoverImage";
 export { BlogActionButtons } from "./BlogActionButtons";
 export { BlogArticleContent } from "./BlogArticleContent";
-export { AuthorCard } from "./AuthorCard";
 export { CommentsSection } from "./CommentsSection";
 export { RelatedPosts } from "./RelatedPosts";
 export { TableOfContents } from "./TableOfContents";

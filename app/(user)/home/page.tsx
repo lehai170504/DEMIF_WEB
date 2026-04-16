@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useVocabularyOverview } from "@/hooks/use-vocabulary";
 import { useLessonHistory } from "@/hooks/use-lesson";
 import { normalizeProgress } from "@/lib/progress";
+import { usePublicBlogs } from "@/hooks/use-blog";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -40,11 +41,12 @@ export default function HomePage() {
   });
 
   // ===== BLOG =====
-  const { data: blogData, isLoading: isLoadingBlogs } = useQuery({
-    queryKey: ["blogs-home"],
-    queryFn: () => blogService.getBlogs(),
+  const { data: blogData, isLoading: isLoadingBlogs } = usePublicBlogs({
+    page: 1,
+    pageSize: 5,
+    sortBy: "publishedAt",
+    sortDirection: "desc",
   });
-
   // ===== LESSON =====
   const { data: lessonsData, isLoading: isLoadingLessons } = useQuery({
     queryKey: ["lessons-home", user?.currentLevel],
@@ -73,7 +75,9 @@ export default function HomePage() {
   });
 
   // ===== HISTORY =====
-  const { data: lessonHistory, isLoading: isLoadingHistory } = useLessonHistory({ pageSize: 15 });
+  const { data: lessonHistory, isLoading: isLoadingHistory } = useLessonHistory(
+    { pageSize: 15 },
+  );
 
   // ===== GLOBAL LOADING =====
   const isPageLoading =
@@ -117,25 +121,31 @@ export default function HomePage() {
 
   // ===== BLOG MAP =====
   const articles =
-    blogData?.map((blog: any) => ({
+    blogData?.items?.map((blog: any) => ({
       title: blog.title,
       excerpt: blog.summary || "",
-      link: `/blog/${blog.id}`,
+      link: `/blog/${blog.slug || blog.id}`,
       image: blog.thumbnailUrl || "/listening-tips-illustration.jpg",
-      date: new Date(blog.createdAt).toLocaleDateString("vi-VN"),
+      date: blog.publishedAt
+        ? new Date(blog.publishedAt).toLocaleDateString("vi-VN")
+        : new Date(blog.createdAt).toLocaleDateString("vi-VN"),
     })) || [];
 
   // ===== LESSON MAP =====
   const mapLessonToComponent = (lesson: any, progressPercent?: number) => ({
     lessonId: lesson.id,
     title: lesson.title,
-    progress: progressPercent !== undefined ? progressPercent : 0, 
+    progress: progressPercent !== undefined ? progressPercent : 0,
     level: (lesson.level || "beginner").toLowerCase(),
     duration: Math.floor(lesson.durationSeconds / 60) || 0,
     category: lesson.category || "General",
     rating: lesson.avgScore || 4.5,
     isPremiumOnly: lesson.isPremiumOnly || false,
-    thumbnailUrl: lesson.thumbnailUrl || (lesson.videoId ? `https://i.ytimg.com/vi/${lesson.videoId}/hqdefault.jpg` : "/video-placeholder.png"),
+    thumbnailUrl:
+      lesson.thumbnailUrl ||
+      (lesson.videoId
+        ? `https://i.ytimg.com/vi/${lesson.videoId}/hqdefault.jpg`
+        : "/video-placeholder.png"),
   });
 
   const historyMap = new Map();
@@ -143,7 +153,7 @@ export default function HomePage() {
     lessonHistory.items.forEach((h: any) => {
       historyMap.set(h.lessonId, {
         status: h.status,
-        progressPercent: normalizeProgress(h.progressPercent, h.status)
+        progressPercent: normalizeProgress(h.progressPercent, h.status),
       });
     });
   }
@@ -153,7 +163,11 @@ export default function HomePage() {
     lessonsData?.items
       ?.filter((lesson: any) => {
         const historyData = historyMap.get(lesson.id);
-        return historyData && historyData.status !== "Completed" && historyData.progressPercent < 1;
+        return (
+          historyData &&
+          historyData.status !== "Completed" &&
+          historyData.progressPercent < 1
+        );
       })
       .map((lesson: any) => {
         const historyData = historyMap.get(lesson.id);

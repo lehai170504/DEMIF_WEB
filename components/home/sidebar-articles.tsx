@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Sparkles, Newspaper } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles, Newspaper, Clock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+
 import { Button } from "../ui/button";
 
 interface Article {
@@ -65,24 +65,32 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
             <Link href={article.link} className="group block">
               <div className="flex gap-4 items-center p-3 rounded-2xl transition-all duration-300 bg-gray-50 dark:bg-white/[0.02] hover:bg-white dark:hover:bg-white/[0.05] border border-gray-100 dark:border-white/5 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5">
                 {/* Image Thumbnail */}
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 group-hover:border-orange-500/30 transition-colors">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 group-hover:border-orange-500/30 transition-colors bg-zinc-100 dark:bg-zinc-800">
                   <Image
-                    src={article.image || "/placeholder.svg"}
+                    src={article.image || "/placeholder-blog.png"}
                     alt={article.title}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0 py-1">
-                  {article.date && (
-                    <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest block mb-1">
-                      {article.date}
-                    </span>
-                  )}
-                  <h4 className="line-clamp-2 text-xs md:text-sm font-bold leading-snug text-gray-700 dark:text-zinc-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    {article.date && (
+                      <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" />
+                        {article.date}
+                      </span>
+                    )}
+                    {/* Badge "Mới" cho bài đầu tiên */}
+                    {index === 0 && (
+                      <span className="text-[8px] bg-blue-500 text-white px-1.5 py-0.5 rounded-md font-black uppercase animate-pulse">
+                        Mới
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="line-clamp-2 text-xs md:text-sm font-bold leading-snug text-gray-700 dark:text-zinc-300 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                     {article.title}
                   </h4>
                 </div>
@@ -98,7 +106,7 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
               <Newspaper className="w-6 h-6 text-gray-400 dark:text-zinc-500" />
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-zinc-500">
-              Đang cập nhật bài viết...
+              Chưa có bài viết mới
             </p>
           </div>
         )}
@@ -108,9 +116,9 @@ export function SidebarArticles({ articles }: SidebarArticlesProps) {
       {articles.length > 0 && (
         <div className="mt-6 pt-2">
           <Link href="/blog" className="block w-full">
-            <Button className="w-full h-12 gap-2">
-              Xem tất cả
-              <Sparkles className="h-3 w-3 group-hover:text-white transition-colors duration-300" />
+            <Button className="w-full h-12 gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-orange-500 dark:hover:bg-orange-500 hover:text-white transition-all duration-300 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg">
+              Khám phá kho kiến thức
+              <Sparkles className="h-3 w-3" />
             </Button>
           </Link>
         </div>

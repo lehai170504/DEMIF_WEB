@@ -11,6 +11,7 @@ import {
   Package,
   Receipt,
   UserCheck,
+  Presentation,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,6 +37,12 @@ const MENU_GROUPS: MenuGroup[] = [
         href: "/admin",
         icon: LayoutDashboard,
         label: "BẢNG ĐIỀU KHIỂN",
+        adminOnly: true,
+      },
+      {
+        href: "/admin/analytics",
+        icon: Presentation,
+        label: "THỐNG KÊ & PHÂN TÍCH",
         adminOnly: true,
       },
     ],
