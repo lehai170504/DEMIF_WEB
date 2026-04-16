@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useVocabularyOverview } from "@/hooks/use-vocabulary";
 
-type FilterType = "all" | "due" | "mastered" | "learning";
+type FilterType = "all" | "due" | "mastered" | "learning" | "new" | "overdue";
 
 interface ReviewFilterProps {
   filter: FilterType;
@@ -83,19 +83,35 @@ export function ReviewFilter({
             active={filter === "due"}
             onClick={() => setFilter("due")}
             label="Cần ôn"
-            count={dueCount}
+            count={overview?.dueCount || 0}
             color="bg-orange-500 shadow-orange-500/20"
+          />
+          <FilterButton
+            active={filter === "overdue"}
+            onClick={() => setFilter("overdue")}
+            label="Quá hạn"
+            count={overview?.overdueCount || 0}
+            color="bg-red-500 shadow-red-500/20"
           />
           <FilterButton
             active={filter === "learning"}
             onClick={() => setFilter("learning")}
             label="Đang học"
+            count={overview?.learningCount || 0}
             color="bg-blue-500 shadow-blue-500/20"
+          />
+          <FilterButton
+            active={filter === "new"}
+            onClick={() => setFilter("new")}
+            label="Mới"
+            count={overview?.newCount || 0}
+            color="bg-indigo-500 shadow-indigo-500/20"
           />
           <FilterButton
             active={filter === "mastered"}
             onClick={() => setFilter("mastered")}
             label="Đã thuộc"
+            count={overview?.masteredCount || 0}
             color="bg-emerald-500 shadow-emerald-500/20"
           />
         </div>

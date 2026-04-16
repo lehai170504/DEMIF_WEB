@@ -54,23 +54,37 @@ export function VocabularyDetailSheet({ item }: VocabularyDetailSheetProps) {
       {/* Nội dung chính với Padding px-8 để không sát viền */}
       <div className="p-8 space-y-10">
         {/* Section 1: Thông tin từ vựng chính */}
-        <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 space-y-4 shadow-sm">
-          <h2 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter break-words">
+        <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 space-y-4 shadow-sm relative overflow-hidden">
+          <h2 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter break-words uppercase">
             {item.word}
           </h2>
-          <p className="text-xl font-bold text-orange-500">{item.meaning}</p>
+          <p className="text-xl font-bold text-orange-500 uppercase">
+            {item.meaning}
+          </p>
           <div className="flex flex-wrap gap-2 pt-2">
+            <Badge
+              variant="outline"
+              className={cn(
+                "rounded-lg px-3 py-1 uppercase text-[9px] font-black border-none",
+                item.reviewStatus === "mastered" &&
+                  "bg-emerald-500/10 text-emerald-500",
+                item.reviewStatus === "overdue" &&
+                  "bg-red-500/10 text-red-500 animate-pulse",
+                item.reviewStatus === "due" &&
+                  "bg-orange-500/10 text-orange-500",
+                item.reviewStatus === "new" &&
+                  "bg-indigo-500/10 text-indigo-500 text-indigo-500",
+                item.reviewStatus === "learning" &&
+                  "bg-blue-500/10 text-blue-500",
+              )}
+            >
+              TRẠNG THÁI: {item.reviewStatus}
+            </Badge>
             <Badge
               variant="outline"
               className="rounded-lg px-3 py-1 uppercase text-[9px] font-black border-orange-500/20 bg-orange-500/5 text-orange-500"
             >
               <Tag className="w-3 h-3 mr-1.5" /> {item.topic}
-            </Badge>
-            <Badge
-              variant="outline"
-              className="rounded-lg px-3 py-1 uppercase text-[9px] font-black border-white/10 dark:text-zinc-400"
-            >
-              {item.lessonCategory || "Chưa phân loại"}
             </Badge>
           </div>
         </div>
@@ -157,14 +171,25 @@ export function VocabularyDetailSheet({ item }: VocabularyDetailSheetProps) {
         {/* Section 5: Lịch ôn kế tiếp */}
         <div className="p-8 rounded-[2.5rem] bg-orange-500 text-white shadow-xl shadow-orange-500/20 relative overflow-hidden group">
           <div className="relative z-10 space-y-2">
-            <div className="flex items-center gap-2 opacity-90">
-              <Clock className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest">
-                Lịch ôn tập kế tiếp
-              </span>
+            <div className="flex justify-between items-center opacity-90">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  Lịch ôn tập kế tiếp
+                </span>
+              </div>
+              {item.daysUntilNextReview !== null && (
+                <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-full uppercase">
+                  {item.daysUntilNextReview > 0
+                    ? `Còn ${item.daysUntilNextReview} ngày`
+                    : item.daysUntilNextReview === 0
+                      ? "Hôm nay"
+                      : "Trễ hạn"}
+                </span>
+              )}
             </div>
             <p className="text-3xl font-black tracking-tight">
-              {formatDate(item.nextReviewAt)}
+              {item.nextReviewAt ? formatDate(item.nextReviewAt) : "Chưa có"}
             </p>
           </div>
           <Clock className="absolute -right-6 -bottom-6 w-40 h-40 opacity-10 group-hover:rotate-12 transition-transform duration-700" />
@@ -187,7 +212,7 @@ function DetailStatCard({
 }) {
   const colorMap: any = {
     emerald: "text-emerald-500 bg-emerald-500/10",
-    zinc: "text-zinc-500 bg-gray-100 dark:bg-white/5",
+    zinc: "text-zinc-500 bg-gray-100 dark:bg-white/5 shadow-inner",
   };
 
   return (

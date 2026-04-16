@@ -18,11 +18,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useDueVocabulary, useReviewVocabulary } from "@/hooks/use-vocabulary";
+import { useReviewQueue, useReviewVocabulary } from "@/hooks/use-vocabulary";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function ReviewSessionPage() {
-  const { data, isLoading } = useDueVocabulary({
+  const { data, isLoading } = useReviewQueue({
     page: 1,
     pageSize: 50,
   });
@@ -35,13 +36,14 @@ export default function ReviewSessionPage() {
   const [results, setResults] = useState({ correct: 0, incorrect: 0 });
   const [direction, setDirection] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [lastReviewResult, setLastReviewResult] = useState<any>(null);
 
   useEffect(() => {
     if (data?.items && totalCards === 0) {
       setReviewQueue(
         data.items.map((item: any) => ({ ...item, _queueKey: Math.random() })),
       );
-      setTotalCards(data.items.length);
+      setTotalCards(data.totalCount);
     }
   }, [data, totalCards]);
 
@@ -56,7 +58,18 @@ export default function ReviewSessionPage() {
       if (!currentItem || isAnimating) return;
       setIsAnimating(true);
 
-      submitReview({ id: currentItem.id, isCorrect });
+      submitReview(
+        { id: currentItem.id, isCorrect },
+        {
+          onSuccess: (res) => {
+            setLastReviewResult(res);
+            if (res.lastReviewWasEarly && isCorrect) {
+              toast.info("Ôn tập sớm: Lịch ôn của từ này sẽ được giữ nguyên.");
+            }
+          },
+        },
+      );
+
       setDirection(isCorrect ? 1 : -1);
 
       setResults((prev) => ({
@@ -245,20 +258,28 @@ export default function ReviewSessionPage() {
 
           {/* Stats Box */}
           <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center justify-between p-5 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5">
-              <div className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-500 uppercase tracking-widest">
-                Đã Nhớ
+            <div className="flex items-center justify-between p-5 rounded-2xl border border-red-100 dark:border-red-500/20 bg-red-50 dark:bg-red-500/5">
+              <div className="text-[10px] font-black text-red-600/70 dark:text-red-500 uppercase tracking-widest">
+                Trễ hạn
               </div>
-              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                {results.correct}
+              <div className="text-2xl font-black text-red-600 dark:text-red-400">
+                {data?.overdueCount || 0}
               </div>
             </div>
-            <div className="flex items-center justify-between p-5 rounded-2xl border border-rose-100 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/5">
-              <div className="text-[10px] font-black text-rose-600/70 dark:text-rose-500 uppercase tracking-widest">
-                Cần Ôn Lại
+            <div className="flex items-center justify-between p-5 rounded-2xl border border-orange-100 dark:border-orange-500/20 bg-orange-50 dark:bg-orange-500/5">
+              <div className="text-[10px] font-black text-orange-600/70 dark:text-orange-500 uppercase tracking-widest">
+                Đến hạn
               </div>
-              <div className="text-2xl font-black text-rose-600 dark:text-rose-400">
-                {results.incorrect}
+              <div className="text-2xl font-black text-orange-600 dark:text-orange-400">
+                {data?.dueCount || 0}
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-5 rounded-2xl border border-blue-100 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/5">
+              <div className="text-[10px] font-black text-blue-600/70 dark:text-blue-500 uppercase tracking-widest">
+                Từ mới
+              </div>
+              <div className="text-2xl font-black text-blue-600 dark:text-blue-400">
+                {data?.newCount || 0}
               </div>
             </div>
           </div>
@@ -334,9 +355,6 @@ export default function ReviewSessionPage() {
                       {currentItem?.word}
                     </h2>
 
-                    <button className="p-4 sm:p-5 rounded-full bg-slate-50 dark:bg-white/5 hover:bg-orange-500 hover:text-white dark:hover:bg-[#FF7A00] transition-all mb-8 group shadow-sm border border-slate-100 dark:border-transparent">
-                      <Volume2 className="h-7 w-7 group-active:scale-90" />
-                    </button>
 
                     <p className="text-center text-slate-500 dark:text-zinc-400 font-medium italic text-sm sm:text-base px-4">
                       "{currentItem?.contextSentence}"

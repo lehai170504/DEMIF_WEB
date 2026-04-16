@@ -10,8 +10,10 @@ import { useDeleteVocabulary } from "@/hooks/use-vocabulary";
 import { VocabularyDetailSheet } from "@/components/vocabulary/vocabulary-detail-sheet";
 import { DeleteVocabularyModal } from "@/components/vocabulary/delete-vocabulary-modal";
 
+import { ReviewStatus, VocabularyItemDto } from "@/types/vocabulary.type";
+
 interface ReviewCard3DProps {
-  item: any;
+  item: VocabularyItemDto;
   index: number;
 }
 
@@ -32,7 +34,39 @@ export function ReviewCard3D({ item, index }: ReviewCard3DProps) {
       ? Math.round((item.correctReviews / item.reviewCount) * 100)
       : 0;
 
-  const isDue = item.nextReviewAt && new Date(item.nextReviewAt) <= new Date();
+  // Render badge dựa trên reviewStatus từ backend
+  const renderBadge = () => {
+    const status = item.reviewStatus;
+    if (status === "mastered") {
+      return (
+        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-black text-emerald-500 uppercase tracking-widest">
+          MASTERED
+        </div>
+      );
+    }
+    if (status === "overdue") {
+      return (
+        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 uppercase tracking-widest animate-pulse">
+          OVERDUE
+        </div>
+      );
+    }
+    if (status === "due") {
+      return (
+        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-[8px] font-black text-orange-500 uppercase tracking-widest">
+          DUE
+        </div>
+      );
+    }
+    if (status === "new") {
+      return (
+        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[8px] font-black text-blue-500 uppercase tracking-widest">
+          NEW
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <>
@@ -59,11 +93,9 @@ export function ReviewCard3D({ item, index }: ReviewCard3DProps) {
               WebkitBackfaceVisibility: "hidden",
             }}
           >
-            {isDue && !item.isMastered && (
-              <div className="absolute top-8 right-8 h-2.5 w-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
-            )}
+            {renderBadge()}
 
-            <h3 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter text-center">
+            <h3 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter text-center uppercase">
               {item.word}
             </h3>
 
