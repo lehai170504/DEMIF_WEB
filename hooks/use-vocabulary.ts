@@ -60,6 +60,7 @@ export const useReviewVocabulary = () => {
       queryClient.invalidateQueries({ queryKey: ["my-vocabulary"] });
       queryClient.invalidateQueries({ queryKey: ["due-vocabulary"] });
       queryClient.invalidateQueries({ queryKey: ["vocabulary-overview"] });
+      queryClient.invalidateQueries({ queryKey: ["review-queue"] });
     },
   });
 };
@@ -84,5 +85,14 @@ export const useVocabularySuggestions = (lessonId: string, limit?: number) => {
     queryKey: ["vocabulary-suggestions", lessonId, limit],
     queryFn: () => vocabularyService.getSuggestions(lessonId, limit),
     enabled: !!lessonId,
+  });
+};
+
+// 8. Review Queue (Lấy stats + items)
+export const useReviewQueue = (params: GetVocabularyParams, enabled = true) => {
+  return useQuery({
+    queryKey: ["review-queue", params],
+    queryFn: () => vocabularyService.getReviewQueue(params),
+    enabled: enabled,
   });
 };

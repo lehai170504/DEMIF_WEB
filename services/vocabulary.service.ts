@@ -60,7 +60,7 @@ export const vocabularyService = {
   reviewWord: async (
     id: string,
     isCorrect: boolean,
-  ): Promise<VocabularyItemDto> => {
+  ): Promise<ReviewResponseDto> => {
     const response = await axiosClient.post(
       `/me/vocabulary/${id}/review`,
       { isCorrect },
@@ -68,7 +68,7 @@ export const vocabularyService = {
         headers: getAuthHeaders(),
       },
     );
-    return response as unknown as VocabularyItemDto;
+    return response as unknown as ReviewResponseDto;
   },
 
   // Xóa từ vựng
@@ -86,5 +86,16 @@ export const vocabularyService = {
       headers: getAuthHeaders(),
     });
     return response as unknown as PagedVocabularyResult;
+  },
+
+  // Lấy danh sách review queue (bao gồm stats)
+  getReviewQueue: async (
+    params: GetVocabularyParams,
+  ): Promise<ReviewQueueResult> => {
+    const response = await axiosClient.get("/me/vocabulary/review", {
+      params,
+      headers: getAuthHeaders(),
+    });
+    return response as unknown as ReviewQueueResult;
   },
 };

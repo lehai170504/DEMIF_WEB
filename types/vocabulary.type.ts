@@ -1,3 +1,5 @@
+export type ReviewStatus = "new" | "learning" | "due" | "overdue" | "mastered";
+
 export interface VocabularyItemDto {
   id: string;
   userId: string;
@@ -11,9 +13,14 @@ export interface VocabularyItemDto {
   note: string;
   reviewCount: number;
   correctReviews: number;
+  isDue: boolean;
+  isOverdue: boolean;
+  reviewStatus: ReviewStatus;
+  daysUntilNextReview: number | null;
   isMastered: boolean;
   lastReviewedAt: string | null;
-  nextReviewAt: string;
+  nextReviewAt: string | null;
+  lastReviewWasEarly: boolean | null;
   masteredAt: string | null;
   createdAt: string;
   updatedAt: string | null;
@@ -34,10 +41,18 @@ export interface PagedVocabularyResult {
   pageSize: number;
 }
 
+export interface ReviewQueueResult extends PagedVocabularyResult {
+  dueCount: number;
+  overdueCount: number;
+  newCount: number;
+  learningCount: number;
+  masteredCount: number;
+}
+
 export interface CreateVocabularyPayload {
   lessonId: string;
   word: string;
-  topic: string;
+  topic?: string;
   meaning: string;
   contextSentence?: string;
   note?: string;
@@ -46,6 +61,8 @@ export interface CreateVocabularyPayload {
 export interface VocabularyOverviewResponse {
   totalCount: number;
   dueCount: number;
+  overdueCount: number;
+  newCount: number;
   masteredCount: number;
   learningCount: number;
   topicCount: number;
@@ -79,4 +96,8 @@ export interface VocabularySuggestionsResponse {
 
 export interface ReviewVocabularyPayload {
   isCorrect: boolean;
+}
+
+export interface ReviewResponseDto extends VocabularyItemDto {
+  lastReviewWasEarly: boolean;
 }

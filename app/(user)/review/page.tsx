@@ -23,9 +23,9 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
 
 export default function ReviewPage() {
-  const [filter, setFilter] = useState<"all" | "due" | "mastered" | "learning">(
-    "all",
-  );
+  const [filter, setFilter] = useState<
+    "all" | "due" | "mastered" | "learning" | "new" | "overdue"
+  >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
   const [selectedLesson, setSelectedLesson] = useState<string>("all");
@@ -38,7 +38,7 @@ export default function ReviewPage() {
   const { data: overview, isLoading: isOverviewLoading } =
     useVocabularyOverview();
 
-  const isDueTab = filter === "due";
+  const isDueTab = filter === "due" || filter === "overdue";
 
   const queryParams = {
     search: debouncedSearch,
@@ -63,10 +63,15 @@ export default function ReviewPage() {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const displayItems = isDueTab
-    ? vocabularyItems
+    ? vocabularyItems.filter((item) => {
+        if (filter === "due") return item.reviewStatus === "due";
+        if (filter === "overdue") return item.reviewStatus === "overdue";
+        return true;
+      })
     : vocabularyItems.filter((item) => {
-        if (filter === "mastered") return item.isMastered;
-        if (filter === "learning") return !item.isMastered;
+        if (filter === "mastered") return item.reviewStatus === "mastered";
+        if (filter === "learning") return item.reviewStatus === "learning";
+        if (filter === "new") return item.reviewStatus === "new";
         return true;
       });
 
