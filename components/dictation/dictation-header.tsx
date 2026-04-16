@@ -19,7 +19,12 @@ interface DictationHeaderProps {
   progress: number;
 }
 
-export function DictationHeader({ lesson, level, onSelectLevel, progress }: DictationHeaderProps) {
+export function DictationHeader({
+  lesson,
+  level,
+  onSelectLevel,
+  progress,
+}: DictationHeaderProps) {
   const pathname = usePathname();
 
   const getLevelColor = (lvl: string) => {
@@ -50,7 +55,7 @@ export function DictationHeader({ lesson, level, onSelectLevel, progress }: Dict
             </Link>
           </Button>
           <div className="flex items-center gap-3">
-            <h1 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[250px]">
+            <h1 className="text-sm font-black font-mono text-gray-900 dark:text-white uppercase tracking-wider line-clamp-1 max-w-[250px]">
               {lesson.title}
             </h1>
           </div>
@@ -64,7 +69,10 @@ export function DictationHeader({ lesson, level, onSelectLevel, progress }: Dict
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-8 px-3 rounded-full font-black text-[10px] uppercase tracking-widest gap-2", getLevelColor(level))}
+                className={cn(
+                  "h-8 px-3 rounded-full font-black text-[10px] uppercase tracking-widest gap-2",
+                  getLevelColor(level),
+                )}
               >
                 {level}
                 <ChevronDown className="h-3 w-3 opacity-50" />
@@ -77,7 +85,9 @@ export function DictationHeader({ lesson, level, onSelectLevel, progress }: Dict
                   onSelect={() => onSelectLevel(l)}
                   className={cn(
                     "text-[10px] font-bold uppercase tracking-widest cursor-pointer",
-                    level === l ? "text-orange-500 bg-orange-500/5" : "text-muted-foreground"
+                    level === l
+                      ? "text-orange-500 bg-orange-500/5"
+                      : "text-muted-foreground",
                   )}
                 >
                   {l}
@@ -105,4 +115,3 @@ export function DictationHeader({ lesson, level, onSelectLevel, progress }: Dict
     </header>
   );
 }
-
