@@ -7,14 +7,24 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+const formatDuration = (seconds: number): string => {
+  if (!seconds || seconds <= 0) return "--";
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+};
+
 interface Lesson {
   lessonId: string;
   title: string;
   progress: number;
   level: string;
+  duration: number;
+  lessonType: string;
   category: string;
   isPremiumOnly?: boolean;
-  thumbnailUrl?: string; // New field for thumbnails
+  thumbnailUrl?: string;
 }
 
 interface ContinueLearningProps {
@@ -24,11 +34,11 @@ interface ContinueLearningProps {
 
 export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningProps) {
   const router = useRouter();
-  // Style cho badge level - Dark mode neon style
-  const levelStyles = {
-    beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+
+  const LEVEL_STYLES: Record<string, { bg: string; text: string }> = {
+    Beginner:     { bg: "bg-emerald-500/90", text: "text-white" },
+    Intermediate: { bg: "bg-blue-500/90",    text: "text-white" },
+    Advanced:     { bg: "bg-purple-500/90",  text: "text-white" },
   };
 
   if (lessons.length === 0) {
@@ -101,7 +111,8 @@ export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningPro
                   toast.error("Nội dung Premium", { description: "Vui lòng nâng cấp tài khoản." });
                   router.push("/subscription");
                 } else {
-                  router.push(`/dictation/${lesson.lessonId}`);
+                  const path = lesson.lessonType === "Shadowing" ? "shadowing" : "dictation";
+                  router.push(`/${path}/${lesson.lessonId}`);
                 }
               }}
               className="cursor-pointer"
@@ -134,12 +145,15 @@ export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningPro
                     </div>
                   )}
 
-                  {/* Category Badge */}
-                  {lesson.category && (
-                    <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white max-w-[80%] truncate">
-                      {lesson.category.toUpperCase()}
-                    </div>
-                  )}
+                  {/* Level Badge */}
+                  {lesson.level && (() => {
+                    const s = LEVEL_STYLES[lesson.level] ?? { bg: "bg-gray-500/80", text: "text-white" };
+                    return (
+                      <div className={cn("absolute bottom-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-black tracking-wider border border-white/10", s.bg, s.text)}>
+                        {lesson.level.toUpperCase()}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Content Section */}
@@ -150,14 +164,17 @@ export function ContinueLearning({ lessons, isPremiumUser }: ContinueLearningPro
                     </h4>
                   </div>
                   
-                  <div className="space-y-1.5 mt-2">
-                    <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider">
-                      <span className="text-gray-500 dark:text-zinc-500">Tiến độ</span>
-                      <span className="font-bold text-gray-900 dark:text-white">
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 dark:text-zinc-400">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatDuration(lesson.duration)}
+                      </span>
+                      <span className="font-bold text-orange-500 text-[10px]">
                         {Math.round(lesson.progress * 100)}%
                       </span>
                     </div>
-                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
+                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5 mt-1.5">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${lesson.progress * 100}%` }}

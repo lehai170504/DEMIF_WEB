@@ -47,12 +47,35 @@ export default function HomePage() {
     sortBy: "publishedAt",
     sortDirection: "desc",
   });
-  // ===== LESSON =====
+  // ===== LESSON (for Continue Learning — all types) =====
   const { data: lessonsData, isLoading: isLoadingLessons } = useQuery({
     queryKey: ["lessons-home", user?.currentLevel],
     queryFn: () =>
       lessonService.getUserLessons({
         pageSize: 15,
+        level: user?.currentLevel,
+      }),
+    enabled: !!user,
+  });
+
+  // ===== RECOMMENDED LESSONS (2 Dictation + 2 Shadowing) =====
+  const { data: dictationRecoData, isLoading: isLoadingDictationReco } = useQuery({
+    queryKey: ["lessons-reco-dictation", user?.currentLevel],
+    queryFn: () =>
+      lessonService.getUserLessons({
+        pageSize: 10,
+        type: "Dictation",
+        level: user?.currentLevel,
+      }),
+    enabled: !!user,
+  });
+
+  const { data: shadowingRecoData, isLoading: isLoadingShadowingReco } = useQuery({
+    queryKey: ["lessons-reco-shadowing", user?.currentLevel],
+    queryFn: () =>
+      lessonService.getUserLessons({
+        pageSize: 10,
+        type: "Shadowing",
         level: user?.currentLevel,
       }),
     enabled: !!user,
@@ -84,6 +107,8 @@ export default function HomePage() {
     isLoadingLeaderboard ||
     isLoadingBlogs ||
     isLoadingLessons ||
+    isLoadingDictationReco ||
+    isLoadingShadowingReco ||
     isLoadingVocab ||
     isLoadingStats ||
     isLoadingPractice ||
@@ -136,8 +161,9 @@ export default function HomePage() {
     lessonId: lesson.id,
     title: lesson.title,
     progress: progressPercent !== undefined ? progressPercent : 0,
-    level: (lesson.level || "beginner").toLowerCase(),
-    duration: Math.floor(lesson.durationSeconds / 60) || 0,
+    level: lesson.level || "Beginner",
+    duration: lesson.durationSeconds ?? 0,
+    lessonType: (lesson.lessonType as string) || "Dictation",
     category: lesson.category || "General",
     rating: lesson.avgScore || 4.5,
     isPremiumOnly: lesson.isPremiumOnly || false,
@@ -158,7 +184,7 @@ export default function HomePage() {
     });
   }
 
-  // Continue Learning: map history with lesson data (ONLY lessons in progress)
+  // Continue Learning: bài đang học (chưa hoàn thành), mọi loại
   const continueLearning =
     lessonsData?.items
       ?.filter((lesson: any) => {
@@ -166,7 +192,8 @@ export default function HomePage() {
         return (
           historyData &&
           historyData.status !== "Completed" &&
-          historyData.progressPercent < 1
+          historyData.progressPercent < 1 &&
+          (!lesson.isPremiumOnly || isPremiumUser)
         );
       })
       .map((lesson: any) => {
@@ -175,11 +202,18 @@ export default function HomePage() {
       })
       .slice(0, 4) || [];
 
-  // Recommended: ONLY lessons NOT in history
-  const recommendedLessons =
-    lessonsData?.items
-      ?.filter((lesson: any) => !historyMap.has(lesson.id))
-      .map((lesson: any) => mapLessonToComponent(lesson)) || [];
+  // Recommended: 2 Dictation + 2 Shadowing chưa học, tự động thay thế nếu bài được bắt đầu
+  const filterUnstarted = (items: any[]) =>
+    items.filter(
+      (l) =>
+        !historyMap.has(l.id) &&
+        (!l.isPremiumOnly || isPremiumUser),
+    );
+
+  const recommendedLessons = [
+    ...filterUnstarted(dictationRecoData?.items ?? []).slice(0, 2).map(mapLessonToComponent),
+    ...filterUnstarted(shadowingRecoData?.items ?? []).slice(0, 2).map(mapLessonToComponent),
+  ];
 
   const recentVocabsFormatted =
     vocabOverview?.recentItems?.slice(0, 4).map((vocab: any) => ({

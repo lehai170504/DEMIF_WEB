@@ -9,14 +9,29 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+const formatDuration = (seconds: number): string => {
+  if (!seconds || seconds <= 0) return "--";
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+};
+
+const LEVEL_STYLES: Record<string, { bg: string; text: string }> = {
+  Beginner:     { bg: "bg-emerald-500/90", text: "text-white" },
+  Intermediate: { bg: "bg-blue-500/90",    text: "text-white" },
+  Advanced:     { bg: "bg-purple-500/90",  text: "text-white" },
+};
+
 interface Lesson {
   lessonId: string;
   title: string;
   duration: number;
   level: string;
+  lessonType: string;
   category: string;
   isPremiumOnly?: boolean;
-  thumbnailUrl?: string; // New field for thumbnails
+  thumbnailUrl?: string;
 }
 
 interface RecommendedLessonsProps {
@@ -68,7 +83,8 @@ export function RecommendedLessons({
                     toast.error("Nội dung Premium", { description: "Vui lòng nâng cấp tài khoản để học bài này." });
                     router.push("/subscription");
                   } else {
-                    router.push(`/dictation/${lesson.lessonId}`);
+                    const path = lesson.lessonType === "Shadowing" ? "shadowing" : "dictation";
+                    router.push(`/${path}/${lesson.lessonId}`);
                   }
                 }}
                 className="group block h-full cursor-pointer"
@@ -101,12 +117,25 @@ export function RecommendedLessons({
                       </div>
                     )}
 
-                    {/* Category Badge */}
-                    {lesson.category && (
-                      <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white max-w-[80%] truncate">
-                        {lesson.category.toUpperCase()}
-                      </div>
-                    )}
+                    {/* Lesson Type Badge */}
+                    <div className={cn(
+                      "absolute top-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded text-[9px] font-black tracking-widest border",
+                      lesson.lessonType === "Shadowing"
+                        ? "bg-blue-500/80 text-white border-blue-400/30"
+                        : "bg-orange-500/80 text-white border-orange-400/30"
+                    )}>
+                      {lesson.lessonType === "Shadowing" ? "SHADOW" : "DICTATION"}
+                    </div>
+
+                    {/* Level Badge */}
+                    {lesson.level && (() => {
+                      const s = LEVEL_STYLES[lesson.level] ?? { bg: "bg-gray-500/80", text: "text-white" };
+                      return (
+                        <div className={cn("absolute bottom-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-black tracking-wider border border-white/10", s.bg, s.text)}>
+                          {lesson.level.toUpperCase()}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Content Section */}
@@ -118,7 +147,7 @@ export function RecommendedLessons({
                     <div className="mt-auto flex items-center text-[11px] font-medium text-gray-500 dark:text-zinc-400">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {lesson.duration}m
+                        {formatDuration(lesson.duration)}
                       </span>
                     </div>
                   </div>
