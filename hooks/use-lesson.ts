@@ -494,6 +494,8 @@ export const useCheckVoice = (lessonId: string, segmentIndex: number) => {
 
 // Đồng bộ tiến độ bài học (Streak & Lesson Tracker)
 export const useSyncLessonProgress = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       id,
@@ -502,5 +504,34 @@ export const useSyncLessonProgress = () => {
       id: string;
       data: { segmentIndex: number; isCompleted: boolean };
     }) => lessonService.syncProgress(id, data),
+    onSuccess: (_, variables) => {
+      // Manual cache update for immediate UI feedback
+      queryClient.setQueryData(["my-progress", variables.id], (prev: any) => {
+        if (!prev) return prev;
+        const newProgress = { ...prev };
+        if (variables.data.isCompleted) {
+          newProgress.status = "Completed";
+          newProgress.progressPercent = 1;
+        }
+        return newProgress;
+      });
+
+      // Làm mới các query liên quan đến thống kê và danh sách bài học
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["stats-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["my-progress", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["user-lessons"] });
+      queryClient.invalidateQueries({ queryKey: ["lessons"] });
+      queryClient.invalidateQueries({ queryKey: ["lesson-history"] });
+      queryClient.invalidateQueries({ queryKey: ["user-lesson", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["my-detailed-stats"] });
+
+      if (variables.data.isCompleted) {
+        toast.success("✨ Bài học đã hoàn thành!", {
+          description: "Tiến độ của bạn đã được ghi nhận trên bảng xếp hạng.",
+        });
+      }
+    },
   });
 };

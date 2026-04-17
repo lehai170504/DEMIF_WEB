@@ -129,7 +129,17 @@ export default function ShadowingPage() {
       const existing = map.get(h.lessonId);
       const currentProgress = normalizeProgress(h.progressPercent, h.status);
 
-      if (!existing || currentProgress > existing.progressPercent) {
+      // Ưu tiên:
+      // 1. Bản ghi có tiến độ cao hơn.
+      // 2. Nếu tiến độ bằng nhau, ưu tiên bản ghi có trạng thái "Completed".
+      const shouldUpdate =
+        !existing ||
+        currentProgress > existing.progressPercent ||
+        (currentProgress === existing.progressPercent &&
+          h.status === "Completed" &&
+          existing.status !== "Completed");
+
+      if (shouldUpdate) {
         map.set(h.lessonId, {
           status: h.status,
           progressPercent: currentProgress,
@@ -354,17 +364,17 @@ export default function ShadowingPage() {
                                   <div
                                     className={cn(
                                       "absolute top-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold shadow-sm border text-white",
-                                      isCompleted
+                                      isCompleted || historyData?.progressPercent >= 1
                                         ? "bg-emerald-500/90 border-emerald-400"
                                         : "bg-orange-500/90 border-orange-400",
                                     )}
                                   >
-                                    {isCompleted ? (
+                                    {isCompleted || historyData?.progressPercent >= 1 ? (
                                       <CheckCircle2 className="h-3 w-3" />
                                     ) : (
                                       <Timer className="h-3 w-3" />
                                     )}
-                                    {isCompleted ? "Đã học" : "Đang học"}
+                                    {isCompleted || historyData?.progressPercent >= 1 ? "Đã học" : "Đang học"}
                                   </div>
                                 )}
 

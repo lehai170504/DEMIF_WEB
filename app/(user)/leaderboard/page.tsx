@@ -28,6 +28,13 @@ export default function LeaderboardPage() {
     staleTime: 60 * 1000,
   });
 
+  const { data: userProgress } = useQuery({
+    queryKey: ["my-detailed-stats", user?.id],
+    queryFn: () => statsService.getProgress(),
+    enabled: !!user,
+    staleTime: 60 * 1000,
+  });
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50/50 dark:bg-[#050505]">
@@ -138,12 +145,15 @@ export default function LeaderboardPage() {
 
           {/* CỘT PHẢI (4/12) */}
           <div className="lg:col-span-4 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pt-2">
-            {currentUser ? (
+            {userProgress || currentUser ? (
               <UserSidebar
                 stats={{
-                  completedLessons: currentUser.completedLessons,
-                  currentStreak: currentUser.currentStreak,
-                  avgFeedbackScore: currentUser.avgFeedbackScore,
+                  completedLessons: userProgress?.lessonsCompleted ?? currentUser?.completedLessons ?? 0,
+                  currentStreak: currentUser?.currentStreak ?? 0,
+                  avgFeedbackScore: 
+                    userProgress 
+                      ? (userProgress.avgShadowingScore + userProgress.avgDictationScore) / 2
+                      : currentUser?.avgFeedbackScore ?? 0,
                 }}
               />
             ) : (
