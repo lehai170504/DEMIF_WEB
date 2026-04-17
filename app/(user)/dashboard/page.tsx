@@ -185,7 +185,7 @@ export default function DashboardPage() {
 
                 <Button
                   onClick={() => router.push("/dictation")}
-                  className="w-full mt-8 h-14 bg-gray-100 dark:bg-white/[0.02] hover:bg-orange-500 border border-gray-200 dark:border-white/5 text-gray-600 dark:text-zinc-400 hover:text-white hover:border-orange-500 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 group relative z-10 shadow-sm"
+                  className="w-full mt-8 h-14 bg-orange-500 hover:bg-orange-600 border border-orange-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 group relative z-10 shadow-md shadow-orange-500/20"
                 >
                   Khám phá thêm
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

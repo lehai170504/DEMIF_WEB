@@ -68,14 +68,45 @@ const generatePagination = (currentPage: number, totalPages: number) => {
   ];
 };
 
+const formatDuration = (seconds: number): string => {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+};
+
+const SKIP_TAGS = new Set(["youtube", "transcript", "video", "audio"]);
+
+const parseTags = (raw: string): string[] => {
+  if (!raw) return [];
+  const parts = raw.includes("#")
+    ? raw.split(/\s+/).filter((t) => t.startsWith("#")).map((t) => t.slice(1))
+    : raw.split(",").map((t) => t.trim());
+  return parts.filter((t) => t.length > 0 && !SKIP_TAGS.has(t.toLowerCase())).slice(0, 2);
+};
+
 export default function ShadowingPage() {
   const [page, setPage] = useState(1);
-  const [category, setCategory] = useState<string>("");
+  const [level, setLevel] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string>("");
 
   const { data: mySubscription } = useMySubscription();
   const hasPremiumAccess = mySubscription?.status === "Active";
+
+  const LEVELS = [
+    { val: "", label: "Tất cả" },
+    { val: "Beginner", label: "Beginner" },
+    { val: "Intermediate", label: "Intermediate" },
+    { val: "Advanced", label: "Advanced" },
+  ];
+
+  const LEVEL_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+    Beginner:     { bg: "bg-emerald-500/90",  text: "text-white", border: "border-emerald-400" },
+    Intermediate: { bg: "bg-blue-500/90",     text: "text-white", border: "border-blue-400" },
+    Advanced:     { bg: "bg-purple-500/90",   text: "text-white", border: "border-purple-400" },
+  };
 
   // Debounce search 0.5s
   useEffect(() => {
@@ -86,16 +117,9 @@ export default function ShadowingPage() {
   // GỌI API: Cố định type là "Shadowing"
   const { data, isLoading, error } = useUserLessons({
     page,
-    pageSize: 10,
+    pageSize: 20,
     type: "Shadowing", // Chỉ lấy bài Shadowing từ Server
-    category: category || undefined,
-  });
-
-  // Query riêng để lấy danh sách Tags (không bị ảnh hưởng bởi filter category hiện tại)
-  const { data: tagData } = useUserLessons({
-    page: 1,
-    pageSize: 50,
-    type: "Shadowing",
+    level: level || undefined,
   });
 
   const { data: lessonHistoryData } = useLessonHistory({ pageSize: 1000 });
@@ -119,26 +143,24 @@ export default function ShadowingPage() {
   // Reset trang khi thay đổi bộ lọc
   useEffect(() => {
     setPage(1);
-  }, [category, debouncedSearch]);
+  }, [level, debouncedSearch]);
 
   // Filter thêm ở client để đảm bảo tính an toàn dữ liệu hiển thị và Search
   const displayItems = useMemo(() => {
     return (data?.items ?? []).filter(
       (item) =>
         (item.lessonType === "Shadowing" || item.lessonType === "1") &&
-        item.title.toLowerCase().includes(debouncedSearch.toLowerCase()),
+        item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) &&
+        (!selectedTag || parseTags(item.tags).includes(selectedTag)),
     );
-  }, [data?.items, debouncedSearch]);
+  }, [data?.items, debouncedSearch, selectedTag]);
 
-  const dynamicTags = useMemo(() => {
-    const sourceData = tagData?.items || data?.items || [];
-    if (sourceData.length === 0) return [];
-    const tags = new Set<string>();
-    sourceData.forEach((i) => {
-      if (i.category) tags.add(i.category.toLowerCase());
-    });
-    return Array.from(tags).map((t) => ({ val: t, label: t }));
-  }, [tagData?.items, data?.items]);
+  const allUniqueTags = useMemo(() => {
+    const items = data?.items ?? [];
+    const tagSet = new Set<string>();
+    items.forEach((item) => parseTags(item.tags).forEach((t) => tagSet.add(t)));
+    return Array.from(tagSet).sort();
+  }, [data?.items]);
 
   return (
     <div className="w-full font-mono pb-20 selection:bg-orange-500/30">
@@ -174,33 +196,55 @@ export default function ShadowingPage() {
               </div>
 
               <div className="flex-1 flex overflow-x-auto no-scrollbar items-center gap-2 px-1 w-full">
-                <button
-                  onClick={() => setCategory("")}
-                  className={cn(
-                    "px-4 py-2 rounded-lg text-[11px] font-bold uppercase transition-all flex-shrink-0 border",
-                    category === ""
-                      ? "bg-zinc-900 dark:bg-orange-500 text-white border-transparent shadow-md"
-                      : "border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500 hover:text-orange-500",
-                  )}
-                >
-                  Tất cả
-                </button>
-                {dynamicTags.map((cat) => (
+                {LEVELS.map((lv) => (
                   <button
-                    key={cat.val}
-                    onClick={() => setCategory(cat.val)}
+                    key={lv.val}
+                    onClick={() => setLevel(lv.val)}
                     className={cn(
                       "px-4 py-2 rounded-lg text-[11px] font-bold uppercase transition-all flex-shrink-0 border",
-                      category === cat.val
+                      level === lv.val
                         ? "bg-zinc-900 dark:bg-orange-500 text-white border-transparent shadow-md"
                         : "border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500 hover:text-orange-500",
                     )}
                   >
-                    {cat.label}
+                    {lv.label}
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Tag cloud */}
+            {allUniqueTags.length > 0 && (
+              <div className="border-t border-gray-100 dark:border-white/5 pt-3 mt-1 px-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex-shrink-0">
+                    #Tags
+                  </span>
+                  {allUniqueTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setSelectedTag(selectedTag === tag ? "" : tag)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border",
+                        selectedTag === tag
+                          ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20"
+                          : "bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-zinc-400 border-gray-200 dark:border-white/10 hover:border-orange-400 hover:text-orange-500",
+                      )}
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                  {selectedTag && (
+                    <button
+                      onClick={() => setSelectedTag("")}
+                      className="ml-auto flex-shrink-0 text-[10px] font-bold text-gray-400 hover:text-orange-500 transition-colors underline underline-offset-2"
+                    >
+                      Xóa tag
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="w-full space-y-8">
@@ -232,11 +276,12 @@ export default function ShadowingPage() {
                           : "Thử thay đổi bộ lọc hoặc quay lại sau nhé!"}
                       </p>
                     </div>
-                    {(category || debouncedSearch) && (
+                    {(level || debouncedSearch || selectedTag) && (
                       <button
                         onClick={() => {
-                          setCategory("");
+                          setLevel("");
                           setSearchQuery("");
+                          setSelectedTag("");
                         }}
                         className="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-orange-500/30 text-orange-500 hover:bg-orange-500/10 transition-all"
                       >
@@ -330,12 +375,18 @@ export default function ShadowingPage() {
                                   </div>
                                 )}
 
-                                {/* Category Badge */}
-                                {lesson.category && (
-                                  <div className="absolute bottom-2 left-2 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white max-w-[80%] truncate">
-                                    {lesson.category.toUpperCase()}
-                                  </div>
-                                )}
+                                {/* Level Badge */}
+                                {lesson.level && (() => {
+                                  const s = LEVEL_STYLES[lesson.level] ?? { bg: "bg-black/60", text: "text-white", border: "border-white/20" };
+                                  return (
+                                    <div className={cn(
+                                      "absolute bottom-2 left-2 z-10 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold border",
+                                      s.bg, s.text, s.border
+                                    )}>
+                                      {lesson.level.toUpperCase()}
+                                    </div>
+                                  );
+                                })()}
                               </div>
 
                               {/* Content Section */}
@@ -344,22 +395,47 @@ export default function ShadowingPage() {
                                   <h4 className="text-[13px] font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-orange-500 transition-colors mb-2">
                                     {lesson.title}
                                   </h4>
+                                  {(() => {
+                                    const tags = parseTags(lesson.tags);
+                                    return tags.length > 0 ? (
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {tags.map((tag) => (
+                                          <button
+                                            key={tag}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setSelectedTag(selectedTag === tag ? "" : tag);
+                                            }}
+                                            className={cn(
+                                              "inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide border transition-all cursor-pointer",
+                                              selectedTag === tag
+                                                ? "bg-orange-500/20 text-orange-500 border-orange-500/40"
+                                                : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-zinc-400 border-gray-200 dark:border-white/5 hover:border-orange-400 hover:text-orange-400",
+                                            )}
+                                          >
+                                            #{tag}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    ) : null;
+                                  })()}
                                 </div>
 
-                                {historyData ? (
-                                  <div className="space-y-1.5 mt-2">
-                                    <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider">
-                                      <span className="text-gray-500 dark:text-zinc-500">
-                                        Tiến độ
+                                <div className="mt-2">
+                                  <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 dark:text-zinc-400">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {formatDuration(lesson.durationSeconds)}
+                                    </span>
+                                    {historyData && (
+                                      <span className="font-bold text-orange-500 text-[10px]">
+                                        {Math.round(historyData.progressPercent * 100)}%
                                       </span>
-                                      <span className="font-bold text-gray-900 dark:text-white">
-                                        {Math.round(
-                                          historyData.progressPercent * 100,
-                                        )}
-                                        %
-                                      </span>
-                                    </div>
-                                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5">
+                                    )}
+                                  </div>
+                                  {historyData && (
+                                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/5 mt-1.5">
                                       <motion.div
                                         initial={{ width: 0 }}
                                         animate={{
@@ -373,15 +449,8 @@ export default function ShadowingPage() {
                                         className="h-full bg-gradient-to-r from-[#FF7A00] to-[#FF9E2C] shadow-[0_0_8px_rgba(255,122,0,0.6)]"
                                       />
                                     </div>
-                                  </div>
-                                ) : (
-                                  <div className="mt-auto flex items-center text-[11px] font-medium text-gray-500 dark:text-zinc-400">
-                                    <span className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
-                                      {Math.floor(lesson.durationSeconds / 60)}m
-                                    </span>
-                                  </div>
-                                )}
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </Link>
