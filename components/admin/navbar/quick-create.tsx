@@ -12,9 +12,19 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import CreateLessonDialog from "@/components/admin/lesson/create-lesson-dialog";
+import { useAuth } from "@/hooks/use-auth";
 
 export function QuickCreate() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  const rolesArray: string[] = Array.isArray(user?.roles)
+    ? user.roles
+    : [user?.roles || ""];
+
+  const isAdmin = rolesArray.some(
+    (r) => typeof r === "string" && r.toLowerCase() === "admin",
+  );
 
   return (
     <DropdownMenu>
@@ -35,6 +45,7 @@ export function QuickCreate() {
           Lối tắt nhanh
         </DropdownMenuLabel>
 
+        {/* Ai cũng có thể thấy mục Tạo bài học */}
         <CreateLessonDialog>
           <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
@@ -48,13 +59,16 @@ export function QuickCreate() {
           </DropdownMenuItem>
         </CreateLessonDialog>
 
-        <DropdownMenuItem
-          onClick={() => router.push("/admin/user-subscriptions")}
-          className="cursor-pointer hover:bg-gray-50 focus:bg-emerald-50 focus:text-emerald-600 rounded-lg py-2.5"
-        >
-          <Users className="mr-2 h-4 w-4 text-emerald-500" />
-          <span className="font-bold">Xem đăng ký</span>
-        </DropdownMenuItem>
+        {/* Chỉ hiển thị mục Xem đăng ký nếu là Admin */}
+        {isAdmin && (
+          <DropdownMenuItem
+            onClick={() => router.push("/admin/user-subscriptions")}
+            className="cursor-pointer hover:bg-gray-50 focus:bg-emerald-50 focus:text-emerald-600 rounded-lg py-2.5"
+          >
+            <Users className="mr-2 h-4 w-4 text-emerald-500" />
+            <span className="font-bold">Xem đăng ký</span>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
