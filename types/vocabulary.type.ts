@@ -30,6 +30,7 @@ export interface GetVocabularyParams {
   lessonId?: string;
   topic?: string;
   search?: string;
+  status?: ReviewStatus;
   page?: number;
   pageSize?: number;
 }
