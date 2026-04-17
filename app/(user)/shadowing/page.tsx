@@ -17,10 +17,56 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { useUserLessons, useLessonHistory } from "@/hooks/use-lesson";
 import { useMySubscription } from "@/hooks/use-subscription";
 import { normalizeProgress } from "@/lib/progress";
 import { cn } from "@/lib/utils";
+
+// Hàm tính toán các trang sẽ hiển thị (rút gọn bằng dấu ...)
+const generatePagination = (currentPage: number, totalPages: number) => {
+  // Nếu tổng số trang nhỏ hơn hoặc bằng 7, hiển thị tất cả
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  // Nếu đang ở những trang đầu (vd: 1, 2, 3)
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, "...", totalPages - 1, totalPages];
+  }
+
+  // Nếu đang ở những trang cuối (vd: 18, 19, 20 trên tổng 20)
+  if (currentPage >= totalPages - 2) {
+    return [
+      1,
+      2,
+      "...",
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+
+  // Nếu đang ở giữa (vd: trang 10 trên tổng 20) -> 1 ... 9 10 11 ... 20
+  return [
+    1,
+    "...",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "...",
+    totalPages,
+  ];
+};
 
 export default function ShadowingPage() {
   const [page, setPage] = useState(1);
@@ -58,12 +104,12 @@ export default function ShadowingPage() {
     lessonHistoryData?.items?.forEach((h) => {
       const existing = map.get(h.lessonId);
       const currentProgress = normalizeProgress(h.progressPercent, h.status);
-      
+
       if (!existing || currentProgress > existing.progressPercent) {
         map.set(h.lessonId, {
           status: h.status,
           progressPercent: currentProgress,
-          level: h.level
+          level: h.level,
         });
       }
     });
@@ -345,46 +391,64 @@ export default function ShadowingPage() {
                   </div>
                 </AnimatePresence>
 
-                {/* --- PAGINATION --- */}
+                {/* --- PAGINATION BẰNG SHADCN --- */}
                 {data && data.totalPages > 1 && (
-                  <div className="mt-20 flex items-center justify-center gap-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      className="rounded-2xl w-12 h-12 border-gray-200 dark:border-white/10 hover:border-orange-500 hover:text-orange-500"
-                    >
-                      <ChevronRight className="rotate-180 h-5 w-5" />
-                    </Button>
-                    <div className="flex gap-2">
-                      {[...Array(data.totalPages)].map((_, i) => (
-                        <Button
-                          key={i + 1}
-                          variant={page === i + 1 ? "default" : "outline"}
-                          onClick={() => setPage(i + 1)}
-                          className={cn(
-                            "w-12 h-12 rounded-2xl font-black text-sm transition-all",
-                            page === i + 1
-                              ? "bg-orange-600 hover:bg-blue-700 border-none shadow-lg shadow-orange-500/40 text-white scale-110"
-                              : "border-gray-200 dark:border-white/10 hover:border-orange-500",
-                          )}
-                        >
-                          {i + 1}
-                        </Button>
-                      ))}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        setPage((p) => Math.min(data.totalPages, p + 1))
-                      }
-                      disabled={page === data.totalPages}
-                      className="rounded-2xl w-12 h-12 border-gray-200 dark:border-white/10 hover:border-orange-500 hover:text-orange-500"
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </Button>
+                  <div className="mt-20">
+                    <Pagination>
+                      <PaginationContent className="gap-2">
+                        {/* Nút Previous */}
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            className={cn(
+                              "rounded-2xl h-12 w-12 sm:w-auto px-4 cursor-pointer border border-gray-200 dark:border-white/10 hover:border-orange-500 hover:text-orange-500 transition-colors",
+                              page === 1
+                                ? "pointer-events-none opacity-50"
+                                : "",
+                            )}
+                          />
+                        </PaginationItem>
+
+                        {/* Danh sách trang với dấu ... */}
+                        {generatePagination(page, data.totalPages).map(
+                          (p, i) => (
+                            <PaginationItem key={i}>
+                              {p === "..." ? (
+                                <PaginationEllipsis className="w-12 h-12 flex items-center justify-center text-slate-400" />
+                              ) : (
+                                <PaginationLink
+                                  onClick={() => setPage(Number(p))}
+                                  isActive={page === p}
+                                  className={cn(
+                                    "w-12 h-12 rounded-2xl font-black text-sm transition-all cursor-pointer border",
+                                    page === p
+                                      ? "bg-orange-500 border-orange-500 hover:bg-orange-600 hover:text-white shadow-lg shadow-orange-500/40 text-white scale-110"
+                                      : "border-gray-200 dark:border-white/10 text-slate-600 hover:border-orange-500 hover:text-orange-500 dark:text-slate-300",
+                                  )}
+                                >
+                                  {p}
+                                </PaginationLink>
+                              )}
+                            </PaginationItem>
+                          ),
+                        )}
+
+                        {/* Nút Next */}
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() =>
+                              setPage((p) => Math.min(data.totalPages, p + 1))
+                            }
+                            className={cn(
+                              "rounded-2xl h-12 w-12 sm:w-auto px-4 cursor-pointer border border-gray-200 dark:border-white/10 hover:border-orange-500 hover:text-orange-500 transition-colors",
+                              page === data.totalPages
+                                ? "pointer-events-none opacity-50"
+                                : "",
+                            )}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                   </div>
                 )}
               </>
