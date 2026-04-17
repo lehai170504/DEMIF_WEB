@@ -206,9 +206,7 @@ export default function BlogPage() {
                           currentPage={params.page || 1}
                           totalPages={totalPages}
                           onPageChange={updatePage}
-                          startIndex={
-                            ((params.page || 1) - 1) * POSTS_PER_PAGE + 1
-                          }
+                          startIndex={((params.page || 1) - 1) * POSTS_PER_PAGE}
                           endIndex={Math.min(
                             (params.page || 1) * POSTS_PER_PAGE,
                             totalCount,
