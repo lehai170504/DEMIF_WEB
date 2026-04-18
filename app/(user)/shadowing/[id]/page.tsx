@@ -99,17 +99,20 @@ export default function ShadowingPracticePage({
 
   useEffect(() => {
     if (segments.length > 0 && myProgress && !isProgressRestored.current) {
-        setCheckResults(prev => {
-           const restored = { ...prev };
-           myProgress.completedSegments?.forEach((cs: any) => {
-              restored[cs.segmentIndex] = {
-                 score: cs.bestScore,
-                 accuracy: cs.bestScore,
-                 passed: true
-              };
-           });
-           return restored;
+        const restored: Record<number, any> = {};
+        myProgress.completedSegments?.forEach((cs: any) => {
+          const seg = segments[cs.segmentIndex];
+          const wordsCount = seg?.wordCount ?? 0;
+          restored[cs.segmentIndex] = {
+            score: cs.bestScore,
+            accuracy: cs.bestScore,
+            correctCount: Math.round((cs.bestScore / 100) * wordsCount),
+            totalWords: wordsCount,
+            passed: true,
+          };
         });
+
+        setCheckResults(prev => ({ ...prev, ...restored }));
         
         // Restore progress pointer
         if (myProgress.completedSegments && myProgress.completedSegments.length < segments.length) {
@@ -394,14 +397,46 @@ export default function ShadowingPracticePage({
   if (error || !lesson) return notFound();
 
   if (isCompleted) {
-    const completedResults = Object.values(checkResults);
+    // Ưu tiên checkResults, nếu trống (do Race Condition khi mới load) thì lấy từ myProgress
+    const effectiveResults = Object.keys(checkResults).length > 0 
+      ? checkResults 
+      : (myProgress?.completedSegments?.reduce((acc: any, cs: any) => {
+          const seg = segments[cs.segmentIndex];
+          const wordsCount = seg?.wordCount ?? 0;
+          acc[cs.segmentIndex] = {
+            score: cs.bestScore,
+            accuracy: cs.bestScore,
+            correctCount: Math.round((cs.bestScore / 100) * wordsCount),
+            totalWords: wordsCount,
+            passed: true,
+          };
+          return acc;
+        }, {}) || {});
+
+    const completedResults = Object.values(effectiveResults);
     const avgAccuracy =
       completedResults.length > 0
         ? Math.round(
-            completedResults.reduce((s, r) => s + (r.accuracyScore ?? 0), 0) /
-              completedResults.length,
+            completedResults.reduce(
+              (s: number, r: any) => s + (r.accuracy ?? r.score ?? 0),
+              0,
+            ) / completedResults.length,
           )
         : 0;
+
+    const totalCorrect = Object.entries(effectiveResults).reduce((sum: number, [idxStr, res]: [string, any]) => {
+      const idx = parseInt(idxStr);
+      if (typeof res.correctCount === "number") return sum + res.correctCount;
+      if (res.words && Array.isArray(res.words)) {
+        return sum + res.words.filter((w: any) => w.isCorrect).length;
+      }
+      // Fallback estimation
+      const accuracy = res.accuracy ?? res.score ?? 0;
+      const seg = segments[idx];
+      return sum + Math.round((accuracy / 100) * (seg?.wordCount ?? 0));
+    }, 0);
+    const totalWords = segments.reduce((s: number, seg: any) => s + (seg.wordCount ?? 0), 0);
+
     return (
       <ShadowingResult
         score={avgAccuracy}
@@ -412,9 +447,19 @@ export default function ShadowingPracticePage({
         }}
         details={[
           {
-            label: "Độ chính xác",
-            value: avgAccuracy,
+            label: "Số câu luyện",
+            value: `${completedResults.length}/${segments.length}`,
+            color: "text-blue-500",
+          },
+          {
+            label: "Từ chính xác",
+            value: `${totalCorrect}/${totalWords}`,
             color: "text-orange-500",
+          },
+          {
+            label: "Tiến độ",
+            value: 100,
+            color: "text-purple-500",
           },
         ]}
       />

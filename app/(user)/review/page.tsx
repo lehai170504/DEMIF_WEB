@@ -44,8 +44,8 @@ export default function ReviewPage() {
     search: debouncedSearch,
     topic: selectedTopic !== "all" ? selectedTopic : undefined,
     lessonId: selectedLesson !== "all" ? selectedLesson : undefined,
-    page: page,
-    pageSize: pageSize,
+    page: 1, // Lấy trang đầu tiên nhưng với kích thước lớn
+    pageSize: 1000, // Lấy hầu hết dữ liệu để lọc client
   };
 
   const allVocab = useVocabulary(queryParams, !isDueTab);
@@ -58,22 +58,25 @@ export default function ReviewPage() {
     setPage(1);
   }, [debouncedSearch, selectedTopic, selectedLesson, filter]);
 
-  const vocabularyItems = data?.items || [];
-  const totalCount = data?.totalCount || 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const unfilteredItems = data?.items || [];
 
-  const displayItems = isDueTab
-    ? vocabularyItems.filter((item) => {
-        if (filter === "due") return item.reviewStatus === "due";
-        if (filter === "overdue") return item.reviewStatus === "overdue";
-        return true;
-      })
-    : vocabularyItems.filter((item) => {
-        if (filter === "mastered") return item.reviewStatus === "mastered";
-        if (filter === "learning") return item.reviewStatus === "learning";
-        if (filter === "new") return item.reviewStatus === "new";
-        return true;
-      });
+  const filteredItems = unfilteredItems.filter((item) => {
+    if (filter === "all") return true;
+    if (filter === "due") return item.isDue;
+    if (filter === "overdue") return item.isOverdue;
+    if (filter === "learning")
+      return item.reviewStatus !== "new" && item.reviewStatus !== "mastered";
+    if (filter === "new") return item.reviewStatus === "new";
+    if (filter === "mastered") return item.reviewStatus === "mastered";
+    return true;
+  });
+
+  const displayItems = filteredItems.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+  const totalCount = filteredItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
     <div className="w-full font-mono pb-20 relative text-gray-900 dark:text-white">
